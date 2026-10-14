@@ -72,3 +72,5 @@ underfoot), deserto_cenere (ash desert with devoured-world fragments), palazzo_c
 the top), terrazze_celesti (white marble, hanging gardens, stairs of light, open silent sky — the paradise Lucifero lost),
 collasso (fragments of all arenas floating in the void), alba (sea of clouds, sunrise). Palettes act6_violet_red_black and
 act7_white_gold_sunrise. 2–3 Reperti in walkable zones.
+
+Also required for every non-scripted boss: the New Game+ `ng_plus` block with NEW, more aggressive patterns per phase (docs/BOSS_AUTHORING.md).

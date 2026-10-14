@@ -29,3 +29,5 @@ Cards:
   World is a prison, Ouranthos is dead. Defeated he laughs and vanishes (cue 'loki_laugh'). brightens_sky; unlocks specchio.
 Zones (palette act3_white_azure): white ridges under the gold-violet sky, auroras at night, from the volcano mouth to the ice
 castle (Rocca di Brina) with its throne hall; 2–3 Reperti per zone.
+
+Also required for every non-scripted boss: the New Game+ `ng_plus` block with NEW, more aggressive patterns per phase (docs/BOSS_AUTHORING.md).

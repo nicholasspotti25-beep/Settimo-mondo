@@ -42,3 +42,5 @@ Cards:
 Zones (palette act5_gold_white_midnight): plateaus of dragon bones, nests carved in rock, a mage's observatory, the Lago dei
 Nove Specchi, wind-battered cliffs, Yggdrasil whose crown sits above the clouds; Yggdrasil visible on the horizon from the
 first zone of the act. 2–3 Reperti per zone.
+
+Also required for every non-scripted boss: the New Game+ `ng_plus` block with NEW, more aggressive patterns per phase (docs/BOSS_AUTHORING.md).

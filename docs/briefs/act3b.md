@@ -32,3 +32,5 @@ Cards:
 Zones (palette act3_white_azure): endless taiga (three clearings), first ship on the Grande Fiume (deck zone, no fast travel),
 river port, second ship crossing the night sea toward a new continent. 2–3 Reperti per walkable zone (the Nave dei Cercatori
 carries seekers' relics).
+
+Also required for every non-scripted boss: the New Game+ `ng_plus` block with NEW, more aggressive patterns per phase (docs/BOSS_AUTHORING.md).

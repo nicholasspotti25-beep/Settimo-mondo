@@ -13,7 +13,8 @@ landmarks, arena dressing). Until then, work on the sim/data/story/bot parts.
 
 ORDER OF WORK (keep the repo runnable after every step):
 1. Boss data + behaviors for ALL your bosses, with every phase/mechanic of the cards; story sequences, dialogue/lore IT+EN,
-   speakers, Voce dell'Alba lines for your altars, time-of-day variants, Metamondo reactions, Form unlocks, key items.
+   speakers, Voce dell'Alba lines for your altars, time-of-day variants, Metamondo reactions, Form unlocks, key items, and the
+   New Game+ `ng_plus` block (new, more aggressive patterns per phase — see BOSS_AUTHORING.md).
 2. Balance with the headless bot: `npm run registry && SM_PARTIAL=1 npm run data && npx tsx tools/balance-bot.ts <id> --seeds=3`.
    Perfect bot must WIN inside the target (120 + 20×D s) with few hits; sloppy bot must not win untouched. Add a bot hook
    (tools/bot/hooks/<id>.ts) for scripted mechanics. Tune attacks for fairness and readability, not just numbers.

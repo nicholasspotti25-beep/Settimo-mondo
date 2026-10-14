@@ -39,3 +39,5 @@ Cards:
 Zones (palette act2_red_blue_black): Porta di Dite (immense arch of bones and iron in rock), Landa dei Roghi (embers plain, fire
 columns, red sky), Bufera Eterna (black storm, horizontal lightning), Cocito (blue frozen lake, shadows trapped below), Fucine
 Sepolte (magma caves and anvils), Cattedrale Caduta (sunken black-marble temple, overturned nave). 2–3 Reperti per zone.
+
+Also required for every non-scripted boss: the New Game+ `ng_plus` block with NEW, more aggressive patterns per phase (docs/BOSS_AUTHORING.md).

@@ -92,6 +92,13 @@ for (const ce of CANON_ENCOUNTERS) {
   if (ce.class === 'secondary' && !b.lore_key && b.dialogue_keys.length === 0) fail(`${where}: secondary boss keeps a fragment of story (lore or line)`);
   if (ce.class === 'principal' && ce.id !== 'lucifero_1' && !b.brightens_sky) fail(`${where}: principal boss must brighten the sky`);
   if (ce.id === 'lucifero_1' && b.brightens_sky) fail(`${where}: narrative defeat does not brighten the sky`);
+  // New Game+: new, more aggressive patterns (C12)
+  if (!b.scripted) {
+    const ng = b.ng_plus?.add_patterns ?? {};
+    const added = Object.values(ng).flat();
+    if (!added.length) fail(`${where}: New Game+ needs new aggressive patterns (ng_plus.add_patterns)`);
+    for (const id of added) if (!b.attacks.some((a) => a.id === id) && !(b.minions ?? []).some((m) => m.attacks.some((a) => a.id === id))) fail(`${where}: ng_plus pattern ${id} is not defined`);
+  }
   // altar before every arena
   if (!C.altars.some((a) => a.before_boss === ce.id)) fail(`${where}: no Altare della Quiete before the arena`);
   // music

@@ -30,3 +30,5 @@ Cards:
   garden, measures return to reality, Little Garden is revealed as a flowerbed in a normal-sized park; you end at 112%
   (storyEvent set_scale 1.12); memorable camera pull-back; brightens_sky; unlocks gigante.
 Palette act4_vivid.
+
+Also required for every non-scripted boss: the New Game+ `ng_plus` block with NEW, more aggressive patterns per phase (docs/BOSS_AUTHORING.md).

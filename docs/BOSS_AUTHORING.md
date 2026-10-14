@@ -92,6 +92,16 @@ phases:
 surface, gravity) and sends `cue arena_state:<state>` to your arena dressing. Arena `hazards` with `from_phase: p2` appear
 when p2 starts (lava floors etc.). The phase transition is an invulnerable roar (`transition` seconds).
 
+## New Game+ (Ciclo dell'Alba) — required for every non-scripted boss
+C12: "bosses return with new, more aggressive patterns". Add at least one NEW attack per phase that only exists in NG+:
+```yaml
+ng_plus:
+  add_patterns: {p1: [ng_tail_cyclone], p2: [ng_double_breath]}   # attack ids defined in `attacks`, used only in NG+
+  speed_mult: 1.1     # optional, keep telegraphs readable
+  idle_mult: 0.8      # shorter gaps between attacks
+```
+NG+ attacks follow the same fairness rules (readable, avoidable). The bot can test them by setting `sim.state.ngCycle = 1`.
+
 ## Time of day
 ```yaml
 time_of_day_variants:

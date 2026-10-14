@@ -31,3 +31,5 @@ Cards (implement every element; Bible C10):
   luminous current (arena variant); "Non hai ombra, Portatore. Né passato." (verbatim); wants a memory not a coin; ferries you
   to the Porta di Dite (zone exit kind boat exists).
 Palette act1_green_gold.
+
+Also required for every non-scripted boss: the New Game+ `ng_plus` block with NEW, more aggressive patterns per phase (docs/BOSS_AUTHORING.md).
