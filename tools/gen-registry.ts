@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import YAML from 'yaml';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const CONTENT = path.join(ROOT, 'src/content');
@@ -48,7 +49,13 @@ const arenas: string[] = [];
 for (const id of dirs(path.join(CONTENT, 'bosses'))) {
   const dir = path.join(CONTENT, 'bosses', id);
   if (has(path.join(dir, 'model.ts'))) models.push(`  ${JSON.stringify(id)}: () => import('../content/bosses/${id}/model'),`);
-  if (has(path.join(dir, 'arena.ts'))) arenas.push(`  ${JSON.stringify(id)}: () => import('../content/bosses/${id}/arena'),`);
+  if (has(path.join(dir, 'arena.ts'))) {
+    // keyed by arena id (read from data/bosses/<id>.yaml) so bosses sharing an arena share its builder
+    const yml = path.join(ROOT, 'data/bosses', `${id}.yaml`);
+    const arenaId = has(yml) ? (YAML.parse(fs.readFileSync(yml, 'utf8'))?.arena as string | undefined) : undefined;
+    const key = arenaId ?? id;
+    if (!arenas.some((l) => l.startsWith(`  ${JSON.stringify(key)}:`))) arenas.push(`  ${JSON.stringify(key)}: () => import('../content/bosses/${id}/arena'),`);
+  }
 }
 const zones: string[] = [];
 for (const id of dirs(path.join(CONTENT, 'zones'))) {
@@ -59,7 +66,7 @@ for (const id of dirs(path.join(CONTENT, 'forms'))) {
   if (has(path.join(CONTENT, 'forms', id, 'environment.ts'))) forms.push(`  ${JSON.stringify(id)}: () => import('../content/forms/${id}/environment'),`);
 }
 r.push('/** Boss model modules (default export: BossModelBuilder). */', 'export const BOSS_MODELS: Record<string, Loader> = {', ...models, '};', '');
-r.push('/** Boss arena dressing modules (default export: ArenaBuilder). */', 'export const ARENA_BUILDERS: Record<string, Loader> = {', ...arenas, '};', '');
+r.push('/** Arena dressing modules keyed by ARENA id (default export: ArenaBuilder). */', 'export const ARENA_BUILDERS: Record<string, Loader> = {', ...arenas, '};', '');
 r.push('/** Zone builders (default export: ZoneBuilder). */', 'export const ZONE_BUILDERS: Record<string, Loader> = {', ...zones, '};', '');
 r.push('/** Metamondo Form environments (default export: FormEnvironmentBuilder). */', 'export const FORM_ENVIRONMENTS: Record<string, Loader> = {', ...forms, '};', '');
 fs.writeFileSync(path.join(OUT, 'registry.render.ts'), r.join('\n'));

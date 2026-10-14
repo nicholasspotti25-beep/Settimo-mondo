@@ -6,7 +6,7 @@ type Loader = () => Promise<any>;
 export const BOSS_MODELS: Record<string, Loader> = {
 };
 
-/** Boss arena dressing modules (default export: ArenaBuilder). */
+/** Arena dressing modules keyed by ARENA id (default export: ArenaBuilder). */
 export const ARENA_BUILDERS: Record<string, Loader> = {
 };
 
