@@ -109,7 +109,9 @@ export function damagePlayer(sim: Sim, attacker: Actor | null, dmg: DamageEvent)
     return 'hit';
   }
 
-  // 4) damage + hit reaction
+  // 4) the ally's wing may shield a mistake (final fight)
+  if (!unavoidable && sim.allyShield(dmg)) return 'blocked';
+  // 5) damage + hit reaction
   applyPlayerDamage(sim, amount, dmg, true);
   if ((pl.state as string) !== 'dead') {
     const kd = dmg.flags.includes('knockdown') || dmg.poise >= 25;

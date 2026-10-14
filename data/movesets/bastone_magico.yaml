@@ -1,0 +1,18 @@
+# Bastone magico (Ramo dell'Antico). Catalyst: light = two homing leaf bolts then a fan of three seeds;
+# heavy = slow thorn orb that bursts; running = flick bolt; jumping = leaf blast below.
+id: bastone_magico
+type: bastone_magico
+grip: catalyst
+reach: 16
+guard: {absorption: 0.5}
+swings:
+  bastone_magico_light:
+    - {id: bm_l1, anim: cast_r, startup: 0.28, active: 0.08, recovery: 0.38, cancel: 0.24, damage_mult: 0.8, poise: 0, projectile: {kind: w_leaf_bolt, speed: 24, radius: 0.32, life: 1.6, homing: 2.2}, arc: {from: [-30, 10], to: [5, 0], roll: 0, hand: r}}
+    - {id: bm_l2, anim: cast_l, startup: 0.28, active: 0.08, recovery: 0.38, cancel: 0.24, damage_mult: 0.8, poise: 0, projectile: {kind: w_leaf_bolt, speed: 24, radius: 0.32, life: 1.6, homing: 2.2}, arc: {from: [30, 10], to: [-5, 0], roll: 0, hand: r}}
+    - {id: bm_l3, anim: cast_sweep, startup: 0.34, active: 0.1, recovery: 0.48, cancel: 0.3, damage_mult: 0.9, poise: 0, projectile: {kind: w_seed_bolt, speed: 22, radius: 0.28, life: 1.3, count: 3, spread: 22, homing: 0.8}, arc: {from: [-50, 0], to: [50, 0], roll: 0, hand: r}}
+  bastone_magico_heavy:
+    {id: bm_h, anim: cast_heavy, startup: 0.6, active: 0.1, recovery: 0.5, cancel: 0.3, damage_mult: 1.9, poise: 20, projectile: {kind: w_thorn_orb, speed: 15, radius: 0.6, life: 2.2, homing: 1.6, explode_radius: 2.6}, arc: {from: [0, 70], to: [0, -10], roll: 0, hand: both}}
+  bastone_magico_run:
+    {id: bm_r, anim: cast_r, startup: 0.2, active: 0.08, recovery: 0.4, damage_mult: 1.0, poise: 0, projectile: {kind: w_leaf_bolt, speed: 28, radius: 0.35, life: 1.4, homing: 2.5}, move: {speed: 3.0, dur: 0.2}, arc: {from: [-40, 0], to: [10, 0], roll: 0, hand: r}}
+  bastone_magico_jump:
+    {id: bm_j, anim: cast_down, startup: 0.22, active: 0.16, recovery: 0.5, damage_mult: 1.35, poise: 20, shape: {type: cylinder, c: [0, -1.0, 0.8], r: 2.0, h: 2.6}, element: nature, arc: {from: [0, 60], to: [0, -70], roll: 0, hand: both}}

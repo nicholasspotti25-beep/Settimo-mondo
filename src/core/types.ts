@@ -111,6 +111,8 @@ export interface SpawnDef {
   pitch?: number;
   /** Custom event name delivered to the boss behavior. */
   event?: string;
+  /** Hazards only: pull the player toward the hazard center (m/s at the center). */
+  pull?: number;
   vfx?: string;
   sfx?: string;
 }

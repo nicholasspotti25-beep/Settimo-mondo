@@ -598,7 +598,9 @@ export class Player {
         desiredSpeed *= sf;
       }
       if (!this.grounded && !this.flying) desiredSpeed *= 1; // air control applied through acceleration
-      const accel = this.grounded || this.flying ? 22 : 22 * B.air_control;
+      // ice (Cocito, frozen arenas) makes footing slide: much lower acceleration on the ground
+      const icy = this.grounded && !this.flying && sim.surfaceAt(this.pos.x, this.pos.z) === 'ice';
+      const accel = this.grounded || this.flying ? (icy ? 3.2 : 22) : 22 * B.air_control;
       forward(dirYaw, tmp);
       const tvx = tmp.x * desiredSpeed, tvz = tmp.z * desiredSpeed;
       const k = 1 - Math.exp(-accel * dt);

@@ -1,0 +1,18 @@
+# Alabarda (Remo del Traghettatore). The ferryman's oar-blade: rowing strokes that sweep wide at polearm reach,
+# a chopping stroke to finish; heavy = double rowing sweep (two hits, both sides).
+id: alabarda
+type: alabarda
+grip: polearm
+reach: 4.3
+guard: {absorption: 0.7}
+swings:
+  alabarda_light:
+    - {id: al_l1, anim: row_sweep_rl, startup: 0.3, active: 0.16, recovery: 0.45, cancel: 0.24, damage_mult: 1.15, poise: 0, shape: {type: arc, r: 4.2, r_in: 0.8, angle: 160, y: [0, 2.2]}, move: {speed: 1.6, dur: 0.22}, arc: {from: [-90, -10], to: [80, 5], roll: 10, hand: both}}
+    - {id: al_l2, anim: row_sweep_lr, startup: 0.3, active: 0.16, recovery: 0.45, cancel: 0.24, damage_mult: 1.15, poise: 0, shape: {type: arc, r: 4.2, r_in: 0.8, angle: 160, y: [0, 2.2]}, move: {speed: 1.6, dur: 0.22}, arc: {from: [80, -10], to: [-90, 5], roll: -10, hand: both}}
+    - {id: al_l3, anim: chop, startup: 0.38, active: 0.16, recovery: 0.55, cancel: 0.3, damage_mult: 1.5, poise: 0, shape: {type: arc, r: 4.4, r_in: 1.2, angle: 50, y: [0, 3.4]}, move: {speed: 2.4, dur: 0.24}, arc: {from: [0, 100], to: [0, -30], roll: 0, hand: both}}
+  alabarda_heavy:
+    {id: al_h, anim: row_double, startup: 0.55, active: 0.3, recovery: 0.6, cancel: 0.32, damage_mult: 1.3, poise: 26, hits: 2, shape: {type: arc, r: 4.4, r_in: 0.6, angle: 220, y: [0, 2.4]}, move: {speed: 1.8, dur: 0.4}, arc: {from: [-110, 0], to: [110, 0], roll: 0, hand: both}}
+  alabarda_run:
+    {id: al_r, anim: charge_thrust, startup: 0.24, active: 0.18, recovery: 0.5, damage_mult: 1.35, poise: 0, shape: {type: capsule, a: [0, 1.3, 0.4], b: [0, 1.2, 4.6], r: 0.6}, move: {speed: 8.0, dur: 0.36}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
+  alabarda_jump:
+    {id: al_j, anim: plunge_chop, startup: 0.22, active: 0.2, recovery: 0.58, damage_mult: 1.6, poise: 22, shape: {type: capsule, a: [0, 0.4, 0.8], b: [0, -0.8, 3.8], r: 0.9}, arc: {from: [0, 90], to: [0, -60], roll: 0, hand: both}}

@@ -75,6 +75,8 @@ export interface SurfaceOpts {
   depthWrite?: boolean;
   /** Fog off for skyboxes/huge distant things. */
   fog?: boolean;
+  /** Multiply the emissive term by vertex colors (glow surfaces tinted per part). */
+  emissiveVertexColor?: boolean;
 }
 
 const LIGHT_PARS_PATCHED = (() => {
@@ -177,6 +179,9 @@ function patchShader(shader: THREE.WebGLProgramParametersWithUniforms, u: Record
     .replace(
       '#include <emissivemap_fragment>',
       `#include <emissivemap_fragment>
+  #if defined( SM_EVC ) && defined( USE_COLOR )
+  totalEmissiveRadiance *= vColor.rgb;
+  #endif
   #ifdef SM_FX
   #ifdef SM_DETAIL
   totalEmissiveRadiance += uSmCrackCol * smoothstep( 0.45, 0.85, smD.a ) * uSmCrack * 2.2;
@@ -224,6 +229,7 @@ export function createStylized(o: SurfaceOpts, globals: KitGlobals, fx: ActorFx 
   if (detail) defines.SM_DETAIL = '';
   if (o.toon) defines.SM_TOON = '';
   if (fx) defines.SM_FX = '';
+  if (o.emissiveVertexColor) defines.SM_EVC = '';
   m.defines = defines;
   const f = fx ?? NEUTRAL_FX;
   const uniforms: Record<string, THREE.IUniform> = {
@@ -248,7 +254,7 @@ export function createStylized(o: SurfaceOpts, globals: KitGlobals, fx: ActorFx 
     patchShader(shader, m.userData.smUniforms as Record<string, THREE.IUniform>);
     m.userData.smShader = shader;
   };
-  const key = `sm1|${detail ? 'd' : ''}|${o.toon ? 't' : ''}|${fx ? 'f' : ''}`;
+  const key = `sm1|${detail ? 'd' : ''}|${o.toon ? 't' : ''}|${fx ? 'f' : ''}|${o.emissiveVertexColor ? 'e' : ''}`;
   m.customProgramCacheKey = () => key;
   return m;
 }

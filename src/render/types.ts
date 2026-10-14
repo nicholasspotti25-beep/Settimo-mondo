@@ -21,6 +21,8 @@ export interface RenderCtx {
   time: number;
   /** Sky brightness progress 0..1 (violet -> gold). */
   skyShade: number;
+  /** Register a named cutscene camera shot (sequence `camera:` steps). Set by the Renderer. */
+  registerShot?: (id: string, fn: import('./camera').ShotFn) => void;
 }
 
 /** Visual for an actor (boss, minion, decoy, clone, ally). */

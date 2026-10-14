@@ -1,0 +1,18 @@
+# Ascia a due mani (Fenditura Ardente). The heaviest single chops: narrow, brutal, slow; the heavy is a
+# two-revolution spinning cleave. Molten edge: fire element.
+id: ascia_a_due_mani
+type: ascia_a_due_mani
+grip: two_hand
+reach: 3.3
+guard: {absorption: 0.75}
+swings:
+  ascia_a_due_mani_light:
+    - {id: ax_l1, anim: chop_diag_r, startup: 0.44, active: 0.16, recovery: 0.6, cancel: 0.32, damage_mult: 1.6, poise: 0, element: fire, shape: {type: arc, r: 3.2, angle: 100, y: [0, 2.8]}, move: {speed: 2.4, dur: 0.28}, arc: {from: [-60, 80], to: [40, -40], roll: -35, hand: both}}
+    - {id: ax_l2, anim: chop_diag_l, startup: 0.44, active: 0.16, recovery: 0.6, cancel: 0.32, damage_mult: 1.6, poise: 0, element: fire, shape: {type: arc, r: 3.2, angle: 100, y: [0, 2.8]}, move: {speed: 2.4, dur: 0.28}, arc: {from: [60, 80], to: [-40, -40], roll: 35, hand: both}}
+    - {id: ax_l3, anim: overhead_split, startup: 0.58, active: 0.16, recovery: 0.75, cancel: 0.38, damage_mult: 2.2, poise: 0, element: fire, shape: {type: arc, r: 3.4, angle: 45, y: [0, 3.6]}, move: {speed: 2.8, dur: 0.3}, arc: {from: [0, 125], to: [0, -60], roll: 0, hand: both}}
+  ascia_a_due_mani_heavy:
+    {id: ax_h, anim: spin_cleave, startup: 0.7, active: 0.32, recovery: 0.7, cancel: 0.38, damage_mult: 1.6, poise: 34, hits: 2, element: fire, shape: {type: arc, r: 3.3, angle: 360, y: [0, 2.6]}, move: {speed: 2.0, dur: 0.5}, arc: {from: [-180, 10], to: [540, 10], roll: 0, hand: both}}
+  ascia_a_due_mani_run:
+    {id: ax_r, anim: chop_diag_r, startup: 0.34, active: 0.16, recovery: 0.65, damage_mult: 1.7, poise: 0, element: fire, shape: {type: arc, r: 3.2, angle: 120, y: [0, 2.8]}, move: {speed: 6.0, dur: 0.34}, arc: {from: [-70, 80], to: [40, -40], roll: -35, hand: both}}
+  ascia_a_due_mani_jump:
+    {id: ax_j, anim: plunge_split, startup: 0.26, active: 0.18, recovery: 0.7, damage_mult: 2.1, poise: 28, element: fire, shape: {type: capsule, a: [0, 0.6, 0.6], b: [0, -0.8, 3.0], r: 1.0}, arc: {from: [0, 120], to: [0, -70], roll: 0, hand: both}}

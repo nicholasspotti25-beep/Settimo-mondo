@@ -1,0 +1,18 @@
+# Spadone (Brace Eterna). Greatsword: huge, slow, wide arcs that cover the flank; every hit is heavy and the
+# charged heavy (rising then crashing) shatters Equilibrio. Burning blade: fire element.
+id: spadone
+type: spadone
+grip: two_hand
+reach: 3.7
+guard: {absorption: 0.75}
+swings:
+  spadone_light:
+    - {id: sd_l1, anim: great_sweep_rl, startup: 0.42, active: 0.18, recovery: 0.55, cancel: 0.3, damage_mult: 1.45, poise: 0, element: fire, shape: {type: arc, r: 3.7, angle: 150, y: [0, 2.6]}, move: {speed: 2.0, dur: 0.3}, arc: {from: [-100, 20], to: [80, -15], roll: -25, hand: both}}
+    - {id: sd_l2, anim: great_sweep_lr, startup: 0.4, active: 0.18, recovery: 0.55, cancel: 0.3, damage_mult: 1.45, poise: 0, element: fire, shape: {type: arc, r: 3.7, angle: 150, y: [0, 2.6]}, move: {speed: 2.0, dur: 0.3}, arc: {from: [85, -10], to: [-100, 20], roll: 25, hand: both}}
+    - {id: sd_l3, anim: great_overhead, startup: 0.5, active: 0.18, recovery: 0.65, cancel: 0.34, damage_mult: 1.85, poise: 0, element: fire, shape: {type: arc, r: 3.9, angle: 60, y: [0, 3.6]}, move: {speed: 2.6, dur: 0.3}, arc: {from: [0, 110], to: [0, -55], roll: 0, hand: both}}
+  spadone_heavy:
+    {id: sd_h, anim: rising_crash, startup: 0.75, active: 0.2, recovery: 0.7, cancel: 0.36, damage_mult: 2.6, poise: 32, element: fire, shape: {type: cylinder, c: [0, -0.3, 2.4], r: 2.0, h: 3.4}, move: {speed: 2.2, dur: 0.4}, arc: {from: [-20, -40], to: [0, -60], roll: 0, hand: both}}
+  spadone_run:
+    {id: sd_r, anim: great_sweep_rl, startup: 0.32, active: 0.18, recovery: 0.6, damage_mult: 1.6, poise: 0, element: fire, shape: {type: arc, r: 3.6, angle: 160, y: [0, 2.6]}, move: {speed: 6.0, dur: 0.36}, arc: {from: [-110, 10], to: [80, -10], roll: -25, hand: both}}
+  spadone_jump:
+    {id: sd_j, anim: plunge_great, startup: 0.26, active: 0.2, recovery: 0.65, damage_mult: 2.0, poise: 26, element: fire, shape: {type: cylinder, c: [0, -0.8, 1.4], r: 2.0, h: 3.0}, arc: {from: [0, 110], to: [0, -70], roll: 0, hand: both}}

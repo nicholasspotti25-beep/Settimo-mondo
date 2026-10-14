@@ -7,7 +7,7 @@ import { bossMaxHp } from '../core/formulas';
 import { DEG, clamp, dist2D, forward, localToWorld, v3, wrapAngle, yawTo, type Vec3 } from '../core/math';
 import { Rng } from '../core/rng';
 import { insideArena } from '../core/terrain';
-import type { BalanceDef, BossDef, MinionDef, ShapeDef, SpawnDef, StatusKind, SwingDef, TimeOfDay } from '../core/types';
+import type { BalanceDef, BossDef, ColliderDef, MinionDef, ShapeDef, SpawnDef, StatusKind, SwingDef, TimeOfDay } from '../core/types';
 import { Actor, nextAttackUid, resetActorIds, spawnYawSpread, type AttackRuntime, type PartRuntime } from './actor';
 import type { ArtRuntime } from './arts';
 import type { BehaviorRegistry } from './behavior';
@@ -447,6 +447,7 @@ export class Sim {
     this.coopGrace = false;
     this.fightPaused = false;
     this.fightInteractables = [];
+    this.dynamicColliders.clear();
     if (this.zone) {
       this.zone.setActiveArena(null);
       this.zone.metaSpace = null;
@@ -1022,6 +1023,7 @@ export class Sim {
           h.flags = [...flags];
           h.status = s.status;
           h.tick = flags.includes('dot') ? 0.5 : 0;
+          h.pull = s.pull ?? 0;
           h.instance = atk.uid * 64 + 16 + (i % 15);
           if (s.speed) {
             forward(pp.yaw, tmp);
@@ -1652,6 +1654,7 @@ export class Sim {
       if (h.team === 'enemy') {
         if (this.player.state === 'dead' || this.fight?.intro) return;
         if (this.zone?.metaSpace && h.permanent) return;
+        if (h.pull > 0) this.pullPlayerToward(h.pos, h.pull, this.hazardRadius(h) + 4, dt);
         const pv = this.player.volume(vol, this);
         if (h.tick > 0) {
           const last = h.lastHit.get(-1) ?? -999;
@@ -1750,6 +1753,60 @@ export class Sim {
   /* ---------------------------------------------------------------------------------------------------------------- */
   /* Ally (Ouranthos in the last fight)                                                                                */
   /* ---------------------------------------------------------------------------------------------------------------- */
+
+  /** Approximate horizontal radius of a hazard shape (for pull zones). */
+  hazardRadius(h: Hazard): number {
+    const sh = h.shape;
+    return sh.type === 'cylinder' || sh.type === 'sphere' ? sh.r : sh.type === 'ring' ? sh.r1 : sh.type === 'arc' ? sh.r : sh.type === 'box' ? Math.max(sh.half[0], sh.half[2]) : 3;
+  }
+
+  /** Pull the player toward a point (gravity holes, whirlpools); strength in m/s at the center, fading to 0 at `radius`. */
+  pullPlayerToward(p: Vec3, strength: number, radius: number, dt: number): void {
+    const pl = this.player;
+    if (pl.state === 'dead' || pl.invulnerable(this) && pl.state === 'grace') return;
+    const dx = p.x - pl.pos.x, dz = p.z - pl.pos.z;
+    const d = Math.hypot(dx, dz);
+    if (d < 0.2 || d > radius) return;
+    const k = strength * (1 - d / radius) * dt;
+    this.pushPlayer((dx / d) * k, (dz / d) * k);
+  }
+
+  /** Displace the player (wind, currents, whirlpools) with collision and bounds. */
+  pushPlayer(dx: number, dz: number): void {
+    const pl = this.player;
+    pl.pos.x += dx;
+    pl.pos.z += dz;
+    this.collidePlayer(pl);
+  }
+
+  /** Dynamic arena colliders (e.g. flowers that grow into barricades). Presentation gets cue 'collider_add:<id>'. */
+  addArenaCollider(id: string, c: ColliderDef): void {
+    if (!this.zone) return;
+    this.zone.arenaColliders = [...this.zone.arenaColliders, { ...c }];
+    this.dynamicColliders.set(id, this.zone.arenaColliders[this.zone.arenaColliders.length - 1]);
+    this.emit({ type: 'vfx', id: `collider_add:${id}`, pos: { x: c.c[0], y: c.c[1], z: c.c[2] }, params: { r: c.r ?? 1, h: c.h ?? 2 } });
+  }
+
+  removeArenaCollider(id: string): void {
+    const c = this.dynamicColliders.get(id);
+    if (!c || !this.zone) return;
+    this.zone.arenaColliders = this.zone.arenaColliders.filter((x) => x !== c);
+    this.dynamicColliders.delete(id);
+    this.emit({ type: 'vfx', id: `collider_remove:${id}`, pos: { x: c.c[0], y: c.c[1], z: c.c[2] } });
+  }
+
+  dynamicColliders = new Map<string, ColliderDef>();
+
+  /** Ouranthos's wing shields one heavy mistake per stored charge (charges come from perfect dodges). */
+  allyShield(dmg: DamageEvent): boolean {
+    const a = this.ally;
+    if (!a || !a.alive || (a.bstate.charge ?? 0) <= 0) return false;
+    if ((dmg.mult ?? 1) < 1.2 && this.player.hp > dmg.amount * 1.5) return false;
+    a.bstate.charge = (a.bstate.charge ?? 0) - 1;
+    this.emit({ type: 'vfx', id: 'ally_wing_shield', pos: { ...this.player.pos } });
+    this.emit({ type: 'cue', id: 'ally_shield', actor: a.id });
+    return true;
+  }
 
   onAllyPerfectDodge(): void {
     if (this.ally) this.ally.bstate.charge = Math.min(3, (this.ally.bstate.charge ?? 0) + 1);

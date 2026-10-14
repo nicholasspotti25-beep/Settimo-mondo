@@ -47,7 +47,7 @@ const spawn = z.object({
   at: z.enum(['self', 'front', 'target', 'target_predict', 'random_arena', 'around_target', 'line_to_target', 'ring_self', 'grid', 'sky_above_target', 'arena_center', 'part']).optional(),
   dist: num.optional(), delay: num.optional(), active: num.optional(), shape: shape.optional(), damage_mult: num.optional(),
   flags: z.array(hitFlag).optional(), interval: num.optional(), repeat: num.optional(), status: status.optional(), element: element.optional(),
-  pitch: num.optional(), event: str.optional(), vfx: str.optional(), sfx: str.optional(),
+  pitch: num.optional(), event: str.optional(), pull: num.optional(), vfx: str.optional(), sfx: str.optional(),
 }).strict();
 
 export const attack = z.object({
