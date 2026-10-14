@@ -1,0 +1,18 @@
+# Scettro (Scettro del Primo Respiro). The god's scepter: two breath bolts from the turning ring, then a short
+# breath of light up close (two ticks). Heavy = a halo burst around the bearer. Light element.
+id: scettro
+type: scettro
+grip: catalyst
+reach: 18
+guard: {absorption: 0.5}
+swings:
+  scettro_light:
+    - {id: sc2_l1, anim: scepter_point_r, startup: 0.22, active: 0.06, recovery: 0.36, cancel: 0.2, damage_mult: 0.8, poise: 0, projectile: {kind: w_breath_bolt, speed: 30, radius: 0.32, life: 1.5, homing: 3.0}, arc: {from: [-20, 30], to: [0, 0], roll: 0, hand: r}}
+    - {id: sc2_l2, anim: scepter_point_l, startup: 0.22, active: 0.06, recovery: 0.36, cancel: 0.2, damage_mult: 0.8, poise: 0, projectile: {kind: w_breath_bolt, speed: 30, radius: 0.32, life: 1.5, homing: 3.0}, arc: {from: [20, 30], to: [0, 0], roll: 0, hand: r}}
+    - {id: sc2_l3, anim: breath_cone, startup: 0.3, active: 0.21, recovery: 0.45, cancel: 0.26, damage_mult: 0.75, poise: 0, hits: 2, element: light, shape: {type: arc, r: 4.6, angle: 50, y: [0, 3.0]}, arc: {from: [0, 20], to: [0, 0], roll: 0, hand: both}}
+  scettro_heavy:
+    {id: sc2_h, anim: halo_burst, startup: 0.55, active: 0.16, recovery: 0.55, cancel: 0.3, damage_mult: 2.0, poise: 24, element: light, shape: {type: cylinder, c: [0, -0.4, 0.4], r: 3.7, h: 3.2}, arc: {from: [0, 90], to: [0, 90], roll: 360, hand: both}}
+  scettro_run:
+    {id: sc2_r, anim: scepter_point_r, startup: 0.2, active: 0.06, recovery: 0.4, damage_mult: 1.0, poise: 0, projectile: {kind: w_breath_bolt, speed: 34, radius: 0.35, life: 1.3, homing: 3.0}, move: {speed: 3.0, dur: 0.2}, arc: {from: [-20, 10], to: [0, 0], roll: 0, hand: r}}
+  scettro_jump:
+    {id: sc2_j, anim: halo_drop, startup: 0.2, active: 0.16, recovery: 0.5, damage_mult: 1.45, poise: 20, element: light, shape: {type: cylinder, c: [0, -1.0, 0.5], r: 2.4, h: 2.6}, arc: {from: [0, 60], to: [0, -80], roll: 0, hand: both}}

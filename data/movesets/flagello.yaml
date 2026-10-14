@@ -1,0 +1,18 @@
+# Flagello (Stella del Mattino). A spiked ball on a black chain: every swing builds momentum, hitting hard at the end
+# of the chain (inner dead zone) and around the impact; heavy = the star whirled three times around you.
+id: flagello
+type: flagello
+grip: flexible
+reach: 4.1
+guard: {absorption: 0.5}
+swings:
+  flagello_light:
+    - {id: fl_l1, anim: flail_swing_rl, startup: 0.36, active: 0.18, recovery: 0.5, cancel: 0.26, damage_mult: 1.4, poise: 0, element: light, shape: {type: arc, r: 4.1, r_in: 1.0, angle: 150, y: [0, 2.6]}, move: {speed: 1.8, dur: 0.26}, arc: {from: [-110, 20], to: [70, 0], roll: -20, hand: r}}
+    - {id: fl_l2, anim: flail_swing_lr, startup: 0.36, active: 0.18, recovery: 0.5, cancel: 0.26, damage_mult: 1.4, poise: 0, element: light, shape: {type: arc, r: 4.1, r_in: 1.0, angle: 150, y: [0, 2.6]}, move: {speed: 1.8, dur: 0.26}, arc: {from: [100, 20], to: [-80, 0], roll: 20, hand: r}}
+    - {id: fl_l3, anim: flail_overhead, startup: 0.46, active: 0.16, recovery: 0.6, cancel: 0.32, damage_mult: 1.85, poise: 0, element: light, shape: {type: cylinder, c: [0, -0.3, 3.4], r: 1.5, h: 3.2}, move: {speed: 2.0, dur: 0.26}, arc: {from: [0, 140], to: [0, -50], roll: 0, hand: r}}
+  flagello_heavy:
+    {id: fl_h, anim: flail_whirl, startup: 0.6, active: 0.46, recovery: 0.6, cancel: 0.34, damage_mult: 1.5, poise: 30, hits: 3, element: light, shape: {type: arc, r: 4.0, r_in: 0.8, angle: 360, y: [0, 2.6]}, arc: {from: [-180, 15], to: [900, 15], roll: 0, hand: r}}
+  flagello_run:
+    {id: fl_r, anim: flail_swing_rl, startup: 0.3, active: 0.18, recovery: 0.56, damage_mult: 1.6, poise: 0, element: light, shape: {type: arc, r: 4.0, r_in: 0.8, angle: 160, y: [0, 2.6]}, move: {speed: 6.0, dur: 0.34}, arc: {from: [-120, 20], to: [70, 0], roll: -20, hand: r}}
+  flagello_jump:
+    {id: fl_j, anim: flail_plunge, startup: 0.24, active: 0.2, recovery: 0.62, damage_mult: 2.0, poise: 28, element: light, shape: {type: cylinder, c: [0, -0.8, 2.2], r: 1.9, h: 3.0}, arc: {from: [0, 130], to: [0, -70], roll: 0, hand: r}}

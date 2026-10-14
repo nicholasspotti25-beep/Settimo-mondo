@@ -1,0 +1,19 @@
+# Falce (Falce dell'Eclissi). The scythe reaps at the blade, not the shaft (inner dead zone): wide reaping arcs, a
+# full harvest spin and an overhead. Heavy = eclipse sweep behind and in front. Void element.
+id: falce
+type: falce
+grip: polearm
+reach: 4.5
+guard: {absorption: 0.7}
+swings:
+  falce_light:
+    - {id: fc_l1, anim: reap_rl, startup: 0.3, active: 0.18, recovery: 0.45, cancel: 0.24, damage_mult: 1.25, poise: 0, element: void, shape: {type: arc, r: 4.5, r_in: 1.4, angle: 170, y: [0, 2.6]}, move: {speed: 2.0, dur: 0.24}, arc: {from: [-100, 20], to: [80, -10], roll: -20, hand: both}}
+    - {id: fc_l2, anim: reap_lr, startup: 0.3, active: 0.18, recovery: 0.45, cancel: 0.24, damage_mult: 1.25, poise: 0, element: void, shape: {type: arc, r: 4.5, r_in: 1.4, angle: 170, y: [0, 2.6]}, move: {speed: 2.0, dur: 0.24}, arc: {from: [90, 20], to: [-90, -10], roll: 20, hand: both}}
+    - {id: fc_l3, anim: harvest_spin, startup: 0.36, active: 0.31, recovery: 0.55, cancel: 0.3, damage_mult: 0.96, poise: 0, hits: 2, element: void, shape: {type: arc, r: 4.3, r_in: 1.2, angle: 360, y: [0, 2.6]}, move: {speed: 1.6, dur: 0.3}, arc: {from: [-180, 10], to: [180, 10], roll: 0, hand: both}}
+    - {id: fc_l4, anim: overhead_harvest, startup: 0.4, active: 0.16, recovery: 0.6, cancel: 0.32, damage_mult: 1.6, poise: 0, element: void, shape: {type: arc, r: 4.7, r_in: 1.6, angle: 50, y: [0, 4.0]}, move: {speed: 2.6, dur: 0.26}, arc: {from: [0, 130], to: [0, -50], roll: 0, hand: both}}
+  falce_heavy:
+    {id: fc_h, anim: eclipse_sweep, startup: 0.6, active: 0.2, recovery: 0.65, cancel: 0.34, damage_mult: 2.4, poise: 26, element: void, shape: {type: arc, r: 4.8, r_in: 1.2, angle: 220, y: [0, 2.8]}, move: {speed: 2.4, dur: 0.3}, arc: {from: [-120, 30], to: [110, -15], roll: -20, hand: both}}
+  falce_run:
+    {id: fc_r, anim: reap_rl, startup: 0.26, active: 0.2, recovery: 0.55, damage_mult: 1.45, poise: 0, element: void, shape: {type: arc, r: 4.5, r_in: 1.2, angle: 180, y: [0, 2.6]}, move: {speed: 6.5, dur: 0.36}, arc: {from: [-110, 15], to: [85, -10], roll: -20, hand: both}}
+  falce_jump:
+    {id: fc_j, anim: plunge_reap, startup: 0.24, active: 0.2, recovery: 0.6, damage_mult: 1.75, poise: 24, element: void, shape: {type: arc, r: 3.6, r_in: 0.8, angle: 120, y: [-1.2, 2.0]}, arc: {from: [0, 110], to: [0, -60], roll: 0, hand: both}}

@@ -1,0 +1,18 @@
+# Scimitarra (Ala di Grifone). Flowing, mobile, wide: two gliding cuts that carry you forward and a pirouette that
+# opens space; parry-capable. Heavy = rising gale cut with a step back into the air of the swing.
+id: scimitarra
+type: scimitarra
+grip: one_hand
+reach: 2.8
+guard: {absorption: 0.8}
+swings:
+  scimitarra_light:
+    - {id: sm_l1, anim: wing_cut_rl, startup: 0.16, active: 0.12, recovery: 0.32, cancel: 0.15, damage_mult: 0.95, poise: 0, shape: {type: arc, r: 2.8, angle: 160, y: [0.1, 2.5]}, move: {speed: 3.4, dur: 0.18}, arc: {from: [-90, 20], to: [80, 0], roll: -35, hand: r}}
+    - {id: sm_l2, anim: wing_cut_lr, startup: 0.16, active: 0.12, recovery: 0.32, cancel: 0.15, damage_mult: 0.95, poise: 0, shape: {type: arc, r: 2.8, angle: 160, y: [0.1, 2.5]}, move: {speed: 3.4, dur: 0.18}, arc: {from: [85, 20], to: [-85, 0], roll: 35, hand: r}}
+    - {id: sm_l3, anim: pirouette_cut, startup: 0.22, active: 0.18, recovery: 0.4, cancel: 0.2, damage_mult: 1.2, poise: 0, shape: {type: arc, r: 2.9, angle: 320, y: [0.1, 2.5]}, move: {speed: 2.4, dur: 0.24}, arc: {from: [-160, 10], to: [180, 0], roll: -20, hand: r}}
+  scimitarra_heavy:
+    {id: sm_h, anim: gale_rise, startup: 0.42, active: 0.14, recovery: 0.5, cancel: 0.28, damage_mult: 1.95, poise: 22, element: physical, shape: {type: arc, r: 3.1, angle: 120, y: [0, 3.4]}, move: {speed: 3.0, dur: 0.24}, arc: {from: [-50, -50], to: [40, 90], roll: -30, hand: r}}
+  scimitarra_run:
+    {id: sm_r, anim: glide_cut, startup: 0.18, active: 0.14, recovery: 0.42, damage_mult: 1.3, poise: 0, shape: {type: arc, r: 2.9, angle: 170, y: [0.1, 2.5]}, move: {speed: 9.0, dur: 0.3}, arc: {from: [-100, 10], to: [80, 0], roll: -35, hand: r}}
+  scimitarra_jump:
+    {id: sm_j, anim: talon_dive, startup: 0.16, active: 0.2, recovery: 0.48, damage_mult: 1.55, poise: 20, shape: {type: cylinder, c: [0, -0.7, 1.1], r: 1.6, h: 2.7}, arc: {from: [30, 80], to: [-20, -60], roll: -20, hand: r}}

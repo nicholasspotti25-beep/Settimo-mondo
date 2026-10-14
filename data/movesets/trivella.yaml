@@ -1,0 +1,18 @@
+# Trivella (Trivella Divorante). The drill-lance grinds: every thrust is a multi-hit drilling, then a sweep;
+# heavy = a long grinding drive that pushes you forward into the target. Strong Equilibrio, mediocre reach.
+id: trivella
+type: trivella
+grip: polearm
+reach: 4.0
+guard: {absorption: 0.7}
+swings:
+  trivella_light:
+    - {id: tv_l1, anim: drill_thrust, startup: 0.22, active: 0.25, recovery: 0.4, cancel: 0.2, damage_mult: 0.66, poise: 0, hits: 3, shape: {type: capsule, a: [0, 1.3, 0.5], b: [0, 1.3, 4.0], r: 0.55}, move: {speed: 2.2, dur: 0.2}, arc: {from: [0, 0], to: [0, 0], roll: 360, hand: both}}
+    - {id: tv_l2, anim: drill_thrust_low, startup: 0.22, active: 0.25, recovery: 0.4, cancel: 0.2, damage_mult: 0.66, poise: 0, hits: 3, shape: {type: capsule, a: [0, 1.1, 0.5], b: [0, 0.8, 4.0], r: 0.55}, move: {speed: 2.2, dur: 0.2}, arc: {from: [0, -5], to: [0, -8], roll: 360, hand: both}}
+    - {id: tv_l3, anim: drill_sweep, startup: 0.3, active: 0.16, recovery: 0.45, cancel: 0.24, damage_mult: 1.2, poise: 0, shape: {type: arc, r: 3.8, r_in: 0.8, angle: 140, y: [0, 2.4]}, move: {speed: 1.8, dur: 0.2}, arc: {from: [-80, 0], to: [70, 0], roll: 0, hand: both}}
+  trivella_heavy:
+    {id: tv_h, anim: grinding_drive, startup: 0.55, active: 0.41, recovery: 0.6, cancel: 0.3, damage_mult: 1.35, poise: 28, hits: 5, shape: {type: capsule, a: [0, 1.3, 0.5], b: [0, 1.3, 4.5], r: 0.65}, move: {speed: 5.0, dur: 0.6}, arc: {from: [0, 0], to: [0, 0], roll: 720, hand: both}}
+  trivella_run:
+    {id: tv_r, anim: drill_charge, startup: 0.22, active: 0.25, recovery: 0.5, damage_mult: 0.8, poise: 0, hits: 3, shape: {type: capsule, a: [0, 1.3, 0.5], b: [0, 1.3, 4.3], r: 0.6}, move: {speed: 8.0, dur: 0.4}, arc: {from: [0, 0], to: [0, 0], roll: 360, hand: both}}
+  trivella_jump:
+    {id: tv_j, anim: drill_plunge, startup: 0.2, active: 0.25, recovery: 0.55, damage_mult: 1.0, poise: 24, hits: 2, shape: {type: capsule, a: [0, -0.4, 0.6], b: [0, -1.2, 2.8], r: 0.9}, arc: {from: [0, 50], to: [0, -60], roll: 360, hand: both}}

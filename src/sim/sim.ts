@@ -705,7 +705,10 @@ export class Sim {
         part.poise = part.poiseMax;
         part.spezzato = this.bal.equilibrio.spezzato_time;
         part.graced = false;
-        if (a.attack?.def.part === part.id) a.cancelAttack(this), a.setState('stagger', 0.6);
+        if (a.attack?.def.part === part.id) {
+          a.cancelAttack(this);
+          a.setState('stagger', 0.6);
+        }
         this.emit({ type: 'spezzato', actor: a.id, part: part.index, pos: { ...part.center } });
         a.behavior?.onSpezzato?.(a, this, part);
       }

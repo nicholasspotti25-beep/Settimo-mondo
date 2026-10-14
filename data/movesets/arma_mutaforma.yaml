@@ -1,0 +1,20 @@
+# Arma mutaforma (Lama dell'Abisso Sognante). The blade dreams a new shape at every step of the combo:
+# sword slash -> whip lash -> axe chop -> spear thrust (the renderer morphs the model on each `anim`).
+# Heavy = an abyssal tide of tentacles in front. Chaos element.
+id: arma_mutaforma
+type: arma_mutaforma
+grip: flexible
+reach: 3.4
+guard: {absorption: 0.6}
+swings:
+  arma_mutaforma_light:
+    - {id: mf_l1, anim: morph_sword_slash, startup: 0.18, active: 0.12, recovery: 0.34, cancel: 0.16, damage_mult: 1.0, poise: 0, element: chaos, shape: {type: arc, r: 3.0, angle: 130, y: [0.1, 2.5]}, move: {speed: 2.6, dur: 0.16}, arc: {from: [-75, 20], to: [70, -10], roll: -25, hand: r}}
+    - {id: mf_l2, anim: morph_whip_lash, startup: 0.24, active: 0.16, recovery: 0.4, cancel: 0.2, damage_mult: 0.66, poise: 0, hits: 2, element: chaos, shape: {type: capsule, a: [0, 1.3, 0.8], b: [0, 1.0, 6.0], r: 0.5}, arc: {from: [10, 70], to: [0, -10], roll: 0, hand: r}}
+    - {id: mf_l3, anim: morph_axe_chop, startup: 0.32, active: 0.16, recovery: 0.5, cancel: 0.26, damage_mult: 1.45, poise: 0, element: chaos, shape: {type: arc, r: 3.0, angle: 100, y: [0, 3.2]}, move: {speed: 2.6, dur: 0.24}, arc: {from: [-40, 95], to: [30, -45], roll: -30, hand: both}}
+    - {id: mf_l4, anim: morph_spear_thrust, startup: 0.24, active: 0.12, recovery: 0.44, cancel: 0.22, damage_mult: 1.3, poise: 0, element: chaos, shape: {type: capsule, a: [0, 1.3, 0.4], b: [0, 1.3, 5.0], r: 0.5}, move: {speed: 4.0, dur: 0.22}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
+  arma_mutaforma_heavy:
+    {id: mf_h, anim: abyssal_tide, startup: 0.55, active: 0.21, recovery: 0.55, cancel: 0.32, damage_mult: 1.4, poise: 26, hits: 2, element: chaos, shape: {type: arc, r: 4.2, angle: 180, y: [0, 3.0]}, arc: {from: [-90, 30], to: [90, 30], roll: 0, hand: both}}
+  arma_mutaforma_run:
+    {id: mf_r, anim: morph_spear_thrust, startup: 0.22, active: 0.16, recovery: 0.48, damage_mult: 1.4, poise: 0, element: chaos, shape: {type: capsule, a: [0, 1.3, 0.4], b: [0, 1.3, 5.0], r: 0.55}, move: {speed: 8.5, dur: 0.32}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
+  arma_mutaforma_jump:
+    {id: mf_j, anim: morph_axe_plunge, startup: 0.22, active: 0.2, recovery: 0.56, damage_mult: 1.9, poise: 24, element: chaos, shape: {type: cylinder, c: [0, -0.8, 1.2], r: 1.8, h: 2.8}, arc: {from: [0, 110], to: [0, -70], roll: 0, hand: both}}

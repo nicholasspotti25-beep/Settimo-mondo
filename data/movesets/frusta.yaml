@@ -1,0 +1,18 @@
+# Frusta (Frusta delle Nove Code). Nine brass-headed cords: the longest reach of any melee weapon; every crack
+# lands three times. Heavy = the cords whirl in a full circle. Weak up close (inner dead zone).
+id: frusta
+type: frusta
+grip: flexible
+reach: 6.6
+guard: {absorption: 0.5}
+swings:
+  frusta_light:
+    - {id: fr_l1, anim: whip_crack_r, startup: 0.28, active: 0.12, recovery: 0.36, cancel: 0.18, damage_mult: 0.6, poise: 0, hits: 3, shape: {type: capsule, a: [0, 1.3, 1.0], b: [-0.6, 1.0, 6.6], r: 0.55}, arc: {from: [-60, 50], to: [10, -10], roll: -30, hand: r}}
+    - {id: fr_l2, anim: whip_crack_l, startup: 0.28, active: 0.12, recovery: 0.36, cancel: 0.18, damage_mult: 0.6, poise: 0, hits: 3, shape: {type: arc, r: 6.2, r_in: 2.0, angle: 45, y: [0, 2.6]}, arc: {from: [60, 50], to: [-10, -10], roll: 30, hand: r}}
+    - {id: fr_l3, anim: whip_overhead, startup: 0.32, active: 0.14, recovery: 0.44, cancel: 0.22, damage_mult: 0.78, poise: 0, hits: 3, shape: {type: capsule, a: [0, 2.2, 1.0], b: [0, 0.4, 7.0], r: 0.6}, arc: {from: [0, 120], to: [0, -20], roll: 0, hand: r}}
+  frusta_heavy:
+    {id: fr_h, anim: whip_whirl, startup: 0.5, active: 0.3, recovery: 0.55, cancel: 0.3, damage_mult: 1.2, poise: 20, hits: 3, shape: {type: arc, r: 5.6, r_in: 1.4, angle: 360, y: [0, 2.4]}, arc: {from: [-180, 10], to: [180, 10], roll: 0, hand: r}}
+  frusta_run:
+    {id: fr_r, anim: whip_crack_r, startup: 0.24, active: 0.14, recovery: 0.46, damage_mult: 0.78, poise: 0, hits: 2, shape: {type: capsule, a: [0, 1.3, 1.0], b: [0, 1.0, 6.0], r: 0.55}, move: {speed: 4.0, dur: 0.2}, arc: {from: [-60, 40], to: [10, -10], roll: -30, hand: r}}
+  frusta_jump:
+    {id: fr_j, anim: whip_down, startup: 0.2, active: 0.18, recovery: 0.52, damage_mult: 0.9, poise: 20, hits: 2, shape: {type: capsule, a: [0, 0.6, 0.8], b: [0, -1.0, 5.0], r: 0.7}, arc: {from: [0, 100], to: [0, -70], roll: 0, hand: r}}

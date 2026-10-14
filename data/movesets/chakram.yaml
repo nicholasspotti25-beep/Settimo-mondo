@@ -1,0 +1,18 @@
+# Chakram (Chakram del Vuoto). A cutting disc: a close slash with the disc in hand, then two throws that return
+# (they can cut going out and coming back). Heavy = a wide orbiting throw that pierces. Void element.
+id: chakram
+type: chakram
+grip: one_hand
+reach: 14
+guard: {absorption: 0.4}
+swings:
+  chakram_light:
+    - {id: ck_l1, anim: disc_slash, startup: 0.14, active: 0.1, recovery: 0.3, cancel: 0.14, damage_mult: 0.9, poise: 0, element: void, shape: {type: arc, r: 2.4, angle: 130, y: [0.2, 2.3]}, move: {speed: 2.4, dur: 0.14}, arc: {from: [-70, 10], to: [60, -5], roll: -60, hand: r}}
+    - {id: ck_l2, anim: disc_throw, startup: 0.22, active: 0.06, recovery: 0.65, cancel: 0.45, damage_mult: 0.6, poise: 0, projectile: {kind: w_void_chakram, speed: 28, radius: 0.45, life: 1.4, homing: 2.0, returns: true, pierce: true}, arc: {from: [-60, 0], to: [40, 0], roll: -80, hand: r}}
+    - {id: ck_l3, anim: disc_backhand_throw, startup: 0.24, active: 0.06, recovery: 0.7, cancel: 0.45, damage_mult: 0.65, poise: 0, projectile: {kind: w_void_chakram, speed: 28, radius: 0.45, life: 1.4, homing: 2.0, returns: true, pierce: true}, arc: {from: [60, 0], to: [-40, 0], roll: 80, hand: r}}
+  chakram_heavy:
+    {id: ck_h, anim: orbital_throw, startup: 0.45, active: 0.06, recovery: 0.7, cancel: 0.45, damage_mult: 1.1, poise: 20, projectile: {kind: w_void_chakram, speed: 24, radius: 0.6, life: 2.0, homing: 3.0, returns: true, pierce: true}, arc: {from: [-90, 10], to: [60, 0], roll: -80, hand: r}}
+  chakram_run:
+    {id: ck_r, anim: disc_slash, startup: 0.16, active: 0.12, recovery: 0.4, damage_mult: 1.25, poise: 0, element: void, shape: {type: arc, r: 2.5, angle: 160, y: [0.2, 2.3]}, move: {speed: 8.0, dur: 0.26}, arc: {from: [-90, 10], to: [70, -5], roll: -60, hand: r}}
+  chakram_jump:
+    {id: ck_j, anim: disc_drop, startup: 0.18, active: 0.18, recovery: 0.48, damage_mult: 1.45, poise: 20, element: void, shape: {type: cylinder, c: [0, -0.8, 0.8], r: 1.6, h: 2.6}, arc: {from: [0, 80], to: [0, -70], roll: -60, hand: r}}
