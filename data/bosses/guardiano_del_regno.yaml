@@ -18,19 +18,19 @@ hurtboxes:
   - {c: [0, 4.0, -0.1], r: 0.42}   # rider helm
 move: {walk: 2.6, run: 7.5, turn: 2.6, preferred_range: [4, 9]}
 idle_gap: [0.7, 1.5]
-music: boss_guardiano
+music: boss_guardiano_del_regno
 intro_sequence: guardiano_intro
 defeat_sequence: guardiano_defeat
 lore_key: boss.guardiano_del_regno.lore
 phases:
   - id: p1
     hp_range: [1.0, 0.5]
-    music: boss_guardiano_p1
+    music: boss_guardiano_del_regno_p1
     patterns: [charge_lateral, lance_thrust_combo, heavy_overhead, lance_sweep, trample]
     opener: lance_sweep
   - id: p2
     hp_range: [0.5, 0.0]
-    music: boss_guardiano_p2
+    music: boss_guardiano_del_regno_p2
     on_enter: [spectral_aura]
     speed_mult: 1.2
     aggression: 1.25
