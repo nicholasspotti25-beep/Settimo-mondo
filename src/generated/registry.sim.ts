@@ -2,10 +2,14 @@
 import type { BehaviorRegistry } from '../sim/behavior';
 import b0 from '../content/bosses/cavaliere_errante/behavior';
 import b1 from '../content/bosses/cerbero/behavior';
-import b2 from '../content/bosses/pyro/behavior';
+import b2 from '../content/bosses/elder_tree/behavior';
+import b3 from '../content/bosses/pyro/behavior';
+import b4 from '../content/bosses/thunder/behavior';
 
 export const BEHAVIORS: BehaviorRegistry = {
   "cavaliere_errante": b0,
   "cerbero": b1,
-  "pyro": b2,
+  "elder_tree": b2,
+  "pyro": b3,
+  "thunder": b4,
 };
