@@ -379,7 +379,7 @@ for (const [lang, table] of [['it', it], ['en', en]] as const) {
 
 // Partial mode (SM_PARTIAL=1): references to content that other work-streams have not authored yet are warnings.
 if (process.env.SM_PARTIAL === '1') {
-  const missing = /unknown (boss|form|sequence|zone|arena|weapon|altar|reperto|speaker|minion|projectile kind|hazard kind|.*swing)|no Altare|missing key|needs flavor_key|exit (to|requires|arrive) unknown|unknown intro_sequence|unknown start|unknown (ending|credits)_sequence/;
+  const missing = /unknown (source boss|boss|form|sequence|zone|arena|weapon|altar|reperto|speaker|minion|projectile kind|hazard kind|.*swing)|no Altare|missing key|needs flavor_key|exit (to|requires|arrive) unknown|unknown (intro|defeat)_sequence|unknown start|unknown (ending|credits)_sequence/;
   for (let i = errors.length - 1; i >= 0; i--) {
     if (missing.test(errors[i])) warnings.push(errors.splice(i, 1)[0]);
   }

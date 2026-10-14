@@ -839,7 +839,7 @@ export class Sim {
       else art.hit.add(a.id);
       const poise = art.poiseLeft;
       art.poiseLeft = 0;
-      applyDamageToActor(this, a, { source: -1, target: a.id, amount: damage, poise, element: (art.def.params.element as any) ?? 'physical', flags: [], pos, instance: art.uid, part: part?.index ?? -1, kind: 'art' }, part);
+      applyDamageToActor(this, a, { source: -1, target: a.id, amount: damage, poise, element: (art.def.params.element as any) ?? 'physical', flags: art.def.params.pierce_guard ? ['unblockable'] : [], pos, instance: art.uid, part: part?.index ?? -1, kind: 'art' }, part);
       pl.onHitLanded(this, null);
       this.emit({ type: 'artHit', art: art.def.id, pos });
       this.emit({ type: 'hitstop', dur: 0.06 });
