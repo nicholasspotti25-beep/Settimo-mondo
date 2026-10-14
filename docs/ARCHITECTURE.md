@@ -101,12 +101,12 @@ Bosses are enormous (typically 4–30 m). Camera distance adapts to player scale
 
 | Work-stream | Owns |
 |---|---|
-| Integrator (lead) | `src/core`, `src/sim`, `src/app`, `src/render/Renderer.ts`, `src/render/camera.ts`, `src/render/types.ts`, `src/input/InputRouter.ts`, `tools/*` except `tools/bot/hooks/*`, `tests/sim*`, `data/balance.yaml`, `data/progression.yaml`, `data/bosses/guardiano_del_regno.yaml` (reference), docs |
-| Render kit | `src/render/kit/**`, `src/render/rigs/**`, `src/render/actors/**`, `src/render/fx/**`, `data/anim/**`, `docs/RENDER_KIT.md` |
-| World | `src/render/world/**`, `src/content/landmarks/**`, `src/content/zones/<act I zones>/**`, `data/zones/<act I>.yaml`, `data/timeofday/**`, `data/skies/**`, `data/palettes/**`, `data/reperti/act1*.yaml`, `docs/WORLD_KIT.md` |
+| Integrator (lead) | `src/core`, `src/sim` (except `arts.ts`), `src/app`, `src/render/types.ts`, `src/input/InputRouter.ts`, `src/input/keyboard.ts`, `src/input/gamepad.ts`, `tools/*` except `tools/bot/hooks/*`, `tests/sim*`, `data/balance.yaml`, `data/progression.yaml`, `data/bosses/guardiano_del_regno.yaml` (reference), docs |
+| Render kit | `src/render/Renderer.ts`, `src/render/camera.ts`, `src/render/kit/**`, `src/render/rigs/**`, `src/render/actors/**`, `src/render/fx/**`, `data/anim/**`, `docs/RENDER_KIT.md` |
+| World | `src/render/world/**`, `src/content/landmarks/**`, `src/content/zones/<act I zones>/**`, `data/zones/<act I>.yaml`, `data/timeofday/**`, `data/skies/**`, `data/palettes/**`, `data/reperti/act1*.yaml`, `locales/*/act1_world.yaml`, `src/content/bosses/guardiano_del_regno/arena.ts`, `docs/WORLD_KIT.md` |
 | UI + touch | `src/ui/**`, `src/input/touch.ts`, `data/ui/**`, `locales/*/ui.yaml` |
 | Audio | `src/audio/**`, `data/music/**` |
-| Weapons | `data/movesets/**`, `data/weapons/**`, `data/transitions/**`, `data/projectiles/weapons.yaml`, `src/render/weapons/**`, `locales/*/weapons.yaml`, `tests/weapons*.test.ts` |
+| Weapons | `src/sim/arts.ts`, `data/movesets/**`, `data/weapons/**`, `data/transitions/**`, `data/projectiles/weapons.yaml`, `src/render/weapons/**`, `locales/*/weapons.yaml`, `tests/weapons*.test.ts` |
 | Act N content | `data/bosses/<their bosses>.yaml`, `data/arenas/<their arenas>.yaml`, `data/altars/<their altars>`, `data/zones/<their zones>` (Acts II–VII), `data/story/actN/**`, `data/voce/actN.yaml`, `data/speakers/actN.yaml`, `data/projectiles/actN.yaml`, `data/hazards/actN.yaml`, `data/reperti/actN.yaml`, `src/content/bosses/<their bosses>/**`, `src/content/zones/<their zones>/**`, `locales/*/actN*.yaml`, `tools/bot/hooks/<their bosses>.ts`, `tests/actN*.test.ts` |
 | Metamondo Forms | `src/content/forms/**`, `data/forms/**`, `locales/*/forms.yaml` |
 
