@@ -1,0 +1,19 @@
+# Artigli (Unghie del Bianco). Bestial and relentless: every claw swipe rakes twice; a four-step flurry ending in
+# a pouncing rake. The fastest damage at the shortest reach. Ice element.
+id: artigli
+type: artigli
+grip: fist
+reach: 1.9
+guard: {absorption: 0.55}
+swings:
+  artigli_light:
+    - {id: ag_l1, anim: claw_r, startup: 0.1, active: 0.1, recovery: 0.22, cancel: 0.1, damage_mult: 0.48, poise: 0, hits: 2, element: ice, shape: {type: arc, r: 1.9, angle: 120, y: [0.2, 2.2]}, move: {speed: 2.0, dur: 0.12}, arc: {from: [-60, 40], to: [40, -30], roll: -40, hand: r}}
+    - {id: ag_l2, anim: claw_l, startup: 0.1, active: 0.1, recovery: 0.22, cancel: 0.1, damage_mult: 0.48, poise: 0, hits: 2, element: ice, shape: {type: arc, r: 1.9, angle: 120, y: [0.2, 2.2]}, move: {speed: 2.0, dur: 0.12}, arc: {from: [60, 40], to: [-40, -30], roll: 40, hand: l}}
+    - {id: ag_l3, anim: claw_double, startup: 0.14, active: 0.12, recovery: 0.3, cancel: 0.14, damage_mult: 0.6, poise: 0, hits: 2, element: ice, shape: {type: arc, r: 2.0, angle: 140, y: [0.2, 2.4]}, move: {speed: 2.4, dur: 0.14}, arc: {from: [0, 70], to: [0, -40], roll: 0, hand: both}}
+    - {id: ag_l4, anim: pounce_rake, startup: 0.2, active: 0.16, recovery: 0.4, cancel: 0.18, damage_mult: 0.78, poise: 0, hits: 3, element: ice, shape: {type: arc, r: 2.2, angle: 120, y: [0.2, 2.4]}, move: {speed: 5.0, dur: 0.22}, arc: {from: [0, 80], to: [0, -50], roll: 0, hand: both}}
+  artigli_heavy:
+    {id: ag_h, anim: rising_rake, startup: 0.42, active: 0.16, recovery: 0.5, cancel: 0.28, damage_mult: 1.08, poise: 22, hits: 2, element: ice, shape: {type: capsule, a: [0, 0.4, 0.6], b: [0, 2.8, 1.6], r: 0.9}, move: {speed: 3.0, dur: 0.24}, arc: {from: [0, -70], to: [0, 90], roll: 0, hand: both}}
+  artigli_run:
+    {id: ag_r, anim: leaping_slash, startup: 0.18, active: 0.14, recovery: 0.44, damage_mult: 1.3, poise: 0, element: ice, shape: {type: arc, r: 2.2, angle: 140, y: [0.2, 2.4]}, move: {speed: 8.0, dur: 0.28}, arc: {from: [-50, 60], to: [40, -40], roll: -30, hand: r}}
+  artigli_jump:
+    {id: ag_j, anim: dive_rake, startup: 0.16, active: 0.2, recovery: 0.48, damage_mult: 0.9, poise: 22, hits: 2, element: ice, shape: {type: cylinder, c: [0, -0.8, 0.9], r: 1.5, h: 2.6}, arc: {from: [0, 80], to: [0, -70], roll: 0, hand: both}}

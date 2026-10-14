@@ -1,0 +1,18 @@
+# Totem (Totem degli Spiriti). Shaman's catalyst with three faces: a wolf spirit that runs down the target, a raven
+# that dives, then the bear face swipes up close. Heavy = drum-beat shockwave around the planted totem.
+id: totem
+type: totem
+grip: catalyst
+reach: 15
+guard: {absorption: 0.5}
+swings:
+  totem_light:
+    - {id: tt_l1, anim: totem_thrust, startup: 0.26, active: 0.08, recovery: 0.38, cancel: 0.22, damage_mult: 0.9, poise: 0, projectile: {kind: w_spirit_wolf, speed: 20, radius: 0.45, life: 1.8, homing: 3.0}, arc: {from: [-20, 20], to: [0, 0], roll: 0, hand: r}}
+    - {id: tt_l2, anim: totem_raise, startup: 0.26, active: 0.08, recovery: 0.38, cancel: 0.22, damage_mult: 0.9, poise: 0, projectile: {kind: w_spirit_raven, speed: 26, radius: 0.4, life: 1.6, homing: 2.5}, arc: {from: [0, 70], to: [0, 20], roll: 0, hand: r}}
+    - {id: tt_l3, anim: bear_swipe, startup: 0.3, active: 0.14, recovery: 0.5, cancel: 0.26, damage_mult: 1.25, poise: 0, element: spirit, shape: {type: arc, r: 3.3, angle: 150, y: [0, 2.8]}, move: {speed: 2.0, dur: 0.2}, arc: {from: [-90, 30], to: [70, -20], roll: -20, hand: both}}
+  totem_heavy:
+    {id: tt_h, anim: drum_slam, startup: 0.6, active: 0.16, recovery: 0.55, cancel: 0.32, damage_mult: 1.9, poise: 24, element: spirit, shape: {type: cylinder, c: [0, -0.4, 0.6], r: 3.6, h: 2.8}, arc: {from: [0, 80], to: [0, -60], roll: 0, hand: both}}
+  totem_run:
+    {id: tt_r, anim: totem_thrust, startup: 0.2, active: 0.08, recovery: 0.42, damage_mult: 1.0, poise: 0, projectile: {kind: w_spirit_wolf, speed: 24, radius: 0.5, life: 1.5, homing: 3.0}, move: {speed: 3.0, dur: 0.2}, arc: {from: [-20, 10], to: [0, 0], roll: 0, hand: r}}
+  totem_jump:
+    {id: tt_j, anim: totem_plant, startup: 0.2, active: 0.18, recovery: 0.52, damage_mult: 1.4, poise: 20, element: spirit, shape: {type: cylinder, c: [0, -1.0, 0.6], r: 2.2, h: 2.6}, arc: {from: [0, 60], to: [0, -80], roll: 0, hand: both}}

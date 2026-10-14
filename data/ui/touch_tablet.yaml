@@ -1,0 +1,21 @@
+# Preset for tablets (e.g. 1024x768 .. 1366x1024): the right-thumb cluster hugs the lower-right corner so thumbs reach every
+# control while holding the tablet with two hands. Fractions of the safe area (see touch_default.yaml).
+stick:       {zone: [0.00, 0.35, 0.42, 1.00], mode: floating, radius: 0.10, sprint_ring: 0.85, dead_zone: 0.12}
+camera_drag: {zone: [0.45, 0.00, 1.00, 0.70], sensitivity: 1.0}
+buttons:
+  light:       {pos: [0.922, 0.855], size: 0.14}
+  heavy:       {pos: [0.843, 0.917], size: 0.11}
+  dodge:       {pos: [0.836, 0.804], size: 0.11}
+  guard:       {pos: [0.950, 0.741], size: 0.10, hold: true}
+  jump:        {pos: [0.758, 0.938], size: 0.09}
+  art_prima:   {pos: [0.886, 0.721], size: 0.08}
+  art_seconda: {pos: [0.815, 0.711], size: 0.08}
+  lacrime:     {pos: [0.037, 0.15], size: 0.08}
+  lock:        {pos: [0.964, 0.639], size: 0.08}
+  slot_1:      {pos: [0.715, 0.052], size: 0.07}
+  slot_2:      {pos: [0.772, 0.052], size: 0.07}
+  slot_3:      {pos: [0.829, 0.052], size: 0.07}
+  interact:    {pos: [0.744, 0.814], size: 0.10}
+  metamondo:   {anchor: eco_ring}
+opacity: {active: 0.85, idle: 0.35}
+left_handed: false

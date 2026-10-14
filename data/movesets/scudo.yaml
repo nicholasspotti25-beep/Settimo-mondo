@@ -1,0 +1,18 @@
+# Scudo (Baluardo Gelido). Defensive by design: guard absorbs everything (1.0) and the shield parries.
+# Light = bash, edge chop, spiked push; heavy = shield slam that cracks Equilibrio. Low damage, high safety.
+id: scudo
+type: scudo
+grip: shield
+reach: 2.2
+guard: {absorption: 1.0}
+swings:
+  scudo_light:
+    - {id: sc_l1, anim: shield_bash, startup: 0.24, active: 0.12, recovery: 0.4, cancel: 0.2, damage_mult: 0.85, poise: 0, element: ice, shape: {type: box, c: [0, 1.2, 1.2], half: [0.9, 1.0, 0.8]}, move: {speed: 3.0, dur: 0.18}, arc: {from: [20, 0], to: [0, 0], roll: 0, hand: l}}
+    - {id: sc_l2, anim: edge_chop, startup: 0.26, active: 0.12, recovery: 0.42, cancel: 0.22, damage_mult: 0.9, poise: 0, element: ice, shape: {type: arc, r: 2.2, angle: 100, y: [0.2, 2.4]}, move: {speed: 1.8, dur: 0.18}, arc: {from: [60, 30], to: [-40, -10], roll: 20, hand: l}}
+    - {id: sc_l3, anim: spike_push, startup: 0.32, active: 0.14, recovery: 0.5, cancel: 0.26, damage_mult: 1.1, poise: 0, element: ice, shape: {type: box, c: [0, 1.2, 1.5], half: [1.0, 1.1, 0.9]}, move: {speed: 4.0, dur: 0.24}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: l}}
+  scudo_heavy:
+    {id: sc_h, anim: shield_slam, startup: 0.48, active: 0.16, recovery: 0.55, cancel: 0.3, damage_mult: 1.7, poise: 30, element: ice, shape: {type: cylinder, c: [0, -0.3, 1.4], r: 1.6, h: 2.8}, move: {speed: 2.0, dur: 0.26}, arc: {from: [0, 90], to: [0, -50], roll: 0, hand: l}}
+  scudo_run:
+    {id: sc_r, anim: shield_rush, startup: 0.2, active: 0.18, recovery: 0.5, damage_mult: 1.3, poise: 0, element: ice, shape: {type: box, c: [0, 1.2, 1.2], half: [1.0, 1.1, 0.9]}, move: {speed: 9.0, dur: 0.36}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: l}}
+  scudo_jump:
+    {id: sc_j, anim: shield_plunge, startup: 0.2, active: 0.2, recovery: 0.55, damage_mult: 1.5, poise: 26, element: ice, shape: {type: cylinder, c: [0, -0.8, 0.8], r: 1.7, h: 2.6}, arc: {from: [0, 60], to: [0, -80], roll: 0, hand: l}}

@@ -2,7 +2,7 @@
   "name": "settimo-mondo",
   "private": true,
   "version": "1.0.0",
-  "description": "Settimo Mondo — boss-only action RPG for phones and tablets (offline PWA + Capacitor).",
+  "description": "Settimo Mondo \u2014 boss-only action RPG for phones and tablets (offline PWA + Capacitor).",
   "type": "module",
   "scripts": {
     "data": "tsx tools/build-data.ts",
@@ -21,7 +21,9 @@
     "check": "npm run registry && npm run data && npm run typecheck && npm run lint && npm run test && npm run audit && npm run bot",
     "cap:sync": "npm run build && npx cap sync",
     "cap:android": "npm run cap:sync && npx cap open android",
-    "cap:ios": "npm run cap:sync && npx cap open ios"
+    "cap:ios": "npm run cap:sync && npx cap open ios",
+    "icons": "tsx tools/gen-icons.ts",
+    "data:partial": "SM_PARTIAL=1 tsx tools/build-data.ts"
   },
   "dependencies": {
     "@capacitor-community/keep-awake": "^8.0.1",

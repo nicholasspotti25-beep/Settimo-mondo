@@ -1,0 +1,19 @@
+# Naginata (Naginata Cristallina). Curved crystal blade on a long shaft: sweeping figure-eights that keep a wide
+# circle clear, a full spin and a closing thrust. Heavy = vertical crystal crescent. Ice element.
+id: naginata
+type: naginata
+grip: polearm
+reach: 4.6
+guard: {absorption: 0.7}
+swings:
+  naginata_light:
+    - {id: ng_l1, anim: nagi_sweep_rl, startup: 0.26, active: 0.16, recovery: 0.42, cancel: 0.22, damage_mult: 1.05, poise: 0, element: ice, shape: {type: arc, r: 4.6, r_in: 1.2, angle: 150, y: [0, 2.4]}, move: {speed: 1.8, dur: 0.2}, arc: {from: [-95, 15], to: [80, -10], roll: -20, hand: both}}
+    - {id: ng_l2, anim: nagi_sweep_lr, startup: 0.26, active: 0.16, recovery: 0.42, cancel: 0.22, damage_mult: 1.05, poise: 0, element: ice, shape: {type: arc, r: 4.6, r_in: 1.2, angle: 150, y: [0, 2.4]}, move: {speed: 1.8, dur: 0.2}, arc: {from: [85, 15], to: [-90, -10], roll: 20, hand: both}}
+    - {id: ng_l3, anim: nagi_spin, startup: 0.32, active: 0.26, recovery: 0.5, cancel: 0.26, damage_mult: 0.81, poise: 0, hits: 2, element: ice, shape: {type: arc, r: 4.4, r_in: 1.0, angle: 360, y: [0, 2.4]}, move: {speed: 1.4, dur: 0.3}, arc: {from: [-180, 5], to: [180, 5], roll: 0, hand: both}}
+    - {id: ng_l4, anim: thrust, startup: 0.26, active: 0.12, recovery: 0.45, cancel: 0.22, damage_mult: 1.2, poise: 0, element: ice, shape: {type: capsule, a: [0, 1.3, 0.5], b: [0, 1.3, 5.0], r: 0.5}, move: {speed: 3.6, dur: 0.2}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
+  naginata_heavy:
+    {id: ng_h, anim: crystal_crescent, startup: 0.55, active: 0.16, recovery: 0.6, cancel: 0.32, damage_mult: 2.1, poise: 24, element: ice, shape: {type: arc, r: 4.8, r_in: 1.0, angle: 40, y: [0, 4.0]}, move: {speed: 2.6, dur: 0.3}, arc: {from: [0, 120], to: [0, -50], roll: 0, hand: both}}
+  naginata_run:
+    {id: ng_r, anim: nagi_sweep_rl, startup: 0.24, active: 0.18, recovery: 0.5, damage_mult: 1.35, poise: 0, element: ice, shape: {type: arc, r: 4.5, r_in: 1.0, angle: 170, y: [0, 2.4]}, move: {speed: 6.5, dur: 0.34}, arc: {from: [-100, 10], to: [85, -10], roll: -20, hand: both}}
+  naginata_jump:
+    {id: ng_j, anim: plunge_spin, startup: 0.22, active: 0.22, recovery: 0.56, damage_mult: 1.6, poise: 22, element: ice, shape: {type: cylinder, c: [0, -0.8, 0.8], r: 2.4, h: 2.8}, arc: {from: [0, 100], to: [0, -60], roll: 0, hand: both}}

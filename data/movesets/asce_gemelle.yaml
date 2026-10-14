@@ -1,0 +1,19 @@
+# Asce gemelle (Asce Gemelle del Taglialegna). Woodcutter's rhythm: right, left, right chops then both axes cross;
+# heavy = double overhead chop (two impacts). Short reach, steady pressure.
+id: asce_gemelle
+type: asce_gemelle
+grip: dual
+reach: 2.3
+guard: {absorption: 0.65}
+swings:
+  asce_gemelle_light:
+    - {id: ag2_l1, anim: chop_r, startup: 0.15, active: 0.1, recovery: 0.3, cancel: 0.14, damage_mult: 0.9, poise: 0, shape: {type: arc, r: 2.3, angle: 110, y: [0.1, 2.4]}, move: {speed: 2.2, dur: 0.14}, arc: {from: [-60, 60], to: [30, -30], roll: -30, hand: r}}
+    - {id: ag2_l2, anim: chop_l, startup: 0.15, active: 0.1, recovery: 0.3, cancel: 0.14, damage_mult: 0.9, poise: 0, shape: {type: arc, r: 2.3, angle: 110, y: [0.1, 2.4]}, move: {speed: 2.2, dur: 0.14}, arc: {from: [60, 60], to: [-30, -30], roll: 30, hand: l}}
+    - {id: ag2_l3, anim: chop_r_low, startup: 0.15, active: 0.1, recovery: 0.3, cancel: 0.14, damage_mult: 0.95, poise: 0, shape: {type: arc, r: 2.3, angle: 120, y: [0, 2.0]}, move: {speed: 2.2, dur: 0.14}, arc: {from: [-80, 10], to: [50, -20], roll: -10, hand: r}}
+    - {id: ag2_l4, anim: cross_chop, startup: 0.24, active: 0.14, recovery: 0.45, cancel: 0.22, damage_mult: 0.9, poise: 0, hits: 2, shape: {type: arc, r: 2.4, angle: 100, y: [0, 2.6]}, move: {speed: 3.0, dur: 0.18}, arc: {from: [0, 80], to: [0, -30], roll: 0, hand: both}}
+  asce_gemelle_heavy:
+    {id: ag2_h, anim: double_overhead, startup: 0.45, active: 0.18, recovery: 0.55, cancel: 0.3, damage_mult: 1.2, poise: 26, hits: 2, shape: {type: arc, r: 2.5, angle: 80, y: [0, 3.0]}, move: {speed: 2.6, dur: 0.26}, arc: {from: [0, 110], to: [0, -50], roll: 0, hand: both}}
+  asce_gemelle_run:
+    {id: ag2_r, anim: spinning_approach, startup: 0.2, active: 0.18, recovery: 0.46, damage_mult: 0.78, poise: 0, hits: 2, shape: {type: arc, r: 2.4, angle: 360, y: [0, 2.4]}, move: {speed: 7.0, dur: 0.34}, arc: {from: [-180, 0], to: [180, 0], roll: 0, hand: both}}
+  asce_gemelle_jump:
+    {id: ag2_j, anim: dual_plunge, startup: 0.18, active: 0.2, recovery: 0.5, damage_mult: 1.6, poise: 22, shape: {type: cylinder, c: [0, -0.7, 0.9], r: 1.6, h: 2.6}, arc: {from: [0, 85], to: [0, -70], roll: 0, hand: both}}

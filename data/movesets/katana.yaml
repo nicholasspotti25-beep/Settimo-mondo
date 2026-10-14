@@ -1,0 +1,19 @@
+# Katana (Zanna d'Argento). Wolf-fast: drawn cut, return cut, rising cut, descending crescent; parry-capable.
+# Heavy = iaijutsu: the blade stays sheathed through the wind-up, then a wide draw cut with a step.
+id: katana
+type: katana
+grip: one_hand
+reach: 2.9
+guard: {absorption: 0.8}
+swings:
+  katana_light:
+    - {id: kt_l1, anim: iai_slash, startup: 0.14, active: 0.1, recovery: 0.3, cancel: 0.14, damage_mult: 0.95, poise: 0, shape: {type: arc, r: 2.9, angle: 140, y: [0.1, 2.4]}, move: {speed: 3.0, dur: 0.14}, arc: {from: [-80, -10], to: [75, 15], roll: -15, hand: r}}
+    - {id: kt_l2, anim: return_slash, startup: 0.14, active: 0.1, recovery: 0.3, cancel: 0.14, damage_mult: 0.95, poise: 0, shape: {type: arc, r: 2.9, angle: 140, y: [0.1, 2.4]}, move: {speed: 2.4, dur: 0.14}, arc: {from: [75, 20], to: [-80, -5], roll: 15, hand: r}}
+    - {id: kt_l3, anim: rising, startup: 0.17, active: 0.1, recovery: 0.34, cancel: 0.16, damage_mult: 1.0, poise: 0, shape: {type: arc, r: 2.8, angle: 90, y: [0, 3.0]}, move: {speed: 2.4, dur: 0.14}, arc: {from: [-30, -55], to: [20, 80], roll: -20, hand: r}}
+    - {id: kt_l4, anim: crescent_down, startup: 0.24, active: 0.12, recovery: 0.46, cancel: 0.22, damage_mult: 1.4, poise: 0, shape: {type: arc, r: 3.0, angle: 110, y: [0, 3.0]}, move: {speed: 4.5, dur: 0.2}, arc: {from: [40, 85], to: [-40, -50], roll: 30, hand: both}}
+  katana_heavy:
+    {id: kt_h, anim: iaijutsu, startup: 0.55, active: 0.1, recovery: 0.45, cancel: 0.28, damage_mult: 2.1, poise: 22, shape: {type: arc, r: 3.4, angle: 170, y: [0.1, 2.5]}, move: {speed: 5.0, dur: 0.18}, arc: {from: [-110, 0], to: [100, 5], roll: -10, hand: r}}
+  katana_run:
+    {id: kt_r, anim: dash_cut, startup: 0.16, active: 0.12, recovery: 0.42, damage_mult: 1.35, poise: 0, shape: {type: arc, r: 2.9, angle: 150, y: [0.1, 2.4]}, move: {speed: 9.0, dur: 0.26}, arc: {from: [-90, 0], to: [80, 5], roll: -15, hand: r}}
+  katana_jump:
+    {id: kt_j, anim: plunge, startup: 0.18, active: 0.2, recovery: 0.48, damage_mult: 1.55, poise: 20, shape: {type: cylinder, c: [0, -0.6, 1.1], r: 1.5, h: 2.7}, arc: {from: [0, 85], to: [0, -60], roll: 0, hand: both}}

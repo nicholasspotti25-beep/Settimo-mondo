@@ -1,0 +1,20 @@
+# Kama gemelle (Kama della Mantide). Mantis rhythm: four hooked slashes alternating hands at insect speed, closed by
+# an X; heavy = a lunging scissor X that covers distance. Short reach, the most hits per second of the blades.
+id: kama_gemelle
+type: kama_gemelle
+grip: dual
+reach: 2.2
+guard: {absorption: 0.65}
+swings:
+  kama_gemelle_light:
+    - {id: km_l1, anim: hook_slash_r, startup: 0.11, active: 0.09, recovery: 0.26, cancel: 0.11, damage_mult: 0.75, poise: 0, shape: {type: arc, r: 2.2, angle: 120, y: [0.1, 2.4]}, move: {speed: 2.4, dur: 0.1}, arc: {from: [-70, 30], to: [50, -20], roll: -40, hand: r}}
+    - {id: km_l2, anim: hook_slash_l, startup: 0.11, active: 0.09, recovery: 0.26, cancel: 0.11, damage_mult: 0.75, poise: 0, shape: {type: arc, r: 2.2, angle: 120, y: [0.1, 2.4]}, move: {speed: 2.4, dur: 0.1}, arc: {from: [70, 30], to: [-50, -20], roll: 40, hand: l}}
+    - {id: km_l3, anim: reap_r, startup: 0.11, active: 0.09, recovery: 0.26, cancel: 0.11, damage_mult: 0.75, poise: 0, shape: {type: arc, r: 2.2, angle: 120, y: [0, 2.0]}, move: {speed: 2.4, dur: 0.1}, arc: {from: [-60, -20], to: [60, 30], roll: -20, hand: r}}
+    - {id: km_l4, anim: reap_l, startup: 0.11, active: 0.09, recovery: 0.26, cancel: 0.11, damage_mult: 0.75, poise: 0, shape: {type: arc, r: 2.2, angle: 120, y: [0, 2.0]}, move: {speed: 2.4, dur: 0.1}, arc: {from: [60, -20], to: [-60, 30], roll: 20, hand: l}}
+    - {id: km_l5, anim: scissor_x, startup: 0.2, active: 0.12, recovery: 0.4, cancel: 0.2, damage_mult: 0.75, poise: 0, hits: 2, shape: {type: arc, r: 2.4, angle: 100, y: [0, 2.6]}, move: {speed: 3.2, dur: 0.16}, arc: {from: [0, 70], to: [0, -40], roll: 0, hand: both}}
+  kama_gemelle_heavy:
+    {id: km_h, anim: mantis_lunge_x, startup: 0.42, active: 0.14, recovery: 0.5, cancel: 0.26, damage_mult: 1.15, poise: 22, hits: 2, shape: {type: arc, r: 2.6, angle: 110, y: [0, 2.8]}, move: {speed: 7.0, dur: 0.3}, arc: {from: [0, 80], to: [0, -40], roll: 0, hand: both}}
+  kama_gemelle_run:
+    {id: km_r, anim: leaping_x, startup: 0.18, active: 0.14, recovery: 0.42, damage_mult: 0.8, poise: 0, hits: 2, shape: {type: arc, r: 2.4, angle: 130, y: [0, 2.6]}, move: {speed: 8.0, dur: 0.28}, arc: {from: [0, 60], to: [0, -40], roll: 0, hand: both}}
+  kama_gemelle_jump:
+    {id: km_j, anim: dive_x, startup: 0.16, active: 0.18, recovery: 0.46, damage_mult: 0.9, poise: 20, hits: 2, shape: {type: cylinder, c: [0, -0.8, 0.9], r: 1.5, h: 2.6}, arc: {from: [0, 80], to: [0, -70], roll: 0, hand: both}}

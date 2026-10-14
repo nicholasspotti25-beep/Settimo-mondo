@@ -3,33 +3,33 @@
 Checklist of every item in PART F. `[x]` = implemented and verified by running it (tests, bot, build or headless browser). On 'continue', resume from the first unchecked item.
 
 ## 1. Foundation
-- [ ] Repo + toolchain (TS strict, Vite, Vitest, ESLint, tsx)
-- [ ] sim/render split (lint-enforced)
-- [ ] Fixed 60 Hz loop + interpolation
-- [ ] Balance file with every C4/C6 number (data/balance.yaml)
-- [ ] Data loaders + zod validation + compiled bundle
-- [ ] Event bus / sim events
-- [ ] Localization service (IT first, EN complete)
-- [ ] Save system (IndexedDB + localStorage, 3 slots, export/import code)
+- [x] Repo + toolchain (TS strict, Vite, Vitest, ESLint, tsx)
+- [x] sim/render split (lint-enforced)
+- [x] Fixed 60 Hz loop + interpolation
+- [x] Balance file with every C4/C6 number (data/balance.yaml)
+- [x] Data loaders + zod validation + compiled bundle
+- [x] Event bus / sim events
+- [x] Localization service (IT first, EN complete)
+- [x] Save system (IndexedDB + localStorage, 3 slots, export/import code)
 - [ ] Debug menu
-- [ ] Test harness (vitest)
+- [x] Test harness (vitest)
 - [ ] Touch input layer
 - [ ] PWA shell (manifest, service worker, icons, offline)
 
 ## 2. Core feel
-- [ ] Player controller + state machine (D6)
+- [x] Player controller + state machine (D6)
 - [ ] Lock-on camera (frames player+boss, pulls back for huge bosses, multi-part lock points)
-- [ ] Fiato
-- [ ] Eco (3 segments)
-- [ ] Lacrime d'Alba (1.2 s, cancel ≤0.4 s, refill on death/meditation)
-- [ ] Dodge + perfect dodge (+40 Eco, +3% Metamondo, slow-mo)
-- [ ] Guard + perfect parry (parry-capable types)
-- [ ] Weapon slots + swapping (0.35 s)
+- [x] Fiato
+- [x] Eco (3 segments)
+- [x] Lacrime d'Alba (1.2 s, cancel ≤0.4 s, refill on death/meditation)
+- [x] Dodge + perfect dodge (+40 Eco, +3% Metamondo, slow-mo)
+- [x] Guard + perfect parry (parry-capable types)
+- [x] Weapon slots + swapping (0.35 s)
 - [ ] Transizioni (49 ordered category pairs)
 - [ ] HUD (thin bars, Eco pips + Metamondo ring, boss bar + Equilibrio)
 - [ ] Procedural humanoid animator
 - [ ] Procedural weapon builder (38 looks)
-- [ ] Hit stop
+- [x] Hit stop
 - [ ] Haptics (hit, parry, perfect dodge, Colpo Rosso warning, Colpo di Grazia, boss defeat)
 
 ## 3. World loop
@@ -49,8 +49,8 @@ Checklist of every item in PART F. `[x]` = implemented and verified by running i
 - [ ] Player casts no shadow until the ending
 
 ## 4. Boss framework + special technology
-- [ ] BossBase (HP, Equilibrio, phases, patterns, death sequence)
-- [ ] Pattern selection constraints (cooldowns, distance, max twice in a row, openers)
+- [x] BossBase (HP, Equilibrio, phases, patterns, death sequence)
+- [x] Pattern selection constraints (cooldowns, distance, max twice in a row, openers)
 - [ ] Multi-head bosses (own Equilibrio per head)
 - [ ] Mounted bosses (Guardiano, Cavaliere dismount)
 - [ ] Ship sections (spline platform, sway, ballista, tentacle break points)
@@ -64,7 +64,7 @@ Checklist of every item in PART F. `[x]` = implemented and verified by running i
 - [ ] Metamondo hooks (shatter, rewrite, devour)
 
 ## 5. Metamondo
-- [ ] MetamondoController (meter 2.5 min, +3%/perfect dodge, starts at 50%, 30 s, +50% dmg, Eco x2, no boss heal/summon)
+- [x] MetamondoController (meter 2.5 min, +3%/perfect dodge, starts at 50%, 30 s, +50% dmg, Eco x2, no boss heal/summon)
 - [ ] Form: Prato Lunare — Respiro Libero (ability + miniature environment)
 - [ ] Form: Specchio — Riflessi (from Loki) (ability + miniature environment)
 - [ ] Form: Gigante — Statura (from Uruk) (ability + miniature environment)
@@ -191,8 +191,8 @@ Checklist of every item in PART F. `[x]` = implemented and verified by running i
 - [ ] Lifecycle checks (background pause/autosave, relaunch restores)
 - [ ] Battery: 30 FPS mode, quality presets, watchdog
 - [ ] PWA build (dist/)
-- [ ] Capacitor Android project
-- [ ] Capacitor iOS project
+- [x] Capacitor Android project
+- [x] Capacitor iOS project
 - [ ] README.md
 - [ ] DECISIONS.md
 - [ ] CREDITS.md

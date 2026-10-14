@@ -1,4 +1,7 @@
-# Canonical touch layout (E7). Fractions of the safe area in landscape, origin top-left.
+# Canonical touch layout (E7). Fractions of the safe area in landscape, origin top-left (right-handed; the left-handed
+# mirror is applied at runtime). `size` = button diameter in layout units (see docs/UI.md: 1 unit ~ 1.45 x clamp(safe height,
+# 300, 400) px, so thumbs get the same physical size on every phone). Lacrime sits under the HUD Eco ring (E7 put it at
+# y 0.18, which overlaps the ring on phones); `interact` is the contextual button (altar, reperto, vista, exit).
 stick:       {zone: [0.00, 0.30, 0.45, 1.00], mode: floating, radius: 0.10, sprint_ring: 0.85, dead_zone: 0.12}
 camera_drag: {zone: [0.50, 0.00, 1.00, 0.65], sensitivity: 1.0}
 buttons:
@@ -9,11 +12,12 @@ buttons:
   jump:        {pos: [0.66, 0.88], size: 0.09}
   art_prima:   {pos: [0.84, 0.46], size: 0.08}
   art_seconda: {pos: [0.74, 0.44], size: 0.08}
-  lacrime:     {pos: [0.06, 0.18], size: 0.08}
+  lacrime:     {pos: [0.055, 0.27], size: 0.08}
   lock:        {pos: [0.95, 0.30], size: 0.08}
   slot_1:      {pos: [0.60, 0.10], size: 0.07}
   slot_2:      {pos: [0.68, 0.10], size: 0.07}
   slot_3:      {pos: [0.76, 0.10], size: 0.07}
+  interact:    {pos: [0.64, 0.64], size: 0.10}
   metamondo:   {anchor: eco_ring}
 opacity: {active: 0.85, idle: 0.35}
 left_handed: false

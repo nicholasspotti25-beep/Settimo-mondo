@@ -1,0 +1,19 @@
+# Tridente (Tridente delle Tre Punte). Three broad prongs: two quick jabs with a wide tip, a raking sweep and a
+# driving thrust. Heavy = the trident is thrown and recalled (it can strike on the way out and back).
+id: tridente
+type: tridente
+grip: polearm
+reach: 4.0
+guard: {absorption: 0.7}
+swings:
+  tridente_light:
+    - {id: td_l1, anim: trident_jab, startup: 0.17, active: 0.1, recovery: 0.32, cancel: 0.16, damage_mult: 0.9, poise: 0, shape: {type: capsule, a: [0, 1.3, 0.5], b: [0, 1.3, 3.8], r: 0.7}, move: {speed: 2.4, dur: 0.14}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
+    - {id: td_l2, anim: trident_jab_high, startup: 0.17, active: 0.1, recovery: 0.32, cancel: 0.16, damage_mult: 0.9, poise: 0, shape: {type: capsule, a: [0, 1.5, 0.5], b: [0, 1.9, 3.8], r: 0.7}, move: {speed: 2.4, dur: 0.14}, arc: {from: [0, 5], to: [0, 10], roll: 0, hand: both}}
+    - {id: td_l3, anim: trident_rake, startup: 0.26, active: 0.16, recovery: 0.46, cancel: 0.22, damage_mult: 1.2, poise: 0, shape: {type: arc, r: 3.9, r_in: 0.8, angle: 140, y: [0, 2.2]}, move: {speed: 1.8, dur: 0.2}, arc: {from: [70, -10], to: [-70, -10], roll: 0, hand: both}}
+    - {id: td_l4, anim: trident_drive, startup: 0.28, active: 0.12, recovery: 0.5, cancel: 0.26, damage_mult: 1.35, poise: 0, shape: {type: capsule, a: [0, 1.3, 0.5], b: [0, 1.3, 4.3], r: 0.75}, move: {speed: 5.0, dur: 0.24}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
+  tridente_heavy:
+    {id: td_h, anim: trident_throw, startup: 0.5, active: 0.08, recovery: 0.6, cancel: 0.36, damage_mult: 1.2, poise: 20, projectile: {kind: w_trident, speed: 34, radius: 0.55, life: 1.3, homing: 1.6, returns: true, pierce: true}, arc: {from: [0, 50], to: [0, 0], roll: 0, hand: r}}
+  tridente_run:
+    {id: td_r, anim: charge_thrust, startup: 0.22, active: 0.16, recovery: 0.5, damage_mult: 1.35, poise: 0, shape: {type: capsule, a: [0, 1.3, 0.5], b: [0, 1.3, 4.3], r: 0.75}, move: {speed: 8.0, dur: 0.32}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
+  tridente_jump:
+    {id: td_j, anim: plunge, startup: 0.2, active: 0.2, recovery: 0.55, damage_mult: 1.55, poise: 20, shape: {type: capsule, a: [0, -0.4, 0.6], b: [0, 0.2, 3.2], r: 1.0}, arc: {from: [0, 60], to: [0, -55], roll: 0, hand: both}}
