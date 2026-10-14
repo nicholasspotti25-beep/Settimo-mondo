@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.vite/
+coverage/
+*.log
+/test-results/
+/tools/out/
+native/android/app/build/
+native/android/.gradle/
+native/android/build/
+native/ios/App/build/
+native/ios/App/DerivedData/
+.DS_Store

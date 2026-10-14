@@ -1,0 +1,111 @@
+# Settimo Mondo — every tuning number lives here (C4, C6, D6–D10). Canonical values are marked (C).
+sim_hz: 60
+player:
+  walk: 2.0            # (C) m/s
+  run: 5.0             # (C)
+  sprint: 7.5          # (C)
+  jump_height: 1.1     # (C) about 1.1 m
+  gravity: 24.0
+  turn_rate: 14.0      # rad/s
+  air_control: 0.35
+  radius: 0.38
+  height: 1.8
+  health: 100          # (C)
+  fiato: 100           # (C)
+  fiato_regen: 30      # (C) per second
+  fiato_regen_delay: 0.7  # (C) seconds without spending
+  sprint_cost: 8       # (C) per second
+  dodge_cost: 18       # (C)
+  jump_cost: 10
+  guard_stamina_ratio: 0.5   # (C) blocking costs half the damage absorbed
+  dodge_duration: 0.40       # (C)
+  dodge_iframes: [0.05, 0.30]  # (C)
+  dodge_distance: 4.2
+  backstep_distance: 2.2
+  backstep_duration: 0.32
+  perfect_dodge_window: 0.12   # (C) dodge begins within 0.12 s before the hit would land
+  perfect_dodge_slowmo: 0.15   # (C) seconds of game time in slow motion
+  perfect_dodge_slowmo_scale: 0.3
+  parry_window: 0.15     # (C)
+  parry_recovery: 0.35
+  input_buffer: 0.20     # (C) default
+  latency_comp_max: 0.04 # (C) extends perfect dodge/parry windows by up to +0.04 s
+  lacrime: 3             # (C)
+  drink_time: 1.2        # (C)
+  drink_cancel: 0.4      # (C) cancelable in the first 0.4 s
+  drink_heal: 1.0        # (C) heals 100%
+  swap_time: 0.35        # (C)
+  transizione_window: 0.5  # (C)
+  flinch_time: 0.38
+  knockdown_time: 1.15
+  guard_break_time: 1.1
+  fall_damage_height: 9.0
+eco:
+  max: 300           # (C) three segments of 100
+  segment: 100
+  light_hit: 6       # (C)
+  heavy_hit: 10      # (C)
+  perfect_dodge: 40  # (C)
+  perfect_parry: 80  # (C)
+  prima_cost: 100    # (C)
+  seconda_cost: 200  # (C)
+  art_hit: 0
+  transizione_hit: 8
+equilibrio:
+  decay: 8           # (C) per second
+  decay_delay: 4     # (C) seconds without hits
+  light_hit: 0       # canon: Equilibrio fills with heavy hits, perfect parries and Arts
+  heavy_hit: 20      # (C)
+  perfect_parry: 35  # (C)
+  arte_prima: 25     # (C)
+  arte_seconda: 45   # (C)
+  jump_hit: 20
+  transizione: 10
+  spezzato_time: 6   # (C)
+  grace_mult: 3      # (C) Colpo di Grazia = 3x weapon damage
+  grace_time: 2.5    # (C)
+  grace_range: 4.5
+metamondo:
+  fill_time: 150         # (C) about 2.5 minutes from empty
+  perfect_dodge_bonus: 3 # (C) +3% per perfect dodge
+  start: 50              # (C) every fight starts at 50%
+  duration: 30           # (C)
+  damage_mult: 1.5       # (C) +50%
+  eco_regen_mult: 2.0    # (C)
+  eco_passive: 0         # Eco does not regenerate passively; "refills at double speed" doubles all Eco gains
+weapon:
+  base: 18               # (C) 18 + 4 x D
+  per_difficulty: 4      # (C)
+  starter_damage: 18     # Lama della Culla: no source boss, D = 0
+boss:
+  ttk_base: 120          # (C) 120 s + 20 s x D
+  ttk_per_d: 20          # (C)
+  hit_base: 0.10         # (C) 10% + 1.2% x D of player Health
+  hit_per_d: 0.012       # (C)
+  heavy_cap: 2.0         # (C) heavy hits up to double
+  ref_hit_rate: 0.62     # reference hits/second of a competent player with a suitable weapon (calibrated by the balance bot)
+  parry_recoil: 1.1
+  phase_transition: 2.0
+  spezzato_time: 6
+  min_hp: 400
+guard_absorption:
+  scudo: 1.0
+  parry_sword: 0.8
+  one_handed: 0.65
+  two_handed: 0.75
+  polearm: 0.7
+  ranged: 0.4
+  catalyst: 0.5
+  fist: 0.55
+  flexible: 0.5
+scale:
+  garden: 0.10           # (C) Little Garden: player at 10%
+  garden_speed: 0.60     # (C) movement only reduced to 60%
+  ascended: 1.12         # (C) after Uruk: 112%
+  gigante: 3.0           # (C) Statura: up to three times your size
+  gigante_speed: 0.75
+camera:
+  distance: 5.2
+  height: 1.7
+  lock_distance_per_size: 0.55
+  fov: 58

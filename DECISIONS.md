@@ -1,0 +1,17 @@
+# DECISIONS
+
+One line per decision: **what** — why — alternative rejected.
+
+- **Stack: TypeScript strict + Three.js (WebGL2) + Vite + Web Audio + IndexedDB + hand-written Service Worker; Capacitor for iOS/Android** — the default stack in D1 is code-first, testable from the CLI and runs on phones — Godot/Unity/Unreal forbidden; Babylon.js rejected (heavier bundle, no clear gain).
+- **Repo lives in `settimo-mondo/`; an extra `src/app/` folder holds orchestration (main loop, scene switching, lifecycle)** — D1 lists no home for the glue between sim, render, ui and audio — putting it in `ui/` or `render/` would blur the `sim`/`render` split.
+- **Boss data lives in `/data/bosses/<id>.yaml` (E1) while `/src/content/bosses/<id>/` holds `behavior.ts` (sim), `model.ts` and `arena.ts` (render)** — E1 and D1 disagree on where data goes; E1 is more specific — a registry generator keeps sim registries free of render imports.
+- **Local frame = Three.js object space (+Z forward, +X = owner's LEFT)** — sim hitboxes and render models share one convention so visuals match hitboxes — a separate "right-handed gameplay frame" would need conversions everywhere.
+- **Slow-motion (perfect dodge) and hit-stop are applied by the outer loop, not inside the sim** — keeps the 60 Hz sim deterministic and identical for the headless bot — sim-internal time scaling would make bot timings differ from play.
+- **Perfect dodge = the hit lands during dodge i-frames AND the dodge began ≤ 0.12 s (+ latency compensation ≤ 0.04 s) earlier** — literal reading of C4/D7 — a separate pre-impact prediction window was rejected as less robust for multi-hit attacks.
+- **Perfect-dodge slow motion = 0.15 s of game time played at 30% speed (≈0.5 s real)** — "0.15 s slow-motion" is ambiguous; this is readable on a phone without stalling the fight.
+- **Light hits add 0 Equilibrio** — C4 lists only heavy hits, perfect parries and Arts as filling Equilibrio; jumping attacks count as heavy (+20), Transizioni +10 (canon silent).
+- **Colpo di Grazia does not end Spezzato** — 3x weapon damage is a modest burst; leaving the remaining Spezzato time keeps the grace strike worth taking (safe, invulnerable, cinematic) — ending Spezzato early would make light-attack spam strictly better.
+- **Lama della Culla (starter): type `spada_corta`, damage 18 (D = 0), category one-handed, not parry-capable; Arts "Primo Passo" (lunge) and "Ninnananna dell'Alba" (cross of light)** — the Bible requires two Arts per weapon including the starter but does not name them; spada corta is not in the parry list.
+- **Transizione categories:** one-handed (spada corta, spada lunga, mazza, stocco, scudo, katana, asce gemelle, kama gemelle, pugnali, scimitarra), two-handed (spadone, martello, ascia a due mani, lama a tenaglia, cesoie, spada bastarda), polearm (lancia, alabarda, naginata, tridente, trivella, falce), ranged (arco lungo, balestra, arpione, chakram), catalyst (bastone magico, tomo, totem, astrolabio, scettro), fist (pugni, artigli), flexible (spada serpentina, catene, frusta, flagello, arma mutaforma) — D8 names the seven categories without assigning types.
+- **Boss HP = TTK(D) × best-available weapon damage × ref_hit_rate (0.62 hits/s)** — derives HP from the canonical TTK formula; ref_hit_rate calibrated by the balance bot — fixed HP tables would drift from the formula.
+- **Boss `poise` field on attacks = stagger power against the player** — the player has no poise bar in the Bible; E1's `poise` is reused as hit-reaction strength (≥25 knocks down).
