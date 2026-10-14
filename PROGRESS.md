@@ -196,3 +196,13 @@ Checklist of every item in PART F. `[x]` = implemented and verified by running i
 - [ ] README.md
 - [ ] DECISIONS.md
 - [ ] CREDITS.md
+
+## Resume notes (orchestration)
+- Work-streams are defined in `docs/briefs/*.md` (COMMON + one per stream). Two resumable workflows drive them:
+  - foundation (render-kit, weapons, world, ui, audio, forms): run `wf_ea1539c0-a6b`, script
+    `/root/.claude/projects/-home-user-settimo-mondo/af03cb07-d77a-5105-8b91-fb3fdb8d8552/workflows/scripts/settimo-foundation-wf_ea1539c0-a6b.js`
+  - content (act1, act2, act3a, act3b, act4, act5, act67): run `wf_64f1d508-04d`, script
+    `/root/.claude/projects/-home-user-settimo-mondo/af03cb07-d77a-5105-8b91-fb3fdb8d8552/workflows/scripts/settimo-content-wf_64f1d508-04d.js`
+  - If interrupted (API session limit), relaunch with `Workflow({scriptPath, resumeFromRunId})`: finished agents are cached;
+    unfinished streams restart and continue from the partial files on disk.
+- After both finish: integration pass (lead), strict `npm run check`, smoke on dist, canon audit to zero, final reviewer.
