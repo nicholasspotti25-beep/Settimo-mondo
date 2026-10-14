@@ -1,0 +1,33 @@
+id: landa_roghi
+act: 2
+name_key: zone.landa_roghi.name
+size: [380, 380]
+biome: pyres
+palette: act2_red_blue_black
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 3, scale: 38, octaves: 4, seed: 610}
+  path_flatten: 7
+  rim: {height: 12, width: 26}
+  flats: [[6, 30, 5, 0, 6]]
+spawn: [0, 0, -170]
+spawn_yaw: 0
+path:
+  - [0, 0, -170]
+  - [6, 0, 30]
+  - [0, 0, 50]
+  - [0, 0, 80]
+  - [0, 0, 180]
+altars: [altare_roghi_01]
+arenas: [roghi_campo]
+exits:
+  - {to: bufera_eterna, at: [0, 0, 180], radius: 6, requires: [pyro], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_roghi, pos: [-80, 0, -60], look: [0, 20, 200], name_key: vista.vista_roghi.name}
+reperti: []
+landmarks: []
+props: []
+surface: ash
+ambience: pyres
+timeofday: landa_roghi

@@ -1,0 +1,7 @@
+id: altare_roghi_01
+zone: landa_roghi
+name_key: altar.altare_roghi_01.name
+pos: [6, 0, 30]
+yaw: 0
+before_boss: pyro
+voice_line_key: null

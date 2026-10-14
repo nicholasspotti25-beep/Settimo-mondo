@@ -1,0 +1,33 @@
+id: bufera_eterna
+act: 2
+name_key: zone.bufera_eterna.name
+size: [380, 380]
+biome: tempest
+palette: act2_red_blue_black
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 4, scale: 38, octaves: 4, seed: 273}
+  path_flatten: 7
+  rim: {height: 16, width: 26}
+  flats: [[6, 30, 5, 0, 6]]
+spawn: [0, 0, -170]
+spawn_yaw: 0
+path:
+  - [0, 0, -170]
+  - [6, 0, 30]
+  - [0, 0, 50]
+  - [0, 0, 80]
+  - [0, 0, 180]
+altars: [altare_bufera_01]
+arenas: [bufera_altura]
+exits:
+  - {to: cocito, at: [0, 0, 180], radius: 6, requires: [thunder], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_bufera, pos: [70, 0, -60], look: [0, 20, 200], name_key: vista.vista_bufera.name}
+reperti: []
+landmarks: []
+props: []
+surface: rock
+ambience: tempest
+timeofday: bufera_eterna

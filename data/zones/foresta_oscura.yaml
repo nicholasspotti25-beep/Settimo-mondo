@@ -1,0 +1,33 @@
+id: foresta_oscura
+act: 1
+name_key: zone.foresta_oscura.name
+size: [400, 400]
+biome: dark_forest
+palette: act1_green_gold
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 3, scale: 38, octaves: 4, seed: 524}
+  path_flatten: 7
+  rim: {height: 12, width: 26}
+  flats: [[6, 76, 5, 0, 6]]
+spawn: [0, 0, -180]
+spawn_yaw: 0
+path:
+  - [0, 0, -180]
+  - [6, 0, 76]
+  - [0, 0, 93]
+  - [0, 0, 120]
+  - [0, 0, 190]
+altars: [altare_foresta_01]
+arenas: [foresta_cuore]
+exits:
+  - {to: palude, at: [0, 0, 190], radius: 6, requires: [elder_tree], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_foresta_ombra, pos: [60, 0, -40], look: [0, 20, 120], name_key: vista.vista_foresta_ombra.name}
+reperti: []
+landmarks: []
+props: []
+surface: moss
+ambience: forest_night
+timeofday: foresta_oscura

@@ -1,0 +1,11 @@
+id: giardino_muschio
+zone: little_garden
+name_key: arena.giardino_muschio.name
+center: [38, 0, 12]
+shape: circle
+radius: 13
+gate: {pos: [38, 0, -1], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: giardino_muschio

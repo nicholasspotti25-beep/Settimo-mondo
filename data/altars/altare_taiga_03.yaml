@@ -1,0 +1,7 @@
+id: altare_taiga_03
+zone: taiga
+name_key: altar.altare_taiga_03.name
+pos: [6, 0, 134]
+yaw: 0
+before_boss: sciamano
+voice_line_key: null

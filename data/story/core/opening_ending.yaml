@@ -1,0 +1,50 @@
+- id: risveglio
+  skippable: true
+  steps:
+    - {fade: out, dur: 0.1}
+    - {music: risveglio}
+    - {caption: story.risveglio.01, dur: 5.5}
+    - {caption: story.risveglio.02, dur: 5.5}
+    - {caption: story.risveglio.03, dur: 5.0}
+    - {camera: castle_wake, dur: 0.1}
+    - {fade: in, dur: 3.0}
+    - {caption: story.risveglio.04, dur: 4.5}
+    - {title: ui.title, dur: 4.0}
+    - {event: autosave, params: {reason: start}}
+- id: finale_alba
+  skippable: false
+  steps:
+    - {fade: white_out, dur: 2.0}
+    - {event: ending}
+    - {music: alba}
+    - {camera: ending_clouds, dur: 0.1}
+    - {fade: white_in, dur: 4.0}
+    - {caption: story.finale.01, dur: 5.5}
+    - {camera: ending_sunrise, dur: 6.0}
+    - {caption: story.finale.02, dur: 5.0}
+    - {event: cue, params: {id: ending_shadow}}
+    - {camera: ending_shadow, dur: 5.0}
+    - {caption: story.finale.03, dur: 4.5}
+    - {event: cue, params: {id: ending_feather}}
+    - {camera: ending_feather, dur: 5.5}
+    - {event: cue, params: {id: ending_laugh}}
+    - {wait: 2.5}
+    - {event: cue, params: {id: ending_lantern}}
+    - {camera: ending_lantern, dur: 4.5}
+    - {event: cue, params: {id: ending_cave}}
+    - {camera: ending_cave, dur: 5.5}
+    - {caption: story.finale.04, dur: 5.0}
+    - {camera: ending_wide, dur: 3.0}
+    - {title: ui.title, dur: 7.0}
+    - {event: credits}
+- id: titoli
+  skippable: true
+  steps:
+    - {music: titoli}
+    - {title: credits.01, dur: 5.0}
+    - {caption: credits.02, dur: 5.0}
+    - {caption: credits.03, dur: 5.0}
+    - {caption: credits.04, dur: 5.0}
+    - {caption: credits.05, dur: 5.0}
+    - {caption: credits.06, dur: 6.0}
+    - {fade: out, dur: 2.0}

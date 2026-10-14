@@ -1,0 +1,36 @@
+id: rocca_brina
+act: 3
+name_key: zone.rocca_brina.name
+size: [300, 380]
+biome: ice_castle
+palette: act3_white_azure
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 2, scale: 38, octaves: 4, seed: 316}
+  path_flatten: 7
+  rim: {height: 8, width: 26}
+  flats: [[6, -52, 5, 0, 6], [6, 70, 5, 0, 6]]
+spawn: [0, 0, -170]
+spawn_yaw: 0
+path:
+  - [0, 0, -170]
+  - [6, 0, -52]
+  - [0, 0, -34]
+  - [0, 0, -10]
+  - [6, 0, 70]
+  - [0, 0, 90]
+  - [0, 0, 120]
+  - [0, 0, 180]
+altars: [altare_rocca_01, altare_rocca_02]
+arenas: [rocca_cancello, rocca_sala_trono]
+exits:
+  - {to: taiga, at: [0, 0, 180], radius: 6, requires: [loki], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_rocca, pos: [70, 0, -130], look: [0, 20, 120], name_key: vista.vista_rocca.name}
+reperti: []
+landmarks: []
+props: []
+surface: ice
+ambience: ice_castle
+timeofday: rocca_brina

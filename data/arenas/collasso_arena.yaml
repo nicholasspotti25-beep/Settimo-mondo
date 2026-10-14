@@ -1,0 +1,12 @@
+id: collasso_arena
+zone: collasso
+name_key: arena.collasso_arena.name
+center: [0, 0, 20]
+shape: circle
+radius: 36
+gate: {pos: [0, 0, -16], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: collasso_arena
+platform: islands

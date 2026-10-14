@@ -1,0 +1,11 @@
+# Shared hazard kinds (telegraph decal + active visual). Add boss-specific kinds in data/hazards/<boss>.yaml.
+- {id: crack, visual: crack, color: '#ffcf8a'}
+- {id: shockwave, visual: circle, color: '#ffe6b0'}
+- {id: beam, visual: light, color: '#fff1c0', element: light}
+- {id: fire_pillar, visual: fire, color: '#ff6a2a', element: fire}
+- {id: lightning_mark, visual: lightning, color: '#9ad8ff', element: lightning}
+- {id: ice_spike, visual: ice, color: '#bfe6ff', element: ice}
+- {id: lava_pool, visual: lava, color: '#ff5a1a', element: fire}
+- {id: mud_pool, visual: mud, color: '#4a3a24', element: water}
+- {id: roots, visual: roots, color: '#6a4a2a', element: nature}
+- {id: void_zone, visual: void, color: '#7a2aff', element: void}

@@ -1,0 +1,11 @@
+id: scogliere_cornice
+zone: scogliere_vento
+name_key: arena.scogliere_cornice.name
+center: [0, 0, 110]
+shape: rect
+half: [8, 34]
+gate: {pos: [0, 0, 76], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: scogliere_cornice

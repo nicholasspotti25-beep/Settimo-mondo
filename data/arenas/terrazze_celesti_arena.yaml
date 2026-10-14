@@ -1,0 +1,11 @@
+id: terrazze_celesti_arena
+zone: terrazze_celesti
+name_key: arena.terrazze_celesti_arena.name
+center: [0, 0, 100]
+shape: circle
+radius: 36
+gate: {pos: [0, 0, 64], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: terrazze_celesti_arena

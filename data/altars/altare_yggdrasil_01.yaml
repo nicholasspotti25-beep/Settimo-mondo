@@ -1,0 +1,7 @@
+id: altare_yggdrasil_01
+zone: yggdrasil
+name_key: altar.altare_yggdrasil_01.name
+pos: [6, 0, 36]
+yaw: 0
+before_boss: re_drago
+voice_line_key: null

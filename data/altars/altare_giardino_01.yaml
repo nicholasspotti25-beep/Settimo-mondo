@@ -1,0 +1,7 @@
+id: altare_giardino_01
+zone: little_garden
+name_key: altar.altare_giardino_01.name
+pos: [-30, 0, -42]
+yaw: 0
+before_boss: re_mantide
+voice_line_key: null

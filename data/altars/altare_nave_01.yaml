@@ -1,0 +1,8 @@
+id: altare_nave_01
+zone: grande_fiume
+name_key: altar.altare_nave_01.name
+pos: [0, 0, -34]
+yaw: 0
+before_boss: grande_aquila_reale
+voice_line_key: null
+fast_travel: false

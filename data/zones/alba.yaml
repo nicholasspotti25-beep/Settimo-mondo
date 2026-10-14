@@ -1,0 +1,24 @@
+id: alba
+act: 7
+name_key: zone.alba.name
+size: [300, 300]
+biome: cloud_sea
+palette: act7_white_gold_sunrise
+terrain:
+  type: islands
+  base: 0
+spawn: [0, 0, 0]
+spawn_yaw: 0
+path:
+  - [0, 0, 0]
+  - [0, 0, 60]
+altars: []
+arenas: []
+exits: []
+vistas: []
+reperti: []
+landmarks: []
+props: []
+surface: cloud
+ambience: dawn
+timeofday: alba

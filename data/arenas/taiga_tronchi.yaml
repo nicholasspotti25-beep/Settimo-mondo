@@ -1,0 +1,11 @@
+id: taiga_tronchi
+zone: taiga
+name_key: arena.taiga_tronchi.name
+center: [110, 0, 50]
+shape: circle
+radius: 28
+gate: {pos: [110, 0, 22], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: taiga_tronchi

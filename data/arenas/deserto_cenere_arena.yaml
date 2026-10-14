@@ -1,0 +1,11 @@
+id: deserto_cenere_arena
+zone: deserto_cenere
+name_key: arena.deserto_cenere_arena.name
+center: [0, 0, 90]
+shape: circle
+radius: 34
+gate: {pos: [0, 0, 56], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: deserto_cenere_arena

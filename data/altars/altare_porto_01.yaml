@@ -1,0 +1,7 @@
+id: altare_porto_01
+zone: porto_fiume
+name_key: altar.altare_porto_01.name
+pos: [6, 0, 30]
+yaw: 0
+before_boss: drago_di_fuoco
+voice_line_key: null

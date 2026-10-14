@@ -1,0 +1,3 @@
+- {id: voce, name_key: speaker.voce.name, color: '#ffe6b0', voice: {base: 330, formant: 1.6, wave: sine, vibrato: 0.02, breath: 0.5}}
+- {id: portatore, name_key: speaker.portatore.name, color: '#f4ece0', voice: {base: 200, formant: 1.2, wave: triangle, vibrato: 0.01, breath: 0.2}}
+- {id: guardiano_del_regno, name_key: boss.guardiano_del_regno.name, color: '#c8ccd2', voice: {base: 92, formant: 0.9, wave: sawtooth, vibrato: 0.01, breath: 0.15}}

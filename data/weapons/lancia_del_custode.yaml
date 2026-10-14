@@ -1,0 +1,15 @@
+id: lancia_del_custode
+name_key: weapon.lancia_del_custode.name
+desc_key: weapon.lancia_del_custode.desc
+flavor_key: weapon.lancia_del_custode.flavor
+type: lancia
+category: polearm
+source_boss: guardiano_del_regno
+source_difficulty: 2
+parry_capable: false
+model: {template: lancia, motif: broken_crown, glow: gold, colors: {primary: '#f2efe6', secondary: '#b8a46a', accent: '#ffe6a8'}}
+stamina_cost: {light: 14, heavy: 30}
+moveset: {light: lance_light_combo, heavy: lance_heavy, running: lance_run, jumping: lance_jump}
+arts:
+  prima:   {id: carica_del_custode, eco_cost: 100, effect: dash_strike, params: {distance: 6.5, damage_mult: 1.45, reach: 4.4, width: 0.8, dur: 0.6}, vfx: art_carica_custode, anim: charge_thrust}
+  seconda: {id: ruota_d_argento, eco_cost: 200, effect: spin, params: {radius: 3.4, damage_mult: 1.85, hits: 2, knockback: 2.5, dur: 0.85}, vfx: art_ruota_argento, anim: spin}

@@ -1,0 +1,38 @@
+id: palude
+act: 1
+name_key: zone.palude.name
+size: [420, 420]
+biome: swamp
+palette: act1_green_gold
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 1.5, scale: 38, octaves: 4, seed: 85}
+  path_flatten: 7
+  rim: {height: 6, width: 26}
+  flats: [[-26, -16, 5, 0, 6], [52, 96, 5, 0, 6]]
+  water_level: -0.6
+spawn: [0, 0, -185]
+spawn_yaw: 0
+path:
+  - [0, 0, -185]
+  - [-26, 0, -16]
+  - [-30, 0, 4]
+  - [-30, 0, 30]
+  - [52, 0, 96]
+  - [60, 0, 114]
+  - [60, 0, 140]
+  - [0, 0, 195]
+altars: [altare_palude_01, altare_palude_02]
+arenas: [palude_pozza, palude_molo]
+exits:
+  - {to: fiume_anime, at: [0, 0, 195], radius: 6, requires: [great_devourer], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_palude_lanterne, pos: [90, 0, -60], look: [0, 20, 200], name_key: vista.vista_palude_lanterne.name}
+reperti: []
+landmarks: []
+props: []
+surface: mud
+ambience: swamp
+timeofday: palude
+water: {level: -0.6, kind: swamp}

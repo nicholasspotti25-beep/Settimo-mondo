@@ -1,0 +1,11 @@
+# Shared projectile kinds. Bosses and weapons may add their own in separate files (data/projectiles/<owner>.yaml).
+- {id: orb, radius: 0.4, speed: 14, life: 4, visual: orb, color: '#ffe0a0', trail: true}
+- {id: spectral_lance, radius: 0.6, speed: 22, life: 1.4, visual: bolt, color: '#bfe0ff', trail: true, element: spirit}
+- {id: golden_wave, radius: 0.9, speed: 26, life: 1.2, visual: wave, color: '#ffd76a', element: light}
+- {id: art_orb, radius: 0.5, speed: 22, life: 2.5, visual: orb, color: '#ffe6b0', trail: true, element: light}
+- {id: light_wave, radius: 0.9, speed: 20, life: 1.6, visual: wave, color: '#fff1c0', element: light}
+- {id: arrow, radius: 0.18, speed: 38, life: 2.5, visual: arrow, color: '#e8d8b0', trail: true}
+- {id: bolt, radius: 0.2, speed: 44, life: 2.2, visual: arrow, color: '#c86a3a', trail: true}
+- {id: fireball, radius: 0.7, speed: 16, life: 3.5, visual: fireball, color: '#ff7a2a', trail: true, element: fire, explode_radius: 2.5}
+- {id: ice_shard, radius: 0.35, speed: 24, life: 2.2, visual: shard, color: '#bfe6ff', trail: true, element: ice}
+- {id: soul, radius: 0.45, speed: 10, life: 6, visual: soul, color: '#9ae8ff', trail: true, element: spirit, homing: 1.2}

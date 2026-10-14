@@ -1,0 +1,33 @@
+id: deserto_cenere
+act: 6
+name_key: zone.deserto_cenere.name
+size: [400, 400]
+biome: ash_desert
+palette: act6_violet_red_black
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 4, scale: 38, octaves: 4, seed: 490}
+  path_flatten: 7
+  rim: {height: 16, width: 26}
+  flats: [[6, 36, 5, 0, 6]]
+spawn: [0, 0, -180]
+spawn_yaw: 0
+path:
+  - [0, 0, -180]
+  - [6, 0, 36]
+  - [0, 0, 56]
+  - [0, 0, 90]
+  - [0, 0, 190]
+altars: [altare_deserto_01]
+arenas: [deserto_cenere_arena]
+exits:
+  - {to: palazzo_capovolto, at: [0, 0, 190], radius: 6, requires: [verme_mangiamondi], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_deserto, pos: [70, 0, -60], look: [0, 20, 200], name_key: vista.vista_deserto.name}
+reperti: []
+landmarks: []
+props: []
+surface: sand
+ambience: ash_desert
+timeofday: deserto_cenere

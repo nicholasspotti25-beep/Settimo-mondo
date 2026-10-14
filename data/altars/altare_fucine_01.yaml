@@ -1,0 +1,7 @@
+id: altare_fucine_01
+zone: fucine_sepolte
+name_key: altar.altare_fucine_01.name
+pos: [6, 0, 22]
+yaw: 0
+before_boss: mostro_di_magma
+voice_line_key: null

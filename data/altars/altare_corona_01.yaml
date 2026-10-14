@@ -1,0 +1,7 @@
+id: altare_corona_01
+zone: corona_bianca
+name_key: altar.altare_corona_01.name
+pos: [6, 0, 86]
+yaw: 0
+before_boss: yeti
+voice_line_key: null

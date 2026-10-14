@@ -1,0 +1,7 @@
+id: altare_deserto_01
+zone: deserto_cenere
+name_key: altar.altare_deserto_01.name
+pos: [6, 0, 36]
+yaw: 0
+before_boss: verme_mangiamondi
+voice_line_key: null

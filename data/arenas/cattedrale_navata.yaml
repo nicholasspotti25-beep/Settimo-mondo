@@ -1,0 +1,11 @@
+id: cattedrale_navata
+zone: cattedrale_caduta
+name_key: arena.cattedrale_navata.name
+center: [0, 0, 50]
+shape: rect
+half: [20, 42]
+gate: {pos: [0, 0, 8], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: cattedrale_navata

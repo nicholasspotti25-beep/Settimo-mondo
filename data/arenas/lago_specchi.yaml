@@ -1,0 +1,11 @@
+id: lago_specchi
+zone: lago_nove_specchi
+name_key: arena.lago_specchi.name
+center: [0, 0, 80]
+shape: circle
+radius: 30
+gate: {pos: [0, 0, 50], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: lago_specchi

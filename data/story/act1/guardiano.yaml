@@ -1,0 +1,13 @@
+- id: guardiano_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 1.6}
+    - {say: boss.guardiano_del_regno.intro, speaker: guardiano_del_regno}
+    - {say: boss.guardiano_del_regno.intro2, speaker: guardiano_del_regno}
+    - {event: start_fight}
+- id: guardiano_defeat
+  skippable: true
+  steps:
+    - {wait: 1.4}
+    - {say: boss.guardiano_del_regno.defeat, speaker: guardiano_del_regno}
+    - {voce: voce.atto1.01}

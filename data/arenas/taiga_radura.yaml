@@ -1,0 +1,11 @@
+id: taiga_radura
+zone: taiga
+name_key: arena.taiga_radura.name
+center: [-110, 0, -50]
+shape: circle
+radius: 28
+gate: {pos: [-110, 0, -78], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: taiga_radura

@@ -1,0 +1,11 @@
+id: pianura_capovolta_arena
+zone: pianura_capovolta
+name_key: arena.pianura_capovolta_arena.name
+center: [0, 0, 80]
+shape: circle
+radius: 32
+gate: {pos: [0, 0, 48], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: pianura_capovolta_arena

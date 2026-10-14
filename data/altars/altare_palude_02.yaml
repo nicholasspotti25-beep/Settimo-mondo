@@ -1,0 +1,7 @@
+id: altare_palude_02
+zone: palude
+name_key: altar.altare_palude_02.name
+pos: [52, 0, 96]
+yaw: 0
+before_boss: great_devourer
+voice_line_key: null

@@ -1,0 +1,11 @@
+id: nidi_rupe
+zone: nidi
+name_key: arena.nidi_rupe.name
+center: [0, 0, 80]
+shape: circle
+radius: 30
+gate: {pos: [0, 0, 50], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: nidi_rupe

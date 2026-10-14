@@ -1,0 +1,12 @@
+id: fiume_traghetto
+zone: fiume_anime
+name_key: arena.fiume_traghetto.name
+center: [0, 0, -40]
+shape: rect
+half: [10, 40]
+gate: {pos: [0, 0, -80], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: fiume_traghetto
+platform: boat

@@ -1,0 +1,11 @@
+id: roghi_campo
+zone: landa_roghi
+name_key: arena.roghi_campo.name
+center: [0, 0, 80]
+shape: circle
+radius: 30
+gate: {pos: [0, 0, 50], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: roghi_campo

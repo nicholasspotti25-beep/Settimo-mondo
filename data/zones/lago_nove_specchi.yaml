@@ -1,0 +1,35 @@
+id: lago_nove_specchi
+act: 5
+name_key: zone.lago_nove_specchi.name
+size: [380, 380]
+biome: mirror_lake
+palette: act5_gold_white_midnight
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 1.5, scale: 38, octaves: 4, seed: 989}
+  path_flatten: 7
+  rim: {height: 6, width: 26}
+  flats: [[6, 30, 5, 0, 6]]
+  water_level: -0.6
+spawn: [0, 0, -170]
+spawn_yaw: 0
+path:
+  - [0, 0, -170]
+  - [6, 0, 30]
+  - [0, 0, 50]
+  - [0, 0, 80]
+  - [0, 0, 180]
+altars: [altare_lago_01]
+arenas: [lago_specchi]
+exits:
+  - {to: scogliere_vento, at: [0, 0, 180], radius: 6, requires: [idra], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_lago, pos: [-80, 0, -50], look: [0, 20, 100], name_key: vista.vista_lago.name}
+reperti: []
+landmarks: []
+props: []
+surface: stone
+ambience: mirror_lake
+timeofday: lago_nove_specchi
+water: {level: -0.6, kind: mirror}

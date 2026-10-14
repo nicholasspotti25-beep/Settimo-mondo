@@ -1,0 +1,7 @@
+id: altare_palude_01
+zone: palude
+name_key: altar.altare_palude_01.name
+pos: [-26, 0, -16]
+yaw: 0
+before_boss: mostro_della_palude
+voice_line_key: null

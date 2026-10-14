@@ -1,0 +1,16 @@
+id: lama_della_culla
+name_key: weapon.lama_della_culla.name
+desc_key: weapon.lama_della_culla.desc
+flavor_key: weapon.lama_della_culla.flavor
+type: spada_corta
+category: one_handed
+source_boss: null
+source_difficulty: 0
+parry_capable: false
+starter: true
+model: {template: spada_corta, motif: cradle_plain, glow: none, colors: {primary: '#c8c2b4', secondary: '#6a5a48', accent: '#e8dcc0'}}
+stamina_cost: {light: 12, heavy: 25}
+moveset: {light: shortsword_light, heavy: shortsword_heavy, running: shortsword_run, jumping: shortsword_jump}
+arts:
+  prima:   {id: primo_passo, eco_cost: 100, effect: dash_strike, params: {distance: 4.5, damage_mult: 1.35, reach: 2.4, dur: 0.5}, vfx: art_primo_passo, anim: lunge}
+  seconda: {id: ninnananna_dell_alba, eco_cost: 200, effect: multi_strike, params: {count: 2, interval: 0.22, reach: 2.8, angle: 110, damage_mult: 1.3, shape: slash, dur: 0.8}, vfx: art_croce_di_luce, anim: cross_slash}

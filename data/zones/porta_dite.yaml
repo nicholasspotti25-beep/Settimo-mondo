@@ -1,0 +1,33 @@
+id: porta_dite
+act: 2
+name_key: zone.porta_dite.name
+size: [360, 360]
+biome: hell_gate
+palette: act2_red_blue_black
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 3, scale: 38, octaves: 4, seed: 839}
+  path_flatten: 7
+  rim: {height: 12, width: 26}
+  flats: [[0, 0, 5, 0, 6]]
+spawn: [0, 0, -160]
+spawn_yaw: 0
+path:
+  - [0, 0, -160]
+  - [0, 0, 0]
+  - [0, 0, 20]
+  - [0, 0, 50]
+  - [0, 0, 170]
+altars: [altare_dite_01]
+arenas: [dite_soglia]
+exits:
+  - {to: landa_roghi, at: [0, 0, 170], radius: 6, requires: [cerbero], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_dite_arco, pos: [50, 0, -120], look: [0, 20, 60], name_key: vista.vista_dite_arco.name}
+reperti: []
+landmarks: []
+props: []
+surface: bone
+ambience: hell_gate
+timeofday: porta_dite

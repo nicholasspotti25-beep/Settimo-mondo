@@ -1,0 +1,7 @@
+id: altare_taiga_01
+zone: taiga
+name_key: altar.altare_taiga_01.name
+pos: [-104, 0, -96]
+yaw: 0
+before_boss: grande_lupo
+voice_line_key: null

@@ -1,0 +1,33 @@
+id: nidi
+act: 5
+name_key: zone.nidi.name
+size: [360, 360]
+biome: nests
+palette: act5_gold_white_midnight
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 5, scale: 38, octaves: 4, seed: 874}
+  path_flatten: 7
+  rim: {height: 20, width: 26}
+  flats: [[6, 30, 5, 0, 6]]
+spawn: [0, 0, -160]
+spawn_yaw: 0
+path:
+  - [0, 0, -160]
+  - [6, 0, 30]
+  - [0, 0, 50]
+  - [0, 0, 80]
+  - [0, 0, 170]
+altars: [altare_nidi_01]
+arenas: [nidi_rupe]
+exits:
+  - {to: osservatorio, at: [0, 0, 170], radius: 6, requires: [drago_a_tre_teste], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_nidi, pos: [-80, 0, -60], look: [0, 20, 200], name_key: vista.vista_nidi.name}
+reperti: []
+landmarks: []
+props: []
+surface: rock
+ambience: nests
+timeofday: nidi

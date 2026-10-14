@@ -1,0 +1,11 @@
+id: palude_pozza
+zone: palude
+name_key: arena.palude_pozza.name
+center: [-30, 0, 30]
+shape: circle
+radius: 26
+gate: {pos: [-30, 0, 4], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: palude_pozza

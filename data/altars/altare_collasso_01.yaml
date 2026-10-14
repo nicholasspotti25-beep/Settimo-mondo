@@ -1,0 +1,8 @@
+id: altare_collasso_01
+zone: collasso
+name_key: altar.altare_collasso_01.name
+pos: [0, 0, -36]
+yaw: 0
+before_boss: cthulhu
+voice_line_key: null
+fast_travel: false

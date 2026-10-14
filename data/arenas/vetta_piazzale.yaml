@@ -1,0 +1,11 @@
+id: vetta_piazzale
+zone: vetta_attesa
+name_key: arena.vetta_piazzale.name
+center: [0, 0, 60]
+shape: circle
+radius: 24
+gate: {pos: [0, 0, 36], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: vetta_piazzale

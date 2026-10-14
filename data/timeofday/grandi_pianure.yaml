@@ -1,0 +1,4 @@
+alba:     {sky: act1_alba, fog: light, ambient: 0.8}
+giorno:   {sky: act1_giorno, fog: thin, ambient: 1.0}
+tramonto: {sky: act1_tramonto, fog: medium, ambient: 0.7}
+notte:    {sky: act1_notte, fog: medium, ambient: 0.4, stars: 1, aurora: 0.3}

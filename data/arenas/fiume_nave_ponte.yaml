@@ -1,0 +1,12 @@
+id: fiume_nave_ponte
+zone: grande_fiume
+name_key: arena.fiume_nave_ponte.name
+center: [0, 0, 10]
+shape: rect
+half: [8, 30]
+gate: {pos: [0, 0, -20], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: fiume_nave_ponte
+platform: ship

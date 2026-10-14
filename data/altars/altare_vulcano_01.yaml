@@ -1,0 +1,7 @@
+id: altare_vulcano_01
+zone: bocca_vulcano
+name_key: altar.altare_vulcano_01.name
+pos: [6, 0, 30]
+yaw: 0
+before_boss: gigante_di_fuoco
+voice_line_key: null

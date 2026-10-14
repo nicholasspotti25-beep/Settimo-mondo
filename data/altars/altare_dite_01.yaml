@@ -1,0 +1,7 @@
+id: altare_dite_01
+zone: porta_dite
+name_key: altar.altare_dite_01.name
+pos: [0, 0, 0]
+yaw: 0
+before_boss: cerbero
+voice_line_key: null

@@ -1,0 +1,11 @@
+id: taiga_tamburi
+zone: taiga
+name_key: arena.taiga_tamburi.name
+center: [0, 0, 180]
+shape: circle
+radius: 26
+gate: {pos: [0, 0, 154], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: taiga_tamburi

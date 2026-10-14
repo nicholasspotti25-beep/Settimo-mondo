@@ -1,0 +1,32 @@
+id: grande_fiume
+act: 3
+name_key: zone.grande_fiume.name
+size: [70, 150]
+biome: ship_river
+palette: act3_white_azure
+terrain:
+  type: deck
+  base: 0
+  flats: [[0, -34, 5, 0, 6]]
+spawn: [0, 0, -55]
+spawn_yaw: 0
+path:
+  - [0, 0, -55]
+  - [0, 0, -34]
+  - [0, 0, -20]
+  - [0, 0, 10]
+  - [0, 0, 62]
+altars: [altare_nave_01]
+arenas: [fiume_nave_ponte]
+exits:
+  - {to: porto_fiume, at: [0, 0, 62], radius: 6, requires: [grande_aquila_reale], arrive: spawn, kind: walk, name_key: exit.grande_fiume.porto_fiume}
+vistas:
+  - {id: vista_nave_prua, pos: [0, 0, 55], look: [0, 20, 300], name_key: vista.vista_nave_prua.name}
+reperti: []
+landmarks: []
+props: []
+surface: wood
+ambience: ship_river
+timeofday: grande_fiume
+no_fast_travel: true
+platform: {kind: ship, spline: [[0, 0, -400], [0, 0, 0], [0, 0, 400]], speed: 4, sway: 0.03}

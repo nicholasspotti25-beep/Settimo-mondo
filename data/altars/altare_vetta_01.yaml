@@ -1,0 +1,7 @@
+id: altare_vetta_01
+zone: vetta_attesa
+name_key: altar.altare_vetta_01.name
+pos: [0, 0, 14]
+yaw: 0
+before_boss: guardiano_del_regno
+voice_line_key: null

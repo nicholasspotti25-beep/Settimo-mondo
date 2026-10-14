@@ -1,0 +1,7 @@
+id: altare_taiga_02
+zone: taiga
+name_key: altar.altare_taiga_02.name
+pos: [104, 0, 4]
+yaw: 0
+before_boss: grande_orso
+voice_line_key: null

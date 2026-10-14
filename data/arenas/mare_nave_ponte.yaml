@@ -1,0 +1,12 @@
+id: mare_nave_ponte
+zone: mare
+name_key: arena.mare_nave_ponte.name
+center: [0, 0, 10]
+shape: rect
+half: [8, 30]
+gate: {pos: [0, 0, -20], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: mare_nave_ponte
+platform: ship

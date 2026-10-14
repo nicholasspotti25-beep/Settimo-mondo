@@ -1,0 +1,33 @@
+id: osservatorio
+act: 5
+name_key: zone.osservatorio.name
+size: [320, 320]
+biome: observatory
+palette: act5_gold_white_midnight
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 3, scale: 38, octaves: 4, seed: 437}
+  path_flatten: 7
+  rim: {height: 12, width: 26}
+  flats: [[6, 22, 5, 0, 6]]
+spawn: [0, 0, -140]
+spawn_yaw: 0
+path:
+  - [0, 0, -140]
+  - [6, 0, 22]
+  - [0, 0, 42]
+  - [0, 0, 70]
+  - [0, 0, 150]
+altars: [altare_osservatorio_01]
+arenas: [osservatorio_cupola]
+exits:
+  - {to: lago_nove_specchi, at: [0, 0, 150], radius: 6, requires: [reina], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_osservatorio, pos: [70, 0, -60], look: [0, 20, 200], name_key: vista.vista_osservatorio.name}
+reperti: []
+landmarks: []
+props: []
+surface: marble
+ambience: observatory
+timeofday: osservatorio

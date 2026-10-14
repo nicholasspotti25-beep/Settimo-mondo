@@ -1,0 +1,31 @@
+id: terrazze_celesti
+act: 7
+name_key: zone.terrazze_celesti.name
+size: [340, 400]
+biome: celestial
+palette: act7_white_gold_sunrise
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 1, scale: 38, octaves: 4, seed: 968}
+  path_flatten: 7
+  rim: {height: 6, width: 26}
+  flats: [[6, 44, 5, 0, 6]]
+spawn: [0, 0, -180]
+spawn_yaw: 0
+path:
+  - [0, 0, -180]
+  - [6, 0, 44]
+  - [0, 0, 64]
+  - [0, 0, 100]
+altars: [altare_terrazze_01]
+arenas: [terrazze_celesti_arena]
+exits: []
+vistas:
+  - {id: vista_terrazze, pos: [60, 0, -80], look: [0, 20, 200], name_key: vista.vista_terrazze.name}
+reperti: []
+landmarks: []
+props: []
+surface: marble
+ambience: celestial
+timeofday: terrazze_celesti

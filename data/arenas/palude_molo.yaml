@@ -1,0 +1,12 @@
+id: palude_molo
+zone: palude
+name_key: arena.palude_molo.name
+center: [60, 0, 140]
+shape: rect
+half: [12, 26]
+gate: {pos: [60, 0, 114], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: palude_molo
+platform: deck

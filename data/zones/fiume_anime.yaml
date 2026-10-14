@@ -1,0 +1,35 @@
+id: fiume_anime
+act: 1
+name_key: zone.fiume_anime.name
+size: [300, 420]
+biome: river_souls
+palette: act1_green_gold
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 1.5, scale: 38, octaves: 4, seed: 798}
+  path_flatten: 7
+  rim: {height: 6, width: 26}
+  flats: [[0, -110, 5, 0, 6]]
+  water_level: -0.6
+spawn: [0, 0, -185]
+spawn_yaw: 0
+path:
+  - [0, 0, -185]
+  - [0, 0, -110]
+  - [0, 0, -80]
+  - [0, 0, -40]
+  - [0, 0, 195]
+altars: [altare_fiume_01]
+arenas: [fiume_traghetto]
+exits:
+  - {to: porta_dite, at: [0, 0, 195], radius: 6, requires: [caronte], arrive: spawn, kind: boat, name_key: exit.fiume_anime.porta_dite}
+vistas:
+  - {id: vista_fiume_rosso, pos: [40, 0, -150], look: [0, 20, 400], name_key: vista.vista_fiume_rosso.name}
+reperti: []
+landmarks: []
+props: []
+surface: wood
+ambience: river_souls
+timeofday: fiume_anime
+water: {level: -0.6, kind: souls}

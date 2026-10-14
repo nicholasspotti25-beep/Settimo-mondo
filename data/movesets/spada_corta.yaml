@@ -1,0 +1,17 @@
+# Spada corta (Lama della Culla): quick, light, short reach. Light combo of three cuts.
+id: spada_corta
+type: spada_corta
+grip: one_hand
+reach: 2.4
+guard: {absorption: 0.65}
+swings:
+  shortsword_light:
+    - {id: ss_l1, anim: slash_rl, startup: 0.16, active: 0.12, recovery: 0.34, cancel: 0.16, damage_mult: 1.0, poise: 0, shape: {type: arc, r: 2.4, angle: 120, yaw: 0, y: [0.2, 2.2]}, move: {speed: 2.6, dur: 0.18}, arc: {from: [60, 10], to: [-70, -10], roll: -20, hand: r}}
+    - {id: ss_l2, anim: slash_lr, startup: 0.15, active: 0.12, recovery: 0.34, cancel: 0.16, damage_mult: 1.0, poise: 0, shape: {type: arc, r: 2.4, angle: 120, yaw: 0, y: [0.2, 2.2]}, move: {speed: 2.6, dur: 0.18}, arc: {from: [-70, -5], to: [65, 15], roll: 20, hand: r}}
+    - {id: ss_l3, anim: thrust, startup: 0.2, active: 0.12, recovery: 0.44, cancel: 0.2, damage_mult: 1.25, poise: 0, shape: {type: capsule, a: [0, 1.2, 0.3], b: [0, 1.2, 2.7], r: 0.55}, move: {speed: 4.0, dur: 0.2}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: r}}
+  shortsword_heavy:
+    {id: ss_h, anim: overhead, startup: 0.42, active: 0.14, recovery: 0.52, cancel: 0.25, damage_mult: 1.65, poise: 20, shape: {type: arc, r: 2.6, angle: 70, y: [0, 2.6]}, move: {speed: 3.0, dur: 0.3}, arc: {from: [5, 80], to: [0, -40], roll: 0, hand: r}}
+  shortsword_run:
+    {id: ss_r, anim: slash_rl, startup: 0.2, active: 0.14, recovery: 0.42, damage_mult: 1.2, poise: 0, shape: {type: arc, r: 2.5, angle: 140, y: [0.2, 2.2]}, move: {speed: 6.5, dur: 0.3}, arc: {from: [70, 10], to: [-80, -10], roll: -25, hand: r}}
+  shortsword_jump:
+    {id: ss_j, anim: plunge, startup: 0.18, active: 0.2, recovery: 0.5, damage_mult: 1.5, poise: 20, shape: {type: cylinder, c: [0, -0.6, 1.0], r: 1.4, h: 2.6}, arc: {from: [0, 80], to: [0, -60], roll: 0, hand: r}}

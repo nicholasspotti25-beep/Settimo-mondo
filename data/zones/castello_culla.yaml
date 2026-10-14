@@ -1,0 +1,26 @@
+id: castello_culla
+act: 1
+name_key: zone.castello_culla.name
+size: [90, 230]
+biome: castle
+palette: act1_green_gold
+terrain:
+  type: interior
+  base: 0
+spawn: [0, 0, -100]
+spawn_yaw: 0
+path:
+  - [0, 0, -100]
+  - [0, 0, 105]
+altars: []
+arenas: []
+exits:
+  - {to: vetta_attesa, at: [0, 0, 105], radius: 6, requires: [], arrive: spawn, kind: walk, name_key: exit.castello_culla.vetta_attesa}
+vistas:
+  - {id: vista_culla_finestre, pos: [30, 0, -40], look: [60, 20, -40], name_key: vista.vista_culla_finestre.name}
+reperti: []
+landmarks: []
+props: []
+surface: stone
+ambience: castle_hall
+timeofday: castello_culla

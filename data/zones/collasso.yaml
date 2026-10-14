@@ -1,0 +1,28 @@
+id: collasso
+act: 7
+name_key: zone.collasso.name
+size: [260, 260]
+biome: collapse
+palette: act7_white_gold_sunrise
+terrain:
+  type: islands
+  base: 0
+  flats: [[0, -36, 5, 0, 6]]
+spawn: [0, 0, -100]
+spawn_yaw: 0
+path:
+  - [0, 0, -100]
+  - [0, 0, -36]
+  - [0, 0, -16]
+  - [0, 0, 20]
+altars: [altare_collasso_01]
+arenas: [collasso_arena]
+exits: []
+vistas: []
+reperti: []
+landmarks: []
+props: []
+surface: void
+ambience: collapse
+timeofday: collasso
+no_fast_travel: true

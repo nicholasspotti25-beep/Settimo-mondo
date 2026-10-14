@@ -1,0 +1,7 @@
+id: altare_terrazze_01
+zone: terrazze_celesti
+name_key: altar.altare_terrazze_01.name
+pos: [6, 0, 44]
+yaw: 0
+before_boss: dio_dei_draghi
+voice_line_key: null

@@ -1,0 +1,33 @@
+id: scogliere_vento
+act: 5
+name_key: zone.scogliere_vento.name
+size: [300, 420]
+biome: wind_cliffs
+palette: act5_gold_white_midnight
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 4, scale: 38, octaves: 4, seed: 216}
+  path_flatten: 7
+  rim: {height: 16, width: 26}
+  flats: [[4, 56, 5, 0, 6]]
+spawn: [0, 0, -185]
+spawn_yaw: 0
+path:
+  - [0, 0, -185]
+  - [4, 0, 56]
+  - [0, 0, 76]
+  - [0, 0, 110]
+  - [0, 0, 200]
+altars: [altare_scogliere_01]
+arenas: [scogliere_cornice]
+exits:
+  - {to: yggdrasil, at: [0, 0, 200], radius: 6, requires: [grifone], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_scogliere, pos: [40, 0, -120], look: [0, 20, 400], name_key: vista.vista_scogliere.name}
+reperti: []
+landmarks: []
+props: []
+surface: rock
+ambience: wind_cliffs
+timeofday: scogliere_vento

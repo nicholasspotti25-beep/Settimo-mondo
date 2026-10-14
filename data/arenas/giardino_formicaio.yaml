@@ -1,0 +1,11 @@
+id: giardino_formicaio
+zone: little_garden
+name_key: arena.giardino_formicaio.name
+center: [0, 0, 48]
+shape: circle
+radius: 12
+gate: {pos: [0, 0, 36], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: giardino_formicaio

@@ -1,0 +1,34 @@
+id: pianura_capovolta
+act: 6
+name_key: zone.pianura_capovolta.name
+size: [380, 380]
+biome: upturned_plain
+palette: act6_violet_red_black
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 3, scale: 38, octaves: 4, seed: 225}
+  path_flatten: 7
+  rim: {height: 12, width: 26}
+  flats: [[6, 28, 5, 0, 6]]
+spawn: [0, 0, -170]
+spawn_yaw: 0
+path:
+  - [0, 0, -170]
+  - [6, 0, 28]
+  - [0, 0, 48]
+  - [0, 0, 80]
+  - [0, 0, 180]
+altars: [altare_capovolta_01]
+arenas: [pianura_capovolta_arena]
+exits:
+  - {to: deserto_cenere, at: [0, 0, 180], radius: 6, requires: [drago_del_vuoto], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_capovolta, pos: [-80, 0, -60], look: [0, 20, 200], name_key: vista.vista_capovolta.name}
+reperti: []
+landmarks: []
+props: []
+surface: void
+ambience: upturned
+timeofday: pianura_capovolta
+gravity_flip: true

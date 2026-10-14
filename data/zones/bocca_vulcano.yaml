@@ -1,0 +1,33 @@
+id: bocca_vulcano
+act: 3
+name_key: zone.bocca_vulcano.name
+size: [380, 380]
+biome: volcano
+palette: act3_white_azure
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 5, scale: 38, octaves: 4, seed: 239}
+  path_flatten: 7
+  rim: {height: 20, width: 26}
+  flats: [[6, 30, 5, 0, 6]]
+spawn: [0, 0, -170]
+spawn_yaw: 0
+path:
+  - [0, 0, -170]
+  - [6, 0, 30]
+  - [0, 0, 50]
+  - [0, 0, 80]
+  - [0, 0, 180]
+altars: [altare_vulcano_01]
+arenas: [vulcano_cratere]
+exits:
+  - {to: corona_bianca, at: [0, 0, 180], radius: 6, requires: [gigante_di_fuoco], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_vulcano, pos: [-90, 0, -70], look: [0, 20, 300], name_key: vista.vista_vulcano.name}
+reperti: []
+landmarks: []
+props: []
+surface: basalt
+ambience: volcano_snow
+timeofday: bocca_vulcano

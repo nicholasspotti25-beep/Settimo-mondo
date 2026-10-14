@@ -1,0 +1,11 @@
+id: yeti_caverna
+zone: corona_bianca
+name_key: arena.yeti_caverna.name
+center: [0, 0, 130]
+shape: circle
+radius: 24
+gate: {pos: [0, 0, 106], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: yeti_caverna

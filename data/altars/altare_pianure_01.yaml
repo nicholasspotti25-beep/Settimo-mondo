@@ -1,0 +1,7 @@
+id: altare_pianure_01
+zone: grandi_pianure
+name_key: altar.altare_pianure_01.name
+pos: [8, 0, 78]
+yaw: 0
+before_boss: cavaliere_errante
+voice_line_key: null

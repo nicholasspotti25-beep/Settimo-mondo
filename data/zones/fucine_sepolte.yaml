@@ -1,0 +1,33 @@
+id: fucine_sepolte
+act: 2
+name_key: zone.fucine_sepolte.name
+size: [340, 340]
+biome: forges
+palette: act2_red_blue_black
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 2, scale: 38, octaves: 4, seed: 177}
+  path_flatten: 7
+  rim: {height: 8, width: 26}
+  flats: [[6, 22, 5, 0, 6]]
+spawn: [0, 0, -150]
+spawn_yaw: 0
+path:
+  - [0, 0, -150]
+  - [6, 0, 22]
+  - [0, 0, 42]
+  - [0, 0, 70]
+  - [0, 0, 160]
+altars: [altare_fucine_01]
+arenas: [fucine_incudini]
+exits:
+  - {to: cattedrale_caduta, at: [0, 0, 160], radius: 6, requires: [mostro_di_magma], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_fucine, pos: [60, 0, -50], look: [0, 20, 100], name_key: vista.vista_fucine.name}
+reperti: []
+landmarks: []
+props: []
+surface: obsidian
+ambience: forges
+timeofday: fucine_sepolte

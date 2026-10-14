@@ -1,0 +1,11 @@
+id: serra_giardiniere
+zone: serra_giardiniere
+name_key: arena.serra_giardiniere.name
+center: [0, 0, 12]
+shape: circle
+radius: 17
+gate: {pos: [0, 0, -5], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: serra_giardiniere

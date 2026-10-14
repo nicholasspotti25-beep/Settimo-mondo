@@ -1,0 +1,7 @@
+id: altare_foresta_01
+zone: foresta_oscura
+name_key: altar.altare_foresta_01.name
+pos: [6, 0, 76]
+yaw: 0
+before_boss: elder_tree
+voice_line_key: null

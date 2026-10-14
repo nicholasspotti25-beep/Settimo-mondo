@@ -1,0 +1,41 @@
+id: little_garden
+act: 4
+name_key: zone.little_garden.name
+size: [150, 150]
+biome: giant_garden
+palette: act4_vivid
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 0.6, scale: 38, octaves: 4, seed: 43}
+  path_flatten: 7
+  rim: {height: 6, width: 26}
+  flats: [[-30, -42, 5, 0, 6], [30, -14, 5, 0, 6], [8, 26, 5, 0, 6]]
+spawn: [0, 0, -65]
+spawn_yaw: 0
+path:
+  - [0, 0, -65]
+  - [-30, 0, -42]
+  - [-38, 0, -28]
+  - [-38, 0, -15]
+  - [30, 0, -14]
+  - [38, 0, -1]
+  - [38, 0, 12]
+  - [8, 0, 26]
+  - [0, 0, 36]
+  - [0, 0, 48]
+  - [0, 0, 70]
+altars: [altare_giardino_01, altare_giardino_02, altare_giardino_03]
+arenas: [giardino_trifogli, giardino_muschio, giardino_formicaio]
+exits:
+  - {to: serra_giardiniere, at: [0, 0, 70], radius: 6, requires: [regina_formica], arrive: spawn, kind: walk, name_key: exit.little_garden.serra_giardiniere}
+vistas:
+  - {id: vista_giardino_siepe, pos: [-55, 0, -55], look: [0, 20, 60], name_key: vista.vista_giardino_siepe.name}
+reperti: []
+landmarks: []
+props: []
+surface: soil
+ambience: garden
+timeofday: little_garden
+player_scale: 0.1
+player_speed_mult: 0.6

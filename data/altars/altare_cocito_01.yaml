@@ -1,0 +1,7 @@
+id: altare_cocito_01
+zone: cocito
+name_key: altar.altare_cocito_01.name
+pos: [6, 0, 30]
+yaw: 0
+before_boss: ice
+voice_line_key: null

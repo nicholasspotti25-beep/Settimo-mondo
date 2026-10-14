@@ -1,0 +1,33 @@
+id: yggdrasil
+act: 5
+name_key: zone.yggdrasil.name
+size: [360, 360]
+biome: world_tree
+palette: act5_gold_white_midnight
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 2, scale: 38, octaves: 4, seed: 486}
+  path_flatten: 7
+  rim: {height: 8, width: 26}
+  flats: [[6, 36, 5, 0, 6]]
+spawn: [0, 0, -160]
+spawn_yaw: 0
+path:
+  - [0, 0, -160]
+  - [6, 0, 36]
+  - [0, 0, 56]
+  - [0, 0, 90]
+  - [0, 0, 170]
+altars: [altare_yggdrasil_01]
+arenas: [chioma_yggdrasil]
+exits:
+  - {to: radice_discesa, at: [0, 0, 170], radius: 6, requires: [re_drago], arrive: spawn, kind: root, name_key: exit.yggdrasil.radice_discesa}
+vistas:
+  - {id: vista_yggdrasil_nubi, pos: [80, 0, -40], look: [0, 20, 90], name_key: vista.vista_yggdrasil_nubi.name}
+reperti: []
+landmarks: []
+props: []
+surface: bark
+ambience: world_tree
+timeofday: yggdrasil

@@ -1,0 +1,8 @@
+id: altare_corona_vista
+zone: corona_bianca
+name_key: altar.altare_corona_vista.name
+pos: [-110, 0, -20]
+yaw: 0
+before_boss: null
+voice_line_key: null
+vista: true

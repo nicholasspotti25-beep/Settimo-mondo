@@ -1,0 +1,56 @@
+- id: prato_lunare
+  order: 1
+  name_key: form.prato_lunare.name
+  desc_key: form.prato_lunare.desc
+  unlocked_by: null
+  environment: prato_lunare
+  base: {duration: 30, damage_mult: 1.5, eco_regen_mult: 2.0, boss_no_heal: true}
+  ability: {id: respiro_libero, name_key: form.prato_lunare.ability, desc_key: form.prato_lunare.ability_desc, params: {}}
+- id: specchio
+  order: 2
+  name_key: form.specchio.name
+  desc_key: form.specchio.desc
+  unlocked_by: loki
+  environment: sala_specchi_ghiaccio
+  base: {duration: 30, damage_mult: 1.5, eco_regen_mult: 2.0, boss_no_heal: true}
+  ability: {id: riflessi, name_key: form.specchio.ability, desc_key: form.specchio.ability_desc, params: {clones: 2, clone_damage_mult: 0.5}}
+- id: gigante
+  order: 3
+  name_key: form.gigante.name
+  desc_key: form.gigante.desc
+  unlocked_by: uruk
+  environment: giardino_colossale
+  base: {duration: 30, damage_mult: 1.5, eco_regen_mult: 2.0, boss_no_heal: true}
+  ability: {id: statura, name_key: form.gigante.ability, desc_key: form.gigante.ability_desc, params: {scale: 3.0, poise_mult: 1.5}}
+- id: firmamento
+  order: 4
+  name_key: form.firmamento.name
+  desc_key: form.firmamento.desc
+  unlocked_by: reina
+  environment: cielo_costellazioni
+  base: {duration: 30, damage_mult: 1.5, eco_regen_mult: 2.0, boss_no_heal: true}
+  ability: {id: tempo_stellare, name_key: form.firmamento.ability, desc_key: form.firmamento.ability_desc, params: {boss_speed: 0.6, weak_mult: 1.25}}
+- id: cielo_aureo
+  order: 5
+  name_key: form.cielo_aureo.name
+  desc_key: form.cielo_aureo.desc
+  unlocked_by: re_drago
+  environment: nubi_dorate
+  base: {duration: 30, damage_mult: 1.5, eco_regen_mult: 2.0, boss_no_heal: true}
+  ability: {id: ali_di_luce, name_key: form.cielo_aureo.ability, desc_key: form.cielo_aureo.ability_desc, params: {}}
+- id: abisso_rosso
+  order: 6
+  name_key: form.abisso_rosso.name
+  desc_key: form.abisso_rosso.desc
+  unlocked_by: lucifero_2
+  environment: cattedrale_di_braci
+  base: {duration: 30, damage_mult: 1.5, eco_regen_mult: 2.0, boss_no_heal: true}
+  ability: {id: patto_di_sangue, name_key: form.abisso_rosso.ability, desc_key: form.abisso_rosso.ability_desc, params: {damage_mult: 2.0, drain: 0.02}}
+- id: rovescio
+  order: 7
+  name_key: form.rovescio.name
+  desc_key: form.rovescio.desc
+  unlocked_by: regina_drago
+  environment: mondo_rovesciato
+  base: {duration: 30, damage_mult: 1.5, eco_regen_mult: 2.0, boss_no_heal: true}
+  ability: {id: inversione, name_key: form.rovescio.ability, desc_key: form.rovescio.ability_desc, params: {reflect_mult: 1.2}}

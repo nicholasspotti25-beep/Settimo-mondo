@@ -1,0 +1,11 @@
+id: foresta_cuore
+zone: foresta_oscura
+name_key: arena.foresta_cuore.name
+center: [0, 0, 120]
+shape: circle
+radius: 27
+gate: {pos: [0, 0, 93], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: foresta_cuore

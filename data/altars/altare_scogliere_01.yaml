@@ -1,0 +1,7 @@
+id: altare_scogliere_01
+zone: scogliere_vento
+name_key: altar.altare_scogliere_01.name
+pos: [4, 0, 56]
+yaw: 0
+before_boss: grifone
+voice_line_key: null

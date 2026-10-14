@@ -1,0 +1,11 @@
+id: dite_soglia
+zone: porta_dite
+name_key: arena.dite_soglia.name
+center: [0, 0, 50]
+shape: circle
+radius: 30
+gate: {pos: [0, 0, 20], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: dite_soglia

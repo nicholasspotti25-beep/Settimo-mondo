@@ -1,0 +1,11 @@
+id: giardino_trifogli
+zone: little_garden
+name_key: arena.giardino_trifogli.name
+center: [-38, 0, -15]
+shape: circle
+radius: 13
+gate: {pos: [-38, 0, -28], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: giardino_trifogli

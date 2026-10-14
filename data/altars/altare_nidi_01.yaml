@@ -1,0 +1,7 @@
+id: altare_nidi_01
+zone: nidi
+name_key: altar.altare_nidi_01.name
+pos: [6, 0, 30]
+yaw: 0
+before_boss: drago_a_tre_teste
+voice_line_key: null

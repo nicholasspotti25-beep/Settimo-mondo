@@ -1,0 +1,35 @@
+id: serra_giardiniere
+act: 4
+name_key: zone.serra_giardiniere.name
+size: [90, 90]
+biome: greenhouse
+palette: act4_vivid
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 0.2, scale: 38, octaves: 4, seed: 929}
+  path_flatten: 7
+  rim: {height: 6, width: 26}
+  flats: [[4, -16, 5, 0, 6]]
+spawn: [0, 0, -38]
+spawn_yaw: 0
+path:
+  - [0, 0, -38]
+  - [4, 0, -16]
+  - [0, 0, -5]
+  - [0, 0, 12]
+  - [0, 0, 40]
+altars: [altare_serra_01]
+arenas: [serra_giardiniere]
+exits:
+  - {to: altipiano_ossa, at: [0, 0, 40], radius: 6, requires: [uruk], arrive: spawn, kind: walk, name_key: exit.serra_giardiniere.altipiano_ossa}
+vistas:
+  - {id: vista_serra, pos: [-20, 0, -30], look: [0, 20, 20], name_key: vista.vista_serra.name}
+reperti: []
+landmarks: []
+props: []
+surface: soil
+ambience: greenhouse
+timeofday: serra_giardiniere
+player_scale: 0.1
+player_speed_mult: 0.6

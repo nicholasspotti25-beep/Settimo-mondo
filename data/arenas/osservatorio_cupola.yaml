@@ -1,0 +1,11 @@
+id: osservatorio_cupola
+zone: osservatorio
+name_key: arena.osservatorio_cupola.name
+center: [0, 0, 70]
+shape: circle
+radius: 28
+gate: {pos: [0, 0, 42], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: osservatorio_cupola

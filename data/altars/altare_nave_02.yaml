@@ -1,0 +1,8 @@
+id: altare_nave_02
+zone: mare
+name_key: altar.altare_nave_02.name
+pos: [0, 0, -34]
+yaw: 0
+before_boss: kraken
+voice_line_key: null
+fast_travel: false

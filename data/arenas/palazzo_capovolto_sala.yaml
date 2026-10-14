@@ -1,0 +1,11 @@
+id: palazzo_capovolto_sala
+zone: palazzo_capovolto
+name_key: arena.palazzo_capovolto_sala.name
+center: [0, 0, 60]
+shape: circle
+radius: 30
+gate: {pos: [0, 0, 30], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: palazzo_capovolto_sala

@@ -1,0 +1,11 @@
+id: cocito_lago
+zone: cocito
+name_key: arena.cocito_lago.name
+center: [0, 0, 80]
+shape: circle
+radius: 30
+gate: {pos: [0, 0, 50], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: cocito_lago

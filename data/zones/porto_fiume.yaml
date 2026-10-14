@@ -1,0 +1,33 @@
+id: porto_fiume
+act: 3
+name_key: zone.porto_fiume.name
+size: [340, 340]
+biome: river_port
+palette: act3_white_azure
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 1.5, scale: 38, octaves: 4, seed: 74}
+  path_flatten: 7
+  rim: {height: 6, width: 26}
+  flats: [[6, 30, 5, 0, 6]]
+spawn: [0, 0, -150]
+spawn_yaw: 0
+path:
+  - [0, 0, -150]
+  - [6, 0, 30]
+  - [0, 0, 50]
+  - [0, 0, 80]
+  - [0, 0, 165]
+altars: [altare_porto_01]
+arenas: [porto_moli]
+exits:
+  - {to: mare, at: [0, 0, 165], radius: 6, requires: [drago_di_fuoco], arrive: spawn, kind: ship, name_key: exit.porto_fiume.mare}
+vistas:
+  - {id: vista_porto_mare, pos: [80, 0, 120], look: [0, 20, 400], name_key: vista.vista_porto_mare.name}
+reperti: []
+landmarks: []
+props: []
+surface: wood
+ambience: port
+timeofday: porto_fiume

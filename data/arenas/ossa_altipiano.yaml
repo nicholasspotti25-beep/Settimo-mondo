@@ -1,0 +1,11 @@
+id: ossa_altipiano
+zone: altipiano_ossa
+name_key: arena.ossa_altipiano.name
+center: [0, 0, 80]
+shape: circle
+radius: 32
+gate: {pos: [0, 0, 48], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: ossa_altipiano

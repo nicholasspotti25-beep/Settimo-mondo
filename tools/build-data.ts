@@ -119,19 +119,19 @@ const balance = loadFile('balance.yaml', S.balance);
 const bosses = loadDefs('bosses', S.boss);
 const weapons = loadDefs('weapons', S.weapon);
 const movesets = loadDefs('movesets', S.moveset);
-const transitions = fs.existsSync(path.join(DATA, 'transitions.yaml')) ? loadArrayFile('transitions.yaml', S.transition) : [];
+const transitions = loadDefs('transitions', S.transition);
 const forms = loadDefs('forms', S.form);
 const altars = loadDefs('altars', S.altar);
 const zones = loadDefs('zones', S.zone);
 const arenas = loadDefs('arenas', S.arena);
 const reperti = loadDefs('reperti', S.reperto);
-const voce = fs.existsSync(path.join(DATA, 'voce.yaml')) ? loadArrayFile('voce.yaml', S.voce) : [];
+const voce = loadDefs('voce', S.voce);
 const sequences = loadDefs('story', S.sequence);
-const speakers = fs.existsSync(path.join(DATA, 'speakers.yaml')) ? loadArrayFile('speakers.yaml', S.speaker) : [];
+const speakers = loadDefs('speakers', S.speaker);
 const progression = loadFile('progression.yaml', S.progression);
-const projectiles = fs.existsSync(path.join(DATA, 'projectiles.yaml')) ? loadArrayFile('projectiles.yaml', S.projectileKind) : [];
-const hazards = fs.existsSync(path.join(DATA, 'hazards.yaml')) ? loadArrayFile('hazards.yaml', S.hazardKind) : [];
-const skies = fs.existsSync(path.join(DATA, 'skies.yaml')) ? loadArrayFile('skies.yaml', S.sky) : [];
+const projectiles = loadDefs('projectiles', S.projectileKind);
+const hazards = loadDefs('hazards', S.hazardKind);
+const skies = loadDefs('skies', S.sky);
 const timeofday: Record<string, z.infer<typeof S.timeofday>> = {};
 for (const [k, v] of Object.entries(loadKeyed('timeofday'))) {
   const t = validate(S.timeofday, v, `data/timeofday/${k}.yaml`);
@@ -145,7 +145,8 @@ for (const [k, v] of Object.entries(loadKeyed('ui'))) {
 }
 const anim = loadKeyed('anim');
 const music = loadKeyed('music');
-const palettes = (fs.existsSync(path.join(DATA, 'palettes.yaml')) ? readYaml(path.join(DATA, 'palettes.yaml')) : {}) as Record<string, Record<string, string>>;
+const palettes: Record<string, Record<string, string>> = {};
+for (const [k, v] of Object.entries(loadKeyed('palettes'))) Object.assign(palettes, k === 'index' ? v : { [k]: v });
 
 dupCheck('boss', bosses.map((b) => b.id));
 dupCheck('weapon', weapons.map((w) => w.id));
@@ -258,7 +259,7 @@ for (const z of zones) {
   for (const r of z.reperti) if (!repIds.has(r)) errors.push(`zone ${z.id}: unknown reperto ${r}`);
   for (const e of z.exits) {
     if (!zoneIds.has(e.to)) errors.push(`zone ${z.id}: exit to unknown zone ${e.to}`);
-    if (!altarIds.has(e.arrive)) errors.push(`zone ${z.id}: exit arrive unknown altar ${e.arrive}`);
+    if (e.arrive !== 'spawn' && !altarIds.has(e.arrive)) errors.push(`zone ${z.id}: exit arrive unknown altar ${e.arrive}`);
     for (const r of e.requires) if (!bossIds.has(r)) errors.push(`zone ${z.id}: exit requires unknown boss ${r}`);
   }
   if (!timeofday[z.timeofday]) errors.push(`zone ${z.id}: unknown timeofday ${z.timeofday}`);
@@ -376,6 +377,13 @@ for (const [lang, table] of [['it', it], ['en', en]] as const) {
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 
+// Partial mode (SM_PARTIAL=1): references to content that other work-streams have not authored yet are warnings.
+if (process.env.SM_PARTIAL === '1') {
+  const missing = /unknown (boss|form|sequence|zone|arena|weapon|altar|reperto|speaker|minion|projectile kind|hazard kind|.*swing)|no Altare|missing key|needs flavor_key|exit (to|requires|arrive) unknown|unknown intro_sequence|unknown start|unknown (ending|credits)_sequence/;
+  for (let i = errors.length - 1; i >= 0; i--) {
+    if (missing.test(errors[i])) warnings.push(errors.splice(i, 1)[0]);
+  }
+}
 if (warnings.length && !quiet) {
   console.warn(`build-data: ${warnings.length} warning(s)`);
   for (const w of warnings.slice(0, 40)) console.warn('  ! ' + w);

@@ -1,0 +1,7 @@
+id: altare_bufera_01
+zone: bufera_eterna
+name_key: altar.altare_bufera_01.name
+pos: [6, 0, 30]
+yaw: 0
+before_boss: thunder
+voice_line_key: null

@@ -1,0 +1,7 @@
+id: altare_palazzo_01
+zone: palazzo_capovolto
+name_key: altar.altare_palazzo_01.name
+pos: [6, 0, 10]
+yaw: 0
+before_boss: regina_drago
+voice_line_key: null

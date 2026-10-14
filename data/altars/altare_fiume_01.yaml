@@ -1,0 +1,7 @@
+id: altare_fiume_01
+zone: fiume_anime
+name_key: altar.altare_fiume_01.name
+pos: [0, 0, -110]
+yaw: 0
+before_boss: caronte
+voice_line_key: null

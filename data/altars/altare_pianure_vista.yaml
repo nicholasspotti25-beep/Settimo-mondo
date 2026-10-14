@@ -1,0 +1,8 @@
+id: altare_pianure_vista
+zone: grandi_pianure
+name_key: altar.altare_pianure_vista.name
+pos: [-120, 0, -40]
+yaw: 0
+before_boss: null
+voice_line_key: null
+vista: true

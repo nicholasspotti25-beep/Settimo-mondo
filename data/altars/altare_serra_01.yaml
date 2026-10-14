@@ -1,0 +1,7 @@
+id: altare_serra_01
+zone: serra_giardiniere
+name_key: altar.altare_serra_01.name
+pos: [4, 0, -16]
+yaw: 0
+before_boss: uruk
+voice_line_key: null

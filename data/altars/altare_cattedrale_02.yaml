@@ -1,0 +1,7 @@
+id: altare_cattedrale_02
+zone: cattedrale_caduta
+name_key: altar.altare_cattedrale_02.name
+pos: [8, 0, -14]
+yaw: 0
+before_boss: lucifero_2
+voice_line_key: null

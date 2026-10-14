@@ -1,0 +1,28 @@
+id: radice_discesa
+act: 6
+name_key: zone.radice_discesa.name
+size: [160, 400]
+biome: hollow_root
+palette: act6_violet_red_black
+terrain:
+  type: interior
+  base: 0
+  flats: [[0, 0, 5, 0, 6]]
+spawn: [0, 0, -185]
+spawn_yaw: 0
+path:
+  - [0, 0, -185]
+  - [0, 0, 0]
+  - [0, 0, 190]
+altars: [altare_radice_vista]
+arenas: []
+exits:
+  - {to: cattedrale_caduta, at: [0, 0, 190], radius: 6, requires: [], arrive: altare_cattedrale_02, kind: root, name_key: exit.radice_discesa.cattedrale_caduta}
+vistas:
+  - {id: vista_radice, pos: [0, 0, 10], look: [0, 20, -200], name_key: vista.vista_radice.name}
+reperti: []
+landmarks: []
+props: []
+surface: bark
+ambience: hollow_root
+timeofday: radice_discesa

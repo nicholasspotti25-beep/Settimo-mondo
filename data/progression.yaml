@@ -1,0 +1,14 @@
+acts:
+  - {n: 1, name_key: act.1.name, palette: act1_green_gold, zones: [castello_culla, vetta_attesa, grandi_pianure, foresta_oscura, palude, fiume_anime]}
+  - {n: 2, name_key: act.2.name, palette: act2_red_blue_black, zones: [porta_dite, landa_roghi, bufera_eterna, cocito, fucine_sepolte, cattedrale_caduta]}
+  - {n: 3, name_key: act.3.name, palette: act3_white_azure, zones: [bocca_vulcano, corona_bianca, rocca_brina, taiga, grande_fiume, porto_fiume, mare]}
+  - {n: 4, name_key: act.4.name, palette: act4_vivid, zones: [little_garden, serra_giardiniere]}
+  - {n: 5, name_key: act.5.name, palette: act5_gold_white_midnight, zones: [altipiano_ossa, nidi, osservatorio, lago_nove_specchi, scogliere_vento, yggdrasil]}
+  - {n: 6, name_key: act.6.name, palette: act6_violet_red_black, zones: [radice_discesa, cattedrale_caduta, pianura_capovolta, deserto_cenere, palazzo_capovolto]}
+  - {n: 7, name_key: act.7.name, palette: act7_white_gold_sunrise, zones: [terrazze_celesti, collasso, alba]}
+start_zone: castello_culla
+start_altar: altare_vetta_01
+start_sequence: risveglio
+ending_sequence: finale_alba
+credits_sequence: titoli
+sky_shades: [0, 0.14, 0.28, 0.42, 0.57, 0.71, 0.86, 1.0]

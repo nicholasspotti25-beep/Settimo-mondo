@@ -1,0 +1,7 @@
+id: altare_lago_01
+zone: lago_nove_specchi
+name_key: altar.altare_lago_01.name
+pos: [6, 0, 30]
+yaw: 0
+before_boss: idra
+voice_line_key: null

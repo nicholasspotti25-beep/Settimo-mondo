@@ -1,0 +1,7 @@
+id: altare_capovolta_01
+zone: pianura_capovolta
+name_key: altar.altare_capovolta_01.name
+pos: [6, 0, 28]
+yaw: 0
+before_boss: drago_del_vuoto
+voice_line_key: null

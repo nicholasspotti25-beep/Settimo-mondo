@@ -1,0 +1,7 @@
+id: altare_rocca_02
+zone: rocca_brina
+name_key: altar.altare_rocca_02.name
+pos: [6, 0, 70]
+yaw: 0
+before_boss: loki
+voice_line_key: null

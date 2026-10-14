@@ -1,0 +1,11 @@
+id: fucine_incudini
+zone: fucine_sepolte
+name_key: arena.fucine_incudini.name
+center: [0, 0, 70]
+shape: circle
+radius: 28
+gate: {pos: [0, 0, 42], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: fucine_incudini

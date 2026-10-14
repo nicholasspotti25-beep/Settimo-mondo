@@ -1,0 +1,7 @@
+id: altare_giardino_03
+zone: little_garden
+name_key: altar.altare_giardino_03.name
+pos: [8, 0, 26]
+yaw: 0
+before_boss: regina_formica
+voice_line_key: null

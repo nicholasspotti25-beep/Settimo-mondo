@@ -1,0 +1,29 @@
+id: palazzo_capovolto
+act: 6
+name_key: zone.palazzo_capovolto.name
+size: [260, 340]
+biome: upturned_palace
+palette: act6_violet_red_black
+terrain:
+  type: interior
+  base: 0
+  flats: [[6, 10, 5, 0, 6]]
+spawn: [0, 0, -150]
+spawn_yaw: 0
+path:
+  - [0, 0, -150]
+  - [6, 0, 10]
+  - [0, 0, 30]
+  - [0, 0, 60]
+altars: [altare_palazzo_01]
+arenas: [palazzo_capovolto_sala]
+exits: []
+vistas:
+  - {id: vista_palazzo, pos: [-50, 0, -90], look: [0, 20, 100], name_key: vista.vista_palazzo.name}
+reperti: []
+landmarks: []
+props: []
+surface: marble
+ambience: upturned_palace
+timeofday: palazzo_capovolto
+gravity_flip: true

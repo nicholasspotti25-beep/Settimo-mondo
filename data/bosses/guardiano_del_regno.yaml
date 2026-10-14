@@ -1,0 +1,177 @@
+# 1. Guardiano del Regno — secondary · Vetta dell'Attesa · D2. Reference boss: copy this structure for every boss.
+id: guardiano_del_regno
+order: 1
+name_key: boss.guardiano_del_regno.name
+class: secondary
+difficulty: 2
+act: 1
+arena: vetta_piazzale
+zone: vetta_attesa
+mounted: true
+model: {builder: guardiano_del_regno, rig: mounted_humanoid, scale: 1.0, palette: act1_green_gold}
+equilibrio_max: 100
+body: {radius: 1.5, height: 4.4, mass: heavy}
+hurtboxes:
+  - {c: [0, 1.4, 0.9], r: 1.25}    # horse chest
+  - {c: [0, 1.5, -0.8], r: 1.2}    # horse body
+  - {c: [0, 3.2, -0.1], r: 0.75}   # rider torso
+  - {c: [0, 4.0, -0.1], r: 0.42}   # rider helm
+move: {walk: 2.6, run: 7.5, turn: 2.6, preferred_range: [4, 9]}
+idle_gap: [0.7, 1.5]
+music: boss_guardiano
+intro_sequence: guardiano_intro
+defeat_sequence: guardiano_defeat
+lore_key: boss.guardiano_del_regno.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_guardiano_p1
+    patterns: [charge_lateral, lance_thrust_combo, heavy_overhead, lance_sweep, trample]
+    opener: lance_sweep
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_guardiano_p2
+    on_enter: [spectral_aura]
+    speed_mult: 1.2
+    aggression: 1.25
+    opener: double_charge
+    patterns: [charge_lateral, lance_thrust_combo, heavy_overhead, lance_sweep, trample, double_charge, spectral_thrust]
+attacks:
+  # Long charge across the plaza: dodge sideways (teaches lateral dodge).
+  - id: charge_lateral
+    anim: charge
+    telegraph: 0.9
+    active: 1.15
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    range: [7, 40]
+    weight: 1.2
+    cooldown: 3
+    track: 1.2
+    track_active: 0.12
+    motion:
+      - {t: 0, dur: 1.1, type: forward, speed: 17}
+    hits:
+      - {t: 0, dur: 1.1, shape: {type: capsule, a: [0, 1.4, 0.8], b: [0, 1.7, 5.2], r: 1.05}}
+    sfx: hooves_charge
+  # Three readable thrusts.
+  - id: lance_thrust_combo
+    anim: thrust
+    telegraph: 0.75
+    active: 0.95
+    recovery: 1.0
+    damage_mult: 0.85
+    poise: 10
+    flags: []
+    range: [0, 6.5]
+    weight: 1.3
+    track: 1.0
+    track_active: 0.35
+    motion:
+      - {t: 0, dur: 0.8, type: forward, speed: 2.2}
+    hits:
+      - {t: 0.0, dur: 0.12, shape: {type: capsule, a: [0, 2.6, 0.6], b: [0, 2.1, 6.0], r: 0.6}}
+      - {t: 0.38, dur: 0.12, shape: {type: capsule, a: [0, 2.6, 0.6], b: [0, 2.1, 6.0], r: 0.6}}
+      - {t: 0.76, dur: 0.14, shape: {type: capsule, a: [0, 2.6, 0.6], b: [0, 2.0, 6.4], r: 0.65}}
+  # One heavy overhead strike: Colpo Rosso, must be dodged.
+  - id: heavy_overhead
+    anim: overhead
+    telegraph: 1.15
+    active: 0.3
+    recovery: 1.45
+    damage_mult: 1.6
+    poise: 30
+    flags: [red, knockdown]
+    range: [0, 5.5]
+    weight: 0.8
+    cooldown: 5
+    track: 1.1
+    hits:
+      - {t: 0.05, dur: 0.2, shape: {type: arc, r: 5.6, angle: 46, y: [-0.5, 5]}}
+    spawns:
+      - {t: 0.08, type: shockwave, radius: 4, shape: {type: ring, r0: 1, r1: 4.5, width: 1.0, height: 0.7}, active: 0.4, damage_mult: 0.5}
+  # Horizontal lance sweep: blockable (teaches guard).
+  - id: lance_sweep
+    anim: sweep_r
+    telegraph: 0.8
+    active: 0.32
+    recovery: 0.95
+    damage_mult: 0.95
+    poise: 14
+    flags: []
+    range: [0, 6]
+    weight: 1.0
+    hits:
+      - {t: 0.02, dur: 0.26, shape: {type: arc, r: 6.2, angle: 150, yaw: 0, y: [0, 4]}}
+  # Rears up and stomps.
+  - id: trample
+    anim: rear_stomp
+    telegraph: 0.85
+    active: 0.25
+    recovery: 1.0
+    damage_mult: 1.1
+    poise: 26
+    flags: [knockdown]
+    range: [0, 3.8]
+    weight: 0.9
+    cooldown: 3
+    hits:
+      - {t: 0.02, dur: 0.18, shape: {type: cylinder, c: [0, 0, 1.6], r: 2.9, h: 2.2}}
+  # Phase 2: charge, wheel around, charge again.
+  - id: double_charge
+    anim: charge
+    telegraph: 0.8
+    active: 1.0
+    recovery: 0.45
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    range: [5, 40]
+    weight: 1.1
+    cooldown: 6
+    track: 1.3
+    track_active: 0.12
+    combo_next: charge_return
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.95, type: forward, speed: 19}
+    hits:
+      - {t: 0, dur: 0.95, shape: {type: capsule, a: [0, 1.4, 0.8], b: [0, 1.7, 5.2], r: 1.05}}
+  - id: charge_return
+    anim: charge
+    telegraph: 0.7
+    active: 1.0
+    recovery: 1.2
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    weight: 0
+    track: 2.4
+    track_active: 0.1
+    motion:
+      - {t: 0, dur: 0.95, type: forward, speed: 19}
+    hits:
+      - {t: 0, dur: 0.95, shape: {type: capsule, a: [0, 1.4, 0.8], b: [0, 1.7, 5.2], r: 1.05}}
+  # Phase 2: spectral thrust that sends a lance of light down the plaza.
+  - id: spectral_thrust
+    anim: thrust
+    telegraph: 0.95
+    active: 0.5
+    recovery: 1.2
+    damage_mult: 1.15
+    poise: 18
+    flags: []
+    range: [3, 18]
+    weight: 1.0
+    cooldown: 4
+    track: 1.0
+    hits:
+      - {t: 0.0, dur: 0.14, shape: {type: capsule, a: [0, 2.4, 0.6], b: [0, 2.0, 6.2], r: 0.65}}
+    spawns:
+      - {t: 0.05, type: projectile, id: spectral_lance, speed: 22, from: [0, 2.2, 3], count: 1}
+time_of_day_variants: {}
+dialogue_keys: [boss.guardiano_del_regno.intro, boss.guardiano_del_regno.defeat]
+drops_weapon: lancia_del_custode
+unlocks_form: null

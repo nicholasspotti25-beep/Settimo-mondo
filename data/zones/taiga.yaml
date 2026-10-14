@@ -1,0 +1,39 @@
+id: taiga
+act: 3
+name_key: zone.taiga.name
+size: [500, 500]
+biome: taiga
+palette: act3_white_azure
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 4, scale: 38, octaves: 4, seed: 931}
+  path_flatten: 7
+  rim: {height: 16, width: 26}
+  flats: [[-104, -96, 5, 0, 6], [104, 4, 5, 0, 6], [6, 134, 5, 0, 6]]
+spawn: [0, 0, -230]
+spawn_yaw: 0
+path:
+  - [0, 0, -230]
+  - [-104, 0, -96]
+  - [-110, 0, -78]
+  - [-110, 0, -50]
+  - [104, 0, 4]
+  - [110, 0, 22]
+  - [110, 0, 50]
+  - [6, 0, 134]
+  - [0, 0, 154]
+  - [0, 0, 180]
+  - [0, 0, 240]
+altars: [altare_taiga_01, altare_taiga_02, altare_taiga_03]
+arenas: [taiga_radura, taiga_tronchi, taiga_tamburi]
+exits:
+  - {to: grande_fiume, at: [0, 0, 240], radius: 6, requires: [sciamano], arrive: spawn, kind: ship, name_key: exit.taiga.grande_fiume}
+vistas:
+  - {id: vista_taiga_fiume, pos: [-160, 0, 120], look: [0, 20, 500], name_key: vista.vista_taiga_fiume.name}
+reperti: []
+landmarks: []
+props: []
+surface: pine
+ambience: taiga
+timeofday: taiga

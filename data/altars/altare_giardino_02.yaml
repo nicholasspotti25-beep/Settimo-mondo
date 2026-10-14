@@ -1,0 +1,7 @@
+id: altare_giardino_02
+zone: little_garden
+name_key: altar.altare_giardino_02.name
+pos: [30, 0, -14]
+yaw: 0
+before_boss: coleottero_imperiale
+voice_line_key: null

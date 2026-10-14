@@ -1,0 +1,33 @@
+id: vetta_attesa
+act: 1
+name_key: zone.vetta_attesa.name
+size: [320, 320]
+biome: summit
+palette: act1_green_gold
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 3, scale: 38, octaves: 4, seed: 897}
+  path_flatten: 7
+  rim: {height: 12, width: 26}
+  flats: [[0, 14, 5, 0, 6]]
+spawn: [0, 0, -135]
+spawn_yaw: 0
+path:
+  - [0, 0, -135]
+  - [0, 0, 14]
+  - [0, 0, 36]
+  - [0, 0, 60]
+  - [0, 0, 118]
+altars: [altare_vetta_01]
+arenas: [vetta_piazzale]
+exits:
+  - {to: grandi_pianure, at: [0, 0, 118], radius: 6, requires: [guardiano_del_regno], arrive: spawn, kind: walk, name_key: exit.vetta_attesa.grandi_pianure}
+vistas:
+  - {id: vista_vetta_mondo, pos: [60, 0, -30], look: [200, 20, -60], name_key: vista.vista_vetta_mondo.name}
+reperti: []
+landmarks: []
+props: []
+surface: stone
+ambience: summit_wind
+timeofday: vetta_attesa

@@ -1,0 +1,7 @@
+id: altare_rocca_01
+zone: rocca_brina
+name_key: altar.altare_rocca_01.name
+pos: [6, 0, -52]
+yaw: 0
+before_boss: guardiano_rocca_di_brina
+voice_line_key: null

@@ -1,0 +1,11 @@
+id: pianure_erba_alta
+zone: grandi_pianure
+name_key: arena.pianure_erba_alta.name
+center: [0, 0, 130]
+shape: circle
+radius: 34
+gate: {pos: [0, 0, 96], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: pianure_erba_alta

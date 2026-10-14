@@ -1,0 +1,11 @@
+id: rocca_cancello
+zone: rocca_brina
+name_key: arena.rocca_cancello.name
+center: [0, 0, -10]
+shape: circle
+radius: 24
+gate: {pos: [0, 0, -34], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: rocca_cancello

@@ -1,0 +1,33 @@
+id: altipiano_ossa
+act: 5
+name_key: zone.altipiano_ossa.name
+size: [400, 400]
+biome: bone_plateau
+palette: act5_gold_white_midnight
+terrain:
+  type: heightfield
+  base: 0
+  noise: {amp: 4, scale: 38, octaves: 4, seed: 88}
+  path_flatten: 7
+  rim: {height: 16, width: 26}
+  flats: [[6, 28, 5, 0, 6]]
+spawn: [0, 0, -180]
+spawn_yaw: 0
+path:
+  - [0, 0, -180]
+  - [6, 0, 28]
+  - [0, 0, 48]
+  - [0, 0, 80]
+  - [0, 0, 190]
+altars: [altare_ossa_01]
+arenas: [ossa_altipiano]
+exits:
+  - {to: nidi, at: [0, 0, 190], radius: 6, requires: [drago_di_ghiaccio], arrive: spawn, kind: walk}
+vistas:
+  - {id: vista_ossa_yggdrasil, pos: [90, 0, -80], look: [0, 20, 600], name_key: vista.vista_ossa_yggdrasil.name}
+reperti: []
+landmarks: []
+props: []
+surface: bone
+ambience: dragon_wind
+timeofday: altipiano_ossa

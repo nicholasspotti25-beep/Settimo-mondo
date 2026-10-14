@@ -1,0 +1,32 @@
+id: mare
+act: 3
+name_key: zone.mare.name
+size: [70, 150]
+biome: ship_sea
+palette: act3_white_azure
+terrain:
+  type: deck
+  base: 0
+  flats: [[0, -34, 5, 0, 6]]
+spawn: [0, 0, -55]
+spawn_yaw: 0
+path:
+  - [0, 0, -55]
+  - [0, 0, -34]
+  - [0, 0, -20]
+  - [0, 0, 10]
+  - [0, 0, 62]
+altars: [altare_nave_02]
+arenas: [mare_nave_ponte]
+exits:
+  - {to: little_garden, at: [0, 0, 62], radius: 6, requires: [kraken], arrive: spawn, kind: walk, name_key: exit.mare.little_garden}
+vistas:
+  - {id: vista_mare_continente, pos: [0, 0, 58], look: [0, 20, 500], name_key: vista.vista_mare_continente.name}
+reperti: []
+landmarks: []
+props: []
+surface: wood
+ambience: ship_sea
+timeofday: mare
+no_fast_travel: true
+platform: {kind: ship, spline: [[0, 0, -400], [0, 0, 0], [0, 0, 400]], speed: 4, sway: 0.06}

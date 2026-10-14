@@ -1,0 +1,11 @@
+id: bufera_altura
+zone: bufera_eterna
+name_key: arena.bufera_altura.name
+center: [0, 0, 80]
+shape: circle
+radius: 30
+gate: {pos: [0, 0, 50], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: bufera_altura

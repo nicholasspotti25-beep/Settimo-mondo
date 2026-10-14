@@ -1,0 +1,7 @@
+id: altare_ossa_01
+zone: altipiano_ossa
+name_key: altar.altare_ossa_01.name
+pos: [6, 0, 28]
+yaw: 0
+before_boss: drago_di_ghiaccio
+voice_line_key: null

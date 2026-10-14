@@ -1,0 +1,11 @@
+id: rocca_sala_trono
+zone: rocca_brina
+name_key: arena.rocca_sala_trono.name
+center: [0, 0, 120]
+shape: circle
+radius: 30
+gate: {pos: [0, 0, 90], yaw: 0, width: 6}
+floor_y: 0
+surface: stone
+obstacles: []
+builder: rocca_sala_trono

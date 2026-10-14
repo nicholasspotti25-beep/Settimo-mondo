@@ -1,0 +1,7 @@
+id: altare_osservatorio_01
+zone: osservatorio
+name_key: altar.altare_osservatorio_01.name
+pos: [6, 0, 22]
+yaw: 0
+before_boss: reina
+voice_line_key: null
