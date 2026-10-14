@@ -1,0 +1,23 @@
+# Trivella Divorante — Verme Mangiamondi (mini, Act VI, D17). A lance with a spiral drill tip ringed with spiral teeth,
+# ash-grey with shards of swallowed landscapes fused to the collar. Mini-boss weapon: functional description only.
+id: trivella_divorante
+name_key: weapon.trivella_divorante.name
+desc_key: weapon.trivella_divorante.desc
+type: trivella
+category: polearm
+source_boss: verme_mangiamondi
+source_difficulty: 17
+parry_capable: false
+model:
+  template: trivella
+  motif: spiral_teeth
+  glow: none
+  colors: {primary: '#8a8478', secondary: '#3a3430', accent: '#d8c8a8'}
+  params: {shaft_len: 1.5, drill_len: 0.75, drill_r: 0.16, turns: 4}
+stamina_cost: {light: 16, heavy: 32}
+moveset: {light: trivella_light, heavy: trivella_heavy, running: trivella_run, jumping: trivella_jump}
+arts:
+  # Perforazione: a spinning thrust that grinds through guards.
+  prima: {id: perforazione, eco_cost: 100, effect: dash_strike, params: {distance: 4.5, reach: 4.4, width: 0.7, drill: 5, pierce_guard: true, damage_mult: 2.5, dur: 0.75}, vfx: art_perforazione, anim: drill_thrust}
+  # Scavo: burrow underground and burst out beneath the target.
+  seconda: {id: scavo, eco_cost: 200, effect: burrow, params: {travel: 0.95, radius: 3.8, damage_mult: 3.5, dur: 1.45}, vfx: art_scavo, anim: burrow}

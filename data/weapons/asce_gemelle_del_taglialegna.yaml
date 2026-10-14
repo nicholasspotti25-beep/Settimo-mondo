@@ -1,0 +1,24 @@
+# Asce Gemelle del Taglialegna — Grande Orso (Act III, D12). Two one-handed woodcutter's axes on fir handles with
+# bark still on them, moss in the lashings and a bone charm on each.
+id: asce_gemelle_del_taglialegna
+name_key: weapon.asce_gemelle_del_taglialegna.name
+desc_key: weapon.asce_gemelle_del_taglialegna.desc
+flavor_key: weapon.asce_gemelle_del_taglialegna.flavor
+type: asce_gemelle
+category: one_handed
+source_boss: grande_orso
+source_difficulty: 12
+parry_capable: false
+model:
+  template: asce_gemelle
+  motif: fir_and_moss
+  glow: none
+  colors: {primary: '#8a8e90', secondary: '#6a4a2a', accent: '#6a8a3a'}
+  params: {haft_len: 0.62, head_h: 0.2, head_d: 0.16, bone_charm: true}
+stamina_cost: {light: 13, heavy: 28}
+moveset: {light: asce_gemelle_light, heavy: asce_gemelle_heavy, running: asce_gemelle_run, jumping: asce_gemelle_jump}
+arts:
+  # Tempesta di Schegge: a flurry of spinning chops that sprays splinters.
+  prima: {id: tempesta_di_schegge, eco_cost: 100, effect: spin, params: {radius: 2.9, hits: 5, move: 3.0, damage_mult: 2.4, dur: 1.0}, vfx: art_tempesta_schegge, anim: spin_flurry}
+  # Abbattimento: a crossed double chop that fells the target's Equilibrio like a tree.
+  seconda: {id: abbattimento, eco_cost: 200, effect: multi_strike, params: {count: 2, interval: 0.07, reach: 2.8, angle: 100, shape: cross, poise_bonus: 55, damage_mult: 3.3, final_mult: 1.2, step: 0.35, dur: 0.9}, vfx: art_abbattimento, anim: cross_chop}

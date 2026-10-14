@@ -1,0 +1,24 @@
+# Arpione Abissale — Kraken (mini, Act III, D13). A barbed harpoon of sea-dark iron on a chain that rewinds into a
+# drum at the grip; bioluminescent beads glow along the chain. Mini-boss weapon: functional description only.
+id: arpione_abissale
+name_key: weapon.arpione_abissale.name
+desc_key: weapon.arpione_abissale.desc
+type: arpione
+category: ranged
+source_boss: kraken
+source_difficulty: 13
+parry_capable: false
+element: water
+model:
+  template: arpione
+  motif: abyss_chain
+  glow: abyss
+  colors: {primary: '#2a3a44', secondary: '#16222a', accent: '#4fe0d0'}
+  params: {shaft_len: 1.6, barbs: 3, chain_drum: true}
+stamina_cost: {light: 15, heavy: 30}
+moveset: {light: arpione_light, heavy: arpione_heavy, running: arpione_run, jumping: arpione_jump}
+arts:
+  # Lancio e Richiamo: throw the harpoon, hook the target and reel it to you.
+  prima: {id: lancio_e_richiamo, eco_cost: 100, effect: grab_pull, params: {range: 13.0, pull: 8.0, hold: 0.8, grab_mult: 1.0, damage_mult: 2.2, dur: 0.95, element: water, thrown: true}, vfx: art_lancio_richiamo, anim: harpoon_cast}
+  # Vortice: a spinning blow on the chain that drags nearby enemies into its eye.
+  seconda: {id: vortice, eco_cost: 200, effect: spin, params: {radius: 5.2, hits: 4, pull: 1.6, damage_mult: 3.4, dur: 1.1, element: water}, vfx: art_vortice, anim: vortex_spin}

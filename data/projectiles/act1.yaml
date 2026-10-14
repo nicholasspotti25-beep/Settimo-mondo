@@ -1,0 +1,11 @@
+# Act I boss projectile kinds (Cavaliere Errante, Elder Tree, Mostro della Palude, Great Devourer, Caronte).
+# Glowing spores shaken loose from the luminous mushrooms when the Elder Tree's heart beats.
+- {id: elder_spore, radius: 0.45, speed: 11, life: 3.6, visual: seed, color: '#c8ff9a', trail: true, element: nature}
+# Reed javelins thrown by the Annegato delle Canne (Mostro della Palude, phase 2).
+- {id: palude_reed, radius: 0.28, speed: 22, life: 2.2, visual: arrow, color: '#b8a26a', trail: true, element: water}
+# A rotten log flung by the Great Devourer's tail across the rafts (rolls along the planks).
+- {id: devourer_log, radius: 1.0, speed: 13, life: 2.4, visual: rock, color: '#4a3a26', element: physical}
+# Souls freed from Caronte's lantern: day = few but fast, night = many but slow (time_of_day_variants).
+- {id: caronte_soul, radius: 0.42, speed: 12, life: 4.6, visual: soul, color: '#8fe8ff', trail: true, element: spirit, homing: 0.55}
+# Great souls (phase 2): heavier, slower, fewer.
+- {id: caronte_great_soul, radius: 0.7, speed: 8.5, life: 5.5, visual: spirit, color: '#c8f4ff', trail: true, element: spirit, homing: 0.4}

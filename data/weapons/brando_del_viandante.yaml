@@ -1,0 +1,24 @@
+# Brando del Viandante — Cavaliere Errante (Act I, D3). Slim longsword whose blade is engraved with every road the
+# knight rode; worn leather grip, a small lantern-shaped pommel (the lantern he leaves you).
+id: brando_del_viandante
+name_key: weapon.brando_del_viandante.name
+desc_key: weapon.brando_del_viandante.desc
+flavor_key: weapon.brando_del_viandante.flavor
+type: spada_lunga
+category: one_handed
+source_boss: cavaliere_errante
+source_difficulty: 3
+parry_capable: true
+model:
+  template: spada_lunga
+  motif: roads_engraved
+  glow: lantern
+  colors: {primary: '#d9d6cc', secondary: '#5a4632', accent: '#e8b860'}
+  params: {blade_len: 1.0, blade_w: 0.06, guard: cross_long, pommel: lantern, engraving: roads}
+stamina_cost: {light: 14, heavy: 28}
+moveset: {light: spada_lunga_light, heavy: spada_lunga_heavy, running: spada_lunga_run, jumping: spada_lunga_jump}
+arts:
+  # Fendente Itinerante: slide forward and rise into an upward cut.
+  prima: {id: fendente_itinerante, eco_cost: 100, effect: dash_strike, params: {distance: 5.0, reach: 3.0, width: 1.0, rising: true, damage_mult: 2.2, dur: 0.6}, vfx: art_fendente_itinerante, anim: rising_slash}
+  # Postura del Viandante: a duelist's guard; any blow that lands during it is turned aside and answered.
+  seconda: {id: postura_del_viandante, eco_cost: 200, effect: counter_stance, params: {reach: 3.6, counter_mult: 4.2, dur: 1.4, angle: 160}, vfx: art_postura_viandante, anim: guard_stance}

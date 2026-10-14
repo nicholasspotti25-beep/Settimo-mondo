@@ -1,0 +1,25 @@
+# Spada del Sovrano — Re Drago (Act V, D17). A hand-and-a-half sword: white blade with gold veins, gold cross-guard
+# swept like wings, an azure crystal set in the hilt (the three heads Legge, Memoria, Pietà).
+id: spada_del_sovrano
+name_key: weapon.spada_del_sovrano.name
+desc_key: weapon.spada_del_sovrano.desc
+flavor_key: weapon.spada_del_sovrano.flavor
+type: spada_bastarda
+category: two_handed
+source_boss: re_drago
+source_difficulty: 17
+parry_capable: true
+element: light
+model:
+  template: spada_bastarda
+  motif: sovereign_veins
+  glow: light
+  colors: {primary: '#f8f6f0', secondary: '#d4a63a', accent: '#6fb0ff'}
+  params: {blade_len: 1.18, blade_w: 0.075, guard: wings, crystal: true, veins: 5}
+stamina_cost: {light: 15, heavy: 30}
+moveset: {light: spada_bastarda_light, heavy: spada_bastarda_heavy, running: spada_bastarda_run, jumping: spada_bastarda_jump}
+arts:
+  # Giuramento di Luce: a golden cut that flies at range.
+  prima: {id: giuramento_di_luce, eco_cost: 100, effect: projectile, params: {kind: w_golden_cut, count: 1, speed: 30, pierce: true, life: 1.2, damage_mult: 2.3, delay: 0.24, element: light, cut: true}, vfx: art_giuramento_luce, anim: golden_cut}
+  # Tre Soffi: three successive waves — white, azure, gold.
+  seconda: {id: tre_soffi, eco_cost: 200, effect: waves, params: {kinds: 'w_breath_white,w_breath_azure,w_breath_gold', count: 3, interval: 0.3, speed: 22, damage_mult: 3.6, element: light}, vfx: art_tre_soffi, anim: three_breaths}

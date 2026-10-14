@@ -1,0 +1,25 @@
+# Pungiglioni Regali — Regina Formica (Act IV, D14). Two daggers of translucent amber, each ending in a black stinger
+# tip beaded with acid; gold-banded grips like the queen's abdomen.
+id: pungiglioni_regali
+name_key: weapon.pungiglioni_regali.name
+desc_key: weapon.pungiglioni_regali.desc
+flavor_key: weapon.pungiglioni_regali.flavor
+type: pugnali
+category: one_handed
+source_boss: regina_formica
+source_difficulty: 14
+parry_capable: false
+element: poison
+model:
+  template: pugnali
+  motif: amber_stingers
+  glow: acid
+  colors: {primary: '#e8a020', secondary: '#2a1a0a', accent: '#c8ff3a'}
+  params: {blade_len: 0.32, amber: true, bands: 3}
+stamina_cost: {light: 12, heavy: 25}
+moveset: {light: pugnali_light, heavy: pugnali_heavy, running: pugnali_run, jumping: pugnali_jump}
+arts:
+  # Puntura Acida: a stab that leaves acid burning in the wound.
+  prima: {id: puntura_acida, eco_cost: 100, effect: dot_stab, params: {reach: 2.4, dot_mult: 0.22, dot_time: 7, damage_mult: 1.0, element: poison}, vfx: art_puntura_acida, anim: acid_stab}
+  # Sciame: six very fast strikes, a swarm of stings.
+  seconda: {id: sciame, eco_cost: 200, effect: multi_strike, params: {count: 6, interval: 0.075, reach: 2.4, angle: 90, shape: thrust, damage_mult: 3.4, step: 0.12, dur: 0.85, element: poison}, vfx: art_sciame, anim: swarm_stabs}

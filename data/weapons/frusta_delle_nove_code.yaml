@@ -1,0 +1,25 @@
+# Frusta delle Nove Code — Idra (Act V, D15). A whip of nine cords of violet-and-green scaled leather, each ending in
+# a small brass serpent head.
+id: frusta_delle_nove_code
+name_key: weapon.frusta_delle_nove_code.name
+desc_key: weapon.frusta_delle_nove_code.desc
+flavor_key: weapon.frusta_delle_nove_code.flavor
+type: frusta
+category: flexible
+source_boss: idra
+source_difficulty: 15
+parry_capable: false
+element: poison
+model:
+  template: frusta
+  motif: nine_heads
+  glow: venom
+  colors: {primary: '#6a2a8a', secondary: '#2a6a4a', accent: '#d8a84a'}
+  params: {cords: 9, cord_len: 1.3, handle_len: 0.32}
+stamina_cost: {light: 14, heavy: 28}
+moveset: {light: frusta_light, heavy: frusta_heavy, running: frusta_run, jumping: frusta_jump}
+arts:
+  # Nove Morsi: nine rapid strikes in a fan.
+  prima: {id: nove_morsi, eco_cost: 100, effect: multi_strike, params: {count: 9, interval: 0.05, reach: 6.2, angle: 26, shape: fan, fan_angle: 120, damage_mult: 2.4, dur: 0.85, element: poison}, vfx: art_nove_morsi, anim: nine_lashes}
+  # Sibilo Multiplo: a circular lash that strikes every target around you.
+  seconda: {id: sibilo_multiplo, eco_cost: 200, effect: spin, params: {radius: 6.2, r_in: 1.0, hits: 3, damage_mult: 3.4, dur: 0.95, element: poison}, vfx: art_sibilo_multiplo, anim: circle_lash}

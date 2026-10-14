@@ -1,0 +1,24 @@
+# Randello del Pantano — Mostro della Palude (Act I, D5). A club of black wood bound with reeds, bones knotted in,
+# and small unlit lanterns hanging from it (the drowned Cercatori's lanterns).
+id: randello_del_pantano
+name_key: weapon.randello_del_pantano.name
+desc_key: weapon.randello_del_pantano.desc
+flavor_key: weapon.randello_del_pantano.flavor
+type: mazza
+category: one_handed
+source_boss: mostro_della_palude
+source_difficulty: 5
+parry_capable: false
+model:
+  template: mazza
+  motif: reeds_lanterns
+  glow: marsh
+  colors: {primary: '#1e1c18', secondary: '#7a8a4a', accent: '#c8d890'}
+  params: {haft_len: 0.85, head_r: 0.16, reeds: 10, lanterns: 3, bones: 2}
+stamina_cost: {light: 16, heavy: 30}
+moveset: {light: mazza_light, heavy: mazza_heavy, running: mazza_run, jumping: mazza_jump}
+arts:
+  # Colpo Melmoso: an area slam that splashes mud and slows everything around.
+  prima: {id: colpo_melmoso, eco_cost: 100, effect: slam, params: {radius: 4.0, impact: 0.42, status: slow, slow_time: 4.0, damage_mult: 2.2, element: water, visual: mud, dur: 0.85}, vfx: art_colpo_melmoso, anim: overhead_slam}
+  # Sprofondamento: a ground strike that opens a sucking mud pit.
+  seconda: {id: sprofondamento, eco_cost: 200, effect: slam, params: {radius: 4.6, impact: 0.5, pit: true, zone_time: 5.0, dps_mult: 0.3, damage_mult: 2.0, element: water, visual: mud, dur: 0.95}, vfx: art_sprofondamento, anim: ground_slam}

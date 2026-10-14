@@ -1,0 +1,24 @@
+# Piuma Reale — Grande Aquila Reale (Act III, D12). A longbow of pale wood with golden feathers fanning from the
+# limbs and a sun-bright string.
+id: piuma_reale
+name_key: weapon.piuma_reale.name
+desc_key: weapon.piuma_reale.desc
+flavor_key: weapon.piuma_reale.flavor
+type: arco_lungo
+category: ranged
+source_boss: grande_aquila_reale
+source_difficulty: 12
+parry_capable: false
+model:
+  template: arco_lungo
+  motif: golden_feathers
+  glow: gold
+  colors: {primary: '#e8dcc0', secondary: '#d4a63a', accent: '#fff1a8'}
+  params: {len: 1.75, bend: 0.22, feathers: 6}
+stamina_cost: {light: 13, heavy: 30}
+moveset: {light: arco_lungo_light, heavy: arco_lungo_heavy, running: arco_lungo_run, jumping: arco_lungo_jump}
+arts:
+  # Freccia Planante: a long-range arrow that glides and accelerates in flight.
+  prima: {id: freccia_planante, eco_cost: 100, effect: projectile, params: {kind: w_glide_arrow, count: 1, speed: 20, accel: 40, pierce: true, homing: 1.2, life: 2.6, damage_mult: 2.4, delay: 0.42}, vfx: art_freccia_planante, anim: draw_glide}
+  # Pioggia d'Oro: a volley loosed into the sky falls as golden rain on the target.
+  seconda: {id: pioggia_d_oro, eco_cost: 200, effect: rain, params: {count: 16, radius: 4.5, delay: 0.75, visual: light, damage_mult: 3.4}, vfx: art_pioggia_oro, anim: sky_volley}

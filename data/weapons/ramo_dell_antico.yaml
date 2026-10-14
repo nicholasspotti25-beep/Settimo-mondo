@@ -1,0 +1,24 @@
+# Ramo dell'Antico — Elder Tree (Act I, D4). A staff of living wood: black bark, leaves that change color, a glowing
+# mushroom cap at its root end (the luminous mushrooms at the Elder Tree's roots).
+id: ramo_dell_antico
+name_key: weapon.ramo_dell_antico.name
+desc_key: weapon.ramo_dell_antico.desc
+flavor_key: weapon.ramo_dell_antico.flavor
+type: bastone_magico
+category: catalyst
+source_boss: elder_tree
+source_difficulty: 4
+parry_capable: false
+model:
+  template: bastone_magico
+  motif: living_wood
+  glow: nature
+  colors: {primary: '#3a2c22', secondary: '#7fc85a', accent: '#d8f08a'}
+  params: {staff_len: 1.75, twist: 0.6, leaves: 9, leaf_cycle: true, mushrooms: 3}
+stamina_cost: {light: 14, heavy: 27}
+moveset: {light: bastone_magico_light, heavy: bastone_magico_heavy, running: bastone_magico_run, jumping: bastone_magico_jump}
+arts:
+  # Radici Fameliche: famished roots burst out of the ground under the target and hold it.
+  prima: {id: radici_fameliche, eco_cost: 100, effect: bind, params: {radius: 3.0, delay: 0.45, bind_time: 2.6, damage_mult: 1.6, visual: roots, element: nature}, vfx: art_radici_fameliche, anim: cast_roots}
+  # Fioritura: the staff blooms and fires a fan of seeds.
+  seconda: {id: fioritura, eco_cost: 200, effect: projectile, params: {kind: w_bloom_seed, count: 9, spread: 70, speed: 26, life: 1.3, damage_mult: 3.6, delay: 0.35, element: nature}, vfx: art_fioritura, anim: cast_fan}

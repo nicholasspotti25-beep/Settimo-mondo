@@ -1,0 +1,25 @@
+# Stella del Mattino — Lucifero, l'Arcangelo Caduto (Act VI, D18). A golden spiked ball on a black chain, the haft of
+# black iron bound in cracked gold like his recomposed armor; the ball glows like a morning star.
+id: stella_del_mattino
+name_key: weapon.stella_del_mattino.name
+desc_key: weapon.stella_del_mattino.desc
+flavor_key: weapon.stella_del_mattino.flavor
+type: flagello
+category: flexible
+source_boss: lucifero_2
+source_difficulty: 18
+parry_capable: false
+element: light
+model:
+  template: flagello
+  motif: morning_star
+  glow: dawn_red
+  colors: {primary: '#e8b840', secondary: '#141014', accent: '#ff4a3a'}
+  params: {haft_len: 0.7, chain_links: 10, ball_r: 0.17, spikes: 14}
+stamina_cost: {light: 17, heavy: 33}
+moveset: {light: flagello_light, heavy: flagello_heavy, running: flagello_run, jumping: flagello_jump}
+arts:
+  # Alba Spezzata: hurl the star at long range; it bursts into rays.
+  prima: {id: alba_spezzata, eco_cost: 100, effect: projectile, params: {kind: w_morning_star, count: 1, speed: 26, explode_radius: 4.8, homing: 1.4, life: 1.4, damage_mult: 2.6, delay: 0.36, rays: 8, element: light}, vfx: art_alba_spezzata, anim: star_throw}
+  # Caduta: the Fall — leap and slam with a red shockwave.
+  seconda: {id: caduta, eco_cost: 200, effect: slam, params: {leap: true, leap_dist: 7.5, impact: 0.62, radius: 5.0, damage_mult: 3.6, element: blood, ring: true, ring_radius: 9.0, ring_mult: 0.3, dur: 1.1}, vfx: art_caduta, anim: fall_slam}

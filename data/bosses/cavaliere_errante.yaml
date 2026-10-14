@@ -1,0 +1,425 @@
+# 2. Cavaliere Errante — secondary · Le Grandi Pianure · D3.
+# Phase 1: mounted duel in the tall grass. He circles you at a canter, charges from the flank, rides past with a side cut and
+# dives at an open guard (holding guard invites the unblockable leap). Phase 2: he dismounts, the grey horse leaves, and he duels
+# on foot with the sword: counter stance (parry + riposte), reactive parries, honest combos.
+# Dawn (alba): chivalrous salute opener, head-on joust instead of circling, never strikes while you drink or lie on the ground.
+# Night (notte): rides out of the lantern-less dark — dark charges (p1) and dark lunges (p2).
+# Behavior: src/content/bosses/cavaliere_errante/behavior.ts (attack `requires`: mounted, on_foot, night_mounted, night_on_foot, guard_open).
+id: cavaliere_errante
+order: 2
+name_key: boss.cavaliere_errante.name
+class: secondary
+difficulty: 3
+act: 1
+arena: pianure_erba_alta
+zone: grandi_pianure
+mounted: true
+model: {builder: cavaliere_errante, rig: mounted_humanoid, scale: 1.0, palette: act1_green_gold}
+equilibrio_max: 120
+body: {radius: 1.6, height: 5.0, mass: heavy}
+# Body = the knight standing (used on foot); while mounted the steed and the seated rider are parts that take full damage.
+hurtboxes:
+  - {c: [0, 0.95, 0], r: 0.8}     # legs
+  - {c: [0, 2.15, 0], r: 0.95}    # torso
+  - {c: [0, 3.25, 0.05], r: 0.55} # hooded helm
+parts:
+  - id: steed
+    name_key: part.cavaliere_errante.steed
+    hurt:
+      - {c: [0, 1.5, 1.05], r: 1.2}   # chest
+      - {c: [0, 1.55, -0.95], r: 1.2} # barrel / hindquarters
+      - {c: [0, 2.7, 2.15], r: 0.6}   # neck and head
+  - id: rider
+    name_key: part.cavaliere_errante.rider
+    hurt:
+      - {c: [0, 3.45, -0.2], r: 0.75}
+      - {c: [0, 4.45, -0.15], r: 0.45}
+move: {walk: 3.0, run: 9.0, turn: 2.8, preferred_range: [6, 12]}
+idle_gap: [0.8, 1.5]
+music: boss_cavaliere_errante
+intro_sequence: cavaliere_errante_intro
+defeat_sequence: cavaliere_errante_defeat
+lore_key: boss.cavaliere_errante.lore
+grants: [lanterna_del_cavaliere]
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_cavaliere_errante_p1
+    patterns: [flank_charge, passing_slash, saddle_cleave, rear_trample, guard_dive, dark_charge]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_cavaliere_errante_p2
+    on_enter: [dismounted]
+    transition: 3.2
+    aggression: 1.1
+    dialogue: boss.cavaliere_errante.mid
+    patterns: [duel_combo, lunge_thrust, riposte_stance, overhead_red, whirl_cut, guard_breaker, dark_lunge]
+attacks:
+  # --- Mounted (phase 1) ------------------------------------------------------------------------------------------------
+  # From the circling canter he wheels the grey horse and charges across: dodge sideways.
+  - id: flank_charge
+    anim: charge
+    telegraph: 0.9
+    active: 1.2
+    recovery: 1.25
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    range: [6, 40]
+    weight: 1.2
+    cooldown: 3
+    track: 1.4
+    track_active: 0.1
+    requires: mounted
+    motion:
+      - {t: 0, dur: 1.15, type: forward, speed: 16}
+    hits:
+      - {t: 0, dur: 1.15, shape: {type: capsule, a: [0, 1.4, 0.6], b: [0, 1.8, 4.0], r: 1.15}}
+    spawns:
+      - {t: -0.85, type: sfx, id: cavaliere_hooves_charge}
+  # Rides past you and cuts from the saddle on his right side (the horse is steered to pass you on the left).
+  - id: passing_slash
+    anim: passing_slash
+    telegraph: 0.8
+    active: 1.0
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 16
+    flags: []
+    range: [3, 16]
+    weight: 1.1
+    cooldown: 2.5
+    track: 0
+    requires: mounted
+    motion:
+      - {t: 0, dur: 0.95, type: forward, speed: 12}
+    hits:
+      - {t: 0.12, dur: 0.75, shape: {type: arc, r: 4.6, r_in: 0.6, angle: 80, yaw: -80, y: [0.3, 4.4]}}
+    spawns:
+      - {t: -0.75, type: sfx, id: cavaliere_draw_blade}
+  # Two cuts from the saddle when you stay close to the horse: overhead, then a wide sweep.
+  - id: saddle_cleave
+    anim: saddle_cleave
+    telegraph: 0.8
+    active: 0.75
+    recovery: 1.15
+    damage_mult: 0.9
+    poise: 14
+    flags: []
+    range: [0, 5]
+    weight: 1.0
+    track: 1.1
+    track_active: 0.3
+    requires: mounted
+    hits:
+      - {t: 0.0, dur: 0.16, shape: {type: arc, r: 5.2, angle: 70, yaw: -15, y: [0, 5]}}
+      - {t: 0.45, dur: 0.18, shape: {type: arc, r: 5.4, angle: 160, yaw: 0, y: [0, 4]}}
+  # The horse rears and stamps: get away from its forelegs.
+  - id: rear_trample
+    anim: rear_stomp
+    telegraph: 0.85
+    active: 0.25
+    recovery: 1.15
+    damage_mult: 1.1
+    poise: 26
+    flags: [knockdown]
+    range: [0, 3.6]
+    weight: 0.9
+    cooldown: 3
+    requires: mounted
+    hits:
+      - {t: 0.02, dur: 0.18, shape: {type: cylinder, c: [0, 0, 1.8], r: 2.9, h: 2.4}}
+  # Dives at an open guard: holding guard invites a spurred leap that no guard can stop.
+  - id: guard_dive
+    anim: leap
+    telegraph: 0.85
+    active: 0.8
+    recovery: 1.35
+    damage_mult: 1.2
+    poise: 28
+    flags: [unblockable, knockdown]
+    range: [1, 16]
+    weight: 0.6
+    cooldown: 5
+    track: 1.3
+    requires: guard_open
+    motion:
+      - {t: 0, dur: 0.6, type: leap_to_target, height: 3.0, dist: 15}
+    hits:
+      - {t: 0.55, dur: 0.2, shape: {type: cylinder, c: [0, 0, 1.4], r: 3.0, h: 3.2}}
+    spawns:
+      - {t: -0.85, type: sfx, id: cavaliere_dive_whinny}
+  # Night only: rides into the dark, vanishes, and charges out of it from far away (hoofbeats announce it).
+  - id: dark_charge
+    anim: charge
+    telegraph: 1.5
+    active: 1.3
+    recovery: 1.3
+    damage_mult: 1.1
+    poise: 24
+    flags: [knockback]
+    range: [0, 60]
+    global: true
+    weight: 0.9
+    cooldown: 6
+    track: 1.6
+    track_active: 0.08
+    requires: night_mounted
+    motion:
+      - {t: -1.32, dur: 0.05, type: teleport_far, dist: 17}
+      - {t: 0, dur: 1.25, type: forward, speed: 18}
+    hits:
+      - {t: 0, dur: 1.25, shape: {type: capsule, a: [0, 1.4, 0.6], b: [0, 1.8, 4.0], r: 1.15}}
+    spawns:
+      - {t: -1.45, type: sfx, id: cavaliere_hooves_dark}
+  # Dawn opener: a chivalrous salute with the raised sword (no hit).
+  - id: salute
+    anim: salute
+    telegraph: 0.5
+    active: 1.6
+    recovery: 0.5
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    weight: 0
+    spawns:
+      - {t: 0.1, type: custom, event: salute}
+  # --- On foot (phase 2) ------------------------------------------------------------------------------------------------
+  # Three honest strokes: diagonal, reverse diagonal, thrust.
+  - id: duel_combo
+    anim: duel_combo
+    telegraph: 0.7
+    active: 1.0
+    recovery: 1.05
+    damage_mult: 0.8
+    poise: 10
+    flags: []
+    range: [0, 4]
+    weight: 1.2
+    track: 1.0
+    track_active: 0.3
+    requires: on_foot
+    motion:
+      - {t: 0, dur: 0.9, type: forward, speed: 2.4}
+    hits:
+      - {t: 0.0, dur: 0.14, shape: {type: arc, r: 3.6, angle: 120, yaw: 10, y: [0, 3.6]}}
+      - {t: 0.38, dur: 0.14, shape: {type: arc, r: 3.6, angle: 120, yaw: -10, y: [0, 3.6]}}
+      - {t: 0.8, dur: 0.14, shape: {type: capsule, a: [0, 2.0, 0.5], b: [0, 1.8, 4.6], r: 0.5}}
+  # Long lunge with the point: the glint on the blade is the warning.
+  - id: lunge_thrust
+    anim: thrust
+    telegraph: 0.8
+    active: 0.45
+    recovery: 1.15
+    damage_mult: 1.0
+    poise: 16
+    flags: [knockback]
+    range: [3.5, 14]
+    weight: 1.0
+    cooldown: 3
+    track: 1.1
+    track_active: 0.15
+    requires: on_foot
+    motion:
+      - {t: 0, dur: 0.35, type: forward, speed: 16}
+    hits:
+      - {t: 0.05, dur: 0.32, shape: {type: capsule, a: [0, 1.9, 0.5], b: [0, 1.8, 4.4], r: 0.55}}
+    spawns:
+      - {t: -0.75, type: sfx, id: cavaliere_blade_glint}
+  # Counter stance: sword held level. Strike his front and he parries and ripostes; wait it out (or strike his back).
+  - id: riposte_stance
+    anim: counter_stance
+    telegraph: 0.45
+    active: 1.6
+    recovery: 0.2
+    damage_mult: 0
+    poise: 0
+    flags: []
+    range: [0, 6]
+    weight: 0.8
+    cooldown: 7
+    track: 1.2
+    track_active: 0.6
+    requires: on_foot
+    combo_next: stance_release
+    spawns:
+      - {t: -0.45, type: sfx, id: cavaliere_blade_glint}
+  # The stance ends in a straight thrust if nobody took the bait (long recovery: punish it).
+  - id: stance_release
+    anim: thrust
+    telegraph: 0.55
+    active: 0.3
+    recovery: 1.4
+    damage_mult: 0.9
+    poise: 14
+    flags: []
+    weight: 0
+    track: 1.4
+    requires: on_foot
+    motion:
+      - {t: 0, dur: 0.25, type: forward, speed: 10}
+    hits:
+      - {t: 0.03, dur: 0.22, shape: {type: capsule, a: [0, 1.9, 0.5], b: [0, 1.8, 4.2], r: 0.55}}
+  # Riposte after a parry (triggered by the behavior; the parry spark is its telegraph).
+  - id: riposte
+    anim: riposte
+    telegraph: 0.42
+    active: 0.3
+    recovery: 1.2
+    damage_mult: 1.15
+    poise: 22
+    flags: []
+    weight: 0
+    track: 2.0
+    requires: on_foot
+    hits:
+      - {t: 0.02, dur: 0.2, shape: {type: arc, r: 3.8, angle: 140, y: [0, 3.6]}}
+  # Colpo Rosso: two-handed overhead. Dodge it.
+  - id: overhead_red
+    anim: overhead
+    telegraph: 1.1
+    active: 0.3
+    recovery: 1.5
+    damage_mult: 1.6
+    poise: 30
+    flags: [red, knockdown]
+    range: [0, 4.5]
+    weight: 0.8
+    cooldown: 6
+    track: 1.1
+    requires: on_foot
+    hits:
+      - {t: 0.05, dur: 0.2, shape: {type: arc, r: 4.3, angle: 50, y: [-0.5, 4.5]}}
+  # A full turn of the blade when you crowd him.
+  - id: whirl_cut
+    anim: spin
+    telegraph: 0.85
+    active: 0.5
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    range: [0, 3.2]
+    weight: 0.9
+    cooldown: 5
+    requires: on_foot
+    hits:
+      - {t: 0.05, dur: 0.35, shape: {type: arc, r: 4.0, angle: 360, y: [0, 3]}}
+  # Pommel bash against a raised guard (on foot, the guard-punish): no guard holds it.
+  - id: guard_breaker
+    anim: shield_bash
+    telegraph: 0.65
+    active: 0.2
+    recovery: 0.95
+    damage_mult: 0.7
+    poise: 24
+    flags: [unblockable, knockback]
+    range: [0, 3.8]
+    weight: 0.6
+    cooldown: 4
+    track: 1.4
+    requires: guard_open_foot
+    hits:
+      - {t: 0.02, dur: 0.16, shape: {type: capsule, a: [0, 1.6, 0.4], b: [0, 1.6, 3.4], r: 0.9}}
+  # Night only, on foot: steps back into the dark and lunges out of it.
+  - id: dark_lunge
+    anim: leap
+    telegraph: 1.3
+    active: 0.75
+    recovery: 1.3
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockdown]
+    range: [0, 40]
+    global: true
+    weight: 0.8
+    cooldown: 6
+    track: 1.5
+    requires: night_on_foot
+    motion:
+      - {t: -1.15, dur: 0.05, type: teleport_far, dist: 9}
+      - {t: 0, dur: 0.55, type: leap_to_target, height: 1.4, dist: 14}
+    hits:
+      - {t: 0.4, dur: 0.25, shape: {type: arc, r: 4.0, angle: 140, y: [0, 3.6]}}
+    spawns:
+      - {t: -1.3, type: sfx, id: cavaliere_dark_step}
+  # Dawn, phase 2 opener: the salute on foot before the fair duel.
+  - id: duel_salute
+    anim: salute
+    telegraph: 0.5
+    active: 1.5
+    recovery: 0.5
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    weight: 0
+    requires: on_foot
+    spawns:
+      - {t: 0.1, type: custom, event: duel_salute}
+  # --- New Game+ (Ciclo dell'Alba) --------------------------------------------------------------------------------------
+  # Passes, wheels around and passes again from the other side.
+  - id: ng_double_pass
+    anim: passing_slash
+    telegraph: 0.75
+    active: 1.0
+    recovery: 0.4
+    damage_mult: 0.9
+    poise: 16
+    flags: []
+    range: [3, 16]
+    weight: 1.0
+    cooldown: 6
+    track: 0
+    requires: mounted
+    combo_next: ng_double_pass_return
+    motion:
+      - {t: 0, dur: 0.95, type: forward, speed: 12}
+    hits:
+      - {t: 0.12, dur: 0.75, shape: {type: arc, r: 4.6, r_in: 0.6, angle: 80, yaw: -80, y: [0.3, 4.4]}}
+  - id: ng_double_pass_return
+    anim: passing_slash
+    telegraph: 0.8
+    active: 1.0
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 16
+    flags: []
+    weight: 0
+    track: 0
+    requires: mounted
+    motion:
+      - {t: 0, dur: 0.95, type: forward, speed: 12}
+    hits:
+      - {t: 0.12, dur: 0.75, shape: {type: arc, r: 4.6, r_in: 0.6, angle: 80, yaw: -80, y: [0.3, 4.4]}}
+  # A feint thrust, a pause, and the real one.
+  - id: ng_feint_thrust
+    anim: thrust
+    telegraph: 0.85
+    active: 0.95
+    recovery: 1.2
+    damage_mult: 0.9
+    poise: 16
+    flags: []
+    range: [0, 6]
+    weight: 1.0
+    cooldown: 5
+    track: 1.1
+    track_active: 0.25
+    requires: on_foot
+    motion:
+      - {t: 0.55, dur: 0.3, type: forward, speed: 11}
+    hits:
+      - {t: 0.6, dur: 0.25, shape: {type: capsule, a: [0, 1.9, 0.5], b: [0, 1.8, 4.6], r: 0.55}}
+time_of_day_variants:
+  alba: {opener: salute, weights: {flank_charge: 0.5, passing_slash: 0.6, saddle_cleave: 1.6}, flags: [chivalrous], note_key: boss.cavaliere_errante.tod.alba}
+  notte: {opener: dark_charge, flags: [night_rider], note_key: boss.cavaliere_errante.tod.notte}
+dialogue_keys: [boss.cavaliere_errante.intro, boss.cavaliere_errante.intro2, boss.cavaliere_errante.mid, boss.cavaliere_errante.salute, boss.cavaliere_errante.salute2, boss.cavaliere_errante.defeat, boss.cavaliere_errante.defeat2]
+drops_weapon: brando_del_viandante
+unlocks_form: null
+metamondo_reaction: null
+ng_plus:
+  add_patterns: {p1: [ng_double_pass], p2: [ng_feint_thrust]}
+  speed_mult: 1.08
+  idle_mult: 0.8

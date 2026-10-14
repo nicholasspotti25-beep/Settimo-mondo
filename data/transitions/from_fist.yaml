@@ -1,0 +1,78 @@
+# Transizioni starting from fist weapons (pugni, artigli): close-quarters momentum hands over to the new weapon.
+- id: tr_fist_one_handed
+  from: fist
+  to: one_handed
+  name_key: transition.fist.one_handed.name
+  anim: tr_uppercut_cut
+  shape: {type: arc, r: 2.7, angle: 120, y: [0.2, 3.0]}
+  damage_mult: 1.3
+  poise: 10
+  duration: 0.5
+  move: {speed: 3.0, dur: 0.14}
+  vfx: tr_uppercut_cut
+- id: tr_fist_two_handed
+  from: fist
+  to: two_handed
+  name_key: transition.fist.two_handed.name
+  anim: tr_grip_and_cleave
+  shape: {type: arc, r: 3.4, angle: 100, y: [0, 3.0]}
+  damage_mult: 1.5
+  poise: 10
+  duration: 0.68
+  move: {speed: 3.0, dur: 0.2}
+  vfx: tr_grip_and_cleave
+- id: tr_fist_polearm
+  from: fist
+  to: polearm
+  name_key: transition.fist.polearm.name
+  anim: tr_pole_leap
+  shape: {type: capsule, a: [0, 1.2, 0.4], b: [0, 0.8, 4.4], r: 0.6}
+  damage_mult: 1.4
+  poise: 10
+  duration: 0.64
+  move: {speed: 6.0, dur: 0.24}
+  vfx: tr_pole_leap
+- id: tr_fist_ranged
+  from: fist
+  to: ranged
+  name_key: transition.fist.ranged.name
+  anim: tr_punch_and_shot
+  shape: {type: capsule, a: [0, 1.4, 0.3], b: [0, 1.4, 1.9], r: 0.6}
+  projectile: {kind: w_link_arrow, speed: 46, radius: 0.24, life: 1.2, gravity: 2, homing: 1.5}
+  damage_mult: 1.25
+  poise: 10
+  duration: 0.58
+  move: {speed: -3.0, dur: 0.2}
+  vfx: tr_punch_and_shot
+- id: tr_fist_catalyst
+  from: fist
+  to: catalyst
+  name_key: transition.fist.catalyst.name
+  anim: tr_burning_palm
+  shape: {type: sphere, c: [0, 1.3, 1.5], r: 1.5}
+  projectile: {kind: w_link_wave, speed: 22, radius: 0.9, life: 0.8}
+  damage_mult: 1.35
+  poise: 10
+  duration: 0.56
+  vfx: tr_burning_palm
+- id: tr_fist_fist
+  from: fist
+  to: fist
+  name_key: transition.fist.fist.name
+  anim: tr_flurry
+  shape: {type: arc, r: 2.1, angle: 110, y: [0.2, 2.4]}
+  damage_mult: 1.3
+  poise: 10
+  duration: 0.46
+  move: {speed: 4.0, dur: 0.2}
+  vfx: tr_flurry
+- id: tr_fist_flexible
+  from: fist
+  to: flexible
+  name_key: transition.fist.flexible.name
+  anim: tr_lashing_hook
+  shape: {type: arc, r: 4.6, r_in: 0.6, angle: 200, y: [0, 2.6]}
+  damage_mult: 1.35
+  poise: 10
+  duration: 0.62
+  vfx: tr_lashing_hook

@@ -1,0 +1,366 @@
+# 4. Mostro della Palude — secondary · La Palude · D5.
+# A humanoid colossus of mud, reeds, bones and unlit lanterns: the heap of drowned Cercatori fused together. A thousand voices
+# whisper inside it and ANNOUNCE every attack before it comes (sfx `voices_<family>` + a whispered caption): listen.
+# Phase 1: emerges from the water (hidden -> `emerge`), two-handed slams (Colpo Rosso), mud waves that slow, arms stretching out
+# of the mire and along the ground, a sweeping arm, and it sinks to erupt beneath you where the bubbles rise.
+# Phase 2: it collapses and splits into three smaller drowned figures that fight one after another (minions, main_share 1);
+# when the third falls the colossus is gone. Among the whispers, a clue: the ferryman does not want coins.
+# Behavior: src/content/bosses/mostro_della_palude/behavior.ts (+ voices.ts, minion_*.ts).
+id: mostro_della_palude
+order: 4
+name_key: boss.mostro_della_palude.name
+class: secondary
+difficulty: 5
+act: 1
+arena: palude_pozza
+zone: palude
+model: {builder: mostro_della_palude, rig: colossus, scale: 1.0, palette: act1_green_gold}
+equilibrio_max: 170
+body: {radius: 2.8, height: 10.5, mass: immovable}
+hurtboxes:
+  - {c: [1.3, 1.6, 0], r: 1.35}    # left leg
+  - {c: [-1.3, 1.6, 0], r: 1.35}   # right leg
+  - {c: [0, 3.9, -0.2], r: 2.1}    # hips of mud and bones
+  - {c: [0, 6.4, 0], r: 2.5}       # chest (lanterns hang here)
+  - {c: [0, 9.1, 0.4], r: 1.4}     # head of reeds
+move: {walk: 1.6, run: 3.4, turn: 1.3, preferred_range: [2, 7]}
+idle_gap: [1.0, 1.7]
+music: boss_mostro_della_palude
+intro_sequence: mostro_della_palude_intro
+defeat_sequence: mostro_della_palude_defeat
+lore_key: boss.mostro_della_palude.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_mostro_della_palude_p1
+    patterns: [double_slam, mud_wave, mire_arms, long_reach, swamp_sweep, submerge_ambush]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_mostro_della_palude_p2
+    on_enter: [split]
+    transition: 3.0
+    # While split the colossus itself does not attack: the three drowned figures fight in sequence (behavior).
+    patterns: [swamp_sweep]
+attacks:
+  # Rises out of the pool in a ring of mud (fight opener; the bubbles and voices announce it). Jump the ring.
+  - id: emerge
+    anim: emerge
+    telegraph: 1.4
+    active: 0.6
+    recovery: 1.2
+    damage_mult: 0.8
+    poise: 18
+    flags: []
+    global: true
+    weight: 0
+    spawns:
+      - {t: -1.4, type: sfx, id: palude_bubbling}
+      - {t: 0.05, type: shockwave, id: palude_slam_ring, radius: 12, shape: {type: ring, r0: 3, r1: 12, width: 1.3, height: 0.7}, active: 0.55, damage_mult: 0.8}
+  # Colpo Rosso: both fists raised, then down on the spot in front. A mud ring follows (jump it or keep away).
+  - id: double_slam
+    anim: double_slam
+    telegraph: 1.15
+    active: 0.4
+    recovery: 1.6
+    damage_mult: 1.5
+    poise: 30
+    flags: [red, knockdown]
+    range: [0, 7.5]
+    weight: 1.0
+    cooldown: 4
+    track: 1.0
+    hits:
+      - {t: 0.05, dur: 0.2, shape: {type: box, c: [0, 0, 5.0], half: [2.6, 2.4, 2.8]}}
+    spawns:
+      - {t: 0.08, type: shockwave, id: palude_slam_ring, at: front, dist: 5, radius: 9, shape: {type: ring, r0: 2.5, r1: 9, width: 1.2, height: 0.7}, active: 0.5, damage_mult: 0.6}
+  # Sweeps both arms through the pool: five waves of mud run outward and slow whoever they catch.
+  - id: mud_wave
+    anim: mud_wave
+    telegraph: 1.0
+    active: 0.5
+    recovery: 1.15
+    damage_mult: 0.75
+    poise: 12
+    flags: []
+    range: [0, 20]
+    weight: 1.0
+    cooldown: 4
+    spawns:
+      - {t: 0.05, type: hazard, id: palude_mud_wave, at: ring_self, count: 5, dist: 3.4, speed: 8.5, delay: 0.25, active: 2.3, flags: [slow], status: {kind: slow, dur: 2.5, power: 0.45}, shape: {type: box, c: [0, 0, 0], half: [3.2, 1.0, 0.7]}}
+  # Arms stretch out of the mire where the mud boils: under you, then beside you.
+  - id: mire_arms
+    anim: mire_arms
+    telegraph: 0.9
+    active: 1.0
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 24
+    flags: []
+    global: true
+    weight: 1.0
+    cooldown: 4
+    spawns:
+      - {t: 0.0, type: hazard, id: palude_mire_arm, at: target_predict, count: 1, delay: 1.0, active: 0.5, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.7, h: 3.4}}
+      - {t: 0.3, type: hazard, id: palude_mire_arm, at: around_target, count: 2, dist: 4.0, radius: 1.5, delay: 1.0, active: 0.5, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 3.2}}
+  # An arm stretches along the ground out of the mire, far beyond its body: sidestep.
+  - id: long_reach
+    anim: long_reach
+    telegraph: 1.0
+    active: 0.45
+    recovery: 1.3
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockback]
+    range: [5, 18]
+    weight: 1.0
+    cooldown: 3
+    track: 1.0
+    hits:
+      - {t: 0.1, dur: 0.25, shape: {type: capsule, a: [0, 0.8, 2.5], b: [0, 0.8, 17.5], r: 1.2}}
+  # A wide horizontal sweep of the arm through the reeds.
+  - id: swamp_sweep
+    anim: sweep_r
+    telegraph: 0.95
+    active: 0.4
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 20
+    flags: [knockback]
+    range: [0, 9]
+    weight: 1.0
+    cooldown: 2.5
+    track: 0.9
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 9.5, r_in: 1.0, angle: 170, y: [0, 3.2]}}
+  # Sinks into the pool and erupts beneath you where the bubbles rise (the behavior moves it to the mark).
+  - id: submerge_ambush
+    anim: submerge
+    telegraph: 0.9
+    active: 2.5
+    recovery: 1.6
+    damage_mult: 1.3
+    poise: 28
+    flags: []
+    global: true
+    weight: 0.7
+    cooldown: 8
+    spawns:
+      - {t: 1.0, type: custom, event: erupt_mark, delay: 1.1}
+      - {t: 1.0, type: hazard, id: palude_bubbles, at: target_predict, count: 1, delay: 1.1, active: 0.35, flags: [knockdown], damage_mult: 1.3, shape: {type: cylinder, c: [0, 0, 0], r: 3.1, h: 6}}
+  # New Game+: mud balls rain on the pool (decals mark them).
+  - id: ng_mud_rain
+    anim: mud_wave
+    telegraph: 1.0
+    active: 1.2
+    recovery: 1.0
+    damage_mult: 0.8
+    poise: 16
+    flags: []
+    global: true
+    weight: 0.8
+    cooldown: 7
+    spawns:
+      - {t: 0.0, type: hazard, id: palude_mire_arm, at: random_arena, count: 5, delay: 1.1, active: 0.4, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 2.0, h: 3}}
+      - {t: 0.4, type: hazard, id: palude_mire_arm, at: target_predict, count: 1, delay: 1.0, active: 0.4, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 2.0, h: 3}}
+  # New Game+: two waves, the second offset.
+  - id: ng_double_wave
+    anim: mud_wave
+    telegraph: 1.0
+    active: 1.2
+    recovery: 1.2
+    damage_mult: 0.75
+    poise: 12
+    flags: []
+    range: [0, 20]
+    weight: 0.8
+    cooldown: 7
+    spawns:
+      - {t: 0.05, type: hazard, id: palude_mud_wave, at: ring_self, count: 5, dist: 3.4, speed: 8.5, delay: 0.25, active: 2.3, flags: [slow], status: {kind: slow, dur: 2.5, power: 0.45}, shape: {type: box, c: [0, 0, 0], half: [3.2, 1.0, 0.7]}}
+      - {t: 0.75, type: hazard, id: palude_mud_wave, at: ring_self, count: 5, dist: 3.4, speed: 8.5, delay: 0.25, active: 2.3, flags: [slow], status: {kind: slow, dur: 2.5, power: 0.45}, shape: {type: box, c: [0, 0, 0], half: [3.2, 1.0, 0.7]}}
+minions:
+  # 1. The lantern-bearer: swings a chain of unlit seekers' lanterns.
+  - id: annegato_lanterna
+    name_key: minion.mostro_della_palude.annegato_lanterna
+    hp: 0.1667
+    main_share: 1
+    equilibrio: 70
+    body: {radius: 1.3, height: 4.6}
+    hurt:
+      - {c: [0, 1.0, 0], r: 0.9}
+      - {c: [0, 2.4, 0], r: 1.0}
+      - {c: [0, 3.8, 0.1], r: 0.6}
+    move: {walk: 2.2, run: 4.6, turn: 2.4, preferred_range: [1.5, 4]}
+    idle_gap: [1.0, 1.6]
+    model: {builder: mostro_della_palude, rig: humanoid, scale: 1.0, palette: act1_green_gold}
+    attacks:
+      - id: lantern_flail
+        anim: sweep_r
+        telegraph: 0.85
+        active: 0.35
+        recovery: 1.0
+        damage_mult: 0.9
+        poise: 16
+        flags: []
+        range: [0, 4.2]
+        weight: 1.2
+        track: 1.0
+        hits:
+          - {t: 0.05, dur: 0.25, shape: {type: arc, r: 4.2, angle: 160, y: [0, 3.5]}}
+      - id: lantern_slam
+        anim: overhead
+        telegraph: 1.0
+        active: 0.3
+        recovery: 1.3
+        damage_mult: 1.2
+        poise: 26
+        flags: [knockdown]
+        range: [0, 4]
+        weight: 1.0
+        cooldown: 3
+        track: 1.0
+        hits:
+          - {t: 0.05, dur: 0.18, shape: {type: arc, r: 3.9, angle: 50, y: [-0.5, 4]}}
+      - id: lantern_hurl
+        anim: throw
+        telegraph: 0.9
+        active: 0.6
+        recovery: 1.1
+        damage_mult: 1.0
+        poise: 18
+        flags: []
+        range: [3.5, 10]
+        weight: 1.0
+        cooldown: 3
+        track: 1.0
+        hits:
+          - {t: 0.15, dur: 0.25, shape: {type: capsule, a: [0, 2.0, 1.0], b: [0, 1.0, 9.5], r: 0.8}}
+  # 2. The reed-spear: lanky and fast, throws reed javelins.
+  - id: annegato_canne
+    name_key: minion.mostro_della_palude.annegato_canne
+    hp: 0.1667
+    main_share: 1
+    equilibrio: 60
+    body: {radius: 1.0, height: 4.3}
+    hurt:
+      - {c: [0, 1.0, 0], r: 0.8}
+      - {c: [0, 2.3, 0], r: 0.85}
+      - {c: [0, 3.6, 0.1], r: 0.55}
+    move: {walk: 3.0, run: 6.0, turn: 3.2, preferred_range: [3, 7]}
+    idle_gap: [0.9, 1.5]
+    model: {builder: mostro_della_palude, rig: humanoid, scale: 1.0, palette: act1_green_gold}
+    attacks:
+      - id: reed_flurry
+        anim: thrust
+        telegraph: 0.75
+        active: 0.85
+        recovery: 1.0
+        damage_mult: 0.65
+        poise: 8
+        flags: []
+        range: [0, 4.5]
+        weight: 1.1
+        track: 1.0
+        track_active: 0.3
+        hits:
+          - {t: 0.0, dur: 0.12, shape: {type: capsule, a: [0, 2.0, 0.5], b: [0, 1.6, 4.6], r: 0.45}}
+          - {t: 0.3, dur: 0.12, shape: {type: capsule, a: [0, 2.0, 0.5], b: [0, 1.6, 4.6], r: 0.45}}
+          - {t: 0.6, dur: 0.12, shape: {type: capsule, a: [0, 2.0, 0.5], b: [0, 1.6, 4.8], r: 0.5}}
+      - id: reed_lunge
+        anim: lunge
+        telegraph: 0.8
+        active: 0.45
+        recovery: 1.15
+        damage_mult: 1.0
+        poise: 16
+        flags: [knockback]
+        range: [4, 13]
+        weight: 1.0
+        cooldown: 3
+        track: 1.1
+        track_active: 0.15
+        motion:
+          - {t: 0, dur: 0.35, type: forward, speed: 15}
+        hits:
+          - {t: 0.05, dur: 0.3, shape: {type: capsule, a: [0, 1.8, 0.5], b: [0, 1.6, 4.4], r: 0.55}}
+      - id: reed_volley
+        anim: throw
+        telegraph: 0.9
+        active: 0.4
+        recovery: 1.0
+        damage_mult: 0.8
+        poise: 12
+        flags: []
+        range: [6, 30]
+        weight: 1.0
+        cooldown: 3
+        track: 1.0
+        spawns:
+          - {t: 0.05, type: projectile, id: palude_reed, count: 3, spread: 24, speed: 20, from: [0, 3.0, 1.0]}
+  # 3. The bone-heap: heavy, charges, calls the mire.
+  - id: annegato_ossa
+    name_key: minion.mostro_della_palude.annegato_ossa
+    hp: 0.1667
+    main_share: 1
+    equilibrio: 80
+    body: {radius: 1.6, height: 5.2}
+    hurt:
+      - {c: [0, 1.2, 0], r: 1.1}
+      - {c: [0, 2.8, 0], r: 1.2}
+      - {c: [0, 4.4, 0.2], r: 0.7}
+    move: {walk: 1.9, run: 4.2, turn: 2.0, preferred_range: [1.5, 4]}
+    idle_gap: [1.0, 1.6]
+    model: {builder: mostro_della_palude, rig: humanoid, scale: 1.0, palette: act1_green_gold}
+    attacks:
+      - id: bone_crush
+        anim: double_slam
+        telegraph: 1.1
+        active: 0.3
+        recovery: 1.5
+        damage_mult: 1.5
+        poise: 30
+        flags: [red, knockdown]
+        range: [0, 4.2]
+        weight: 1.0
+        cooldown: 4
+        track: 1.0
+        hits:
+          - {t: 0.05, dur: 0.2, shape: {type: box, c: [0, 0, 2.9], half: [1.7, 2.2, 1.9]}}
+      - id: bone_charge
+        anim: charge
+        telegraph: 0.9
+        active: 1.0
+        recovery: 1.2
+        damage_mult: 1.1
+        poise: 24
+        flags: [knockback]
+        range: [4, 20]
+        weight: 1.0
+        cooldown: 3
+        track: 1.2
+        track_active: 0.1
+        motion:
+          - {t: 0, dur: 0.9, type: forward, speed: 11}
+        hits:
+          - {t: 0, dur: 0.9, shape: {type: capsule, a: [0, 1.4, 0.4], b: [0, 1.6, 2.6], r: 1.2}}
+      - id: bone_mire
+        anim: mire_arms
+        telegraph: 0.8
+        active: 0.8
+        recovery: 1.0
+        damage_mult: 1.0
+        poise: 22
+        flags: []
+        global: true
+        weight: 0.8
+        cooldown: 4
+        spawns:
+          - {t: 0.0, type: hazard, id: palude_mire_arm, at: target_predict, count: 1, delay: 1.0, active: 0.5, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.7, h: 3.4}}
+time_of_day_variants: {}
+dialogue_keys: [boss.mostro_della_palude.defeat]
+drops_weapon: randello_del_pantano
+unlocks_form: null
+metamondo_reaction: null
+ng_plus:
+  add_patterns: {p1: [ng_mud_rain, ng_double_wave]}
+  speed_mult: 1.08
+  idle_mult: 0.8

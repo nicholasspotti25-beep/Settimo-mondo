@@ -1,0 +1,25 @@
+# Brina Silente — Ice, il Cavaliere di Ghiaccio (Act II, D9). An ultra-thin rapier of clear azure ice with a swept
+# hilt of frost crystal; breath of cold mist trails the point.
+id: brina_silente
+name_key: weapon.brina_silente.name
+desc_key: weapon.brina_silente.desc
+flavor_key: weapon.brina_silente.flavor
+type: stocco
+category: one_handed
+source_boss: ice
+source_difficulty: 9
+parry_capable: true
+element: ice
+model:
+  template: stocco
+  motif: frost_crystal
+  glow: frost
+  colors: {primary: '#cfeaff', secondary: '#6fa8dc', accent: '#ffffff'}
+  params: {blade_len: 1.05, blade_w: 0.022, guard: swept, translucent: true}
+stamina_cost: {light: 12, heavy: 25}
+moveset: {light: stocco_light, heavy: stocco_heavy, running: stocco_run, jumping: stocco_jump}
+arts:
+  # Affondo Gelido: a lunging thrust that freezes the target for an instant.
+  prima: {id: affondo_gelido, eco_cost: 100, effect: dash_strike, params: {distance: 4.5, reach: 3.4, width: 0.5, freeze: 1.4, damage_mult: 2.1, dur: 0.55, element: ice}, vfx: art_affondo_gelido, anim: freeze_thrust}
+  # Danza dei Cristalli: three rapid thrusts, each loosing a shard of ice.
+  seconda: {id: danza_dei_cristalli, eco_cost: 200, effect: multi_strike, params: {count: 3, interval: 0.15, reach: 3.3, shape: thrust, projectile: w_ice_shard, proj_speed: 34, proj_mult: 0.25, damage_mult: 2.7, step: 0.25, dur: 0.85, element: ice}, vfx: art_danza_cristalli, anim: triple_thrust}

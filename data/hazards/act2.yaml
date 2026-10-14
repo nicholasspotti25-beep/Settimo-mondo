@@ -1,0 +1,21 @@
+# Act II hazard kinds (telegraph decal + active visual).
+- {id: cerbero_roar, visual: circle, color: '#ff7a3a', element: fire}
+- {id: hellfire, visual: fire, color: '#ff4a18', element: fire}
+- {id: cerbero_landing, visual: crack, color: '#ff9a5a'}
+- {id: pyro_fire_wave, visual: fire, color: '#ff6a1a', element: fire}
+- {id: pyro_scorch, visual: embers, color: '#ff3a10', element: fire}
+- {id: pyro_nova, visual: circle, color: '#ffb04a', element: fire}
+- {id: thunder_mark, visual: lightning, color: '#8fd0ff', element: lightning}
+- {id: thunder_ring, visual: circle, color: '#bfe8ff', element: lightning}
+- {id: thunder_storm, visual: lightning, color: '#d6f0ff', element: lightning}
+- {id: ice_spike_line, visual: ice, color: '#bfe8ff', element: ice}
+- {id: frost_ring, visual: circle, color: '#d8f4ff', element: ice}
+- {id: frost_breath, visual: fog, color: '#e6f8ff', element: ice}
+- {id: magma_geyser, visual: lava, color: '#ff5a12', element: fire}
+- {id: magma_wave, visual: lava, color: '#ff7a20', element: fire}
+- {id: lava_rim, visual: lava, color: '#ff4a10', element: fire}
+- {id: magma_crack, visual: crack, color: '#ff8a3a', element: fire}
+- {id: lucifero_blade, visual: spikes, color: '#e8c070', element: light}
+- {id: lucifero_embers, visual: embers, color: '#ff3a2a', element: fire}
+- {id: lucifero_wing, visual: shadow, color: '#3a0e12', element: void}
+- {id: lucifero_rifiuto, visual: light, color: '#fff0d0', element: light}

@@ -1,0 +1,25 @@
+# Brace Eterna — Pyro, il Cavaliere di Fiamme (Act II, D8). A wavy flamberge greatsword of dark red steel with an
+# incandescent core running down the fuller; flames lick the edge.
+id: brace_eterna
+name_key: weapon.brace_eterna.name
+desc_key: weapon.brace_eterna.desc
+flavor_key: weapon.brace_eterna.flavor
+type: spadone
+category: two_handed
+source_boss: pyro
+source_difficulty: 8
+parry_capable: false
+element: fire
+model:
+  template: spadone
+  motif: flamberge_core
+  glow: ember
+  colors: {primary: '#5a1a14', secondary: '#2a1a18', accent: '#ff8a2a'}
+  params: {blade_len: 1.45, blade_w: 0.14, wave: 7, core: true, flames: true}
+stamina_cost: {light: 18, heavy: 35}
+moveset: {light: spadone_light, heavy: spadone_heavy, running: spadone_run, jumping: spadone_jump}
+arts:
+  # Onda Incandescente: a cut that sends a wave of fire racing along the ground.
+  prima: {id: onda_incandescente, eco_cost: 100, effect: ground_wave, params: {kind: line, length: 14, width: 2.4, speed: 17, visual: fire, damage_mult: 2.4, at: 0.32, element: fire, status: burn, cut: true}, vfx: art_onda_incandescente, anim: wave_cut}
+  # Lama Rovente: the blade drinks the core's fire: flaming edge for 10 seconds.
+  seconda: {id: lama_rovente, eco_cost: 200, effect: buff_self, params: {element: fire, time: 10, bonus: 0.4, burst: 1.4, radius: 3.2, dur: 0.8}, vfx: art_lama_rovente, anim: imbue}

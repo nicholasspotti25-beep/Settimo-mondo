@@ -1,0 +1,80 @@
+# Transizioni starting from a one-handed weapon (spada corta/lunga, mazza, stocco, scudo, katana, asce gemelle, kama,
+# pugnali, scimitarra). A swap within 0.5 s of a landed hit plays the linking move of the (from -> to) category pair.
+# Startup/active/recovery = 30/30/40% of `duration`; damage = mean of both weapons' damage x damage_mult.
+- id: tr_one_handed_one_handed
+  from: one_handed
+  to: one_handed
+  name_key: transition.one_handed.one_handed.name
+  anim: tr_hand_change
+  shape: {type: arc, r: 2.9, angle: 160, y: [0.1, 2.4]}
+  damage_mult: 1.25
+  poise: 10
+  duration: 0.5
+  move: {speed: 3.0, dur: 0.16}
+  vfx: tr_hand_change
+- id: tr_one_handed_two_handed
+  from: one_handed
+  to: two_handed
+  name_key: transition.one_handed.two_handed.name
+  anim: tr_double_grip
+  shape: {type: arc, r: 3.4, angle: 80, y: [0, 3.0]}
+  damage_mult: 1.5
+  poise: 10
+  duration: 0.68
+  move: {speed: 3.6, dur: 0.24}
+  vfx: tr_double_grip
+- id: tr_one_handed_polearm
+  from: one_handed
+  to: polearm
+  name_key: transition.one_handed.polearm.name
+  anim: tr_long_lunge
+  shape: {type: capsule, a: [0, 1.3, 0.4], b: [0, 1.3, 4.8], r: 0.55}
+  damage_mult: 1.35
+  poise: 10
+  duration: 0.6
+  move: {speed: 5.5, dur: 0.24}
+  vfx: tr_long_lunge
+- id: tr_one_handed_ranged
+  from: one_handed
+  to: ranged
+  name_key: transition.one_handed.ranged.name
+  anim: tr_thrust_shot
+  shape: {type: capsule, a: [0, 1.3, 0.3], b: [0, 1.3, 2.6], r: 0.5}
+  projectile: {kind: w_link_arrow, speed: 48, radius: 0.24, life: 1.2, gravity: 2, homing: 1.5}
+  damage_mult: 1.2
+  poise: 10
+  duration: 0.6
+  move: {speed: 3.5, dur: 0.14}
+  vfx: tr_thrust_shot
+- id: tr_one_handed_catalyst
+  from: one_handed
+  to: catalyst
+  name_key: transition.one_handed.catalyst.name
+  anim: tr_enchanted_cut
+  shape: {type: arc, r: 2.8, angle: 140, y: [0.1, 2.4]}
+  projectile: {kind: w_link_orb, speed: 26, radius: 0.4, life: 1.4, homing: 2.0}
+  damage_mult: 1.2
+  poise: 10
+  duration: 0.62
+  vfx: tr_enchanted_cut
+- id: tr_one_handed_fist
+  from: one_handed
+  to: fist
+  name_key: transition.one_handed.fist.name
+  anim: tr_hilt_and_fist
+  shape: {type: capsule, a: [0, 1.4, 0.3], b: [0, 1.4, 2.0], r: 0.6}
+  damage_mult: 1.3
+  poise: 10
+  duration: 0.48
+  move: {speed: 5.0, dur: 0.16}
+  vfx: tr_hilt_and_fist
+- id: tr_one_handed_flexible
+  from: one_handed
+  to: flexible
+  name_key: transition.one_handed.flexible.name
+  anim: tr_loosened_blade
+  shape: {type: capsule, a: [0, 1.2, 0.6], b: [0, 1.0, 5.2], r: 0.55}
+  damage_mult: 1.3
+  poise: 10
+  duration: 0.6
+  vfx: tr_loosened_blade

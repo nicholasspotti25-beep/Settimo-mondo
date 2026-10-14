@@ -1,0 +1,290 @@
+# 9. Thunder, il Cavaliere di Fulmini — secondary · Bufera Eterna · D8.
+# Second of the Tre Cavalieri del Giuramento. Blue-and-silver armor crossed by electric arcs, a great hammer.
+# Fast and unpredictable: dashes (straight, zig-zag, through you and back), overheads, lightning that MARKS the ground
+# before striking. Phase 2: he calls a rain of lightning and the fight becomes a dance among discharges (the storm keeps
+# striking marked ground around the arena, never right under your feet when it is called).
+# Local frame: +Z forward, +Y up, +X = Thunder's LEFT.
+id: thunder
+order: 9
+name_key: boss.thunder.name
+title_key: boss.thunder.title
+class: secondary
+difficulty: 8
+act: 2
+arena: bufera_altura
+zone: bufera_eterna
+model: {builder: thunder, rig: humanoid, scale: 1.0, palette: act2_red_blue_black}
+equilibrio_max: 160
+body: {radius: 1.55, height: 5.4, mass: heavy}
+hurtboxes:
+  - {c: [0, 1.05, 0], r: 1.15}
+  - {c: [0, 2.45, 0], r: 1.25}
+  - {c: [0, 3.65, 0.05], r: 1.2}
+  - {c: [0, 4.8, 0.12], r: 0.58}
+move: {walk: 3.4, run: 9.0, turn: 3.2, preferred_range: [3, 10]}
+idle_gap: [0.55, 1.15]
+music: boss_thunder
+intro_sequence: thunder_intro
+defeat_sequence: thunder_defeat
+lore_key: boss.thunder.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_thunder_p1
+    opener: lightning_dash
+    patterns: [lightning_dash, side_dash_l, side_dash_r, overhead_smash, hammer_sweep, lightning_mark, ground_pound]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_thunder_p2
+    on_enter: [storm]
+    transition: 2.6
+    speed_mult: 1.1
+    aggression: 1.12
+    opener: storm_call
+    dialogue: boss.thunder.mid
+    patterns: [lightning_dash, side_dash_l, side_dash_r, overhead_smash, hammer_sweep, lightning_mark, ground_pound, storm_call, chain_bolts, thunder_dive]
+attacks:
+  # A dash as fast as a bolt: through where you stand, then he turns and sweeps back.
+  - id: lightning_dash
+    anim: charge
+    telegraph: 0.6
+    active: 0.4
+    recovery: 0.55
+    damage_mult: 0.9
+    poise: 18
+    flags: [knockback]
+    element: lightning
+    range: [5, 22]
+    weight: 1.25
+    cooldown: 3
+    track: 1.5
+    track_active: 0.08
+    combo_next: dash_turn_sweep
+    combo_chance: 0.6
+    motion:
+      - {t: 0, dur: 0.36, type: charge_through, speed: 25}
+    hits:
+      - {t: 0, dur: 0.36, shape: {type: capsule, a: [0, 1.0, 0.4], b: [0, 2.6, 3.2], r: 1.35}}
+    sfx: thunder_dash
+  - id: dash_turn_sweep
+    anim: sweep_l
+    telegraph: 0.55
+    active: 0.3
+    recovery: 1.1
+    damage_mult: 0.95
+    poise: 18
+    flags: []
+    element: lightning
+    weight: 0
+    track: 3.0
+    hits:
+      - {t: 0.03, dur: 0.24, shape: {type: arc, r: 6.4, angle: 160, y: [0, 4.5]}}
+    sfx: hammer_swing
+  # Zig-zag: a sidestep in a blink, then a lunging smash. Two mirrored versions.
+  - id: side_dash_l
+    anim: dash_l
+    telegraph: 0.72
+    active: 0.5
+    recovery: 1.05
+    damage_mult: 1.1
+    poise: 22
+    flags: []
+    element: lightning
+    range: [2, 14]
+    weight: 0.9
+    cooldown: 4
+    track: 1.6
+    motion:
+      - {t: -0.38, dur: 0.24, type: strafe_left, speed: 14}
+      - {t: 0, dur: 0.28, type: toward_target, speed: 18, track: 4}
+    hits:
+      - {t: 0.26, dur: 0.2, shape: {type: arc, r: 5.6, angle: 60, y: [-0.5, 5]}}
+    sfx: thunder_dash
+  - id: side_dash_r
+    anim: dash_r
+    telegraph: 0.72
+    active: 0.5
+    recovery: 1.05
+    damage_mult: 1.1
+    poise: 22
+    flags: []
+    element: lightning
+    range: [2, 14]
+    weight: 0.9
+    cooldown: 4
+    track: 1.6
+    motion:
+      - {t: -0.38, dur: 0.24, type: strafe_right, speed: 14}
+      - {t: 0, dur: 0.28, type: toward_target, speed: 18, track: 4}
+    hits:
+      - {t: 0.26, dur: 0.2, shape: {type: arc, r: 5.6, angle: 60, y: [-0.5, 5]}}
+    sfx: thunder_dash
+  # Two-handed overhead: the hammer comes down with a crackling ring (jump it).
+  - id: overhead_smash
+    anim: overhead
+    telegraph: 0.82
+    active: 0.35
+    recovery: 1.15
+    damage_mult: 1.3
+    poise: 26
+    flags: [knockdown]
+    element: lightning
+    range: [0, 5]
+    weight: 1.1
+    cooldown: 3
+    track: 1.2
+    hits:
+      - {t: 0.03, dur: 0.2, shape: {type: arc, r: 5.8, angle: 50, y: [-0.5, 5.5]}}
+    spawns:
+      - {t: 0.05, type: shockwave, id: thunder_ring, shape: {type: ring, r0: 4.2, r1: 11, width: 1.2, height: 0.8}, delay: 0.3, active: 0.6, damage_mult: 0.55}
+    sfx: hammer_slam
+  # Horizontal sweep, sometimes chained into the overhead.
+  - id: hammer_sweep
+    anim: sweep_r
+    telegraph: 0.66
+    active: 0.3
+    recovery: 0.95
+    damage_mult: 0.95
+    poise: 16
+    flags: []
+    element: lightning
+    range: [0, 4.5]
+    weight: 1.2
+    cooldown: 2
+    track: 1.2
+    track_active: 0.15
+    combo_next: overhead_smash
+    combo_chance: 0.45
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 4}
+    hits:
+      - {t: 0.03, dur: 0.24, shape: {type: arc, r: 6.2, angle: 165, y: [0, 4.5]}}
+    sfx: hammer_swing
+  # He raises the hammer to the storm: the ground is MARKED around you, then the lightning falls.
+  - id: lightning_mark
+    anim: cast
+    telegraph: 0.72
+    active: 0.5
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    element: lightning
+    range: [0, 36]
+    weight: 1.1
+    cooldown: 4.5
+    track: 1.0
+    spawns:
+      - {t: 0.0, type: hazard, id: thunder_mark, at: around_target, count: 3, dist: 3.6, delay: 1.15, active: 0.3, damage_mult: 1.0, shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 30}}
+    sfx: thunder_call
+  # Close: hammer into the ground, the shock spreads in a short ring.
+  - id: ground_pound
+    anim: slam
+    telegraph: 0.72
+    active: 0.3
+    recovery: 1.05
+    damage_mult: 1.1
+    poise: 24
+    flags: []
+    element: lightning
+    range: [0, 2.5]
+    weight: 1.0
+    cooldown: 4
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: cylinder, c: [0, 0, 1.0], r: 4.4, h: 3}}
+    sfx: hammer_slam
+  # Phase 2: the rain of lightning. Three waves of marked ground; one mark always follows you.
+  - id: storm_call
+    anim: cast
+    telegraph: 0.95
+    active: 2.4
+    recovery: 1.1
+    damage_mult: 0.95
+    poise: 18
+    flags: []
+    element: lightning
+    range: [0, 40]
+    global: true
+    weight: 0.9
+    cooldown: 11
+    spawns:
+      - {t: 0.0, type: hazard, id: thunder_storm, at: random_arena, count: 7, delay: 1.1, active: 0.3, damage_mult: 0.95, repeat: 3, interval: 0.8, shape: {type: cylinder, c: [0, 0, 0], r: 2.3, h: 30}}
+    sfx: thunder_call
+  # Phase 2: three bolts thrown from the hammer head.
+  - id: chain_bolts
+    anim: thrust
+    telegraph: 0.7
+    active: 0.4
+    recovery: 1.0
+    damage_mult: 0.85
+    poise: 14
+    flags: []
+    element: lightning
+    range: [6, 36]
+    weight: 1.0
+    cooldown: 4
+    track: 1.3
+    spawns:
+      - {t: 0.05, type: projectile, id: thunder_bolt, count: 3, spread: 28, speed: 30, from: [0, 3.2, 2.0]}
+    sfx: thunder_bolt
+  # Phase 2: he rises into the storm and falls on you with the hammer (Colpo Rosso); the impact spreads a ring.
+  - id: thunder_dive
+    anim: leap
+    telegraph: 0.9
+    active: 1.15
+    recovery: 1.4
+    damage_mult: 1.55
+    poise: 30
+    flags: [red, knockdown]
+    element: lightning
+    range: [5, 40]
+    weight: 0.9
+    cooldown: 8
+    track: 1.3
+    motion:
+      - {t: 0, dur: 0.85, type: leap_to_target, height: 9, dist: 26}
+    hits:
+      - {t: 0.82, dur: 0.2, shape: {type: cylinder, c: [0, -9, 1.0], r: 3.6, h: 14}}
+    spawns:
+      - {t: 0.86, type: shockwave, id: thunder_ring, shape: {type: ring, r0: 5.0, r1: 15, width: 1.3, height: 0.9}, delay: 0.3, active: 0.85, damage_mult: 0.6}
+    sfx: thunder_dive
+  # Environmental strikes of the phase 2 storm (behavior-driven, never selected by the AI).
+  - id: storm_ambient
+    anim: cast
+    telegraph: 0.5
+    active: 0.1
+    recovery: 0.1
+    damage_mult: 0.8
+    poise: 16
+    flags: []
+    element: lightning
+    weight: 0
+  # New Game+: two dashes back to back, the second from the other side.
+  - id: double_dash
+    anim: charge
+    telegraph: 0.55
+    active: 0.4
+    recovery: 0.4
+    damage_mult: 0.9
+    poise: 18
+    flags: [knockback]
+    element: lightning
+    range: [5, 22]
+    weight: 0.8
+    cooldown: 7
+    track: 1.5
+    track_active: 0.08
+    combo_next: lightning_dash
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.36, type: charge_through, speed: 25}
+    hits:
+      - {t: 0, dur: 0.36, shape: {type: capsule, a: [0, 1.0, 0.4], b: [0, 2.6, 3.2], r: 1.35}}
+time_of_day_variants:
+  notte: {opener: lightning_mark, note_key: boss.thunder.tod.notte}
+dialogue_keys: [boss.thunder.intro, boss.thunder.intro2, boss.thunder.mid, boss.thunder.defeat]
+drops_weapon: tuono_spezzacielo
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [double_dash], p2: [double_dash]}
+  idle_mult: 0.85

@@ -1,0 +1,24 @@
+# Remo del Traghettatore — Caronte (Act I, D6). A long black oar with a paddle-blade edged in steel; faint spectral
+# cyan veins and a tiny lantern of soul-eyes at the collar.
+id: remo_del_traghettatore
+name_key: weapon.remo_del_traghettatore.name
+desc_key: weapon.remo_del_traghettatore.desc
+flavor_key: weapon.remo_del_traghettatore.flavor
+type: alabarda
+category: polearm
+source_boss: caronte
+source_difficulty: 6
+parry_capable: false
+model:
+  template: alabarda
+  motif: ferryman_oar
+  glow: spirit
+  colors: {primary: '#16161c', secondary: '#5a6a78', accent: '#9ae8ff'}
+  params: {shaft_len: 2.2, blade: paddle, blade_len: 0.62, blade_w: 0.26, lantern: true}
+stamina_cost: {light: 17, heavy: 32}
+moveset: {light: alabarda_light, heavy: alabarda_heavy, running: alabarda_run, jumping: alabarda_jump}
+arts:
+  # Richiamo delle Anime: three spectral souls rise from the lantern and fly at the target one after another.
+  prima: {id: richiamo_delle_anime, eco_cost: 100, effect: projectile, params: {kind: w_soul_lantern, count: 3, spread: 36, speed: 18, homing: 2.6, sequential: 0.14, life: 3.0, damage_mult: 2.3, delay: 0.3, element: spirit}, vfx: art_richiamo_anime, anim: cast_souls}
+  # Spinta della Corrente: a wide rowing cut that pushes everything back like a current.
+  seconda: {id: spinta_della_corrente, eco_cost: 200, effect: spin, params: {radius: 5.0, angle: 210, hits: 1, knockback: 4.0, damage_mult: 3.2, dur: 0.85, element: water, wave: true}, vfx: art_spinta_corrente, anim: wide_sweep}

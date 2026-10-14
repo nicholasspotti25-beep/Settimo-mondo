@@ -1,0 +1,24 @@
+# Ala di Grifone — Grifone (Act V, D16). A scimitar whose curved blade is shaped like a wing, its flat chased with a
+# feather pattern in white and gold; the grip is wrapped in ochre leather and tipped with feathers.
+id: ala_di_grifone
+name_key: weapon.ala_di_grifone.name
+desc_key: weapon.ala_di_grifone.desc
+flavor_key: weapon.ala_di_grifone.flavor
+type: scimitarra
+category: one_handed
+source_boss: grifone
+source_difficulty: 16
+parry_capable: true
+model:
+  template: scimitarra
+  motif: wing_blade
+  glow: wind
+  colors: {primary: '#f4f0e6', secondary: '#c89a4a', accent: '#ffe6a0'}
+  params: {blade_len: 0.92, blade_w: 0.12, curve: 0.3, feathers: 6}
+stamina_cost: {light: 13, heavy: 27}
+moveset: {light: scimitarra_light, heavy: scimitarra_heavy, running: scimitarra_run, jumping: scimitarra_jump}
+arts:
+  # Colpo d'Ala: a wide wing-beat cut that throws the target back on a gust.
+  prima: {id: colpo_d_ala, eco_cost: 100, effect: spin, params: {radius: 3.8, angle: 180, hits: 1, knockback: 4.5, damage_mult: 2.2, dur: 0.7, gust: true}, vfx: art_colpo_ala, anim: wing_cut}
+  # Tuffo del Rapace: leap into the air and dive with a downward slash.
+  seconda: {id: tuffo_del_rapace, eco_cost: 200, effect: slam, params: {leap: true, leap_dist: 8.0, impact: 0.62, height: 4.0, radius: 3.4, damage_mult: 3.6, dur: 1.0}, vfx: art_tuffo_rapace, anim: raptor_dive}

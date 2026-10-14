@@ -1,0 +1,9 @@
+# Act II projectile kinds (La Discesa): Cerbero, the Three Knights of the Oath, the Mostro di Magma, Lucifero.
+- {id: cerbero_fireball, radius: 0.85, speed: 17, life: 3.0, visual: fireball, color: '#ff5a1e', trail: true, element: fire, explode_radius: 2.6}
+- {id: pyro_flame_orb, radius: 0.7, speed: 15, life: 3.2, visual: fireball, color: '#ff8a2a', trail: true, element: fire, explode_radius: 2.2}
+- {id: pyro_flame_crescent, radius: 1.1, speed: 21, life: 1.5, visual: crescent, color: '#ff6a1a', trail: true, element: fire}
+- {id: thunder_bolt, radius: 0.5, speed: 30, life: 1.4, visual: bolt, color: '#9fd8ff', trail: true, element: lightning}
+- {id: ice_crystal, radius: 0.4, speed: 26, life: 1.6, visual: shard, color: '#cfefff', trail: true, element: ice}
+- {id: magma_rock, radius: 1.0, speed: 17, life: 4.0, gravity: 14, visual: rock, color: '#ff6a20', trail: true, element: fire, explode_radius: 2.8}
+- {id: lucifero_feather, radius: 0.35, speed: 22, life: 2.4, visual: feather, color: '#2a1a22', trail: true, element: void}
+- {id: lucifero_ember, radius: 0.55, speed: 14, life: 3.4, homing: 0.6, visual: orb, color: '#ff3a2a', trail: true, element: fire}

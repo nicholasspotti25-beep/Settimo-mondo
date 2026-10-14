@@ -1,0 +1,24 @@
+# Mandibole Imperiali — Coleottero Imperiale (Act IV, D14). Two curved stag-beetle blades of metallic blue chitin
+# joined at a hinged base; they open and close like mandibles.
+id: mandibole_imperiali
+name_key: weapon.mandibole_imperiali.name
+desc_key: weapon.mandibole_imperiali.desc
+flavor_key: weapon.mandibole_imperiali.flavor
+type: lama_a_tenaglia
+category: two_handed
+source_boss: coleottero_imperiale
+source_difficulty: 14
+parry_capable: false
+model:
+  template: lama_a_tenaglia
+  motif: stag_mandibles
+  glow: iridescent
+  colors: {primary: '#2a4ab0', secondary: '#101830', accent: '#7ae0ff'}
+  params: {haft_len: 1.0, blade_len: 0.85, open_angle: 34, teeth: 5}
+stamina_cost: {light: 17, heavy: 33}
+moveset: {light: lama_a_tenaglia_light, heavy: lama_a_tenaglia_heavy, running: lama_a_tenaglia_run, jumping: lama_a_tenaglia_jump}
+arts:
+  # Morsa: the blades snap shut on the target and hold it.
+  prima: {id: morsa, eco_cost: 100, effect: grab_pull, params: {range: 3.6, pull: 1.0, hold: 2.2, grab_mult: 1.0, crush: 2, damage_mult: 2.2, dur: 0.95}, vfx: art_morsa, anim: pincer_grab}
+  # Carica Corazzata: an armored shoulder-charge with the blades spread wide.
+  seconda: {id: carica_corazzata, eco_cost: 200, effect: dash_strike, params: {distance: 8.5, reach: 2.6, width: 1.7, knockback: 3.0, guarded: true, damage_mult: 3.4, dur: 0.8}, vfx: art_carica_corazzata, anim: armored_charge}

@@ -1,0 +1,25 @@
+# Grimorio delle Menzogne — Loki (Act III, D13). A green leather tome with gold clasps; its pages rewrite themselves
+# with glowing glyphs that never say the same thing twice.
+id: grimorio_delle_menzogne
+name_key: weapon.grimorio_delle_menzogne.name
+desc_key: weapon.grimorio_delle_menzogne.desc
+flavor_key: weapon.grimorio_delle_menzogne.flavor
+type: tomo
+category: catalyst
+source_boss: loki
+source_difficulty: 13
+parry_capable: false
+element: spirit
+model:
+  template: tomo
+  motif: lying_pages
+  glow: trickster
+  colors: {primary: '#1f5a32', secondary: '#c8a03a', accent: '#7af0a0'}
+  params: {w: 0.3, h: 0.4, thick: 0.09, clasps: 2, pages_fan: 5}
+stamina_cost: {light: 14, heavy: 27}
+moveset: {light: tomo_light, heavy: tomo_heavy, running: tomo_run, jumping: tomo_jump}
+arts:
+  # Falso Specchio: an illusion of you that draws the boss's attack.
+  prima: {id: falso_specchio, eco_cost: 100, effect: decoy, params: {time: 6.0, burst: true, radius: 3.0, damage_mult: 1.6, element: spirit}, vfx: art_falso_specchio, anim: cast_mirror}
+  # Verità Scomoda: a bolt of light that dissolves illusions and burns whoever casts them.
+  seconda: {id: verita_scomoda, eco_cost: 200, effect: beam, params: {at: 0.3, beam_time: 0.45, length: 20, width: 0.9, ticks: 3, dispel: true, damage_mult: 3.4, element: light}, vfx: art_verita_scomoda, anim: cast_beam}

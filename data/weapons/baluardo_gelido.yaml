@@ -1,0 +1,25 @@
+# Baluardo Gelido — Guardiano della Rocca di Brina (Act III, D11). A large tower shield of layered ice with a ring of
+# spikes and frost in the joints; guard absorbs everything and it parries.
+id: baluardo_gelido
+name_key: weapon.baluardo_gelido.name
+desc_key: weapon.baluardo_gelido.desc
+flavor_key: weapon.baluardo_gelido.flavor
+type: scudo
+category: one_handed
+source_boss: guardiano_rocca_di_brina
+source_difficulty: 11
+parry_capable: true
+element: ice
+model:
+  template: scudo
+  motif: tower_ice
+  glow: frost
+  colors: {primary: '#bfe0f4', secondary: '#5a8ab0', accent: '#eaf8ff'}
+  params: {height: 1.15, width: 0.62, spikes: 7, boss_spike: true}
+stamina_cost: {light: 15, heavy: 30}
+moveset: {light: scudo_light, heavy: scudo_heavy, running: scudo_run, jumping: scudo_jump}
+arts:
+  # Urto del Baluardo: a shoulder-charge behind the shield.
+  prima: {id: urto_del_baluardo, eco_cost: 100, effect: dash_strike, params: {distance: 6.0, reach: 1.8, width: 1.3, knockback: 2.5, guarded: true, damage_mult: 2.0, dur: 0.6, element: ice}, vfx: art_urto_baluardo, anim: shoulder_charge}
+  # Muro di Brina: a wall of frost rises in front of you and stops projectiles.
+  seconda: {id: muro_di_brina, eco_cost: 200, effect: barrier, params: {width: 6.0, time: 8.0, shock: true, radius: 3.0, damage_mult: 1.6, element: ice}, vfx: art_muro_brina, anim: raise_wall}

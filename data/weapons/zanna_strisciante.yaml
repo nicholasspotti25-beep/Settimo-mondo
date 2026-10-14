@@ -1,0 +1,23 @@
+# Zanna Strisciante — Great Devourer (mini, Act I, D6). Segmented snake-sword: green-and-black scaled segments on a
+# venom-green core wire; the blade extends like a whip. Mini-boss weapon: functional description only.
+id: zanna_strisciante
+name_key: weapon.zanna_strisciante.name
+desc_key: weapon.zanna_strisciante.desc
+type: spada_serpentina
+category: flexible
+source_boss: great_devourer
+source_difficulty: 6
+parry_capable: false
+model:
+  template: spada_serpentina
+  motif: serpent_scales
+  glow: venom
+  colors: {primary: '#2f5a32', secondary: '#121812', accent: '#a8d060'}
+  params: {segments: 9, seg_len: 0.11, blade_w: 0.07, extend: 4.6, fang_tip: true}
+stamina_cost: {light: 15, heavy: 28}
+moveset: {light: spada_serpentina_light, heavy: spada_serpentina_heavy, running: spada_serpentina_run, jumping: spada_serpentina_jump}
+arts:
+  # Sibilo: a hissing forward dash with the blade fully extended.
+  prima: {id: sibilo, eco_cost: 100, effect: dash_strike, params: {distance: 5.5, reach: 5.4, width: 0.6, damage_mult: 2.3, dur: 0.6, element: poison}, vfx: art_sibilo, anim: whip_dash}
+  # Avvolgimento: the blade coils around the target and drags it in, then snaps.
+  seconda: {id: avvolgimento, eco_cost: 200, effect: grab_pull, params: {range: 8.0, pull: 5.0, hold: 1.4, throw: true, grab_mult: 0.4, damage_mult: 3.4, dur: 1.0, element: poison}, vfx: art_avvolgimento, anim: whip_hook}

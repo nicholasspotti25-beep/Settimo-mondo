@@ -1,0 +1,26 @@
+# Scettro del Primo Respiro — Dio dei Draghi, Ouranthos (Act VII, D19). A white-gold scepter crowned by a turning ring
+# of light with six small halos and a seventh, empty. Delivered after the final victory (Cthulhu).
+id: scettro_del_primo_respiro
+name_key: weapon.scettro_del_primo_respiro.name
+desc_key: weapon.scettro_del_primo_respiro.desc
+flavor_key: weapon.scettro_del_primo_respiro.flavor
+type: scettro
+category: catalyst
+source_boss: dio_dei_draghi
+source_difficulty: 19
+parry_capable: false
+delivered_by: cthulhu
+element: light
+model:
+  template: scettro
+  motif: seventh_ring
+  glow: dawn
+  colors: {primary: '#fbf6ea', secondary: '#e8c56a', accent: '#fff1c0'}
+  params: {len: 1.05, ring_r: 0.17, halos: 6}
+stamina_cost: {light: 15, heavy: 30}
+moveset: {light: scettro_light, heavy: scettro_heavy, running: scettro_run, jumping: scettro_jump}
+arts:
+  # Respiro Primordiale: a cone of primordial light breathed from the ring.
+  prima: {id: respiro_primordiale, eco_cost: 100, effect: cone_breath, params: {range: 9.0, angle: 55, ticks: 6, damage_mult: 2.5, dur: 1.2, element: light}, vfx: art_respiro_primordiale, anim: breath_cone}
+  # Settimo Anello: a ring of light that pulls enemies in and burns them.
+  seconda: {id: settimo_anello, eco_cost: 200, effect: black_hole, params: {at: front, dist: 4.0, radius: 6.0, time: 3.0, pull: 5.0, dps_mult: 0.85, burst: 1.0, damage_mult: 1.7, visual: light, element: light, ring: true}, vfx: art_settimo_anello, anim: ring_of_light}

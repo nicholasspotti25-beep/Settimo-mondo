@@ -1,0 +1,24 @@
+# Zanna d'Argento — Grande Lupo (Act III, D11). A katana with a thin silver blade and a hilt carved as a wolf's head;
+# a cloud of fine snow follows the edge.
+id: zanna_d_argento
+name_key: weapon.zanna_d_argento.name
+desc_key: weapon.zanna_d_argento.desc
+flavor_key: weapon.zanna_d_argento.flavor
+type: katana
+category: one_handed
+source_boss: grande_lupo
+source_difficulty: 11
+parry_capable: true
+model:
+  template: katana
+  motif: wolf_hilt
+  glow: moon
+  colors: {primary: '#e4e8f0', secondary: '#7a7e88', accent: '#ffcf6a'}
+  params: {blade_len: 1.0, blade_w: 0.038, curve: 0.09, tsuba: wolf, pommel: wolf_head}
+stamina_cost: {light: 13, heavy: 27}
+moveset: {light: katana_light, heavy: katana_heavy, running: katana_run, jumping: katana_jump}
+arts:
+  # Taglio Lunare: a crescent-moon cut that flies at range.
+  prima: {id: taglio_lunare, eco_cost: 100, effect: projectile, params: {kind: w_moon_crescent, count: 1, speed: 30, pierce: true, life: 1.3, damage_mult: 2.2, delay: 0.22, cut: true}, vfx: art_taglio_lunare, anim: moon_cut}
+  # Branco: the pack — three rapid cuts from three different angles around the target.
+  seconda: {id: branco, eco_cost: 200, effect: multi_strike, params: {count: 3, interval: 0.2, reach: 3.0, angle: 110, teleport: true, damage_mult: 3.5, final_mult: 1.3, dur: 0.95}, vfx: art_branco, anim: pack_cuts}

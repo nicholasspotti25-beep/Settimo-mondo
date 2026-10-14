@@ -1,0 +1,44 @@
+# Player weapon projectile kinds (movesets, Arts, Transizioni). Owned by the weapons work-stream.
+# speed/life/radius here are defaults; swings and Arts pass their own values. Colors follow each weapon's look.
+
+# --- moveset projectiles ---------------------------------------------------------------------------------------------
+- {id: w_golden_arrow, radius: 0.2, speed: 42, life: 2.5, gravity: 9, visual: arrow, color: '#ffd76a', trail: true}
+- {id: w_drake_bolt, radius: 0.22, speed: 52, life: 2.0, gravity: 3, visual: arrow, color: '#d8452a', trail: true}
+- {id: w_fire_bolt, radius: 0.28, speed: 46, life: 2.0, gravity: 3, visual: bolt, color: '#ff6a2a', trail: true, element: fire, explode_radius: 2.6}
+- {id: w_harpoon, radius: 0.35, speed: 30, life: 1.2, visual: harpoon, color: '#4fb8b0', trail: true, element: water}
+- {id: w_leaf_bolt, radius: 0.3, speed: 24, life: 2.2, homing: 2.2, visual: petal, color: '#9adf6a', trail: true, element: nature}
+- {id: w_seed_bolt, radius: 0.24, speed: 26, life: 1.6, visual: seed, color: '#d8c860', trail: true, element: nature}
+- {id: w_thorn_orb, radius: 0.55, speed: 14, life: 2.4, homing: 1.4, visual: orb, color: '#6ab04a', trail: true, element: nature, explode_radius: 2.4}
+- {id: w_page_shard, radius: 0.26, speed: 26, life: 2.0, homing: 2.6, visual: shard, color: '#d8f0b0', trail: true, element: spirit}
+- {id: w_lie_glyph, radius: 0.36, speed: 20, life: 2.4, homing: 2.0, visual: star, color: '#5fdf8a', trail: true, element: spirit}
+- {id: w_star_bolt, radius: 0.3, speed: 30, life: 2.0, homing: 1.8, visual: star, color: '#bfd8ff', trail: true, element: light}
+- {id: w_orbit_star, radius: 0.6, speed: 12, life: 3.0, homing: 2.4, visual: comet, color: '#ffe8a8', trail: true, element: light, explode_radius: 2.8}
+- {id: w_breath_bolt, radius: 0.34, speed: 30, life: 1.8, homing: 1.6, visual: orb, color: '#fff1c0', trail: true, element: light}
+- {id: w_spirit_wolf, radius: 0.55, speed: 22, life: 1.8, homing: 2.4, visual: spirit, color: '#bfe0ff', trail: true, element: spirit}
+- {id: w_spirit_raven, radius: 0.45, speed: 26, life: 1.8, homing: 2.8, visual: raven, color: '#5a5a8a', trail: true, element: spirit}
+- {id: w_trident, radius: 0.5, speed: 26, life: 1.6, visual: harpoon, color: '#7a9a4a', trail: true}
+- {id: w_void_chakram, radius: 0.45, speed: 28, life: 1.4, homing: 2.0, visual: disc, color: '#7a3ac8', trail: true, element: void}
+
+# --- Art projectiles ---------------------------------------------------------------------------------------------------
+- {id: w_soul_lantern, radius: 0.55, speed: 18, life: 3.0, homing: 2.6, visual: soul, color: '#9ae8ff', trail: true, element: spirit}
+- {id: w_bloom_seed, radius: 0.32, speed: 24, life: 1.4, visual: seed, color: '#f0a8d8', trail: true, element: nature}
+- {id: w_ice_shard, radius: 0.3, speed: 34, life: 1.2, homing: 3.0, visual: shard, color: '#bfe6ff', trail: true, element: ice}
+- {id: w_moon_crescent, radius: 0.9, speed: 30, life: 1.3, visual: crescent, color: '#e6eeff', trail: true}
+- {id: w_spirit_bear, radius: 1.4, speed: 17, life: 1.6, visual: spirit, color: '#ffcf9a', trail: true, element: spirit}
+- {id: w_raven, radius: 0.55, speed: 24, life: 1.6, visual: raven, color: '#3a3858', trail: true, element: spirit}
+- {id: w_glide_arrow, radius: 0.26, speed: 26, life: 2.6, gravity: 1, visual: arrow, color: '#fff0a0', trail: true, element: light}
+- {id: w_fire_dart, radius: 0.32, speed: 44, life: 2.0, gravity: 2, visual: bolt, color: '#ff5a1a', trail: true, element: fire, explode_radius: 3.6}
+- {id: w_scale_bolt, radius: 0.26, speed: 50, life: 1.8, gravity: 2, visual: arrow, color: '#e0502a', trail: true, element: fire}
+- {id: w_comet, radius: 0.8, speed: 20, life: 2.6, homing: 1.4, visual: comet, color: '#9ad0ff', trail: true, element: light, explode_radius: 4.2}
+- {id: w_golden_cut, radius: 1.0, speed: 30, life: 1.2, visual: crescent, color: '#ffd76a', trail: true, element: light}
+- {id: w_breath_white, radius: 1.1, speed: 22, life: 1.4, visual: wave, color: '#f8f4ec', element: light}
+- {id: w_breath_azure, radius: 1.1, speed: 22, life: 1.4, visual: wave, color: '#7ab8ff', element: light}
+- {id: w_breath_gold, radius: 1.2, speed: 22, life: 1.4, visual: wave, color: '#ffcf4a', element: light}
+- {id: w_morning_star, radius: 0.7, speed: 26, life: 1.4, visual: ball, color: '#ffc84a', trail: true, element: light, explode_radius: 4.6}
+- {id: w_orbital_chakram, radius: 0.75, speed: 24, life: 2.4, homing: 2.6, visual: disc, color: '#9a5ae8', trail: true, element: void}
+- {id: w_trident_throw, radius: 0.7, speed: 30, life: 2.0, homing: 2.0, visual: harpoon, color: '#a8c860', trail: true}
+
+# --- Transizione projectiles -------------------------------------------------------------------------------------------
+- {id: w_link_arrow, radius: 0.24, speed: 46, life: 1.4, gravity: 2, visual: arrow, color: '#ffe6b0', trail: true}
+- {id: w_link_orb, radius: 0.4, speed: 26, life: 1.4, homing: 2.0, visual: orb, color: '#ffe6b0', trail: true, element: light}
+- {id: w_link_wave, radius: 0.9, speed: 22, life: 0.9, visual: wave, color: '#fff1c0', element: light}

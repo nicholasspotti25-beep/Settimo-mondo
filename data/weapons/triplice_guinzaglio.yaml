@@ -1,0 +1,24 @@
+# Triplice Guinzaglio — Cerbero (Act II, D7). Three black-iron chains, each ending in a hook, joined at a heavy ring;
+# ember-red heat glints in the links (Cerbero's ember eyes and broken chains).
+id: triplice_guinzaglio
+name_key: weapon.triplice_guinzaglio.name
+desc_key: weapon.triplice_guinzaglio.desc
+flavor_key: weapon.triplice_guinzaglio.flavor
+type: catene
+category: flexible
+source_boss: cerbero
+source_difficulty: 7
+parry_capable: false
+model:
+  template: catene
+  motif: hellhound_hooks
+  glow: ember
+  colors: {primary: '#1a1a1e', secondary: '#4a4048', accent: '#ff5a2a'}
+  params: {chains: 3, links: 12, link_len: 0.09, hook: barbed}
+stamina_cost: {light: 15, heavy: 28}
+moveset: {light: catene_light, heavy: catene_heavy, running: catene_run, jumping: catene_jump}
+arts:
+  # Tre Morsi: three whip strikes in sequence, one per chain, like three heads biting.
+  prima: {id: tre_morsi, eco_cost: 100, effect: multi_strike, params: {count: 3, interval: 0.17, reach: 5.0, angle: 70, shape: fan, damage_mult: 2.3, step: 0.15, dur: 0.85, element: fire}, vfx: art_tre_morsi, anim: triple_lash}
+  # Guinzaglio: the hooks bite and drag the target toward you.
+  seconda: {id: guinzaglio, eco_cost: 200, effect: grab_pull, params: {range: 10.0, pull: 7.0, hold: 1.6, grab_mult: 0.5, throw: true, damage_mult: 3.2, dur: 1.05, element: fire}, vfx: art_guinzaglio, anim: chain_hook}

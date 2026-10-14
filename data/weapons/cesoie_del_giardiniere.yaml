@@ -1,0 +1,24 @@
+# Cesoie del Giardiniere — Uruk (Act IV, D15). Enormous gardener's shears of old bronze on pale bark handles; the two
+# crossed blades come apart into two short swords. A dewdrop gem at the pivot.
+id: cesoie_del_giardiniere
+name_key: weapon.cesoie_del_giardiniere.name
+desc_key: weapon.cesoie_del_giardiniere.desc
+flavor_key: weapon.cesoie_del_giardiniere.flavor
+type: cesoie
+category: two_handed
+source_boss: uruk
+source_difficulty: 15
+parry_capable: false
+model:
+  template: cesoie
+  motif: gardener_bronze
+  glow: dew
+  colors: {primary: '#b08a4a', secondary: '#d8ccb0', accent: '#bff0ff'}
+  params: {blade_len: 0.78, handle_len: 0.42, pivot_gem: true}
+stamina_cost: {light: 14, heavy: 32}
+moveset: {light: cesoie_light, heavy: cesoie_heavy, running: cesoie_run, jumping: cesoie_jump}
+arts:
+  # Potatura: a wide scissor cut that prunes Equilibrio away.
+  prima: {id: potatura, eco_cost: 100, effect: multi_strike, params: {count: 2, interval: 0.06, reach: 3.6, angle: 170, shape: scissor, poise_bonus: 45, damage_mult: 2.2, step: 0.3, dur: 0.8}, vfx: art_potatura, anim: scissor_cut}
+  # Innesto: plant a seed in the enemy; after three seconds it blooms into binding vines.
+  seconda: {id: innesto, eco_cost: 200, effect: bind, params: {plant: true, reach: 2.8, radius: 3.4, delay: 3.0, bind_time: 3.2, damage_mult: 3.0, plant_mult: 0.4, visual: flowers, element: nature, dur: 0.7}, vfx: art_innesto, anim: plant_seed}

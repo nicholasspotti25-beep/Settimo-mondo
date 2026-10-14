@@ -1,0 +1,24 @@
+# Chakram del Vuoto — Drago del Vuoto (mini, Act VI, D16). A black disc flecked with tiny moving stars around a central
+# hole that swallows light, rimmed in violet. Mini-boss weapon: functional description only.
+id: chakram_del_vuoto
+name_key: weapon.chakram_del_vuoto.name
+desc_key: weapon.chakram_del_vuoto.desc
+type: chakram
+category: ranged
+source_boss: drago_del_vuoto
+source_difficulty: 16
+parry_capable: false
+element: void
+model:
+  template: chakram
+  motif: void_hole
+  glow: void
+  colors: {primary: '#0e0a18', secondary: '#3a2a5a', accent: '#b07aff'}
+  params: {radius: 0.3, hole: 0.12, stars: 18}
+stamina_cost: {light: 14, heavy: 29}
+moveset: {light: chakram_light, heavy: chakram_heavy, running: chakram_run, jumping: chakram_jump}
+arts:
+  # Lancio Orbitale: throw the chakram on a wide orbit; it returns to the hand.
+  prima: {id: lancio_orbitale, eco_cost: 100, effect: throw_return, params: {kind: w_orbital_chakram, speed: 24, distance: 13, damage_mult: 2.4, dur: 0.6, element: void}, vfx: art_lancio_orbitale, anim: orbital_throw}
+  # Foro Nero: the chakram hangs still in the air and pulls nearby enemies into its hole.
+  seconda: {id: foro_nero, eco_cost: 200, effect: black_hole, params: {at: front, dist: 5.0, radius: 5.0, time: 3.2, pull: 6.0, dps_mult: 0.7, burst: 1.0, damage_mult: 1.6, visual: void, element: void}, vfx: art_foro_nero, anim: black_hole_cast}

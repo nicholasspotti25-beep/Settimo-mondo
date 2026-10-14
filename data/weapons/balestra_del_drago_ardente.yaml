@@ -1,0 +1,23 @@
+# Balestra del Drago Ardente — Drago di Fuoco (mini, Act III, D12). A heavy crossbow with rust-red scales on the
+# limbs and a smoking bolt groove. Mini-boss weapon: functional description only.
+id: balestra_del_drago_ardente
+name_key: weapon.balestra_del_drago_ardente.name
+desc_key: weapon.balestra_del_drago_ardente.desc
+type: balestra
+category: ranged
+source_boss: drago_di_fuoco
+source_difficulty: 12
+parry_capable: false
+model:
+  template: balestra
+  motif: dragon_scales
+  glow: ember
+  colors: {primary: '#8a2a1a', secondary: '#3a2a22', accent: '#ff7a3a'}
+  params: {stock_len: 0.85, span: 0.8, scales: 8}
+stamina_cost: {light: 16, heavy: 32}
+moveset: {light: balestra_light, heavy: balestra_heavy, running: balestra_run, jumping: balestra_jump}
+arts:
+  # Dardo Incendiario: a bolt that explodes in fire.
+  prima: {id: dardo_incendiario, eco_cost: 100, effect: projectile, params: {kind: w_fire_dart, count: 1, speed: 46, explode_radius: 3.6, life: 2.0, damage_mult: 2.4, delay: 0.3, status: burn, element: fire}, vfx: art_dardo_incendiario, anim: fire_bolt}
+  # Salva a Scaglie: three bolts in a fan.
+  seconda: {id: salva_a_scaglie, eco_cost: 200, effect: projectile, params: {kind: w_scale_bolt, count: 3, spread: 26, speed: 50, life: 1.8, damage_mult: 3.3, delay: 0.32, pierce: true, element: fire}, vfx: art_salva_scaglie, anim: fan_volley}

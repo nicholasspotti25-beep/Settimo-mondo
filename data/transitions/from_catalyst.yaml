@@ -1,0 +1,76 @@
+# Transizioni starting from a catalyst (bastone magico, tomo, totem, astrolabio, scettro): the last spell's energy
+# is spent into the new weapon.
+- id: tr_catalyst_one_handed
+  from: catalyst
+  to: one_handed
+  name_key: transition.catalyst.one_handed.name
+  anim: tr_summoned_blade
+  shape: {type: arc, r: 3.0, angle: 150, y: [0.1, 2.4]}
+  damage_mult: 1.3
+  poise: 10
+  duration: 0.56
+  move: {speed: 3.5, dur: 0.18}
+  vfx: tr_summoned_blade
+- id: tr_catalyst_two_handed
+  from: catalyst
+  to: two_handed
+  name_key: transition.catalyst.two_handed.name
+  anim: tr_weight_of_rite
+  shape: {type: cylinder, c: [0, -0.5, 1.8], r: 2.6, h: 3.2}
+  damage_mult: 1.55
+  poise: 10
+  duration: 0.74
+  vfx: tr_weight_of_rite
+- id: tr_catalyst_polearm
+  from: catalyst
+  to: polearm
+  name_key: transition.catalyst.polearm.name
+  anim: tr_spear_of_light
+  shape: {type: capsule, a: [0, 1.3, 0.4], b: [0, 1.3, 5.6], r: 0.6}
+  damage_mult: 1.4
+  poise: 10
+  duration: 0.64
+  move: {speed: 3.0, dur: 0.2}
+  vfx: tr_spear_of_light
+- id: tr_catalyst_ranged
+  from: catalyst
+  to: ranged
+  name_key: transition.catalyst.ranged.name
+  anim: tr_blessed_shot
+  projectile: {kind: w_link_arrow, speed: 40, radius: 0.3, life: 1.6, gravity: 1, homing: 3.0, pierce: true}
+  damage_mult: 1.35
+  poise: 10
+  duration: 0.6
+  vfx: tr_blessed_shot
+- id: tr_catalyst_catalyst
+  from: catalyst
+  to: catalyst
+  name_key: transition.catalyst.catalyst.name
+  anim: tr_echo_of_chant
+  shape: {type: ring, r0: 0.6, r1: 3.6, width: 1.2, height: 2.0}
+  projectile: {kind: w_link_orb, speed: 26, radius: 0.4, life: 1.5, homing: 2.4, count: 2, spread: 18}
+  damage_mult: 1.3
+  poise: 10
+  duration: 0.66
+  vfx: tr_echo_of_chant
+- id: tr_catalyst_fist
+  from: catalyst
+  to: fist
+  name_key: transition.catalyst.fist.name
+  anim: tr_rune_fist
+  shape: {type: sphere, c: [0, 1.3, 1.6], r: 1.4}
+  damage_mult: 1.4
+  poise: 10
+  duration: 0.52
+  move: {speed: 4.5, dur: 0.16}
+  vfx: tr_rune_fist
+- id: tr_catalyst_flexible
+  from: catalyst
+  to: flexible
+  name_key: transition.catalyst.flexible.name
+  anim: tr_chain_of_light
+  shape: {type: arc, r: 5.4, r_in: 1.0, angle: 150, y: [0, 2.6]}
+  damage_mult: 1.35
+  poise: 10
+  duration: 0.64
+  vfx: tr_chain_of_light

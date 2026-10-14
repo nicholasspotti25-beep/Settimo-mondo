@@ -1,0 +1,23 @@
+# Tridente delle Tre Punte — Drago a Tre Teste (mini, Act V, D15). A green-brown trident whose three points are of
+# different colors: fire-red, poison-green, lightning-gold. Mini-boss weapon: functional description only.
+id: tridente_delle_tre_punte
+name_key: weapon.tridente_delle_tre_punte.name
+desc_key: weapon.tridente_delle_tre_punte.desc
+type: tridente
+category: polearm
+source_boss: drago_a_tre_teste
+source_difficulty: 15
+parry_capable: false
+model:
+  template: tridente
+  motif: three_elements
+  glow: tri
+  colors: {primary: '#5a6a3a', secondary: '#3a2a1a', accent: '#ffd040'}
+  params: {shaft_len: 1.9, prong_len: 0.42, prong_colors: '#ff5a2a,#7adf3a,#ffd040'}
+stamina_cost: {light: 15, heavy: 30}
+moveset: {light: tridente_light, heavy: tridente_heavy, running: tridente_run, jumping: tridente_jump}
+arts:
+  # Triplice Affondo: three thrusts in sequence, one per point.
+  prima: {id: triplice_affondo, eco_cost: 100, effect: multi_strike, params: {count: 3, interval: 0.15, reach: 4.4, shape: thrust, damage_mult: 2.3, step: 0.3, dur: 0.8, elements: 'fire,poison,lightning'}, vfx: art_triplice_affondo, anim: triple_thrust}
+  # Lancio del Tridente: hurl the trident and call it back.
+  seconda: {id: lancio_del_tridente, eco_cost: 200, effect: throw_return, params: {kind: w_trident_throw, speed: 30, distance: 15, damage_mult: 3.3, dur: 0.8}, vfx: art_lancio_tridente, anim: trident_throw}

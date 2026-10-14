@@ -1,3 +1,5 @@
+# Lancia del Custode — Guardiano del Regno (Act I, D2). Cavalry lance: long white shaft, leaf-shaped head engraved
+# with a crown (the Guardiano's broken-crown helm). Act I green-gold palette in the brass fittings.
 id: lancia_del_custode
 name_key: weapon.lancia_del_custode.name
 desc_key: weapon.lancia_del_custode.desc
@@ -7,9 +9,16 @@ category: polearm
 source_boss: guardiano_del_regno
 source_difficulty: 2
 parry_capable: false
-model: {template: lancia, motif: broken_crown, glow: gold, colors: {primary: '#f2efe6', secondary: '#b8a46a', accent: '#ffe6a8'}}
+model:
+  template: lancia
+  motif: broken_crown
+  glow: gold
+  colors: {primary: '#f2efe6', secondary: '#b8a46a', accent: '#ffe6a8'}
+  params: {shaft_len: 2.25, head: leaf, head_len: 0.52, head_w: 0.13, engraving: crown, vamplate: true}
 stamina_cost: {light: 14, heavy: 30}
-moveset: {light: lance_light_combo, heavy: lance_heavy, running: lance_run, jumping: lance_jump}
+moveset: {light: lancia_light, heavy: lancia_heavy, running: lancia_run, jumping: lancia_jump}
 arts:
-  prima:   {id: carica_del_custode, eco_cost: 100, effect: dash_strike, params: {distance: 6.5, damage_mult: 1.45, reach: 4.4, width: 0.8, dur: 0.6}, vfx: art_carica_custode, anim: charge_thrust}
-  seconda: {id: ruota_d_argento, eco_cost: 200, effect: spin, params: {radius: 3.4, damage_mult: 1.85, hits: 2, knockback: 2.5, dur: 0.85}, vfx: art_ruota_argento, anim: spin}
+  # Carica del Custode: the Guardiano's own charge — a forward dash ending in a long-reach thrust.
+  prima: {id: carica_del_custode, eco_cost: 100, effect: dash_strike, params: {distance: 7.0, reach: 4.6, width: 0.75, damage_mult: 2.3, dur: 0.65}, vfx: art_carica_custode, anim: charge_thrust}
+  # Ruota d'Argento: a full silver wheel of the lance that throws back everything near.
+  seconda: {id: ruota_d_argento, eco_cost: 200, effect: spin, params: {radius: 4.2, hits: 2, knockback: 3.0, damage_mult: 3.4, dur: 0.9}, vfx: art_ruota_argento, anim: spin}

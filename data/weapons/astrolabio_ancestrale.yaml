@@ -1,0 +1,25 @@
+# Astrolabio Ancestrale — Reina, la Maga Ancestrale (Act V, D16). Three concentric rings of gold and midnight-blue
+# orbit the bearer around a star core; constellations are etched on the bands.
+id: astrolabio_ancestrale
+name_key: weapon.astrolabio_ancestrale.name
+desc_key: weapon.astrolabio_ancestrale.desc
+flavor_key: weapon.astrolabio_ancestrale.flavor
+type: astrolabio
+category: catalyst
+source_boss: reina
+source_difficulty: 16
+parry_capable: false
+element: light
+model:
+  template: astrolabio
+  motif: three_orbits
+  glow: star
+  colors: {primary: '#e8c56a', secondary: '#141c48', accent: '#bfd8ff'}
+  params: {rings: 3, ring_r: 0.55, orbit_r: 1.1, stars: 12}
+stamina_cost: {light: 15, heavy: 30}
+moveset: {light: astrolabio_light, heavy: astrolabio_heavy, running: astrolabio_run, jumping: astrolabio_jump}
+arts:
+  # Congiunzione: the three rings align and fire a beam of light.
+  prima: {id: congiunzione, eco_cost: 100, effect: beam, params: {at: 0.38, beam_time: 0.4, length: 22, width: 0.8, ticks: 3, damage_mult: 2.3, element: light}, vfx: art_congiunzione, anim: align_rings}
+  # Cometa: launch a comet that explodes on impact.
+  seconda: {id: cometa, eco_cost: 200, effect: projectile, params: {kind: w_comet, count: 1, speed: 20, accel: 14, homing: 1.6, explode_radius: 4.4, life: 2.6, damage_mult: 3.5, delay: 0.45, element: light}, vfx: art_cometa, anim: comet_cast}

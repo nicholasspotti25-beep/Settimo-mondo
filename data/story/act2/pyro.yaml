@@ -1,0 +1,15 @@
+# Pyro (secondary): one line before, one line after. The first seal of the Cathedral breaks with him.
+- id: pyro_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 1.8}
+    - {say: boss.pyro.intro, speaker: pyro}
+    - {say: boss.pyro.intro2, speaker: pyro}
+    - {event: start_fight}
+- id: pyro_defeat
+  skippable: true
+  steps:
+    - {wait: 1.6}
+    - {say: boss.pyro.defeat, speaker: pyro}
+    - {event: cue, params: {id: seal_broken_fire}}
+    - {caption: story.atto2.sigillo_fuoco, dur: 3.5}

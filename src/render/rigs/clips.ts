@@ -30,13 +30,37 @@ export interface CycleDef {
   /** Root rotation oscillation (deg). */
   rootRot?: CycleTerm;
 }
+/**
+ * Travelling wave along a bone chain (serpents, tails, tentacles, necks, wing fingers): bone k of the chain gets
+ * amp * lerp(1, ampEnd, k/(n-1)) * sin(2PI(phase - k/wavelength + offset)) on `axis` (degrees).
+ */
+export interface WaveDef {
+  /** Chain name (model.chains) or bone prefix: 'body' matches body_0, body_1, ... in numeric order. */
+  chain: string;
+  axis: 'x' | 'y' | 'z';
+  amp: number;
+  /** Wavelength in bones (default 6). */
+  wavelength?: number;
+  /** Amplitude multiplier at the chain end (default 1). */
+  ampEnd?: number;
+  /** Phase offset 0..1. */
+  offset?: number;
+  /** Seconds per cycle (time-driven). Default 1.2. */
+  period?: number;
+  /** Size units per cycle (distance-driven, locomotion). Overrides period when moving. */
+  stride?: number;
+}
 export interface StagePose {
+  /** Bone rotations (deg). Keys are bone names or prefix globs ('neck*' = every bone starting with 'neck'). */
   pose?: Record<string, Rot>;
   root?: [number, number, number];
   rootRot?: Rot;
   cycle?: CycleDef;
+  waves?: WaveDef[];
   /** Blend curve for reaching this stage's pose. */
   ease?: 'out' | 'in' | 'inout' | 'snap' | 'linear' | 'back';
+  /** Blend time as a fraction of the stage duration (default: telegraph 0.75, active 0.25 (max 0.08 s), recovery 0.5). */
+  blend?: number;
 }
 export interface ClipDef extends StagePose {
   telegraph?: StagePose;
@@ -120,6 +144,7 @@ function mirrorStage(s: StagePose | undefined): StagePose | undefined {
     }
     out.cycle = c;
   }
+  if (s.waves) out.waves = s.waves.map((w) => ({ ...w, chain: mirrorName(w.chain), amp: w.axis === 'x' ? w.amp : -w.amp }));
   return out;
 }
 
@@ -143,12 +168,29 @@ export function concreteClip(lib: ClipLibraryDef, name: string, depth = 0): Clip
       const merge = (x: StagePose | undefined, y: StagePose | undefined): StagePose | undefined => (x || y ? { ...x, ...y, pose: { ...(x?.pose ?? {}), ...(y?.pose ?? {}) } } : undefined);
       return {
         ...merge(b, c), telegraph: merge(b.telegraph, c.telegraph), active: merge(b.active, c.active), recovery: merge(b.recovery, c.recovery),
-        hold: c.hold ?? b.hold, mask: c.mask ?? b.mask,
+        hold: c.hold ?? b.hold, mask: c.mask ?? b.mask, mirror: undefined, base: undefined,
       };
     }
   }
   return c;
 }
+
+/** Concrete clip by resolved name (handles the synthetic '~mirror:<clip>' names produced by resolveKeyword). */
+export function getClip(lib: ClipLibraryDef, name: string): ClipDef | null {
+  if (name.startsWith('~mirror:')) {
+    const src = name.slice(8);
+    const tmp: ClipLibraryDef = { family: lib.family, clips: { ...lib.clips, [name]: { mirror: src } }, aliases: lib.aliases };
+    return concreteClip(tmp, name);
+  }
+  return concreteClip(lib, name);
+}
+
+/** Every keyword the render kit guarantees for boss attack/state animation (docs/RENDER_KIT.md). */
+export const KEYWORDS: readonly string[] = [
+  'idle', 'walk', 'run', 'overhead', 'sweep_l', 'sweep_r', 'thrust', 'thrust_heavy', 'slam', 'stomp', 'rear_stomp', 'charge', 'leap',
+  'bite', 'breath', 'roar', 'claw_l', 'claw_r', 'tail_sweep', 'grab', 'throw', 'spin', 'cast', 'summon', 'fly', 'hover', 'dive', 'swoop',
+  'burrow', 'emerge', 'coil', 'shield_bash', 'block', 'kick', 'howl', 'stagger', 'spezzato', 'death', 'intro', 'transition',
+];
 
 /**
  * Resolve an animation keyword to a clip name: exact, family alias, global alias, auto-mirror of _l/_r, progressively

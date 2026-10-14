@@ -1,0 +1,267 @@
+# 3. Elder Tree — secondary · La Foresta Oscura · D4.
+# A seed of Yggdrasil grown without sun: a gigantic rooted tree with a bark face, branch arms, black leaves and luminous
+# mushrooms at its roots. Phase 1: roots erupt where the soil cracks (decals), branches whip low across the clearing (jump or
+# dodge), one heavy branch slam (Colpo Rosso), pollen that blurs vision ('blind'). Phase 2: the trunk opens on a heart of light
+# (lockable weak point): heavy hits and Arts on the heart break Equilibrio fast; the bark resists. Dying, it lets the first ray of
+# light in centuries reach the forest floor (cue 'first_light' for the arena dressing).
+# Behavior: src/content/bosses/elder_tree/behavior.ts (frontal attacks only toward the face; `requires: heart_open`).
+id: elder_tree
+order: 3
+name_key: boss.elder_tree.name
+class: secondary
+difficulty: 4
+act: 1
+arena: foresta_cuore
+zone: foresta_oscura
+model: {builder: elder_tree, rig: tree, scale: 1.0, palette: act1_green_gold}
+equilibrio_max: 160
+body: {radius: 3.4, height: 18, mass: immovable}
+hurtboxes:
+  - {c: [0, 1.6, 0], r: 3.4}
+  - {c: [0, 4.6, 0], r: 3.1}
+  - {c: [0, 7.6, 0.2], r: 2.6}
+  - {c: [0, 10.4, 0.3], r: 2.2}
+parts:
+  # The heart of light behind the opened bark (phase 2 only).
+  - id: heart
+    name_key: part.elder_tree.heart
+    active: false
+    lockable: true
+    damage_mult: 1.5
+    poise_mult: 2.5
+    hurt:
+      - {c: [0, 2.3, 2.95], r: 1.15}
+move: {walk: 0, run: 0, turn: 0.55, preferred_range: [0, 60]}
+idle_gap: [0.9, 1.7]
+music: boss_elder_tree
+intro_sequence: elder_tree_intro
+defeat_sequence: elder_tree_defeat
+lore_key: boss.elder_tree.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_elder_tree_p1
+    patterns: [root_eruption, root_wave, branch_whip_l, branch_whip_r, branch_slam, pollen_cloud, root_stomp]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_elder_tree_p2
+    on_enter: [heart_open]
+    transition: 3.0
+    speed_mult: 1.08
+    aggression: 1.1
+    opener: heart_pulse
+    patterns: [root_eruption, root_wave, branch_whip_l, branch_whip_r, branch_slam, pollen_cloud, root_stomp, heart_pulse, root_cage, spore_volley]
+attacks:
+  # Roots burst from the ground where the soil cracks: under you, then around you.
+  - id: root_eruption
+    anim: root_call
+    telegraph: 0.8
+    active: 1.25
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 26
+    flags: []
+    global: true
+    weight: 1.1
+    cooldown: 3.5
+    spawns:
+      - {t: -0.8, type: sfx, id: elder_soil_crack}
+      - {t: 0.0, type: hazard, id: elder_roots, at: target_predict, count: 1, delay: 1.0, active: 0.45, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 1.9, h: 3.6}}
+      - {t: 0.3, type: hazard, id: elder_roots, at: around_target, count: 3, dist: 3.9, radius: 1.6, delay: 1.0, active: 0.45, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 3.2}}
+  # A line of cracks races from the trunk toward you: step aside as it arrives.
+  - id: root_wave
+    anim: root_call
+    telegraph: 0.9
+    active: 1.1
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    range: [3, 40]
+    weight: 1.0
+    cooldown: 4
+    spawns:
+      - {t: 0.0, type: hazard, id: elder_roots, at: line_to_target, dist: 5, delay: 0.75, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 3}}
+      - {t: 0.12, type: hazard, id: elder_roots, at: line_to_target, dist: 8, delay: 0.75, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 3}}
+      - {t: 0.24, type: hazard, id: elder_roots, at: line_to_target, dist: 11, delay: 0.75, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 3}}
+      - {t: 0.36, type: hazard, id: elder_roots, at: line_to_target, dist: 14, delay: 0.75, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 3}}
+      - {t: 0.48, type: hazard, id: elder_roots, at: line_to_target, dist: 17, delay: 0.75, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 3}}
+      - {t: 0.6, type: hazard, id: elder_roots, at: line_to_target, dist: 20, delay: 0.75, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 3}}
+      - {t: 0.72, type: hazard, id: elder_roots, at: line_to_target, dist: 23, delay: 0.75, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 3}}
+  # Low branch sweep from the tree's left arm (+X side): jump it at the apex or roll through.
+  - id: branch_whip_l
+    anim: branch_whip_l
+    telegraph: 0.95
+    active: 0.4
+    recovery: 1.05
+    damage_mult: 1.0
+    poise: 20
+    flags: [knockback]
+    range: [0, 12]
+    weight: 1.0
+    cooldown: 2
+    track: 0.8
+    requires: front
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 12.5, r_in: 2.0, angle: 150, yaw: 35, y: [0, 1.0]}}
+    spawns:
+      - {t: -0.9, type: sfx, id: elder_branch_creak}
+  # The same from the right arm.
+  - id: branch_whip_r
+    anim: branch_whip_r
+    telegraph: 0.95
+    active: 0.4
+    recovery: 1.05
+    damage_mult: 1.0
+    poise: 20
+    flags: [knockback]
+    range: [0, 12]
+    weight: 1.0
+    cooldown: 2
+    track: 0.8
+    requires: front
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 12.5, r_in: 2.0, angle: 150, yaw: -35, y: [0, 1.0]}}
+    spawns:
+      - {t: -0.9, type: sfx, id: elder_branch_creak}
+  # Colpo Rosso: a great branch rises and falls along the line in front of the face.
+  - id: branch_slam
+    anim: branch_slam
+    telegraph: 1.15
+    active: 0.35
+    recovery: 1.55
+    damage_mult: 1.45
+    poise: 28
+    flags: [red, knockdown]
+    range: [2, 13]
+    weight: 0.8
+    cooldown: 5
+    track: 1.0
+    requires: front
+    hits:
+      - {t: 0.05, dur: 0.22, shape: {type: box, c: [0, 1, 8.2], half: [1.9, 2.2, 5.6]}}
+    spawns:
+      - {t: 0.08, type: hazard, id: elder_roots, at: front, count: 1, dist: 13.5, delay: 0.0, active: 0.25, damage_mult: 0.5, shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 1.5}}
+  # The black canopy shakes loose glowing pollen: the cloud bursts on you and blurs your vision.
+  - id: pollen_cloud
+    anim: shake_canopy
+    telegraph: 1.0
+    active: 0.6
+    recovery: 1.0
+    damage_mult: 0.25
+    poise: 0
+    flags: []
+    global: true
+    weight: 0.7
+    cooldown: 9
+    spawns:
+      - {t: -1.0, type: sfx, id: elder_canopy_rustle}
+      - {t: 0.0, type: hazard, id: elder_pollen, at: target, count: 1, delay: 1.0, active: 0.7, flags: [blind], shape: {type: cylinder, c: [0, 0, 0], r: 4.0, h: 4}}
+      - {t: 0.25, type: hazard, id: elder_pollen, at: random_arena, count: 2, delay: 1.1, active: 0.7, flags: [blind], shape: {type: cylinder, c: [0, 0, 0], r: 3.6, h: 4}}
+  # The roots around the trunk lash out at anyone hugging it (all around).
+  - id: root_stomp
+    anim: root_stomp
+    telegraph: 0.85
+    active: 0.4
+    recovery: 1.2
+    damage_mult: 0.9
+    poise: 20
+    flags: [knockback]
+    range: [0, 3.2]
+    weight: 1.2
+    cooldown: 3
+    hits:
+      - {t: 0.05, dur: 0.2, shape: {type: cylinder, c: [0, 0, 0], r: 6.6, h: 1.6}}
+    spawns:
+      - {t: 0.05, type: vfx, id: elder_root_lash}
+      - {t: -0.85, type: sfx, id: elder_roots_grind}
+  # Phase 2: the heart beats and a ring of light runs across the clearing (jump it).
+  - id: heart_pulse
+    anim: heart_pulse
+    telegraph: 1.1
+    active: 1.0
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 16
+    flags: []
+    global: true
+    weight: 0.8
+    cooldown: 6
+    requires: heart_open
+    spawns:
+      - {t: -1.1, type: sfx, id: elder_heartbeat}
+      - {t: 0.0, type: shockwave, id: elder_light_ring, radius: 20, shape: {type: ring, r0: 3.5, r1: 20, width: 1.4, height: 0.8}, active: 1.0, damage_mult: 0.9}
+  # Phase 2: roots close in a ring around you, then the center erupts — slip out between them.
+  - id: root_cage
+    anim: root_call
+    telegraph: 0.9
+    active: 1.7
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 26
+    flags: []
+    global: true
+    weight: 0.9
+    cooldown: 7
+    requires: heart_open
+    spawns:
+      - {t: -0.9, type: sfx, id: elder_soil_crack}
+      - {t: 0.0, type: hazard, id: elder_roots, at: around_target, count: 6, dist: 4.4, radius: 1.3, delay: 1.0, active: 0.5, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 1.3, h: 3.4}}
+      - {t: 0.6, type: hazard, id: elder_roots, at: target, count: 1, delay: 1.0, active: 0.45, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 3.8}}
+  # Phase 2: the heart throws glowing spores in a fan.
+  - id: spore_volley
+    anim: heart_pulse
+    telegraph: 0.9
+    active: 0.6
+    recovery: 1.0
+    damage_mult: 0.7
+    poise: 10
+    flags: []
+    range: [5, 40]
+    weight: 0.8
+    cooldown: 4
+    track: 1.0
+    requires: heart_open_front
+    spawns:
+      - {t: 0.05, type: projectile, id: elder_spore, count: 5, spread: 50, speed: 11, from: [0, 2.6, 3.4]}
+  # New Game+: the canopy drops a rain of black seed-pods all over the clearing.
+  - id: ng_seed_rain
+    anim: shake_canopy
+    telegraph: 1.0
+    active: 1.4
+    recovery: 1.0
+    damage_mult: 0.8
+    poise: 18
+    flags: []
+    global: true
+    weight: 0.8
+    cooldown: 8
+    spawns:
+      - {t: 0.0, type: hazard, id: elder_roots, at: random_arena, count: 6, delay: 1.1, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.8, h: 4}}
+      - {t: 0.4, type: hazard, id: elder_roots, at: target_predict, count: 1, delay: 1.0, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.8, h: 4}}
+  # New Game+: a double whip, left then right.
+  - id: ng_double_whip
+    anim: branch_whip_l
+    telegraph: 0.95
+    active: 1.0
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 18
+    flags: [knockback]
+    range: [0, 12]
+    weight: 0.9
+    cooldown: 6
+    track: 0.6
+    requires: front
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 12.5, r_in: 2.0, angle: 150, yaw: 35, y: [0, 1.0]}}
+      - {t: 0.65, dur: 0.3, shape: {type: arc, r: 12.5, r_in: 2.0, angle: 150, yaw: -35, y: [0, 1.0]}}
+time_of_day_variants: {}
+dialogue_keys: []
+drops_weapon: ramo_dell_antico
+unlocks_form: null
+metamondo_reaction: null
+ng_plus:
+  add_patterns: {p1: [ng_seed_rain], p2: [ng_seed_rain, ng_double_whip]}
+  speed_mult: 1.08
+  idle_mult: 0.8

@@ -1,0 +1,8 @@
+# Cerbero (secondary): no speech, a single Voce dell'Alba line as the Gate of Dis lets the shadowless pass.
+- id: cerbero_defeat
+  skippable: true
+  steps:
+    - {wait: 1.8}
+    - {camera: boss_close, dur: 2.2}
+    - {voce: voce.atto2.cerbero_porta}
+    - {event: cue, params: {id: dite_gate_open}}

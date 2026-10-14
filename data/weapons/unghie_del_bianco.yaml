@@ -1,0 +1,25 @@
+# Unghie del Bianco — Yeti (Act III, D10). Long claws of bone and blue ice lashed to fur gloves; frost rimes the
+# white fur cuffs.
+id: unghie_del_bianco
+name_key: weapon.unghie_del_bianco.name
+desc_key: weapon.unghie_del_bianco.desc
+flavor_key: weapon.unghie_del_bianco.flavor
+type: artigli
+category: fist
+source_boss: yeti
+source_difficulty: 10
+parry_capable: false
+element: ice
+model:
+  template: artigli
+  motif: bone_ice
+  glow: frost
+  colors: {primary: '#efe9dc', secondary: '#9ad0f0', accent: '#d8f4ff'}
+  params: {claws: 4, claw_len: 0.34, fur: true}
+stamina_cost: {light: 12, heavy: 26}
+moveset: {light: artigli_light, heavy: artigli_heavy, running: artigli_run, jumping: artigli_jump}
+arts:
+  # Graffio Valanga: three raking slashes that throw up sprays of snow.
+  prima: {id: graffio_valanga, eco_cost: 100, effect: multi_strike, params: {count: 3, interval: 0.13, reach: 2.6, angle: 140, shape: slash, damage_mult: 2.2, step: 0.45, dur: 0.75, element: ice, snow: true}, vfx: art_graffio_valanga, anim: claw_flurry}
+  # Balzo Predatore: a predator's leap that lands on the target.
+  seconda: {id: balzo_predatore, eco_cost: 200, effect: slam, params: {leap: true, leap_dist: 9.0, impact: 0.55, radius: 3.0, damage_mult: 3.5, element: ice, rake: true, dur: 0.95}, vfx: art_balzo_predatore, anim: pounce}

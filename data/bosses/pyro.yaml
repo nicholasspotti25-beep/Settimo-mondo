@@ -1,0 +1,319 @@
+# 8. Pyro, il Cavaliere di Fiamme — secondary · Landa dei Roghi · D8.
+# First of the Tre Cavalieri del Giuramento. A giant knight in dark-red incandescent armor, cloak of flames, wavy
+# greatsword (flamberge). Long two-handed combos, fire waves that run along the ground, a leap with slam.
+# Phase 2: he wraps himself in flames and attacks at range too (crescents, orbs, fire columns, a nova of waves).
+# Local frame: +Z forward, +Y up, +X = Pyro's LEFT. Blade in both hands, swings read right-to-left then left-to-right.
+id: pyro
+order: 8
+name_key: boss.pyro.name
+title_key: boss.pyro.title
+class: secondary
+difficulty: 8
+act: 2
+arena: roghi_campo
+zone: landa_roghi
+model: {builder: pyro, rig: humanoid, scale: 1.0, palette: act2_red_blue_black}
+equilibrio_max: 170
+body: {radius: 1.7, height: 5.8, mass: heavy}
+hurtboxes:
+  - {c: [0, 1.1, 0], r: 1.25}     # greaves
+  - {c: [0, 2.6, 0], r: 1.35}     # tassets and belly
+  - {c: [0, 3.9, 0.05], r: 1.25}  # breastplate
+  - {c: [0, 5.15, 0.15], r: 0.6}  # helm
+move: {walk: 2.8, run: 7.2, turn: 2.5, preferred_range: [3, 8]}
+idle_gap: [0.7, 1.3]
+music: boss_pyro
+intro_sequence: pyro_intro
+defeat_sequence: pyro_defeat
+lore_key: boss.pyro.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_pyro_p1
+    opener: combo_a
+    patterns: [combo_a, fire_wave_slam, leap_slam, rising_slash, cloak_sweep, pommel_strike, giuramento]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_pyro_p2
+    on_enter: [wreathed]
+    transition: 2.6
+    speed_mult: 1.08
+    aggression: 1.15
+    opener: inferno_nova
+    dialogue: boss.pyro.mid
+    patterns: [combo_a, fire_wave_slam, leap_slam, rising_slash, cloak_sweep, giuramento, flame_crescent, fire_orbs, pillar_line, inferno_nova]
+attacks:
+  # Two-handed chain: right-to-left sweep, left-to-right sweep, overhead cleave that sends a wave of fire.
+  - id: combo_a
+    anim: sweep_r
+    telegraph: 0.78
+    active: 0.3
+    recovery: 0.42
+    damage_mult: 0.95
+    poise: 16
+    flags: []
+    range: [0, 5.5]
+    weight: 1.3
+    cooldown: 3
+    track: 1.1
+    track_active: 0.15
+    combo_next: combo_b
+    combo_chance: 0.8
+    motion:
+      - {t: -0.1, dur: 0.35, type: forward, speed: 4}
+    hits:
+      - {t: 0.03, dur: 0.24, shape: {type: arc, r: 7.2, angle: 150, y: [0, 4.5]}}
+    sfx: greatsword_swing
+  - id: combo_b
+    anim: sweep_l
+    telegraph: 0.52
+    active: 0.3
+    recovery: 0.42
+    damage_mult: 0.95
+    poise: 16
+    flags: []
+    weight: 0
+    track: 1.5
+    track_active: 0.15
+    combo_next: combo_c
+    combo_chance: 0.7
+    motion:
+      - {t: -0.1, dur: 0.35, type: forward, speed: 4}
+    hits:
+      - {t: 0.03, dur: 0.24, shape: {type: arc, r: 7.2, angle: 150, y: [0, 4.5]}}
+    sfx: greatsword_swing
+  - id: combo_c
+    anim: overhead
+    telegraph: 0.72
+    active: 0.4
+    recovery: 1.35
+    damage_mult: 1.35
+    poise: 26
+    flags: [knockdown]
+    element: fire
+    weight: 0
+    track: 1.3
+    hits:
+      - {t: 0.03, dur: 0.2, shape: {type: arc, r: 7.6, angle: 40, y: [-0.5, 6]}}
+    spawns:
+      - {t: 0.06, type: custom, event: fire_wave_single}
+    sfx: greatsword_slam
+  # The blade bites the ground and three waves of fire run out in a fan.
+  - id: fire_wave_slam
+    anim: slam
+    telegraph: 0.95
+    active: 0.4
+    recovery: 1.25
+    damage_mult: 1.2
+    poise: 24
+    flags: []
+    element: fire
+    range: [0, 22]
+    weight: 1.1
+    cooldown: 5
+    track: 1.1
+    hits:
+      - {t: 0.03, dur: 0.2, shape: {type: arc, r: 6.8, angle: 44, y: [-0.5, 6]}}
+    spawns:
+      - {t: 0.06, type: custom, event: fire_wave_fan}
+    sfx: greatsword_slam
+  # A leap with slam (Colpo Rosso): the landing leaves the ground burning.
+  - id: leap_slam
+    anim: leap
+    telegraph: 0.92
+    active: 1.05
+    recovery: 1.35
+    damage_mult: 1.6
+    poise: 30
+    flags: [red, knockdown]
+    element: fire
+    range: [6, 40]
+    weight: 1.15
+    cooldown: 6
+    track: 1.3
+    motion:
+      - {t: 0, dur: 0.8, type: leap_to_target, height: 7, dist: 24}
+    hits:
+      - {t: 0.78, dur: 0.2, shape: {type: cylinder, c: [0, -7, 1.6], r: 3.8, h: 12}}
+    spawns:
+      - {t: 0.8, type: hazard, id: pyro_scorch, at: self, delay: 0.45, active: 2.6, flags: [dot], damage_mult: 0.35, shape: {type: cylinder, c: [0, 0, 1.6], r: 3.6, h: 1.5}}
+    sfx: pyro_leap
+  # Closes distance with a rising cut.
+  - id: rising_slash
+    anim: thrust_heavy
+    telegraph: 0.72
+    active: 0.4
+    recovery: 1.05
+    damage_mult: 1.05
+    poise: 20
+    flags: []
+    range: [4, 14]
+    weight: 1.0
+    cooldown: 3.5
+    track: 1.2
+    track_active: 0.2
+    motion:
+      - {t: 0, dur: 0.32, type: forward, speed: 15}
+    hits:
+      - {t: 0.12, dur: 0.24, shape: {type: capsule, a: [0, 1.5, 0.5], b: [0, 3.5, 6.5], r: 1.2}}
+    sfx: greatsword_swing
+  # The burning cloak whirls around him: for whoever stands too close or behind.
+  - id: cloak_sweep
+    anim: spin
+    telegraph: 0.68
+    active: 0.35
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 18
+    flags: [knockback, burn]
+    element: fire
+    range: [0, 2.5]
+    weight: 1.0
+    cooldown: 4
+    hits:
+      - {t: 0.03, dur: 0.3, shape: {type: arc, r: 6.2, angle: 360, y: [0, 4]}}
+    sfx: cloak_whoosh
+  # A short pommel strike that punishes hugging.
+  - id: pommel_strike
+    anim: kick
+    telegraph: 0.52
+    active: 0.22
+    recovery: 0.95
+    damage_mult: 0.8
+    poise: 14
+    flags: []
+    range: [0, 2.2]
+    weight: 0.9
+    cooldown: 3
+    hits:
+      - {t: 0.02, dur: 0.18, shape: {type: sphere, c: [0, 1.8, 2.6], r: 1.7}}
+  # Il Giuramento: a slow two-handed overhead (Colpo Rosso) that splits the ground into a line of fire columns.
+  - id: giuramento
+    anim: overhead
+    telegraph: 1.25
+    active: 0.35
+    recovery: 1.6
+    damage_mult: 1.7
+    poise: 32
+    flags: [red, knockdown]
+    element: fire
+    range: [0, 9]
+    weight: 0.8
+    cooldown: 10
+    track: 1.0
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: arc, r: 8.2, angle: 32, y: [-0.5, 7]}}
+    spawns:
+      - {t: 0.08, type: hazard, id: fire_pillar, at: line_to_target, count: 6, dist: 3.2, delay: 0.55, active: 0.5, damage_mult: 0.9, shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 6}}
+    sfx: greatsword_slam
+  # Phase 2 (at range): a crescent of fire flung from the blade.
+  - id: flame_crescent
+    anim: sweep_r
+    telegraph: 0.78
+    active: 0.35
+    recovery: 1.0
+    damage_mult: 0.95
+    poise: 16
+    flags: []
+    element: fire
+    range: [5, 34]
+    weight: 1.2
+    cooldown: 3
+    track: 1.2
+    combo_next: flame_crescent_back
+    combo_chance: 0.5
+    spawns:
+      - {t: 0.06, type: projectile, id: pyro_flame_crescent, count: 1, speed: 21, from: [0, 2.2, 2.2], pitch: 0}
+    sfx: greatsword_swing
+  - id: flame_crescent_back
+    anim: sweep_l
+    telegraph: 0.55
+    active: 0.35
+    recovery: 1.15
+    damage_mult: 0.9
+    poise: 16
+    flags: []
+    element: fire
+    weight: 0
+    track: 1.5
+    spawns:
+      - {t: 0.06, type: projectile, id: pyro_flame_crescent, count: 2, spread: 24, speed: 21, from: [0, 2.2, 2.2], pitch: 0}
+    sfx: greatsword_swing
+  # Phase 2: he raises the blade and five orbs of fire drift toward you.
+  - id: fire_orbs
+    anim: cast
+    telegraph: 0.9
+    active: 0.6
+    recovery: 1.1
+    damage_mult: 0.8
+    poise: 12
+    flags: []
+    element: fire
+    range: [6, 34]
+    weight: 1.0
+    cooldown: 6
+    track: 1.0
+    spawns:
+      - {t: 0.05, type: projectile, id: pyro_flame_orb, count: 5, spread: 64, speed: 13, homing: 0.35, from: [0, 6.2, 0.6]}
+    sfx: fire_gather
+  # Phase 2: fire columns erupt in a line toward you.
+  - id: pillar_line
+    anim: slam
+    telegraph: 0.85
+    active: 0.4
+    recovery: 1.15
+    damage_mult: 0.95
+    poise: 18
+    flags: []
+    element: fire
+    range: [4, 34]
+    weight: 1.0
+    cooldown: 5
+    track: 1.1
+    hits:
+      - {t: 0.03, dur: 0.2, shape: {type: arc, r: 6.6, angle: 40, y: [-0.5, 6]}}
+    spawns:
+      - {t: 0.06, type: hazard, id: fire_pillar, at: line_to_target, count: 7, dist: 3.4, delay: 0.7, active: 0.55, damage_mult: 0.9, shape: {type: cylinder, c: [0, 0, 0], r: 1.7, h: 6}}
+    sfx: greatsword_slam
+  # Phase 2: he plants the blade, a ring of fire races outward (jump it) followed by eight running waves.
+  - id: inferno_nova
+    anim: slam
+    telegraph: 1.15
+    active: 1.0
+    recovery: 1.5
+    damage_mult: 1.0
+    poise: 22
+    flags: []
+    element: fire
+    range: [0, 26]
+    weight: 0.8
+    cooldown: 12
+    hits:
+      - {t: 0.0, dur: 0.12, shape: {type: sphere, c: [0, 1.0, 1.0], r: 3.2}}
+    spawns:
+      - {t: 0.0, type: shockwave, id: pyro_nova, shape: {type: ring, r0: 4.6, r1: 20, width: 1.4, height: 0.9}, active: 1.25, damage_mult: 0.9}
+      - {t: 0.55, type: custom, event: fire_wave_nova}
+    sfx: pyro_nova
+  # New Game+: the chain does not stop: a fourth spinning cut.
+  - id: combo_d
+    anim: spin
+    telegraph: 0.55
+    active: 0.4
+    recovery: 1.4
+    damage_mult: 1.1
+    poise: 22
+    flags: [burn]
+    element: fire
+    range: [0, 5]
+    weight: 0.8
+    cooldown: 8
+    hits:
+      - {t: 0.03, dur: 0.34, shape: {type: arc, r: 7.4, angle: 360, y: [0, 4.5]}}
+time_of_day_variants:
+  notte: {opener: fire_wave_slam, note_key: boss.pyro.tod.notte}
+dialogue_keys: [boss.pyro.intro, boss.pyro.intro2, boss.pyro.mid, boss.pyro.defeat]
+drops_weapon: brace_eterna
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [combo_d], p2: [combo_d]}
+  idle_mult: 0.85

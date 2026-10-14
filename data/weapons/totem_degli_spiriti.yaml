@@ -1,0 +1,25 @@
+# Totem degli Spiriti — Sciamano (Act III, D12). A carved totem staff with three faces (wolf, bear, raven), deer
+# antlers, feathers and drum-skin bindings.
+id: totem_degli_spiriti
+name_key: weapon.totem_degli_spiriti.name
+desc_key: weapon.totem_degli_spiriti.desc
+flavor_key: weapon.totem_degli_spiriti.flavor
+type: totem
+category: catalyst
+source_boss: sciamano
+source_difficulty: 12
+parry_capable: false
+element: spirit
+model:
+  template: totem
+  motif: three_spirits
+  glow: spirit_warm
+  colors: {primary: '#7a5a3a', secondary: '#c8b090', accent: '#9ad8ff'}
+  params: {staff_len: 1.6, faces: 3, antlers: true, feathers: 4}
+stamina_cost: {light: 15, heavy: 29}
+moveset: {light: totem_light, heavy: totem_heavy, running: totem_run, jumping: totem_jump}
+arts:
+  # Ruggito Spirituale: the bear spirit bursts from the totem and charges forward.
+  prima: {id: ruggito_spirituale, eco_cost: 100, effect: projectile, params: {kind: w_spirit_bear, count: 1, speed: 17, pierce: true, life: 1.6, damage_mult: 2.3, delay: 0.32, knockback: 2.0, element: spirit}, vfx: art_ruggito_spirituale, anim: totem_roar}
+  # Stormo di Corvi: a wave of ravens hitting everything in a line.
+  seconda: {id: stormo_di_corvi, eco_cost: 200, effect: waves, params: {kinds: w_raven, count: 7, interval: 0.07, speed: 24, damage_mult: 3.4, spread: 18, element: spirit}, vfx: art_stormo_corvi, anim: raven_wave}

@@ -1,0 +1,25 @@
+# Kama della Mantide — Re Mantide (Act IV, D13). Two jade-green chitin sickles, serrated like a mantis's forelegs,
+# with petal-pink guards from the Mantis King's crown.
+id: kama_della_mantide
+name_key: weapon.kama_della_mantide.name
+desc_key: weapon.kama_della_mantide.desc
+flavor_key: weapon.kama_della_mantide.flavor
+type: kama_gemelle
+category: one_handed
+source_boss: re_mantide
+source_difficulty: 13
+parry_capable: false
+element: nature
+model:
+  template: kama_gemelle
+  motif: mantis_jade
+  glow: jade
+  colors: {primary: '#3fbf6a', secondary: '#1a3a24', accent: '#ff7ab8'}
+  params: {haft_len: 0.42, blade_len: 0.36, serration: 7}
+stamina_cost: {light: 12, heavy: 26}
+moveset: {light: kama_gemelle_light, heavy: kama_gemelle_heavy, running: kama_gemelle_run, jumping: kama_gemelle_jump}
+arts:
+  # Imboscata Verde: a lightning dash through the target with a double cut.
+  prima: {id: imboscata_verde, eco_cost: 100, effect: dash_strike, params: {distance: 7.5, reach: 2.4, width: 1.0, through: true, double: true, double_mult: 0.45, damage_mult: 2.4, dur: 0.6, element: nature}, vfx: art_imboscata_verde, anim: dash_through}
+  # Falcata Incrociata: two sickle cuts crossing in an X.
+  seconda: {id: falcata_incrociata, eco_cost: 200, effect: multi_strike, params: {count: 2, interval: 0.12, reach: 3.2, angle: 130, shape: cross, damage_mult: 3.4, final_mult: 1.2, step: 0.4, dur: 0.85, element: nature, burst: 3.0}, vfx: art_falcata_incrociata, anim: x_cut}

@@ -1,0 +1,24 @@
+# Naginata Cristallina — Drago di Ghiaccio (mini, Act V, D14). A long white shaft with a curved blade of faceted ice
+# crystal and a frozen-fog tassel. Mini-boss weapon: functional description only.
+id: naginata_cristallina
+name_key: weapon.naginata_cristallina.name
+desc_key: weapon.naginata_cristallina.desc
+type: naginata
+category: polearm
+source_boss: drago_di_ghiaccio
+source_difficulty: 14
+parry_capable: false
+element: ice
+model:
+  template: naginata
+  motif: crystal_blade
+  glow: frost
+  colors: {primary: '#f0f6ff', secondary: '#9ac8f0', accent: '#dff4ff'}
+  params: {shaft_len: 2.0, blade_len: 0.7, blade_w: 0.12, curve: 0.2, facets: true}
+stamina_cost: {light: 16, heavy: 30}
+moveset: {light: naginata_light, heavy: naginata_heavy, running: naginata_run, jumping: naginata_jump}
+arts:
+  # Falciata Glaciale: a wide cut that leaves a trail of ice on the ground.
+  prima: {id: falciata_glaciale, eco_cost: 100, effect: hazard_zone, params: {trail: true, reach: 4.8, angle: 170, trail_count: 4, radius: 1.5, time: 4.0, visual: ice, dps_mult: 0.18, status: slow, damage_mult: 1.6, element: ice}, vfx: art_falciata_glaciale, anim: glacial_sweep}
+  # Punta di Cristallo: a crystal thrust that shatters Equilibrio.
+  seconda: {id: punta_di_cristallo, eco_cost: 200, effect: dash_strike, params: {distance: 5.0, reach: 5.2, width: 0.6, poise_bonus: 60, damage_mult: 3.2, dur: 0.75, element: ice, shatter: true}, vfx: art_punta_cristallo, anim: crystal_thrust}

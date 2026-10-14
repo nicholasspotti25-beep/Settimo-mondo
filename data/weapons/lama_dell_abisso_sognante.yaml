@@ -1,0 +1,27 @@
+# Lama dell'Abisso Sognante — Cthulhu, Dio Maggiore del Caos (Act VII, D20). A blade of dreaming abyss: teal-black
+# substance veined with violet, many tiny eyes along the spine, mist bleeding off its edge. It changes form at every
+# step of the combo (sword, whip, axe, spear). Usable only from New Game+ (Ciclo dell'Alba).
+id: lama_dell_abisso_sognante
+name_key: weapon.lama_dell_abisso_sognante.name
+desc_key: weapon.lama_dell_abisso_sognante.desc
+flavor_key: weapon.lama_dell_abisso_sognante.flavor
+type: arma_mutaforma
+category: flexible
+source_boss: cthulhu
+source_difficulty: 20
+parry_capable: false
+ng_plus_only: true
+element: chaos
+model:
+  template: arma_mutaforma
+  motif: dreaming_eyes
+  glow: chaos
+  colors: {primary: '#0e2a2e', secondary: '#4a1a6a', accent: '#5affd0'}
+  params: {eyes: 7, mist: true, forms: 'sword,whip,axe,spear'}
+stamina_cost: {light: 15, heavy: 30}
+moveset: {light: arma_mutaforma_light, heavy: arma_mutaforma_heavy, running: arma_mutaforma_run, jumping: arma_mutaforma_jump}
+arts:
+  # Metamorfosi: lock the blade into the chosen form and fight with that form's moveset for ten seconds.
+  prima: {id: metamorfosi, eco_cost: 100, effect: shape_shift, params: {forms: 'spada_lunga,frusta,ascia_a_due_mani,lancia', time: 10, burst: 2.6, damage_mult: 1.4, element: chaos, dur: 0.6}, vfx: art_metamorfosi, anim: metamorphosis}
+  # Risveglio Abissale: a wave of light tentacles erupts all around you.
+  seconda: {id: risveglio_abissale, eco_cost: 200, effect: tentacle_ring, params: {radius: 6.0, ticks: 3, pull: 2.5, damage_mult: 3.8, dur: 1.0, element: chaos}, vfx: art_risveglio_abissale, anim: abyssal_tentacles}

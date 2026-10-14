@@ -1,0 +1,25 @@
+# Fenditura Ardente — Mostro di Magma (Act II, D9). A two-handed axe whose heavy blade is black volcanic rock split
+# by veins of lava; an obsidian spike crowns the haft.
+id: fenditura_ardente
+name_key: weapon.fenditura_ardente.name
+desc_key: weapon.fenditura_ardente.desc
+flavor_key: weapon.fenditura_ardente.flavor
+type: ascia_a_due_mani
+category: two_handed
+source_boss: mostro_di_magma
+source_difficulty: 9
+parry_capable: false
+element: fire
+model:
+  template: ascia_a_due_mani
+  motif: lava_veins
+  glow: lava
+  colors: {primary: '#1c1816', secondary: '#3a2a22', accent: '#ff5a1a'}
+  params: {haft_len: 1.4, blade_h: 0.55, blade_d: 0.42, rock: true, veins: 6}
+stamina_cost: {light: 18, heavy: 34}
+moveset: {light: ascia_a_due_mani_light, heavy: ascia_a_due_mani_heavy, running: ascia_a_due_mani_run, jumping: ascia_a_due_mani_jump}
+arts:
+  # Frattura Magmatica: the blade bites the ground and a lava fissure tears open in front of you.
+  prima: {id: frattura_magmatica, eco_cost: 100, effect: ground_wave, params: {kind: fissure, length: 11, width: 1.8, speed: 13, visual: lava, damage_mult: 2.0, at: 0.42, linger: 4, linger_time: 3.0, dps_mult: 0.22, element: fire}, vfx: art_frattura_magmatica, anim: fissure_cut}
+  # Eruzione: leap and slam; the impact erupts in a radial explosion.
+  seconda: {id: eruzione, eco_cost: 200, effect: slam, params: {leap: true, leap_dist: 7.0, impact: 0.6, radius: 5.4, damage_mult: 3.7, element: fire, visual: lava, ring: true, ring_radius: 8.0, ring_mult: 0.3, dur: 1.15}, vfx: art_eruzione, anim: leap_slam}

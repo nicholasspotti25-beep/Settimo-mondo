@@ -1,0 +1,25 @@
+# Pugni di Brace — Gigante di Fuoco (Act III, D10). Black-rock gauntlets cracked by veins of fire, knuckles of
+# cooled magma; embers drift from the seams.
+id: pugni_di_brace
+name_key: weapon.pugni_di_brace.name
+desc_key: weapon.pugni_di_brace.desc
+flavor_key: weapon.pugni_di_brace.flavor
+type: pugni
+category: fist
+source_boss: gigante_di_fuoco
+source_difficulty: 10
+parry_capable: false
+element: fire
+model:
+  template: pugni
+  motif: magma_knuckles
+  glow: ember
+  colors: {primary: '#221c1a', secondary: '#4a3a32', accent: '#ff7a2a'}
+  params: {size: 1.15, knuckle_spikes: 0, veins: 5, cuff: true}
+stamina_cost: {light: 12, heavy: 26}
+moveset: {light: pugni_light, heavy: pugni_heavy, running: pugni_run, jumping: pugni_jump}
+arts:
+  # Pugno Cratere: a punch into the ground; a ring of fire races outward.
+  prima: {id: pugno_cratere, eco_cost: 100, effect: ground_wave, params: {kind: ring, radius: 7.0, width: 1.6, visual: fire, damage_mult: 2.3, at: 0.36, element: fire, status: burn}, vfx: art_pugno_cratere, anim: ground_punch}
+  # Presa Ardente: seize the target with burning hands and hurl it.
+  seconda: {id: presa_ardente, eco_cost: 200, effect: grab_pull, params: {range: 3.4, pull: 2.0, hold: 1.0, throw: true, grab_mult: 0.35, damage_mult: 3.6, dur: 1.1, element: fire}, vfx: art_presa_ardente, anim: grab_throw}

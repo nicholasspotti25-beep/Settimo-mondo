@@ -1,0 +1,342 @@
+# 7. Cerbero — secondary · Porta di Dite · D7.
+# Three heads, three roles: LEFT bites, CENTER spits fire, RIGHT growls shockwaves. Every attack belongs to one head and
+# that head alone winds up (part telegraph): read the head, read the attack. Heads rest out of reach (~5 m up); a head that
+# attacks comes down to the ground and stays low through its recovery: that is the moment to strike it.
+# Phase 2: the chains at the necks break completely and Cerbero leaps at the target with sudden jumps.
+# Local frame: +Z forward, +Y up, +X = Cerbero's LEFT.
+id: cerbero
+order: 7
+name_key: boss.cerbero.name
+class: secondary
+difficulty: 7
+act: 2
+arena: dite_soglia
+zone: porta_dite
+model: {builder: cerbero, rig: quadruped, scale: 1.0, palette: act2_red_blue_black}
+equilibrio_max: 160
+body: {radius: 3.4, height: 7.2, mass: immovable}
+hurtboxes:
+  - {c: [0, 3.0, 2.2], r: 2.4}     # chest
+  - {c: [0, 3.3, -0.9], r: 2.4}    # barrel
+  - {c: [0, 3.0, -3.7], r: 2.1}    # haunches
+  - {c: [1.6, 1.1, 2.7], r: 1.0}   # front left leg
+  - {c: [-1.6, 1.1, 2.7], r: 1.0}  # front right leg
+  - {c: [1.5, 1.1, -3.9], r: 1.0}  # hind left leg
+  - {c: [-1.5, 1.1, -3.9], r: 1.0} # hind right leg
+parts:
+  - {id: head_left, name_key: boss.cerbero.head_left, hurt: [{c: [2.3, 5.2, 5.6], r: 1.25}], damage_mult: 1.25, poise_mult: 1.2, equilibrio: 70, lockable: true}
+  - {id: head_center, name_key: boss.cerbero.head_center, hurt: [{c: [0, 5.8, 6.2], r: 1.35}], damage_mult: 1.25, poise_mult: 1.2, equilibrio: 80, lockable: true}
+  - {id: head_right, name_key: boss.cerbero.head_right, hurt: [{c: [-2.3, 5.2, 5.6], r: 1.25}], damage_mult: 1.25, poise_mult: 1.2, equilibrio: 70, lockable: true}
+move: {walk: 3.2, run: 9.0, turn: 1.7, preferred_range: [3, 10]}
+idle_gap: [0.7, 1.4]
+music: boss_cerbero
+defeat_sequence: cerbero_defeat
+lore_key: boss.cerbero.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_cerbero_p1
+    opener: growl_shock
+    patterns: [bite_left, fire_spit, fire_breath, growl_shock, paw_swipe, tail_lash, rear_stomp]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_cerbero_p2
+    on_enter: [chains_broken]
+    transition: 2.6
+    speed_mult: 1.12
+    aggression: 1.15
+    opener: pounce
+    patterns: [bite_left, fire_spit, fire_breath, growl_shock, paw_swipe, tail_lash, rear_stomp, pounce, chain_whip, three_heads, hell_howl]
+attacks:
+  # LEFT head: a lunging bite to the front-left. The head ends on the ground, exposed through the long recovery.
+  - id: bite_left
+    anim: bite_l
+    part: head_left
+    telegraph: 0.72
+    active: 0.32
+    recovery: 1.2
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    range: [0, 5.5]
+    weight: 1.25
+    cooldown: 2.2
+    track: 1.1
+    track_active: 0.2
+    combo_next: bite_snap
+    combo_chance: 0.45
+    motion:
+      - {t: -0.08, dur: 0.34, type: forward, speed: 7}
+    hits:
+      - {t: 0.06, dur: 0.22, shape: {type: capsule, a: [1.5, 1.3, 3.0], b: [2.2, 1.2, 9.0], r: 1.5}}
+    sfx: cerbero_bite
+  - id: bite_snap
+    anim: bite_l
+    part: head_left
+    telegraph: 0.5
+    active: 0.26
+    recovery: 1.35
+    damage_mult: 0.8
+    poise: 12
+    flags: []
+    weight: 0
+    track: 1.6
+    track_active: 0.15
+    motion:
+      - {t: -0.05, dur: 0.25, type: forward, speed: 5}
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: capsule, a: [1.2, 1.3, 3.0], b: [1.9, 1.2, 8.2], r: 1.4}}
+    sfx: cerbero_bite
+  # CENTER head: three burning spits; they burst where they land.
+  - id: fire_spit
+    anim: spit
+    part: head_center
+    telegraph: 0.85
+    active: 0.5
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 14
+    flags: []
+    element: fire
+    range: [4, 28]
+    weight: 1.1
+    cooldown: 3.5
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: cerbero_fireball, count: 3, spread: 30, speed: 17, from: [0, 5.6, 7.2]}
+    sfx: cerbero_spit
+  # CENTER head: a breath that sweeps from Cerbero's right to its left. Dodge through it, or get behind.
+  - id: fire_breath
+    anim: breath
+    part: head_center
+    telegraph: 1.0
+    active: 1.45
+    recovery: 1.25
+    damage_mult: 0.55
+    poise: 10
+    flags: [burn]
+    element: fire
+    range: [0, 10]
+    weight: 0.9
+    cooldown: 7
+    track: 1.0
+    hits:
+      - {t: 0.0, dur: 0.38, shape: {type: arc, c: [0, 0, 3], r: 12, angle: 34, yaw: -36, y: [0, 4]}}
+      - {t: 0.35, dur: 0.38, shape: {type: arc, c: [0, 0, 3], r: 12, angle: 34, yaw: -12, y: [0, 4]}}
+      - {t: 0.7, dur: 0.38, shape: {type: arc, c: [0, 0, 3], r: 12, angle: 34, yaw: 12, y: [0, 4]}}
+      - {t: 1.05, dur: 0.38, shape: {type: arc, c: [0, 0, 3], r: 12, angle: 34, yaw: 36, y: [0, 4]}}
+    sfx: cerbero_breath
+  # RIGHT head: a growl that becomes a shockwave racing over the ground. Jump it or dodge through it.
+  - id: growl_shock
+    anim: howl_r
+    part: head_right
+    telegraph: 0.8
+    active: 1.1
+    recovery: 1.0
+    damage_mult: 0.85
+    poise: 22
+    flags: []
+    range: [0, 20]
+    weight: 1.0
+    cooldown: 4
+    track: 1.0
+    hits:
+      - {t: 0.0, dur: 0.12, shape: {type: sphere, c: [-2.3, 1.0, 5.6], r: 3.0}}
+    spawns:
+      - {t: 0.0, type: shockwave, id: cerbero_roar, from: [-2.3, 0, 5.0], shape: {type: ring, r0: 4.6, r1: 18, width: 1.4, height: 0.9}, active: 1.1, damage_mult: 0.85}
+    sfx: cerbero_growl
+  # Body: front paws rake the ground ahead.
+  - id: paw_swipe
+    anim: claw_r
+    telegraph: 0.62
+    active: 0.26
+    recovery: 0.95
+    damage_mult: 0.9
+    poise: 16
+    flags: []
+    range: [0, 3.5]
+    weight: 1.0
+    cooldown: 2
+    hits:
+      - {t: 0.02, dur: 0.22, shape: {type: arc, c: [0, 0, 1.5], r: 7.5, angle: 110, y: [0, 3]}}
+  # Body: the tail lashes whoever stands behind.
+  - id: tail_lash
+    anim: tail_sweep
+    telegraph: 0.62
+    active: 0.3
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 18
+    flags: [knockback]
+    range: [0, 9]
+    weight: 1.4
+    cooldown: 3
+    track: 0.3
+    hits:
+      - {t: 0.02, dur: 0.26, shape: {type: arc, c: [0, 0, -3], r: 10, angle: 140, yaw: 180, y: [0, 3]}}
+  # Body: rears up and slams both forepaws down on whoever hides underneath.
+  - id: rear_stomp
+    anim: rear_stomp
+    telegraph: 0.85
+    active: 0.3
+    recovery: 1.1
+    damage_mult: 1.1
+    poise: 26
+    flags: [knockdown]
+    range: [0, 2.5]
+    weight: 1.1
+    cooldown: 5
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: cylinder, c: [0, 0, 1.5], r: 5.2, h: 3}}
+  # Phase 2: the chains are gone. A sudden leap onto the target.
+  - id: pounce
+    anim: leap
+    telegraph: 0.72
+    active: 0.95
+    recovery: 1.25
+    damage_mult: 1.25
+    poise: 28
+    flags: [knockdown]
+    range: [5, 40]
+    weight: 1.3
+    cooldown: 3.5
+    track: 1.4
+    combo_next: pounce_again
+    combo_chance: 0.45
+    motion:
+      - {t: 0, dur: 0.75, type: leap_to_target, height: 5.5, dist: 26}
+    hits:
+      - {t: 0.72, dur: 0.2, shape: {type: cylinder, c: [0, -6, 2.2], r: 4.4, h: 11}}
+    spawns:
+      - {t: 0.75, type: shockwave, id: cerbero_landing, shape: {type: ring, r0: 6.8, r1: 12, width: 1.2, height: 0.7}, delay: 0.3, active: 0.5, damage_mult: 0.5}
+    sfx: cerbero_leap
+  - id: pounce_again
+    anim: leap
+    telegraph: 0.55
+    active: 0.95
+    recovery: 1.45
+    damage_mult: 1.15
+    poise: 28
+    flags: [knockdown]
+    weight: 0
+    track: 2.2
+    motion:
+      - {t: 0, dur: 0.75, type: leap_to_target, height: 4.5, dist: 22}
+    hits:
+      - {t: 0.72, dur: 0.2, shape: {type: cylinder, c: [0, -6, 2.2], r: 4.4, h: 11}}
+    spawns:
+      - {t: 0.75, type: shockwave, id: cerbero_landing, shape: {type: ring, r0: 6.8, r1: 12, width: 1.2, height: 0.7}, delay: 0.3, active: 0.5, damage_mult: 0.5}
+    sfx: cerbero_leap
+  # Phase 2: the broken chains whip around at ankle height. Jump them or roll through.
+  - id: chain_whip
+    anim: spin
+    telegraph: 0.85
+    active: 0.5
+    recovery: 1.15
+    damage_mult: 0.9
+    poise: 18
+    flags: []
+    range: [0, 8]
+    weight: 1.0
+    cooldown: 5
+    hits:
+      - {t: 0.05, dur: 0.4, shape: {type: arc, r: 11.5, r_in: 2, angle: 360, y: [0, 1.0]}}
+    sfx: chain_whip
+  # Phase 2 signature: the three heads attack in order — left, center, right. Read them one by one.
+  - id: three_heads
+    anim: bite_l
+    part: head_left
+    telegraph: 0.62
+    active: 0.3
+    recovery: 0.35
+    damage_mult: 0.95
+    poise: 18
+    flags: []
+    range: [0, 6]
+    weight: 0.9
+    cooldown: 11
+    track: 1.1
+    track_active: 0.2
+    combo_next: three_heads_fire
+    combo_chance: 1
+    motion:
+      - {t: -0.08, dur: 0.3, type: forward, speed: 7}
+    hits:
+      - {t: 0.06, dur: 0.2, shape: {type: capsule, a: [1.5, 1.3, 3.0], b: [2.2, 1.2, 9.0], r: 1.5}}
+  - id: three_heads_fire
+    anim: spit
+    part: head_center
+    telegraph: 0.62
+    active: 0.4
+    recovery: 0.35
+    damage_mult: 0.85
+    poise: 12
+    flags: []
+    element: fire
+    weight: 0
+    track: 1.4
+    combo_next: three_heads_growl
+    combo_chance: 1
+    spawns:
+      - {t: 0.05, type: projectile, id: cerbero_fireball, count: 3, spread: 36, speed: 18, from: [0, 5.6, 7.2]}
+  - id: three_heads_growl
+    anim: howl_r
+    part: head_right
+    telegraph: 0.62
+    active: 1.1
+    recovery: 1.3
+    damage_mult: 0.85
+    poise: 22
+    flags: []
+    weight: 0
+    hits:
+      - {t: 0.0, dur: 0.12, shape: {type: sphere, c: [-2.3, 1.0, 5.6], r: 3.0}}
+    spawns:
+      - {t: 0.0, type: shockwave, id: cerbero_roar, from: [-2.3, 0, 5.0], shape: {type: ring, r0: 4.6, r1: 18, width: 1.4, height: 0.9}, active: 1.1, damage_mult: 0.85}
+  # Phase 2: all three heads howl at once: three shockwaves in rhythm. Jump, jump, jump.
+  - id: hell_howl
+    anim: howl
+    telegraph: 1.05
+    active: 1.5
+    recovery: 1.2
+    damage_mult: 0.75
+    poise: 20
+    flags: []
+    range: [0, 22]
+    weight: 0.8
+    cooldown: 12
+    hits:
+      - {t: 0.0, dur: 0.12, shape: {type: sphere, c: [0, 1.0, 5.4], r: 3.4}}
+    spawns:
+      - {t: 0.0, type: shockwave, id: cerbero_roar, from: [0, 0, 5.0], shape: {type: ring, r0: 5.0, r1: 19, width: 1.4, height: 0.9}, active: 1.15, damage_mult: 0.75, repeat: 3, interval: 0.7}
+    sfx: cerbero_howl
+  # New Game+: the left head bites three times in a row.
+  - id: bite_frenzy
+    anim: bite_l
+    part: head_left
+    telegraph: 0.6
+    active: 0.95
+    recovery: 1.3
+    damage_mult: 0.85
+    poise: 16
+    flags: []
+    range: [0, 6]
+    weight: 1.0
+    cooldown: 8
+    track: 1.2
+    track_active: 0.3
+    motion:
+      - {t: 0, dur: 0.9, type: forward, speed: 4}
+    hits:
+      - {t: 0.05, dur: 0.16, shape: {type: capsule, a: [1.5, 1.3, 3.0], b: [2.2, 1.2, 9.0], r: 1.5}}
+      - {t: 0.4, dur: 0.16, shape: {type: capsule, a: [1.5, 1.3, 3.0], b: [2.2, 1.2, 9.0], r: 1.5}}
+      - {t: 0.75, dur: 0.18, shape: {type: capsule, a: [1.5, 1.3, 3.0], b: [2.2, 1.2, 9.0], r: 1.5}}
+time_of_day_variants:
+  notte: {opener: fire_spit, weights: {fire_spit: 1.3, fire_breath: 1.2}, note_key: boss.cerbero.tod.notte}
+  alba: {opener: growl_shock, weights: {growl_shock: 1.3}, note_key: boss.cerbero.tod.alba}
+dialogue_keys: []
+drops_weapon: triplice_guinzaglio
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [bite_frenzy], p2: [bite_frenzy]}
+  idle_mult: 0.85

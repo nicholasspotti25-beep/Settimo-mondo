@@ -1,0 +1,21 @@
+# Act I boss hazard kinds (telegraph decal + active visual).
+# Elder Tree: roots erupting from the soil (the decal is the cracking soil), pollen that blurs vision, the heart's light ring.
+- {id: elder_roots, visual: roots, color: '#5a3e22', element: nature}
+- {id: elder_pollen, visual: pollen, color: '#e8dc78', element: nature}
+- {id: elder_light_ring, visual: light, color: '#fff0b0', element: light}
+- {id: elder_root_ring, visual: roots, color: '#4a3220', element: nature}
+# Mostro della Palude: mud waves that slow, arms stretching out of the mire, bubbles where the colossus will erupt, slam rings.
+- {id: palude_mud_wave, visual: mud, color: '#4a3c24', element: water}
+- {id: palude_mire_arm, visual: mud, color: '#2e2a1a', element: water}
+- {id: palude_bubbles, visual: water, color: '#6a7a4e', element: water}
+- {id: palude_slam_ring, visual: mud, color: '#5a4a2c', element: water}
+# Great Devourer: ripples marking an attack from below, the pier crushed by its coils, the tail slam, the emergence splash.
+- {id: devourer_ripple, visual: whirlpool, color: '#3e6a52', element: water}
+- {id: devourer_coil, visual: crack, color: '#9a8a5a', element: physical}
+- {id: devourer_tail, visual: water, color: '#2c4a3a', element: water}
+- {id: devourer_splash, visual: water, color: '#5a8a6a', element: water}
+# Caronte: oar wakes across the bridge, drowned hands of souls rising from the luminous current, current eddies.
+- {id: caronte_oar_wake, visual: water, color: '#7ad6ff', element: spirit}
+- {id: caronte_soul_hands, visual: light, color: '#9ae8ff', element: spirit}
+- {id: caronte_eddy, visual: whirlpool, color: '#5ac8f0', element: spirit}
+- {id: caronte_lantern_gaze, visual: light, color: '#d8fbff', element: spirit}
