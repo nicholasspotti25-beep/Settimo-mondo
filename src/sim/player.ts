@@ -433,6 +433,12 @@ export class Player {
           this.setState('idle');
         }
         if (this.fiato <= 0 && !(sim.meta.active && sim.meta.ability === 'respiro_libero')) return false;
+        if (this.state === 'climb') {
+          this.climbWall = null;
+          this.grounded = false;
+          this.setState('jump');
+          return true;
+        }
         if (!this.grounded && !this.flying) return false;
         this.startDodge(sim, input);
         return true;
@@ -578,7 +584,8 @@ export class Player {
     } else if (rooted || s === 'stagger' || s === 'knockdown' || s === 'guardbreak' || s === 'interact' || s === 'grabbed') {
       // no movement
     } else if (s === 'climb') {
-      this.pos.y += input.moveZ !== 0 || input.moveX !== 0 ? 1.6 * dt : 0;
+      this.updateClimb(sim, input, dt);
+      return;
     } else {
       if (mag > 0.05) {
         if (s === 'guard' || s === 'parry' || s === 'drink' || s === 'swap') desiredSpeed = B.walk * (s === 'drink' ? 0.6 : 1);
@@ -607,6 +614,7 @@ export class Player {
         this.yaw = turnToward(this.yaw, dirYaw, B.turn_rate * dt);
       }
       if (s === 'idle' || s === 'move') this.state = mag > 0.05 ? 'move' : 'idle';
+      if ((s === 'idle' || s === 'move') && this.grounded && mag > 0.5 && sim.zone?.def.climb?.length && !sim.fight) this.tryClimb(sim, dirYaw);
       // footsteps
       const spd = len2D(this.vel);
       if (this.grounded && spd > 0.5) {
@@ -636,6 +644,60 @@ export class Player {
     this.vy = Math.max(0, this.vy - 12 * dt);
     this.pos.y = clamp(target, ground + 0.2, ground + 40);
     this.grounded = this.pos.y <= ground + 0.25;
+  }
+
+  /** Marked climbable wall currently held: segment a->b on XZ, top height. */
+  climbWall: { ax: number; az: number; bx: number; bz: number; top: number; nx: number; nz: number } | null = null;
+
+  private tryClimb(sim: Sim, dirYaw: number): void {
+    const walls = sim.zone?.def.climb ?? [];
+    const fx = Math.sin(dirYaw), fz = Math.cos(dirYaw);
+    for (const w of walls) {
+      const ax = w.a[0], az = w.a[2], bx = w.b[0], bz = w.b[2];
+      const vx = bx - ax, vz = bz - az;
+      const l2 = vx * vx + vz * vz || 1;
+      const t = clamp(((this.pos.x - ax) * vx + (this.pos.z - az) * vz) / l2, 0, 1);
+      const qx = ax + vx * t, qz = az + vz * t;
+      const dx = qx - this.pos.x, dz = qz - this.pos.z;
+      const d = Math.hypot(dx, dz);
+      if (d > 0.9 * Math.max(0.5, this.scale) || d < 1e-4) continue;
+      if ((dx * fx + dz * fz) / d < 0.6) continue;
+      if (this.pos.y >= w.top - 0.3) continue;
+      this.climbWall = { ax, az, bx, bz, top: w.top, nx: -dx / d, nz: -dz / d };
+      this.yaw = Math.atan2(dx, dz);
+      this.vel.x = 0; this.vel.z = 0;
+      this.setState('climb');
+      return;
+    }
+  }
+
+  private updateClimb(sim: Sim, input: PlayerInput, dt: number): void {
+    const w = this.climbWall;
+    if (!w) {
+      this.setState('idle');
+      return;
+    }
+    // stick forward (toward the wall) climbs, back descends
+    const fwd = -(input.moveX * w.nx + input.moveZ * w.nz);
+    const speed = 1.7 * Math.max(0.5, this.scale);
+    this.pos.y += clamp(fwd, -1, 1) * speed * dt;
+    const ground = sim.groundAt(this.pos.x, this.pos.z);
+    if (this.pos.y <= ground && fwd < 0) {
+      this.pos.y = ground;
+      this.climbWall = null;
+      this.setState('idle');
+      return;
+    }
+    if (this.pos.y >= w.top - 0.15) {
+      // mantle over the top
+      this.pos.x -= w.nx * 0.9 * Math.max(0.5, this.scale);
+      this.pos.z -= w.nz * 0.9 * Math.max(0.5, this.scale);
+      this.pos.y = Math.max(w.top, sim.groundAt(this.pos.x, this.pos.z));
+      this.climbWall = null;
+      this.grounded = true;
+      this.setState('idle');
+      sim.emit({ type: 'land', pos: { ...this.pos }, hard: false });
+    }
   }
 
   applyGravity(sim: Sim, dt: number): void {

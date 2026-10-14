@@ -117,17 +117,21 @@ export function nextEncounter(c: Content, s: GameStateData): string | null {
   return null;
 }
 
-/** Principal bosses defeated (Lucifero I is a narrative defeat and does not brighten the sky). */
+/** Sky shades gained: one per principal boss defeated (Lucifero I is a narrative defeat and does not count).
+ * In the Ciclo dell'Alba (New Game+) the sky already starts golden. */
 export function skyShade(c: Content, s: GameStateData): number {
   let n = 0;
   for (const b of c.bosses) if (b.brightens_sky && s.defeated.includes(b.id)) n++;
-  if (s.ngCycle > 0) n = Math.max(n, 4);
-  return n;
+  if (s.ngCycle > 0) n = 7;
+  return Math.min(7, n);
 }
 
-/** Portatore theme note count: 1 base note + one per principal boss defeated (7 in the final fight). */
+/**
+ * Portatore theme melodic notes: one per principal boss defeated (Lucifero I excluded), so the seven notes are heard in full
+ * only in the final fight (after Ouranthos's trial). Before the first note the theme exists as its heartbeat rhythm.
+ */
 export function themeNotes(c: Content, s: GameStateData): number {
-  let n = 1;
+  let n = 0;
   for (const b of c.bosses) if (b.class === 'principal' && b.id !== 'lucifero_1' && s.defeated.includes(b.id)) n++;
   return Math.min(7, n);
 }

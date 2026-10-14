@@ -2095,6 +2095,14 @@ export class Sim {
     return skyShade(this.c, this.state);
   }
 
+  /** Flip arena gravity (Rovescio): the presentation rotates the world; positions stay on the same plane. */
+  setGravity(sign: 1 | -1): void {
+    if (!this.zone || this.zone.gravitySign === sign) return;
+    this.zone.gravitySign = sign;
+    this.player.ceiling = sign < 0;
+    this.emit({ type: 'gravityFlip', sign });
+  }
+
   /** Debug: kill the current boss. */
   debugKillBoss(): void {
     const b = this.boss;
