@@ -15,6 +15,7 @@
   skippable: false
   steps:
     - {fade: white_out, dur: 2.0}
+    - {event: travel, params: {zone: alba, altar: spawn}}
     - {event: ending}
     - {music: alba}
     - {camera: ending_clouds, dur: 0.1}

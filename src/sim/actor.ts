@@ -829,6 +829,8 @@ export class Actor {
       this.idleTimer = 0.6;
     }
     this.history.length = 0;
+    if (this.isMain && ph.arena_state) sim.setArenaVariant(ph.arena_state);
+    if (this.isMain) sim.spawnArenaHazards(ph.id);
     sim.emit({ type: 'bossPhase', actor: this.id, boss: this.defId, phase: index, phaseId: ph.id, music: ph.music });
     if (ph.dialogue) sim.emit({ type: 'dialogue', key: ph.dialogue, speaker: this.defId });
     this.behavior?.onPhaseEnter?.(this, sim, index, ph);

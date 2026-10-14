@@ -99,6 +99,8 @@ export class Sim {
   private projIds = 1;
   private hazIds = 1;
   private lastInput: PlayerInput = emptyInput();
+  /** Interactables available during a fight (e.g. the ship's ballista), registered by boss behaviors. */
+  fightInteractables: Interactable[] = [];
   /** Memory fight return point (Specchio dei Ricordi). */
   memoryReturn: { zone: string; altar: string } | null = null;
   /** Ending reached (presentation runs the sunrise). */
@@ -393,6 +395,7 @@ export class Sim {
     boss.yaw = yawTo(boss.pos, this.player.pos);
     boss.updatePartsWorld();
     behavior?.init?.(boss, this);
+    this.spawnArenaHazards(null);
     boss.enterPhase(this, 0);
     const tOpener = boss.tod.opener;
     this.emit({ type: 'gateLock', arena: arena.id });
@@ -443,6 +446,7 @@ export class Sim {
     this.barriers.clear();
     this.coopGrace = false;
     this.fightPaused = false;
+    this.fightInteractables = [];
     if (this.zone) {
       this.zone.setActiveArena(null);
       this.zone.metaSpace = null;
@@ -1781,7 +1785,19 @@ export class Sim {
       }
     }
     if (this.fight || this.seq.running) {
-      this.prompt = null;
+      let fi: Interactable | null = null;
+      if (this.fight?.active && !this.seq.running) {
+        let bd = Infinity;
+        for (const it of this.fightInteractables) {
+          const d = dist2D(pl.pos, it.pos);
+          if (d <= it.radius && d < bd) {
+            bd = d;
+            fi = it;
+          }
+        }
+      }
+      if (fi?.id !== this.prompt?.id) this.emit({ type: 'interactPrompt', key: fi?.promptKey ?? null });
+      this.prompt = fi;
       return;
     }
     const it = z.nearestInteractable(pl.pos, (i) => {
@@ -1812,7 +1828,12 @@ export class Sim {
 
   interact(): boolean {
     const it = this.prompt;
-    if (!it || this.fight) return false;
+    if (!it) return false;
+    if (this.fight) {
+      if (!this.fightInteractables.includes(it) || !this.boss) return false;
+      this.boss.behavior?.onInteract?.(this.boss, this, it.id);
+      return true;
+    }
     switch (it.kind) {
       case 'altar':
         this.openAltar(it.id);
@@ -2025,6 +2046,18 @@ export class Sim {
         }
         break;
       }
+      case 'start_fight_direct':
+        this.startFightDirect(String(params.boss), { skipIntro: params.skip_intro === true });
+        break;
+      case 'arena_state':
+        this.setArenaVariant(params.state ? String(params.state) : null);
+        break;
+      case 'gravity':
+        this.setGravity(Number(params.sign) < 0 ? -1 : 1);
+        break;
+      case 'give_item':
+        this.giveItem(String(params.item));
+        break;
       case 'boss_scripted':
         if (this.boss) this.boss.setState('scripted');
         break;
@@ -2093,6 +2126,61 @@ export class Sim {
 
   skyShade(): number {
     return skyShade(this.c, this.state);
+  }
+
+  /** Switch the active arena to a variant (data: arena.variants[state]); presentation gets an 'arena_state:<state>' cue. */
+  setArenaVariant(state: string | null): void {
+    const z = this.zone;
+    if (!z || !z.activeArenaDef) return;
+    if (state && !z.activeArenaDef.variants?.[state]) {
+      // a phase keyword without a geometry change is still forwarded to the arena dressing
+      this.emit({ type: 'cue', id: `arena_state:${state}` });
+      return;
+    }
+    z.setActiveArena(z.activeArenaDef, state);
+    for (const a of this.actors) this.clampActor(a);
+    this.collidePlayer(this.player);
+    this.emit({ type: 'cue', id: `arena_state:${state ?? 'default'}` });
+    if (z.gravitySign < 0) this.emit({ type: 'gravityFlip', sign: -1 });
+  }
+
+  /** Spawn the arena's static hazards for a phase (data: arena.hazards with optional from_phase). */
+  spawnArenaHazards(phaseId: string | null): void {
+    const def = this.zone?.activeArenaDef;
+    if (!def?.hazards) return;
+    for (const h of def.hazards) {
+      // at fight start (phaseId null) spawn the always-on hazards; on a phase change spawn those tied to that phase
+      if ((h.from_phase ?? null) !== phaseId) continue;
+      // static hazard shapes are authored relative to the arena center
+      const hz = this.addStaticHazard(h.kind, h.shape, h.dps_mult, h.status);
+      hz.pos.x = def.center[0]; hz.pos.y = def.floor_y; hz.pos.z = def.center[2];
+      hz.yaw = def.yaw ?? 0;
+    }
+  }
+
+  addFightInteractable(id: string, pos: Vec3, radius: number, promptKey: string): Interactable {
+    const it: Interactable = { kind: 'custom', id, pos: { ...pos }, radius, promptKey };
+    this.fightInteractables.push(it);
+    return it;
+  }
+
+  removeFightInteractable(id: string): void {
+    this.fightInteractables = this.fightInteractables.filter((i) => i.id !== id);
+    if (this.prompt?.id === id) this.prompt = null;
+  }
+
+  /** Spawn the AI ally (Ouranthos in the last fight): a player-team actor that attacks the boss and cannot be hurt. */
+  spawnAlly(md: MinionDef, pos: Vec3, behaviorKey?: string): Actor {
+    const f = behaviorKey ? this.behaviors[behaviorKey] : undefined;
+    const a = new Actor('ally', md, pos, 'player', f ? f() : null, 1e9, false);
+    a.invulnerable = true;
+    a.yaw = this.boss ? yawTo(pos, this.boss.pos) : 0;
+    a.idleTimer = 1.5;
+    a.behavior?.init?.(a, this);
+    this.actors.push(a);
+    this.ally = a;
+    if (this.fight) this.fight.ally = a;
+    return a;
   }
 
   /** Flip arena gravity (Rovescio): the presentation rotates the world; positions stay on the same plane. */

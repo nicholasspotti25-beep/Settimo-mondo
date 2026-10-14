@@ -39,6 +39,8 @@ export interface BossBehavior {
   onDeath?(a: Actor, sim: Sim): void;
   onMetamondoStart?(a: Actor, sim: Sim): MetamondoReaction;
   onMetamondoEnd?(a: Actor, sim: Sim): void;
+  /** The player used an in-fight interactable registered with sim.addFightInteractable (e.g. the ship's ballista). */
+  onInteract?(a: Actor, sim: Sim, id: string): void;
 }
 
 export type BehaviorFactory = () => BossBehavior;
