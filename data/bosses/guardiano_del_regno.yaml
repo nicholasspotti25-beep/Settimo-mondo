@@ -171,7 +171,41 @@ attacks:
       - {t: 0.0, dur: 0.14, shape: {type: capsule, a: [0, 2.4, 0.6], b: [0, 2.0, 6.2], r: 0.65}}
     spawns:
       - {t: 0.05, type: projectile, id: spectral_lance, speed: 22, from: [0, 2.2, 3], count: 1}
+  # NG+ only: a fan of three spectral lances thrown down the plaza.
+  - id: ng_lance_volley
+    anim: thrust
+    telegraph: 0.9
+    active: 0.5
+    recovery: 1.1
+    damage_mult: 0.8
+    poise: 12
+    flags: []
+    range: [4, 22]
+    weight: 1.0
+    cooldown: 5
+    track: 1.0
+    spawns:
+      - {t: 0.05, type: projectile, id: spectral_lance, count: 3, spread: 36, speed: 20, from: [0, 2.2, 2.5]}
+  # NG+ only: the spectral steed stamps a ring of light that expands across the plaza (jump or dodge it).
+  - id: ng_spectral_ring
+    anim: rear_stomp
+    telegraph: 1.0
+    active: 1.0
+    recovery: 1.2
+    damage_mult: 0.9
+    poise: 20
+    flags: []
+    range: [0, 14]
+    weight: 0.9
+    cooldown: 7
+    spawns:
+      - {t: 0.0, type: shockwave, radius: 16, shape: {type: ring, r0: 2, r1: 16, width: 1.4, height: 0.8}, active: 1.0, damage_mult: 0.9}
 time_of_day_variants: {}
 dialogue_keys: [boss.guardiano_del_regno.intro, boss.guardiano_del_regno.defeat]
 drops_weapon: lancia_del_custode
 unlocks_form: null
+# New Game+ (Ciclo dell'Alba): new, more aggressive patterns.
+ng_plus:
+  add_patterns: {p1: [ng_lance_volley], p2: [ng_lance_volley, ng_spectral_ring]}
+  speed_mult: 1.08
+  idle_mult: 0.8
