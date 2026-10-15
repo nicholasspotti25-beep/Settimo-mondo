@@ -70,7 +70,7 @@ export class Cards {
     this.deathS = h('div', { class: 's' });
     this.death = h('div', { class: 'sm-death' }, this.deathT, this.deathS);
     this.loading = h('div', { class: 'sm-loading' }, svgIcon(ICONS.seed));
-    this.el = h('div', { class: 'sm-layer sm-cards' }, this.death, this.zone.el, this.act.el, this.boss.el, this.banner.el, this.toasts, this.loading);
+    this.el = h('div', { class: 'sm-layer sm-cardlayer' }, this.death, this.zone.el, this.act.el, this.boss.el, this.banner.el, this.toasts, this.loading);
   }
 
   /** New session (title -> game): the current act does not get a card again. */
@@ -167,6 +167,10 @@ export class Cards {
     }
   }
 
+  private bigCardOn(): boolean {
+    return this.zone.left > 0 || this.act.left > 0 || this.boss.left > 0 || this.banner.left > 0 || this.pendingZone !== null;
+  }
+
   private toast(n: Toast): void {
     if (this.queue.length > 5) this.queue.shift();
     this.queue.push(n);
@@ -191,7 +195,8 @@ export class Cards {
         this.toastEl.remove();
         this.toastEl = null;
       }
-    } else if (this.queue.length) {
+    } else if (this.queue.length && !this.bigCardOn()) {
+      // toasts wait for the zone / act / boss cards and the dawn banner, which share the upper-center of the screen
       const n = this.queue.shift()!;
       const el = h('div', { class: 'sm-toast' },
         h('div', { class: 'ic' }, svgIcon(n.ic)),

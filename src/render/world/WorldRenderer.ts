@@ -18,6 +18,8 @@ import { biomeOf } from './biomes';
 import { createZoneEnv, releaseZoneEnv } from './env';
 import { SkyDome } from './sky';
 import { buildZone } from './zone';
+import { ZoneSites } from './sites';
+import { zoneEnv } from './env';
 
 const FALLBACK_TOD: TodPreset = { sky: 'act1_giorno', fog: 'thin', ambient: 1 };
 
@@ -26,6 +28,8 @@ export class WorldRenderer {
   readonly atmosphere: Atmosphere;
   readonly sky: SkyDome;
   zoneVisual: ZoneVisual | null = null;
+  /** Altars, fog gates, Reperti, exits and vistas of the current zone (built for every zone, custom or generic). */
+  sites: ZoneSites | null = null;
   arenaVisuals = new Map<string, ArenaVisual>();
   private zoneId = '';
   private builtQuality: QualityLevel;
@@ -107,6 +111,11 @@ export class WorldRenderer {
   /* ---------------------------------------------------------------------------------------------------------------- */
 
   private disposeZone(): void {
+    if (this.sites) {
+      this.group.remove(this.sites.group);
+      this.sites.dispose();
+      this.sites = null;
+    }
     for (const a of this.arenaVisuals.values()) {
       this.group.remove(a.root);
       a.dispose();
@@ -152,6 +161,12 @@ export class WorldRenderer {
       }
       this.zoneVisual = visual;
       this.group.add(visual.root);
+      try {
+        this.sites = new ZoneSites(zoneEnv(def, this.ctx));
+        if (this.sites) this.group.add(this.sites.group);
+      } catch (err) {
+        console.error(`[world] sites of ${def.id} failed`, err);
+      }
       for (const arenaId of def.arenas) {
         const loader = ARENA_BUILDERS[arenaId];
         if (!loader) continue;
@@ -240,6 +255,7 @@ export class WorldRenderer {
     this.atmosphere.update(dt, this.focus, this.ctx.time);
     this.sky.update(camera);
     if (this.zoneVisual) this.zoneVisual.update(sim, dt, camera);
+    this.sites?.update(sim, dt);
     for (const a of this.arenaVisuals.values()) a.update(sim, dt);
   }
 

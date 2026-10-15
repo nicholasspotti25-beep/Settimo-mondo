@@ -65,20 +65,21 @@ void main() {
   float n3 = smNoise2(q * 2.7 + vec2(uTime * 0.35, -uTime * 1.5));
   float dens = n1 * 0.55 + n2 * 0.33 + n3 * 0.18;
   float streak = pow(smNoise2(vec2(q.x * 1.5, q.y * 0.11 - uTime * 0.65)), 3.0);
-  vec3 col = mix(uEdge, uCore, clamp(dens * 1.15 + streak * 0.6 - lift * 0.35, 0.0, 1.0));
-  col += uCore * streak * 0.7;
+  float warm = clamp(dens * 1.2 + streak * 0.6 - lift * 0.45 + 0.1, 0.0, 1.0);
+  vec3 col = mix(uEdge, uCore, warm) * (0.5 + dens * 0.5);
+  col += uCore * streak * 0.55;
   // sparks drifting upward
   vec2 sq = vec2(q.x * 1.7, q.y * 1.7 - uTime * 1.1);
   vec2 cell = floor(sq);
   float h = smHash12(cell);
   vec2 f = fract(sq) - 0.5 - (smHash22(cell) - 0.5) * 0.6;
   float sp = step(0.9, h) * exp(-dot(f, f) * 70.0) * (0.55 + 0.45 * sin(uTime * 5.0 + h * 40.0));
-  col += vec3(1.0, 0.94, 0.82) * sp * 1.4;
-  float a = (0.32 + dens * 0.95) * mask * uOpacity;
+  col += vec3(1.0, 0.94, 0.82) * sp * 1.6;
+  float a = (0.16 + dens * 0.62) * mask * uOpacity;
   vec3 ray = vAtmWorld - cameraPosition;
   float dist = length(ray);
   float fa = smFogAmount(ray, dist);
-  float nb = mix(0.95, 1.35, uNight);
+  float nb = mix(0.8, 1.05, uNight);
   // a little stronger seen edge-on so the wall still reads from oblique angles
   gl_FragColor = vec4(col * a * nb * (1.0 - fa * 0.8), 1.0);
 }
@@ -100,7 +101,7 @@ function makeMaterial(shape: 0 | 1, size: [number, number], o: MistOpts): THREE.
       uShape: { value: shape },
       uSize: { value: new THREE.Vector2(size[0], size[1]) },
       uCore: { value: new THREE.Color().setStyle(o.core ?? '#ffd9a2', THREE.NoColorSpace) },
-      uEdge: { value: new THREE.Color().setStyle(o.edge ?? '#9a86d6', THREE.NoColorSpace) },
+      uEdge: { value: new THREE.Color().setStyle(o.edge ?? '#8a74c8', THREE.NoColorSpace) },
     },
     transparent: true,
     depthWrite: false,
