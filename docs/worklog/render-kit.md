@@ -64,3 +64,9 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
     framing, cloak width 0.42H→0.2H and lighter color, rider blade attached to a bone (sockets are not part targets).
   - renderer.stats during the Guardiano fight: high 37 calls / 140k tris; low 35 calls / 46k tris.
   - Capture tip: wait for `!__game.renderer.world.busy` before screenshots, otherwise frames are blank.
+
+### Lead note (09:30, smoke screenshots)
+- vetta_attesa at dawn (boss_01 smoke shot) is badly overexposed: sky, terrain and characters wash out to near-white and the
+  HUD loses contrast. Tone mapping / exposure / bloom threshold need a pass so the brightest act still reads on a phone.
+- Smoke scenes captured during the boss intro title card are fully black behind the card (boss_04..): fine during the
+  intro, but check the intro fade does not leave the arena black after the card.
