@@ -206,6 +206,7 @@ Checklist of every item in PART F. `[x]` = implemented and verified by running i
   A stream that reports its brief complete goes through adversarial review + fix (two rounds when serious findings remain).
 - If interrupted (API usage limit; windows reset at :50 every 5 h — 00:50, 05:50, 10:50, 15:50, 20:50 UTC), snapshot-commit and
   relaunch with `Workflow({scriptPath, resumeFromRunId: "wf_38b1ecdd-baa"})`: finished chunks replay from cache.
-- GitHub: `origin` = nicholasspotti25-beep/settimo-mondo (push refused until the Claude GitHub App is installed on it).
-  Hosting for the phone-only owner: `tools/deploy-pages.sh --partial` publishes dist/ to the gh-pages branch.
+- GitHub: `origin` = nicholasspotti25-beep/settimo-mondo (push to main at every check-in).
+  Hosting for the phone-only owner: `tools/deploy-pages.sh --partial` publishes dist/ to the gh-pages branch (GitHub Pages
+  enabled): https://nicholasspotti25-beep.github.io/Settimo-mondo/ — publish only builds that pass `npm run smoke`.
 - After all streams finish: final integration, strict `npm run check`, smoke on dist, canon audit to zero, final reviewer.

@@ -1,0 +1,68 @@
+# Interface (ui stream). Keys flatten to ui.*; ui.title lives in story_core.yaml.
+ui:
+  prompt:
+    meditate: "Meditate"
+    examine: "Examine"
+    look: "Behold"
+    board: "Go aboard"
+    continue: "Move on"
+  hud:
+    grace: "Colpo di Grazia"
+    perfect_dodge: "Perfect dodge"
+    perfect_parry: "Perfect parry"
+    metamondo_ready: "The Metamondo calls"
+    phase: "Phase {n}"
+    challenge:
+      noDamage: "Unscathed"
+      singleWeapon: "One weapon"
+      noLacrime: "No Lacrime"
+      noMetamondo: "No Metamondo"
+  status:
+    slow: "Slowed"
+    freeze: "Frozen"
+    burn: "Burning"
+    blind: "Blinded"
+    mute: "Silenced"
+    madness: "Madness"
+    poison: "Poisoned"
+    void: "Void"
+    root: "Rooted"
+  note:
+    weapon: "Weapon obtained"
+    arts: "Arts: {prima} · {seconda}"
+    form: "Form unlocked"
+    item: "Key item"
+    altar: "Altar discovered"
+    reperto: "Relic found"
+    vista: "Vista beheld"
+  card:
+    act: "Act {n}"
+    defeated: "The dawn advances"
+    memory: "Memory"
+  death:
+    line: "The light withdraws, but it does not go out."
+    sub: "Returning to the altar"
+  loading: "The world takes shape"
+  story:
+    hold: "Hold"
+    tap_gesture: "Tap to perform the gesture"
+    trace_gesture: "Trace the sign, or tap"
+    advance: "Tap to continue"
+  touch:
+    light: "Light attack"
+    heavy: "Heavy attack"
+    dodge: "Dodge"
+    guard: "Guard"
+    jump: "Jump"
+    art_prima: "First Art"
+    art_seconda: "Second Art"
+    lacrime: "Lacrime"
+    lock: "Lock on"
+    slot: "Weapon {n}"
+    interact: "Interact"
+    metamondo: "Metamondo"
+    pause: "Pause"
+  menu:
+    continue: "Continue"
+    new_game: "New game"
+    tagline: "The world awaits its dawn"

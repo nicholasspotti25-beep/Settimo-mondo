@@ -1,0 +1,68 @@
+# Interfaccia (stream ui). Chiavi appiattite in ui.*; ui.title vive in story_core.yaml.
+ui:
+  prompt:
+    meditate: "Medita"
+    examine: "Esamina"
+    look: "Osserva"
+    board: "Sali a bordo"
+    continue: "Prosegui"
+  hud:
+    grace: "Colpo di Grazia"
+    perfect_dodge: "Schivata perfetta"
+    perfect_parry: "Parata perfetta"
+    metamondo_ready: "Il Metamondo ti chiama"
+    phase: "Fase {n}"
+    challenge:
+      noDamage: "Senza ferite"
+      singleWeapon: "Un'arma sola"
+      noLacrime: "Senza Lacrime"
+      noMetamondo: "Senza Metamondo"
+  status:
+    slow: "Rallentato"
+    freeze: "Congelato"
+    burn: "In fiamme"
+    blind: "Accecato"
+    mute: "Ammutolito"
+    madness: "Follia"
+    poison: "Avvelenato"
+    void: "Vuoto"
+    root: "Radicato"
+  note:
+    weapon: "Arma ottenuta"
+    arts: "Arti: {prima} · {seconda}"
+    form: "Forma sbloccata"
+    item: "Oggetto chiave"
+    altar: "Altare scoperto"
+    reperto: "Reperto trovato"
+    vista: "Vista contemplata"
+  card:
+    act: "Atto {n}"
+    defeated: "L'alba avanza"
+    memory: "Ricordo"
+  death:
+    line: "La luce si ritira, ma non si spegne."
+    sub: "Ritorno all'altare"
+  loading: "Il mondo si compone"
+  story:
+    hold: "Tieni premuto"
+    tap_gesture: "Tocca per compiere il gesto"
+    trace_gesture: "Traccia il segno, o tocca"
+    advance: "Tocca per continuare"
+  touch:
+    light: "Attacco leggero"
+    heavy: "Attacco pesante"
+    dodge: "Schivata"
+    guard: "Guardia"
+    jump: "Salto"
+    art_prima: "Arte prima"
+    art_seconda: "Arte seconda"
+    lacrime: "Lacrime"
+    lock: "Aggancio"
+    slot: "Arma {n}"
+    interact: "Interagisci"
+    metamondo: "Metamondo"
+    pause: "Pausa"
+  menu:
+    continue: "Continua"
+    new_game: "Nuova partita"
+    tagline: "Il mondo attende la sua alba"
