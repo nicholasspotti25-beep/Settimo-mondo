@@ -119,7 +119,7 @@ vec3 smSkyGradient(vec3 dir) {
   vec3 col = mix(hor, uZenith, pow(clamp(e, 0.0, 1.0), 0.45));
   col = mix(col, uGround, smoothstep(0.0, -0.22, e));
   float g = max(dot(dir, uGlowDir), 0.0);
-  col += uGlow * (pow(g, 10.0) * 0.38 + pow(g, 60.0) * 0.35);
+  col += uGlow * (pow(g, 6.0) * 0.30 + pow(g, 28.0) * 0.14);
   return col * uSkyBright;
 }
 `;

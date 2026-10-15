@@ -159,15 +159,15 @@ export const CSS = /* css */ `
 
 /* ------------------------------------------------------------------ touch controls */
 .sm-touch { touch-action: none; }
-.sm-touch.on { pointer-events: auto; }
+#sm-ui .sm-touch.on { pointer-events: auto; }
 .sm-ctrls { position: absolute; inset: 0; transition: opacity .35s ease; }
 .sm-ctrls.gone { opacity: 0 !important; transition: opacity .25s; }
 .sm-b { position: absolute; border-radius: 50%; transform: translate(-50%,-50%); color: var(--ivory); pointer-events: none;
   background: radial-gradient(circle at 50% 38%, rgba(255,246,226,.16), rgba(26,18,40,.42) 62%, rgba(16,10,26,.52));
   box-shadow: 0 0 0 1.2px rgba(234,208,154,.55), 0 2px 10px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12);
   transition: transform .08s ease, background .12s, box-shadow .2s, opacity .3s; }
-.sm-b > .sm-ico { position: absolute; left: 24%; top: 24%; width: 52%; height: 52%; }
-.sm-b.light > .sm-ico { left: 26%; top: 26%; width: 48%; height: 48%; }
+#sm-ui .sm-b > .sm-ico { position: absolute; left: 24%; top: 24%; width: 52%; height: 52%; }
+#sm-ui .sm-b.light > .sm-ico { left: 26%; top: 26%; width: 48%; height: 48%; }
 .sm-b.on { transform: translate(-50%,-50%) scale(.9); background: radial-gradient(circle at 50% 40%, rgba(255,240,200,.55), rgba(190,150,90,.42) 60%, rgba(60,40,30,.5)); box-shadow: 0 0 0 1.6px var(--gold-hi), 0 0 18px rgba(255,220,150,.6); }
 .sm-b.off { opacity: .38; }
 .sm-b.art { color: rgba(246,239,226,.5); }
@@ -252,6 +252,18 @@ export const CSS = /* css */ `
 .sm-portrait .t { font: 500 18px var(--serif); letter-spacing: .14em; }
 .sm-portrait .s { font: italic 14px var(--serif); color: var(--ivory-dim); }
 .sm-dbgov { position: absolute; left: calc(var(--sl) + 8px); bottom: calc(var(--sb) + 8px); padding: 6px 8px; border-radius: 4px; background: rgba(0,0,0,.55); font: 10.5px/1.35 ui-monospace,Menlo,monospace; color: #e9f4e0; white-space: pre; }
+
+/* ------------------------------------------------------------------ HUD additions: desktop trio + prompt, tap-to-advance, lock state */
+.sm-trio { position: absolute; right: calc(var(--sr) + 16px); bottom: calc(var(--sb) + 14px); display: flex; gap: calc(6px * var(--k)); }
+.sm-trio-w { width: calc(34px * var(--k)); height: calc(34px * var(--k)); padding: calc(5px * var(--k)); border-radius: 30%; color: var(--ivory-dim); background: rgba(16,10,26,.42); box-shadow: 0 0 0 1px var(--line-2); transition: color .2s, box-shadow .2s; }
+.sm-trio-w.cur { color: var(--gold-hi); box-shadow: 0 0 0 1.6px var(--gold-hi), 0 0 12px rgba(255,214,140,.45); }
+.sm-trio-w.empty { opacity: .35; }
+.sm-prompt { position: absolute; left: 50%; bottom: calc(var(--sb) + 26%); transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 7px 18px 7px 12px; border-radius: 999px; background: linear-gradient(90deg, rgba(20,14,32,0), rgba(20,14,32,.66) 20%, rgba(20,14,32,.66) 80%, rgba(20,14,32,0)); font: 600 calc(14px * var(--k)) var(--serif); letter-spacing: .16em; text-transform: uppercase; color: var(--gold-hi); text-shadow: 0 1px 6px #000; opacity: 0; transition: opacity .3s; white-space: nowrap; }
+.sm-prompt.on { opacity: 1; }
+.sm-prompt i { width: calc(20px * var(--k)); height: calc(20px * var(--k)); }
+.sm-tapcatch { position: absolute; inset: 0; pointer-events: auto; touch-action: none; }
+.sm-b.lock.act { color: var(--gold-hi); box-shadow: 0 0 0 1.6px var(--gold-hi), 0 0 14px rgba(255,214,140,.5); }
+.sm-st[title] { cursor: default; }
 
 /* ------------------------------------------------------------------ screens (menus) */
 .sm-screen { position: absolute; inset: 0; pointer-events: auto; display: flex; flex-direction: column; color: var(--ivory);

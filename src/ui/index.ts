@@ -1,7 +1,7 @@
-/** UI factory. The full UI (HUD, touch controls, menus, layout editor, debug menu) lives in src/ui/**. */
+/** UI factory: the full game UI (HUD, touch controls, story layer, cards, menus) lives in src/ui/**. */
 import type { GameUI } from '../app/interfaces';
-import { MinimalUI } from './MinimalUI';
+import { SettimoUI } from './UI';
 
 export function createUI(): GameUI {
-  return new MinimalUI();
+  return new SettimoUI();
 }

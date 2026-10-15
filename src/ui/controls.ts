@@ -50,7 +50,7 @@ export class ControlsView {
     this.stickCss = new StyleCache(this.stick);
     this.knobCss = new StyleCache(knob);
     this.sprintCss = new StyleCache(sprint);
-    this.ctrls = h('div', { class: 'sm-ctrls' }, this.stick);
+    this.ctrls = h('div', { class: 'sm-ctrls gone' }, this.stick);
     this.ctrlsCss = new StyleCache(this.ctrls);
     this.el = h('div', { class: 'sm-layer sm-touch' }, this.ctrls);
     const game = ctx.game;
@@ -128,27 +128,31 @@ export class ControlsView {
     return this.visible(b.id);
   }
 
-  /** Double tap: lock the enemy lock point nearest to the finger on screen. */
+  /**
+   * Double tap: lock the lock point under the finger. Each candidate gets a screen reach of its projected body (or part)
+   * radius, at least a thumb's width; the closest candidate relative to its reach wins (parts beat the body when both fit).
+   */
   private pickLockAt(x: number, y: number): boolean {
     const game = this.ctx.game;
     const sim = game.sim;
-    const cam = game.renderer.rig.camera;
     const L = this.L;
     if (!L) return false;
-    const reach = Math.max(60, L.unit * 0.16);
-    let best: { actor: number; part: number } | null = null;
-    let bestD = reach;
-    const v = this.tmp;
-    const test = (actor: number, part: number) => {
-      if (!sim.lockPointPos(actor, part, this.tmpP)) return;
-      v.set(this.tmpP.x, this.tmpP.y, this.tmpP.z).project(cam);
-      if (v.z > 1 || v.z < -1) return;
-      const sx = (v.x * 0.5 + 0.5) * L.view.w;
-      const sy = (0.5 - v.y * 0.5) * L.view.h;
-      const d = Math.hypot(sx - x, sy - y) - (part >= 0 ? 0 : 8);
-      if (d < bestD) {
-        bestD = d;
-        best = { actor, part };
+    const minReach = Math.max(56, L.unit * 0.14);
+    let bestActor = -1;
+    let bestPart = -1;
+    let bestScore = 1;
+    const test = (actor: number, part: number, worldR: number) => {
+      const c = sim.lockPointPos(actor, part, this.tmpP);
+      if (!c || !this.toScreen(c.x, c.y, c.z, L)) return;
+      const sx = this.tmp.x, sy = this.tmp.y;
+      // projected radius: offset the point vertically by the world radius
+      const rr = this.toScreen(c.x, c.y + worldR, c.z, L) ? Math.hypot(this.tmp.x - sx, this.tmp.y - sy) : 0;
+      const reach = Math.max(minReach, rr * 1.15);
+      const score = Math.hypot(sx - x, sy - y) / reach + (part >= 0 ? 0 : 0.08);
+      if (score < bestScore) {
+        bestScore = score;
+        bestActor = actor;
+        bestPart = part;
       }
     };
     for (const a of sim.actors) {
@@ -157,13 +161,22 @@ export class ControlsView {
       for (const p of a.parts) {
         if (!p.def.lockable || !p.active || p.broken) continue;
         lockable++;
-        test(a.id, p.index);
+        let pr = 0.5;
+        for (const s of p.world) pr = Math.max(pr, s.r);
+        test(a.id, p.index, pr);
       }
-      if (!lockable || !a.flags.has('parts_only')) test(a.id, -1);
+      if (!lockable || !a.flags.has('parts_only')) test(a.id, -1, Math.max(a.radius, a.height * 0.5) * a.scale);
     }
-    if (!best) return false;
-    const pick = best as { actor: number; part: number };
-    game.input.pickLock(pick.actor, pick.part);
+    if (bestActor < 0) return false;
+    game.input.pickLock(bestActor, bestPart);
+    return true;
+  }
+
+  /** Project a world point to CSS pixels into this.tmp (x, y). False when behind the camera. */
+  private toScreen(x: number, y: number, z: number, L: ResolvedLayout): boolean {
+    const v = this.tmp.set(x, y, z).project(this.ctx.game.renderer.rig.camera);
+    if (v.z > 1 || v.z < -1) return false;
+    v.set((v.x * 0.5 + 0.5) * L.view.w, (0.5 - v.y * 0.5) * L.view.h, v.z);
     return true;
   }
 

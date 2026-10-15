@@ -178,8 +178,11 @@ export class Atmosphere {
     const lc = new THREE.Color(sky.light_color).multiply(tint).multiplyScalar(sky.light_intensity * (1 + s * 0.12));
     out.light.set(lc.r, lc.g, lc.b);
     const amb = tod.ambient;
-    const hs = new THREE.Color(sky.hemi_sky).multiply(tint).multiplyScalar(1.15 * amb);
-    const hg = new THREE.Color(sky.hemi_ground).multiply(tint).multiplyScalar(1.15 * amb);
+    // ambient stays well below the key light so forms read; the violet sky tint is partly desaturated
+    const hs = new THREE.Color(sky.hemi_sky).multiply(tint);
+    const hl = hs.r * 0.2126 + hs.g * 0.7152 + hs.b * 0.0722;
+    hs.lerp(new THREE.Color(hl, hl, hl), 0.35).multiplyScalar(0.62 * amb);
+    const hg = new THREE.Color(sky.hemi_ground).multiply(tint).multiplyScalar(0.7 * amb);
     out.hemiSky.set(hs.r, hs.g, hs.b);
     out.hemiGround.set(hg.r, hg.g, hg.b);
     out.exposure = sky.exposure * (1 + s * 0.06);
@@ -191,7 +194,7 @@ export class Atmosphere {
     out.fogHeightBase = hf[1];
     out.fogFalloff = hf[2];
     out.cloud = zo.cloud ?? 0.5;
-    out.rays = (zo.rays ?? 0.5) * (todName === 'notte' ? 0.35 : todName === 'giorno' ? 0.8 : 1);
+    out.rays = (zo.rays ?? 0.5) * (todName === 'notte' ? 0.12 : todName === 'giorno' ? 0.75 : 1);
     out.night = todName === 'notte' ? 1 : todName === 'tramonto' ? 0.45 : todName === 'alba' ? 0.25 : 0;
     out.glowBoost = 1 + out.night * 1.1;
     out.sun = ending || sky.id === 'sunrise' ? 1 : 0;
@@ -281,12 +284,13 @@ export class Atmosphere {
     gd.normalize();
     U.uLightDir.value.copy(gd);
     this.sun.color.setRGB(c.light.x, c.light.y, c.light.z).multiplyScalar(1 + fl * 1.5);
-    this.sun.intensity = 1;
+    // three's Lambert/Standard BRDF divides by PI: lights carry PI so albedo x irradiance matches the custom shaders
+    this.sun.intensity = Math.PI;
     this.sun.position.copy(focus).addScaledVector(gd, 120);
     this.sun.target.position.copy(focus);
     this.hemi.color.setRGB(c.hemiSky.x, c.hemiSky.y, c.hemiSky.z).multiplyScalar(1 + fl * 2);
     this.hemi.groundColor.setRGB(c.hemiGround.x, c.hemiGround.y, c.hemiGround.z);
-    this.hemi.intensity = 1;
+    this.hemi.intensity = Math.PI;
     U.uLightColor.value.copy(this.sun.color);
     U.uHemiSky.value.copy(this.hemi.color);
     U.uHemiGround.value.copy(this.hemi.groundColor);

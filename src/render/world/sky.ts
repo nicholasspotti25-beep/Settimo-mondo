@@ -65,8 +65,8 @@ void main() {
     float ang = atan(dot(d, ay), dot(d, ax));
     float rays = smNoise2(vec2(ang * 9.0, uTime * 0.04)) * 0.6 + smNoise2(vec2(ang * 23.0, -uTime * 0.03)) * 0.4;
     rays = smoothstep(0.45, 0.95, rays);
-    float fall = pow(g, 3.0) * smoothstep(-0.02, 0.12, e);
-    col += uGlow * rays * fall * 0.32 * uRays;
+    float fall = pow(g, 4.5) * smoothstep(-0.02, 0.12, e);
+    col += uGlow * rays * fall * 0.2 * uRays;
   }
   #endif
 

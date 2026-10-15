@@ -104,6 +104,8 @@ export class Hud {
   private touchOn = false;
   private lastHp = -1;
   private readyFlash = false;
+  /** Colpo di Grazia state this frame: 0 none, 1 Spezzato target out of reach, 2 available (light button glow). */
+  graceLevel: 0 | 1 | 2 = 0;
 
   constructor(private readonly ctx: UiCtx) {
     // ring: Metamondo track (outer) + three Eco pips (inner) + seed core
@@ -282,6 +284,7 @@ export class Hud {
     const sim = game.sim;
     const p = sim.player;
     if (!visible) {
+      this.graceLevel = 0;
       toggle(this.redwarn, 'on', false);
       toggle(this.rededge, 'on', false);
       return;
@@ -366,7 +369,7 @@ export class Hud {
     this.updateBoss(dt);
 
     // --- Colpo di Grazia prompt
-    const g = this.graceState();
+    const g = (this.graceLevel = this.graceState());
     toggle(this.grace, 'on', g === 2);
     toggle(this.grace, 'far', g === 1);
     if (g) setText(this.grace.lastChild as HTMLElement, this.ctx.t('ui.hud.grace'));

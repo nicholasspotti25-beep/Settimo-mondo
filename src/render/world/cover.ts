@@ -17,7 +17,7 @@ function tuftGeometry(type: CoverDef['type']): THREE.BufferGeometry {
   const pos: number[] = [];
   const t: number[] = [];
   const idx: number[] = [];
-  const blades = type === 'reeds' ? 4 : type === 'moss' ? 6 : type === 'flowers' ? 5 : 5;
+  const blades = type === 'moss' ? 5 : 4;
   const seg = type === 'moss' ? 1 : 2;
   let base = 0;
   for (let b = 0; b < blades; b++) {
@@ -156,7 +156,7 @@ export class GroundCover {
     const scaleAdj = def.type === 'moss' ? 1.1 : 1;
     this.cell = 10;
     this.grid = q === 'low' ? 5 : q === 'medium' ? 7 : 9;
-    const dens = def.density * (q === 'low' ? 0.5 : q === 'medium' ? 0.75 : 1) * scaleAdj;
+    const dens = def.density * (q === 'low' ? 0.5 : q === 'medium' ? 0.72 : 0.85) * scaleAdj;
     this.perCell = Math.max(4, Math.round(this.cell * this.cell * dens));
     const total = this.perCell * this.grid * this.grid;
     const geo = tuftGeometry(def.type);
@@ -178,7 +178,7 @@ export class GroundCover {
         uGlowBoost: ATMOS.uGlowBoost,
       },
       side: THREE.DoubleSide,
-      fog: true,
+      fog: false,
     });
     this.mesh = new THREE.InstancedMesh(geo, this.mat, total);
     this.mesh.name = 'cover';
