@@ -198,11 +198,14 @@ Checklist of every item in PART F. `[x]` = implemented and verified by running i
 - [ ] CREDITS.md
 
 ## Resume notes (orchestration)
-- Work-streams are defined in `docs/briefs/*.md` (COMMON + one per stream). Two resumable workflows drive them:
-  - foundation (render-kit, weapons, world, ui, audio, forms): run `wf_ea1539c0-a6b`, script
-    `/root/.claude/projects/-home-user-settimo-mondo/af03cb07-d77a-5105-8b91-fb3fdb8d8552/workflows/scripts/settimo-foundation-wf_ea1539c0-a6b.js`
-  - content (act1, act2, act3a, act3b, act4, act5, act67): run `wf_64f1d508-04d`, script
-    `/root/.claude/projects/-home-user-settimo-mondo/af03cb07-d77a-5105-8b91-fb3fdb8d8552/workflows/scripts/settimo-content-wf_64f1d508-04d.js`
-  - If interrupted (API session limit), relaunch with `Workflow({scriptPath, resumeFromRunId})`: finished agents are cached;
-    unfinished streams restart and continue from the partial files on disk.
-- After both finish: integration pass (lead), strict `npm run check`, smoke on dist, canon audit to zero, final reviewer.
+- Work-streams are defined in `docs/briefs/*.md` (COMMON + one per stream); each stream keeps `docs/worklog/<stream>.md`.
+- One resumable workflow drives everything in bounded chunks (the earlier whole-brief workflows wasted each usage window on
+  re-orientation): run `wf_38b1ecdd-baa`, script
+  `/root/.claude/projects/-home-user-settimo-mondo/af03cb07-d77a-5105-8b91-fb3fdb8d8552/workflows/scripts/settimo-chunks-wf_38b1ecdd-baa.js`.
+  Engine lane: world, render-kit, weapons, audio, forms (+ an integration pass every 3 chunks). Game lane: ui, act1..act67.
+  A stream that reports its brief complete goes through adversarial review + fix (two rounds when serious findings remain).
+- If interrupted (API usage limit; windows reset at :50 every 5 h — 00:50, 05:50, 10:50, 15:50, 20:50 UTC), snapshot-commit and
+  relaunch with `Workflow({scriptPath, resumeFromRunId: "wf_38b1ecdd-baa"})`: finished chunks replay from cache.
+- GitHub: `origin` = nicholasspotti25-beep/settimo-mondo (push refused until the Claude GitHub App is installed on it).
+  Hosting for the phone-only owner: `tools/deploy-pages.sh --partial` publishes dist/ to the gh-pages branch.
+- After all streams finish: final integration, strict `npm run check`, smoke on dist, canon audit to zero, final reviewer.
