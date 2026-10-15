@@ -175,7 +175,7 @@ attacks:
     spawns:
       - {t: 0.05, type: vfx, id: elder_root_lash}
       - {t: -0.85, type: sfx, id: elder_roots_grind}
-  # Phase 2: the heart beats and a ring of light runs across the clearing (jump it).
+  # Phase 2: the heart beats, a ring of light flashes on the soil around the trunk (0.3 s) and runs across the clearing (jump it).
   - id: heart_pulse
     anim: heart_pulse
     telegraph: 1.1
@@ -190,7 +190,7 @@ attacks:
     requires: heart_open
     spawns:
       - {t: -1.1, type: sfx, id: elder_heartbeat}
-      - {t: 0.0, type: shockwave, id: elder_light_ring, radius: 20, shape: {type: ring, r0: 3.5, r1: 20, width: 1.4, height: 0.8}, active: 1.0, damage_mult: 0.9}
+      - {t: 0.0, type: shockwave, id: elder_light_ring, radius: 20, shape: {type: ring, r0: 3.5, r1: 20, width: 1.4, height: 0.8}, delay: 0.3, active: 1.0, damage_mult: 0.9}
   # Phase 2: roots close in a ring around you, then the center erupts — slip out between them.
   - id: root_cage
     anim: root_call

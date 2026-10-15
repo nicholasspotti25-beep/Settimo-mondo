@@ -102,7 +102,7 @@ function conifer(p: Parts, r: R, h: number, w: number, leaf: [string, string], b
 /* Small helpers                                                                                                       */
 /* ------------------------------------------------------------------------------------------------------------------ */
 
-function rockPiece(p: Parts, r: R, rad: number, col: [string, string], pos: [number, number, number] = [0, 0, 0], sy = 0.7, detail = 1): void {
+export function rockPiece(p: Parts, r: R, rad: number, col: [string, string], pos: [number, number, number] = [0, 0, 0], sy = 0.7, detail = 1): void {
   p.add(blob(rad, detail, 0.32, r.int(1, 9999), 0.4), 'matte', { color: col, cover: 1, aoBottom: 0.55, jitter: 0.1 }, mat4([pos[0], pos[1] + rad * sy * 0.55, pos[2]], [r.range(-0.3, 0.3), r.range(0, 6), r.range(-0.3, 0.3)], [r.range(0.9, 1.3), sy, r.range(0.8, 1.1)]));
 }
 
@@ -134,7 +134,7 @@ function leafDisc(rad: number, seg = 8): THREE.BufferGeometry {
   return g;
 }
 
-function sword(p: Parts, r: R, at: [number, number, number], tilt: [number, number, number], len = 1.3): void {
+export function sword(p: Parts, r: R, at: [number, number, number], tilt: [number, number, number], len = 1.3): void {
   const m = mat4(at, tilt);
   p.add(box(0.09, len, 0.02), 'metal', { color: ['#4a4a52', '#9a9aa6'] }, m.clone().multiply(mat4([0, len / 2, 0])));
   p.add(box(0.38, 0.05, 0.06), 'metal', { color: '#5a4a3a' }, m.clone().multiply(mat4([0, len, 0])));

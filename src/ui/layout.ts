@@ -59,16 +59,17 @@ export function unitFor(safe: Rect): number {
   return clamp(safe.h, 300, 400) * 1.45;
 }
 
-/** HUD Eco ring geometry (top-left corner of the safe area; top-right when mirrored). */
+/** HUD Eco ring geometry (top-left corner of the safe area; top-right when mirrored). Grows on tablets with the HUD scale. */
 export function hudRing(safe: Rect, unit: number, mirrored: boolean): Circle {
-  const r = clamp(unit * 0.054, 22, 34);
+  const r = clamp(safe.h * 0.075, 22, 46);
   const m = clamp(unit * 0.02, 8, 14);
   return { cx: mirrored ? safe.x + safe.w - m - r : safe.x + m + r, cy: safe.y + m + r, r };
 }
 
 function zoneRect(z: [number, number, number, number], safe: Rect, mirror: boolean): Rect {
-  let [x0, y0, x1, y1] = z;
-  if (mirror) [x0, x1] = [1 - x1, 1 - x0];
+  const [zx0, y0, zx1, y1] = z;
+  const x0 = mirror ? 1 - zx1 : zx0;
+  const x1 = mirror ? 1 - zx0 : zx1;
   return { x: safe.x + x0 * safe.w, y: safe.y + y0 * safe.h, w: (x1 - x0) * safe.w, h: (y1 - y0) * safe.h };
 }
 

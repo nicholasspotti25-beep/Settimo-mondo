@@ -17,6 +17,7 @@ import { Hud } from './hud';
 import { StoryLayer } from './story';
 import { Cards } from './cards';
 import { ControlsView } from './controls';
+import { AltarMenu } from './altar';
 import { defaultCharacter } from '../sim/gamestate';
 
 export class SettimoUI implements GameUI {
@@ -27,6 +28,13 @@ export class SettimoUI implements GameUI {
   private story!: StoryLayer;
   private cards!: Cards;
   private controls!: ControlsView;
+  private altar!: AltarMenu;
+  private loading = false;
+  private pendingFadeIn = false;
+  private transitioning = false;
+  private pauseBtn!: HTMLElement;
+  private flashEl: HTMLElement | null = null;
+  private flashTimer = 0;
   private title!: HTMLElement;
   private fadeEl!: HTMLElement;
   private probe!: HTMLElement;
@@ -36,6 +44,7 @@ export class SettimoUI implements GameUI {
   private touchOn = false;
   private lang = '';
   private fadeTimer = 0;
+  private fadeDone: (() => void) | null = null;
   private titleLabel: () => void = () => undefined;
 
   mount(root: HTMLElement, game: Game): void {
@@ -48,9 +57,12 @@ export class SettimoUI implements GameUI {
     this.controls = new ControlsView(this.ctx);
     this.story = new StoryLayer(this.ctx);
     this.cards = new Cards(this.ctx);
+    this.altar = new AltarMenu(this.ctx, { transition: (fn) => this.transition(fn), flash: (t) => this.flash(t) });
+    this.pauseBtn = h('button', { class: 'sm-topbtn sm-pausebtn sm-hidden', type: 'button' }, svgIcon(ICONS.pause));
+    this.pauseBtn.addEventListener('click', () => this.openPause());
     this.title = this.buildTitle();
     this.fadeEl = h('div', { class: 'sm-fade' });
-    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.story.el, this.title, this.fadeEl);
+    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.title, this.fadeEl);
     root.appendChild(this.root);
     this.mounted = true;
 
@@ -64,6 +76,17 @@ export class SettimoUI implements GameUI {
     window.addEventListener('resize', () => this.relayout());
     window.addEventListener('orientationchange', () => setTimeout(() => this.relayout(), 250));
     window.addEventListener('blur', () => this.controls.touch.releaseAll());
+    window.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || e.repeat) return;
+      if (this.root.querySelector('.sm-dialog')) return;
+      if (this.altar.isOpen) {
+        if (!this.transitioning) this.altar.leave();
+      } else this.openPause();
+    });
+    // pause overlay after the app comes back from the background (the Game already freezes the sim while hidden)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.openPause();
+    });
     this.applySettings(game.settings);
   }
 
@@ -94,6 +117,7 @@ export class SettimoUI implements GameUI {
     const k = clamp(0.94 + (Math.min(view.w, view.h) - 390) * 0.0008, 0.92, 1.28);
     this.root.style.setProperty('--k', k.toFixed(3));
     this.hud.layout(L, this.touchOn);
+    toggle(this.pauseBtn, 'mir', s.leftHanded);
     this.controls.layout(L);
   }
 
@@ -131,6 +155,43 @@ export class SettimoUI implements GameUI {
     return el;
   }
 
+  /* ------------------------------------------------------------------------------------------------ pause */
+
+  /** Open the pause menu when the game is actually playable (not in title, altar, ending or a transition). */
+  private openPause(): void {
+    const sim = this.game.sim;
+    if (this.mode !== 'game' || this.altar.isOpen || this.transitioning || sim.endingActive) return;
+    this.controls.touch.releaseAll();
+    this.game.input.clear();
+    this.game.audio?.playUi('confirm');
+    this.altar.openPause();
+  }
+
+  /** Small transient confirmation pill (copy, save). */
+  private flash(text: string): void {
+    this.flashEl?.remove();
+    const el = h('div', { class: 'sm-toastmini' }, text);
+    this.flashEl = el;
+    this.root.appendChild(el);
+    clearTimeout(this.flashTimer);
+    this.flashTimer = window.setTimeout(() => el.remove(), 1800);
+  }
+
+  /* ------------------------------------------------------------------------------------------------ transitions */
+
+  /** Fade out, run a world-changing action (meditation, fast travel, memory fight), fade back in once streaming ends. */
+  private transition(fn: () => void): void {
+    if (this.transitioning) return;
+    this.transitioning = true;
+    void this.fade('out', 0.38).then(() => {
+      try {
+        fn();
+      } finally {
+        this.pendingFadeIn = true;
+      }
+    });
+  }
+
   /* ------------------------------------------------------------------------------------------------ GameUI */
 
   update(dt: number): void {
@@ -146,6 +207,15 @@ export class SettimoUI implements GameUI {
     this.controls.update(dt, controlsOn);
     this.story.update(dt, inGame);
     this.cards.update(dt);
+    this.altar.update(inGame && !story && !sim.endingActive ? sim.altarOpen : null);
+    toggle(this.root, 'inmenu', this.altar.isOpen);
+    toggle(this.pauseBtn, 'sm-hidden', !(this.mode === 'game' && hudOn && !this.altar.isOpen && sim.player.alive));
+    if (this.pendingFadeIn && !this.loading) {
+      this.pendingFadeIn = false;
+      void this.fade('in', 0.7).then(() => {
+        this.transitioning = false;
+      });
+    }
   }
 
   onEvent(e: SimEvent): void {
@@ -163,10 +233,12 @@ export class SettimoUI implements GameUI {
     if (m === 'game') {
       this.story.reset();
       this.cards.reset();
+      this.altar.reset();
       this.relayout();
     }
     if (m === 'title') {
       this.story.reset();
+      this.altar.reset();
       this.controls.touch.releaseAll();
     }
   }
@@ -179,13 +251,18 @@ export class SettimoUI implements GameUI {
     void el.offsetWidth;
     el.style.opacity = kind.endsWith('out') ? '1' : '0';
     clearTimeout(this.fadeTimer);
+    this.fadeDone?.();
     return new Promise((r) => {
-      this.fadeTimer = window.setTimeout(r, dur * 1000);
+      this.fadeDone = r;
+      this.fadeTimer = window.setTimeout(() => {
+        this.fadeDone = null;
+        r();
+      }, dur * 1000);
     });
   }
 
   paused(): boolean {
-    return false;
+    return this.mounted && this.altar.paused;
   }
 
   applySettings(s: Settings): void {
@@ -201,12 +278,14 @@ export class SettimoUI implements GameUI {
       this.hud.relabel();
       this.story.relabel();
       this.controls.relabel();
+      this.altar.relabel();
       this.titleLabel();
     }
     this.relayout();
   }
 
   setLoading(on: boolean): void {
+    this.loading = on;
     if (this.mounted) this.cards.setLoading(on);
   }
 

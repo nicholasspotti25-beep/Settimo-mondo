@@ -30,6 +30,10 @@ export class CameraRig {
   /** Extra roll used by gravity flips (Rovescio). */
   roll = 0;
   rollTarget = 0;
+  /** Lock-on framing (horizontal unit direction player -> target, look-ahead and look rise in meters). */
+  private lockDir = new THREE.Vector3();
+  private lockAhead = 0;
+  private lockRise = 0;
 
   constructor(aspect: number) {
     this.camera = new THREE.PerspectiveCamera(this.baseFov, aspect, 0.03, 4000);
@@ -92,7 +96,13 @@ export class CameraRig {
       const dh = lock.y - (py + headH);
       const desiredPitch = clamp(0.22 + Math.atan2(Math.max(-2, dh), Math.max(2, d2)) * 0.55 + size * 0.008, 0.08, 0.95);
       this.pitch = damp(this.pitch, desiredPitch + clamp(input.dy * 0, -0.2, 0.2), 4, dt);
-      this.target.set(px + (lock.x - px) * 0.18, py + headH + Math.max(0, dh) * 0.25, pz + (lock.z - pz) * 0.18);
+      // orbit around the player (a small bounded lean toward the target keeps both in frame at any range)
+      const inv = d2 > 1e-3 ? 1 / d2 : 0;
+      const lean = Math.min(d2 * 0.1, 1.1 * scaleK);
+      this.lockDir.set((lock.x - px) * inv, 0, (lock.z - pz) * inv);
+      this.target.set(px + this.lockDir.x * lean, py + headH + clamp(dh, 0, size * 0.6) * 0.12, pz + this.lockDir.z * lean);
+      this.lockAhead = Math.min(d2 * 0.35, (4.5 + size * 0.15) * scaleK);
+      this.lockRise = clamp(dh, -1.5 * scaleK, size * 0.5) * 0.35;
     } else {
       this.yaw = wrapAngle(this.yaw + input.dx * sens);
       this.pitch = clamp(this.pitch + (this.invertY ? -input.dy : input.dy) * sens, -0.35, 1.15);
@@ -124,7 +134,7 @@ export class CameraRig {
     }
     this.camera.position.copy(this.tmpPos);
     this.tmpLook.copy(this.target);
-    if (lock) this.tmpLook.set(this.target.x * 0.6 + lock.x * 0.4, this.target.y * 0.75 + lock.y * 0.25, this.target.z * 0.6 + lock.z * 0.4);
+    if (lock) this.tmpLook.set(this.target.x + this.lockDir.x * this.lockAhead, this.target.y + this.lockRise, this.target.z + this.lockDir.z * this.lockAhead);
     this.camera.lookAt(this.tmpLook);
     this.roll = damp(this.roll, this.rollTarget, 3, dt);
     if (this.roll) this.camera.rotateZ(this.roll);

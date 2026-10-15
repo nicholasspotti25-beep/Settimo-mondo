@@ -1,0 +1,508 @@
+# Quadruped pose library (wolves, bears, Cerbero, steeds). Root bone: body (pelvis over the hind legs; rearing pivots there).
+# Bones: body spine chest neck_* (neck_l_*, neck_r_* on multi-head rigs) head jaw (head_l jaw_l ...) leg_fl_0..2 leg_fr_0..2
+#        leg_bl_0..2 leg_br_0..2 tail_*. x = pitch: a leg swings BACK with +x, a neck/head nods DOWN with +x,
+#        rootRot x > 0 pitches the nose down, < 0 rears up. y turns left, z rolls (top to the right).
+family: quadruped
+aliases:
+  thrust: bite
+  thrust_heavy: charge
+  grab: bite
+  coil: bite
+  overhead: rear_stomp
+  slam: rear_stomp
+  shield_bash: charge
+  sweep_r: claw_r
+  sweep_l: claw_l
+  throw: bite
+  cast: roar
+  summon: howl
+  block: roar
+  burrow: spezzato
+  attack: bite
+clips:
+  idle:
+    pose:
+      neck*: [-2, 0, 0]
+      head*: [6, 0, 0]
+      tail*: [6, 0, 0]
+      leg_fl_1: [-3, 0, 0]
+      leg_fr_1: [-3, 0, 0]
+    cycle:
+      period: 3.2
+      root: {y: [0.008, 0]}
+      bones:
+        chest: {x: [-1.2, 0]}
+        neck*: {x: [1.6, 0.2], y: [1.5, 0.6]}
+        head*: {y: [3, 0.4]}
+        tail*: {y: [7, 0.1]}
+        jaw*: {x: [1.5, 0.3, pos]}
+  walk:
+    pose:
+      neck*: [6, 0, 0]
+      head*: [4, 0, 0]
+      tail*: [10, 0, 0]
+    cycle:
+      stride: 1.7
+      root: {y: [0.02, 0.1, double]}
+      rootRot: {z: [1.6, 0], y: [2, 0]}
+      bones:
+        leg_bl_0: {x: [-20, 0]}
+        leg_bl_1: {x: [16, 0.85, pos]}
+        leg_bl_2: {x: [-14, 0.85, pos]}
+        leg_br_0: {x: [-20, 0.5]}
+        leg_br_1: {x: [16, 0.35, pos]}
+        leg_br_2: {x: [-14, 0.35, pos]}
+        leg_fl_0: {x: [-22, 0.25]}
+        leg_fl_1: {x: [30, 0.1, pos]}
+        leg_fl_2: {x: [16, 0.1, pos]}
+        leg_fr_0: {x: [-22, 0.75]}
+        leg_fr_1: {x: [30, 0.6, pos]}
+        leg_fr_2: {x: [16, 0.6, pos]}
+        neck*: {x: [3, 0.25, double]}
+        tail*: {y: [8, 0]}
+  run:
+    pose:
+      neck*: [16, 0, 0]
+      head*: [-6, 0, 0]
+      tail*: [-12, 0, 0]
+    rootRot: [3, 0, 0]
+    cycle:
+      stride: 3.4
+      root: {y: [0.06, 0.15]}
+      rootRot: {x: [6, 0.25]}
+      bones:
+        leg_bl_0: {x: [-40, 0]}
+        leg_bl_1: {x: [36, 0.8, pos]}
+        leg_br_0: {x: [-40, 0.1]}
+        leg_br_1: {x: [36, 0.9, pos]}
+        leg_fl_0: {x: [-46, 0.5]}
+        leg_fl_1: {x: [60, 0.35, pos]}
+        leg_fl_2: {x: [24, 0.35, pos]}
+        leg_fr_0: {x: [-46, 0.6]}
+        leg_fr_1: {x: [60, 0.45, pos]}
+        leg_fr_2: {x: [24, 0.45, pos]}
+        spine: {x: [-6, 0.25]}
+        neck*: {x: [-8, 0.25]}
+        head*: {x: [6, 0.25]}
+        tail*: {x: [8, 0.2]}
+  hover:
+    base: idle
+  fly:
+    base: run
+  bite:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-22, 0, 0]
+        head*: [-14, 0, 0]
+        jaw*: [36, 0, 0]
+        leg_fl_0: [-10, 0, 0]
+        leg_fr_0: [-10, 0, 0]
+        leg_bl_1: [16, 0, 0]
+        leg_br_1: [16, 0, 0]
+      rootRot: [-4, 0, 0]
+      root: [0, -0.04, -0.12]
+    active:
+      pose:
+        neck*: [24, 0, 0]
+        head*: [8, 0, 0]
+        jaw*: [2, 0, 0]
+        leg_fl_0: [-26, 0, 0]
+        leg_fr_0: [-20, 0, 0]
+        leg_bl_0: [20, 0, 0]
+        leg_br_0: [20, 0, 0]
+      rootRot: [8, 0, 0]
+      root: [0, -0.06, 0.3]
+    recovery:
+      pose:
+        neck*: [10, 0, 0]
+        jaw*: [10, 0, 0]
+      root: [0, -0.02, 0.12]
+  charge:
+    telegraph:
+      pose:
+        neck*: [24, 0, 0]
+        head*: [14, 0, 0]
+        leg_fl_0: [-24, 0, 0]
+        leg_fl_1: [30, 0, 0]
+        leg_bl_0: [-10, 0, 0]
+        leg_bl_1: [24, 0, 0]
+        leg_br_0: [-10, 0, 0]
+        leg_br_1: [24, 0, 0]
+        tail*: [-20, 0, 0]
+      rootRot: [6, 0, 0]
+      root: [0, -0.1, -0.08]
+      cycle:
+        period: 0.7
+        bones:
+          leg_fr_0: {x: [-30, 0, pos]}
+          leg_fr_1: {x: [40, 0, pos]}
+    active:
+      pose:
+        neck*: [30, 0, 0]
+        head*: [16, 0, 0]
+        tail*: [-20, 0, 0]
+      rootRot: [6, 0, 0]
+      cycle:
+        period: 0.34
+        root: {y: [0.07, 0.15]}
+        rootRot: {x: [7, 0.25]}
+        bones:
+          leg_bl_0: {x: [-42, 0]}
+          leg_bl_1: {x: [36, 0.8, pos]}
+          leg_br_0: {x: [-42, 0.1]}
+          leg_br_1: {x: [36, 0.9, pos]}
+          leg_fl_0: {x: [-48, 0.5]}
+          leg_fl_1: {x: [62, 0.35, pos]}
+          leg_fr_0: {x: [-48, 0.6]}
+          leg_fr_1: {x: [62, 0.45, pos]}
+    recovery:
+      pose:
+        neck*: [-10, 0, 0]
+        leg_fl_0: [-30, 0, 0]
+        leg_fr_0: [-26, 0, 0]
+        leg_bl_0: [-24, 0, 0]
+        leg_br_0: [-20, 0, 0]
+        leg_bl_1: [30, 0, 0]
+        leg_br_1: [30, 0, 0]
+      rootRot: [-6, 0, 0]
+      root: [0, -0.06, 0]
+  rear_stomp:
+    hold: 3
+    telegraph:
+      pose:
+        neck*: [-20, 0, 0]
+        head*: [-10, 0, 0]
+        jaw*: [20, 0, 0]
+        leg_fl_0: [-74, 0, 0]
+        leg_fl_1: [96, 0, 0]
+        leg_fl_2: [30, 0, 0]
+        leg_fr_0: [-64, 0, 0]
+        leg_fr_1: [86, 0, 0]
+        leg_fr_2: [30, 0, 0]
+        leg_bl_0: [-30, 0, 0]
+        leg_bl_1: [24, 0, 0]
+        leg_br_0: [-30, 0, 0]
+        leg_br_1: [24, 0, 0]
+        tail*: [24, 0, 0]
+      rootRot: [-44, 0, 0]
+      root: [0, 0.02, -0.06]
+      cycle:
+        period: 0.5
+        bones:
+          leg_fl_0: {x: [-12, 0]}
+          leg_fr_0: {x: [-12, 0.5]}
+    active:
+      pose:
+        neck*: [26, 0, 0]
+        head*: [10, 0, 0]
+        jaw*: [10, 0, 0]
+        leg_fl_0: [-30, 0, 0]
+        leg_fl_1: [4, 0, 0]
+        leg_fr_0: [-26, 0, 0]
+        leg_fr_1: [4, 0, 0]
+        leg_bl_0: [8, 0, 0]
+        leg_bl_1: [20, 0, 0]
+        leg_br_0: [8, 0, 0]
+        leg_br_1: [20, 0, 0]
+      rootRot: [10, 0, 0]
+      root: [0, -0.1, 0.2]
+    recovery:
+      pose:
+        neck*: [10, 0, 0]
+        leg_fl_0: [-16, 0, 0]
+        leg_fr_0: [-12, 0, 0]
+      rootRot: [3, 0, 0]
+      root: [0, -0.04, 0.1]
+  stomp:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-12, 0, 0]
+        leg_fr_0: [-80, 0, -6]
+        leg_fr_1: [100, 0, 0]
+        leg_fr_2: [30, 0, 0]
+      rootRot: [-10, 0, 4]
+      root: [0, 0, -0.04]
+    active:
+      pose:
+        neck*: [18, 0, 0]
+        leg_fr_0: [-30, 0, -4]
+        leg_fr_1: [6, 0, 0]
+        leg_fl_1: [20, 0, 0]
+      rootRot: [8, 0, 0]
+      root: [0, -0.08, 0.1]
+  claw_r:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-8, 14, 0]
+        head*: [0, 10, 0]
+        jaw*: [16, 0, 0]
+        leg_fr_0: [-110, -20, -40]
+        leg_fr_1: [70, 0, 0]
+        leg_fr_2: [40, 0, 0]
+      rootRot: [-18, 10, 8]
+      root: [0, 0, -0.06]
+    active:
+      pose:
+        neck*: [14, -14, 0]
+        head*: [6, -10, 0]
+        leg_fr_0: [-40, 40, 20]
+        leg_fr_1: [20, 0, 0]
+        leg_fr_2: [-10, 0, 0]
+        leg_fl_0: [-20, 0, 0]
+      rootRot: [6, -16, -6]
+      root: [0, -0.06, 0.2]
+    recovery:
+      pose:
+        neck*: [6, -6, 0]
+        leg_fr_0: [-20, 10, 0]
+      rootRot: [2, -6, 0]
+      root: [0, -0.02, 0.08]
+  claw_l:
+    mirror: claw_r
+  leap:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [10, 0, 0]
+        head*: [-10, 0, 0]
+        leg_fl_0: [-10, 0, 0]
+        leg_fl_1: [40, 0, 0]
+        leg_fr_0: [-10, 0, 0]
+        leg_fr_1: [40, 0, 0]
+        leg_bl_0: [-50, 0, 0]
+        leg_bl_1: [60, 0, 0]
+        leg_bl_2: [-40, 0, 0]
+        leg_br_0: [-50, 0, 0]
+        leg_br_1: [60, 0, 0]
+        leg_br_2: [-40, 0, 0]
+        tail*: [20, 0, 0]
+      rootRot: [-6, 0, 0]
+      root: [0, -0.24, -0.1]
+    active:
+      pose:
+        neck*: [-10, 0, 0]
+        head*: [10, 0, 0]
+        jaw*: [30, 0, 0]
+        leg_fl_0: [-70, 0, 0]
+        leg_fl_1: [10, 0, 0]
+        leg_fr_0: [-70, 0, 0]
+        leg_fr_1: [10, 0, 0]
+        leg_bl_0: [50, 0, 0]
+        leg_bl_1: [10, 0, 0]
+        leg_br_0: [50, 0, 0]
+        leg_br_1: [10, 0, 0]
+        tail*: [-10, 0, 0]
+      rootRot: [-14, 0, 0]
+      root: [0, 0.3, 0.3]
+    recovery:
+      pose:
+        neck*: [14, 0, 0]
+        jaw*: [4, 0, 0]
+        leg_fl_0: [-20, 0, 0]
+        leg_fl_1: [40, 0, 0]
+        leg_fr_0: [-20, 0, 0]
+        leg_fr_1: [40, 0, 0]
+        leg_bl_1: [30, 0, 0]
+        leg_br_1: [30, 0, 0]
+      rootRot: [8, 0, 0]
+      root: [0, -0.16, 0.1]
+  breath:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-30, 0, 0]
+        head*: [-20, 0, 0]
+        jaw*: [10, 0, 0]
+        leg_fl_0: [-14, 0, 0]
+        leg_fr_0: [-14, 0, 0]
+      rootRot: [-8, 0, 0]
+      root: [0, 0.02, -0.08]
+    active:
+      pose:
+        neck*: [16, 0, 0]
+        head*: [-4, 0, 0]
+        jaw*: [42, 0, 0]
+        leg_fl_0: [-24, 0, 0]
+        leg_fr_0: [-24, 0, 0]
+        leg_fl_1: [20, 0, 0]
+        leg_fr_1: [20, 0, 0]
+      rootRot: [6, 0, 0]
+      root: [0, -0.08, 0.06]
+      cycle:
+        period: 0.8
+        bones:
+          neck*: {y: [10, 0]}
+  roar:
+    hold: 2.5
+    telegraph:
+      pose:
+        neck*: [20, 0, 0]
+        head*: [10, 0, 0]
+        leg_fl_0: [-20, 0, 0]
+        leg_fr_0: [-20, 0, 0]
+        leg_fl_1: [24, 0, 0]
+        leg_fr_1: [24, 0, 0]
+      rootRot: [4, 0, 0]
+      root: [0, -0.1, 0]
+    active:
+      pose:
+        neck*: [-26, 0, 0]
+        head*: [-20, 0, 0]
+        jaw*: [44, 0, 0]
+        tail*: [-20, 0, 0]
+        leg_fl_0: [-20, 0, 0]
+        leg_fr_0: [-20, 0, 0]
+      rootRot: [-12, 0, 0]
+      root: [0, 0.02, -0.02]
+      cycle:
+        period: 0.12
+        bones:
+          head*: {y: [2.5, 0]}
+          chest: {x: [1.5, 0.3]}
+    recovery:
+      pose:
+        neck*: [4, 0, 0]
+        jaw*: [6, 0, 0]
+  howl:
+    base: roar
+    active:
+      pose:
+        neck*: [-40, 0, 0]
+        head*: [-34, 0, 0]
+        jaw*: [30, 0, 0]
+      rootRot: [-16, 0, 0]
+  tail_sweep:
+    hold: 1.5
+    telegraph:
+      pose:
+        neck*: [0, 30, 0]
+        head*: [0, 20, 0]
+        tail*: [0, 30, 0]
+        leg_fl_0: [-20, 0, 10]
+      rootRot: [0, 40, 0]
+      root: [0, -0.04, 0]
+    active:
+      pose:
+        neck*: [0, -20, 0]
+        tail*: [-10, -34, 0]
+        leg_bl_0: [20, 0, 0]
+        leg_br_0: [20, 0, 0]
+      rootRot: [0, -120, 0]
+      root: [0, -0.04, 0]
+    recovery:
+      pose:
+        tail*: [0, -10, 0]
+      rootRot: [0, -40, 0]
+  kick:
+    hold: 1.5
+    telegraph:
+      pose:
+        neck*: [20, 0, 0]
+        leg_bl_0: [-30, 0, 0]
+        leg_bl_1: [50, 0, 0]
+        leg_br_0: [-30, 0, 0]
+        leg_br_1: [50, 0, 0]
+        leg_fl_0: [-20, 0, 0]
+        leg_fr_0: [-20, 0, 0]
+      rootRot: [10, 0, 0]
+      root: [0, -0.1, 0]
+    active:
+      pose:
+        neck*: [30, 0, 0]
+        head*: [20, 0, 0]
+        leg_bl_0: [70, 0, 0]
+        leg_bl_1: [-10, 0, 0]
+        leg_br_0: [66, 0, 0]
+        leg_br_1: [-10, 0, 0]
+        tail*: [-40, 0, 0]
+      rootRot: [26, 0, 0]
+      root: [0, 0.1, 0]
+    recovery:
+      pose:
+        neck*: [10, 0, 0]
+      rootRot: [4, 0, 0]
+  spin:
+    active:
+      pose:
+        neck*: [10, 0, 0]
+        tail*: [0, -20, 0]
+      cycle:
+        period: 0.6
+        rootRot: {y: [150, 0]}
+  dive:
+    base: leap
+  swoop:
+    base: charge
+  emerge:
+    base: rear_stomp
+  stagger:
+    active:
+      pose:
+        neck*: [-18, 12, 0]
+        head*: [-12, 10, 0]
+        jaw*: [20, 0, 0]
+        leg_fl_0: [-20, 0, 0]
+        leg_fr_0: [10, 0, 0]
+        leg_bl_1: [30, 0, 0]
+        leg_br_1: [30, 0, 0]
+      rootRot: [-10, 10, -6]
+      root: [0, -0.04, -0.16]
+  spezzato:
+    telegraph:
+      pose:
+        neck*: [-20, 0, 0]
+        jaw*: [20, 0, 0]
+      rootRot: [-10, 0, 0]
+      root: [0, 0, -0.1]
+    active:
+      pose:
+        neck*: [26, 0, 0]
+        head*: [24, 0, 0]
+        jaw*: [10, 0, 0]
+        leg_fl_0: [-60, 0, 0]
+        leg_fl_1: [110, 0, 0]
+        leg_fr_0: [-54, 0, 0]
+        leg_fr_1: [104, 0, 0]
+        leg_bl_0: [-40, 0, 0]
+        leg_bl_1: [80, 0, 0]
+        leg_br_0: [-36, 0, 0]
+        leg_br_1: [76, 0, 0]
+        tail*: [30, 0, 0]
+      rootRot: [10, 0, 4]
+      root: [0, -0.42, 0]
+      cycle:
+        period: 2.4
+        bones:
+          chest: {x: [2.5, 0]}
+          neck*: {x: [2, 0.2]}
+  death:
+    telegraph:
+      pose:
+        neck*: [-30, 0, 0]
+        jaw*: [30, 0, 0]
+        leg_fl_0: [-40, 0, 0]
+      rootRot: [-20, 0, 0]
+      root: [0, 0.02, -0.08]
+    active:
+      pose:
+        neck*: [10, 20, 0]
+        head*: [20, 10, 0]
+        jaw*: [16, 0, 0]
+        leg_fl_0: [-40, 0, 30]
+        leg_fl_1: [40, 0, 0]
+        leg_fr_0: [-30, 0, 10]
+        leg_fr_1: [30, 0, 0]
+        leg_bl_0: [-20, 0, 30]
+        leg_bl_1: [30, 0, 0]
+        leg_br_0: [-10, 0, 10]
+        leg_br_1: [20, 0, 0]
+        tail*: [10, 20, 0]
+      rootRot: [4, 0, 78]
+      root: [-0.3, -0.62, 0]
+  intro:
+    base: roar
+  transition:
+    base: roar

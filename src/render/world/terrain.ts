@@ -349,7 +349,7 @@ export class TerrainMeshes {
     for (let j0 = 0; j0 < f.nz - 1; j0 += C) {
       for (let i0 = 0; i0 < f.nx - 1; i0 += C) {
         const i1 = Math.min(f.nx - 1, i0 + C), j1 = Math.min(f.nz - 1, j0 + C);
-        const lods = steps.map((s) => chunkGeometry(f, i0, j0, i1, j1, s, 3));
+        const lods = steps.map((s) => chunkGeometry(f, i0, j0, i1, j1, s, 6));
         const mesh = new THREE.Mesh(lods[0], this.material);
         mesh.receiveShadow = true;
         mesh.castShadow = false;
@@ -437,7 +437,8 @@ export function buildBackdrop(field: ZoneField, kind: BackdropKind, height: numb
       const base = e >= 0 ? field.height(x, z) : t.heightAt(x, z);
       const out = Math.max(0, -e);
       let y = base + backdropRise(kind, height, out, x, z, water);
-      if (e > 0) y -= 0.6;
+      // in-bounds backdrop vertices sink with the grid step so coarse chords never poke through a concave rim
+      if (e > 0) y -= 0.6 + S * 0.22;
       if (kind === 'water' && water !== null && out > 10) y = Math.min(y, water - 1.2 - out * 0.004);
       H[k] = y;
     }

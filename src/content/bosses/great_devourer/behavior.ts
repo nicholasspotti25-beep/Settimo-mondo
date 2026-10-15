@@ -6,7 +6,7 @@
  *    surfacing beside the pier, coils around a stilt, the tail slamming across the pier, breaches across the rafts). Each of them
  *    ends with the serpent surfaced somewhere, so every attack from below opens a punish window.
  *  - SURFACED: head and neck reared above the deck, hittable; bites, low head sweeps, logs flung by the tail. After 2–3 surfaced
- *    attacks (or a few seconds) it dives again (`dive`).
+ *    attacks (or ~11 s) it dives again (`dive`).
  * Phase 2 (flag 'pier_destroyed', arena variant): the pier is smashed into rafts and logs; no stilts remain.
  * Hazard placement fix-ups (stilt coils, tail across the pier) move the freshly spawned hazard after the data spawn.
  * Deterministic: sim.rng only.
@@ -26,9 +26,9 @@ export const STILTS: readonly [number, number][] = [
 /** A coil around a stilt is only chosen when the player stands this close to one. */
 export const STILT_REACH = 7.5;
 /** Surfaced attacks before the serpent dives again (inclusive range). */
-export const SURFACED_ATTACKS: [number, number] = [2, 3];
+export const SURFACED_ATTACKS: [number, number] = [3, 4];
 /** Max seconds surfaced before it prefers to dive. */
-export const SURFACED_MAX_TIME = 9;
+export const SURFACED_MAX_TIME = 11;
 
 interface DevourerState {
   surfaced: boolean;
@@ -189,7 +189,7 @@ function attack(a: Actor, id: string): AttackDef | undefined {
 export default defineBehavior(() => ({
   init(a: Actor, sim: Sim) {
     const s: DevourerState = {
-      surfaced: true, opened: false, surfacedAttacks: 0, surfacedLimit: 2, surfacedTime: 0, markX: 0, markZ: 0, hasMark: false, stilt: -1,
+      surfaced: true, opened: false, surfacedAttacks: 0, surfacedLimit: SURFACED_ATTACKS[0], surfacedTime: 0, markX: 0, markZ: 0, hasMark: false, stilt: -1,
     };
     a.bstate = s;
     // starts under the water, far out in the fog

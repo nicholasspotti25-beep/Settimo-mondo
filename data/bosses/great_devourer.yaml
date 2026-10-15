@@ -16,6 +16,9 @@ arena: palude_molo
 zone: palude
 model: {builder: great_devourer, rig: serpent, scale: 1.0, palette: act1_green_gold}
 equilibrio_max: 170
+# The serpent spends a third of the fight under the planks (untouchable): the formula HP (5654, which assumes reference uptime)
+# is reduced so a clean fight ends inside the 240 s target.
+hp_override: 5200
 body: {radius: 1.8, height: 8.0, mass: immovable}
 # The neck rising out of the water (local frame; the head leans toward the pier, +Z).
 hurtboxes:
@@ -133,7 +136,7 @@ attacks:
       - {t: 0.05, dur: 0.35, shape: {type: arc, r: 10.5, r_in: 1.5, angle: 150, yaw: 0, y: [0, 1.0]}}
     spawns:
       - {t: -0.95, type: sfx, id: devourer_scales}
-  # Dives back under the planks; the splash ring can be jumped.
+  # Dives back under the planks; the splash flashes on the water (0.25 s) and its ring can be jumped.
   - id: dive
     anim: dive
     telegraph: 0.55
@@ -146,7 +149,7 @@ attacks:
     weight: 0
     requires: surfaced
     spawns:
-      - {t: 0.1, type: shockwave, id: devourer_splash, radius: 6, shape: {type: ring, r0: 1.2, r1: 6, width: 1.1, height: 0.7}, active: 0.4, damage_mult: 0.6}
+      - {t: 0.1, type: shockwave, id: devourer_splash, radius: 6, shape: {type: ring, r0: 1.2, r1: 6, width: 1.1, height: 0.7}, delay: 0.25, active: 0.4, damage_mult: 0.6}
       - {t: 0.3, type: custom, event: submerge}
   # --- Submerged -----------------------------------------------------------------------------------------------------------
   # Ripples gather under you: the head bursts up through the planks where they boil, and stays reared there.
@@ -185,7 +188,7 @@ attacks:
       - {t: -1.1, type: custom, event: flank_mark}
       - {t: -1.0, type: vfx, id: devourer_ripples}
       - {t: 0.0, type: custom, event: surface}
-      - {t: 0.02, type: shockwave, id: devourer_splash, radius: 8, shape: {type: ring, r0: 1.5, r1: 8, width: 1.3, height: 0.8}, active: 0.55, damage_mult: 0.8}
+      - {t: 0.02, type: shockwave, id: devourer_splash, radius: 8, shape: {type: ring, r0: 1.5, r1: 8, width: 1.3, height: 0.8}, delay: 0.25, active: 0.55, damage_mult: 0.8}
   # Coils around the stilt nearest to you and crushes that stretch of the pier (the planks crack first), then rears there.
   - id: coil_crush
     anim: coil

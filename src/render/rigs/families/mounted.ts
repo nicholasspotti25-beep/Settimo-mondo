@@ -46,5 +46,6 @@ export function mountedSkeleton(mb: ModelBuilder, o: MountedOpts): MountedDims {
   mb.info.follow = [{ bone: 'rider_root', target: 'seat', off: 'dismounted' }];
   mb.info.hideOnFlag = { dismounted: ['body'] };
   mb.info.flagPrefix = { dismounted: 'foot_' };
+  mb.info.flagRoot = { dismounted: 'rider_hips' };
   return { horse: q, rider, saddleY: saddleModel.y };
 }

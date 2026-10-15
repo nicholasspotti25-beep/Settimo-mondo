@@ -10,7 +10,7 @@ buttons:
   jump:        {pos: [0.758, 0.938], size: 0.09}
   art_prima:   {pos: [0.886, 0.721], size: 0.08}
   art_seconda: {pos: [0.815, 0.711], size: 0.08}
-  lacrime:     {pos: [0.037, 0.15], size: 0.08}
+  lacrime:     {pos: [0.037, 0.19], size: 0.08}
   lock:        {pos: [0.964, 0.639], size: 0.08}
   slot_1:      {pos: [0.715, 0.052], size: 0.07}
   slot_2:      {pos: [0.772, 0.052], size: 0.07}

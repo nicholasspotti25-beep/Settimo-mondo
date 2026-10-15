@@ -1,0 +1,396 @@
+# Mounted pose library: humanoid rider (bones prefixed rider_) on a quadruped steed (quadruped bone names).
+# Root offsets/rotation drive the steed's body. With the actor flag 'dismounted' the rider plays the 'foot_' clips
+# (the humanoid library with the rider_ prefix) and the root moves to rider_hips.
+# Lance/weapon in the right fist (grip_r; +Z out of the fist): the weapon's pitch is the SUM of the x rotations of
+# rider_arm_r + rider_forearm_r + rider_hand_r (0 = horizontal forward, -90 = straight up, +30 = 30 deg down).
+family: mounted
+includes:
+  - {family: quadruped, clipPrefix: steed_}
+  - {family: humanoid, bonePrefix: rider_, clipPrefix: foot_}
+aliases:
+  bite: thrust
+  thrust_heavy: thrust
+  claw_r: sweep_r
+  claw_l: sweep_l
+  tail_sweep: sweep_r
+  spin: sweep_r
+  slam: overhead
+  stomp: rear_stomp
+  shield_bash: charge
+  dive: charge
+  swoop: charge
+  grab: thrust
+  coil: thrust
+  throw: thrust
+  cast: roar
+  summon: roar
+  breath: roar
+  howl: roar
+  burrow: rear_stomp
+  emerge: rear_stomp
+  hover: idle
+  fly: run
+  attack: thrust
+clips:
+  idle:
+    base: steed_idle
+    pose:
+      rider_spine: [2, 0, 0]
+      rider_chest: [-2, 4, 0]
+      rider_neck: [-2, 0, 0]
+      rider_head: [-4, -4, 0]
+      rider_thigh_l: [-62, 0, 30]
+      rider_thigh_r: [-62, 0, -30]
+      rider_shin_l: [74, 0, 0]
+      rider_shin_r: [74, 0, 0]
+      rider_foot_l: [-14, 0, 0]
+      rider_foot_r: [-14, 0, 0]
+      rider_arm_l: [-26, 0, 10]
+      rider_forearm_l: [-60, 0, 0]
+      rider_hand_l: [10, 0, 0]
+      rider_arm_r: [-12, 0, -14]
+      rider_forearm_r: [-72, 0, 0]
+      rider_hand_r: [20, 0, 0]
+  walk:
+    base: steed_walk
+    pose:
+      rider_spine: [4, 0, 0]
+      rider_chest: [0, 0, 0]
+      rider_head: [-4, 0, 0]
+      rider_thigh_l: [-62, 0, 30]
+      rider_thigh_r: [-62, 0, -30]
+      rider_shin_l: [74, 0, 0]
+      rider_shin_r: [74, 0, 0]
+      rider_foot_l: [-14, 0, 0]
+      rider_foot_r: [-14, 0, 0]
+      rider_arm_l: [-28, 0, 10]
+      rider_forearm_l: [-58, 0, 0]
+      rider_arm_r: [-12, 0, -14]
+      rider_forearm_r: [-72, 0, 0]
+      rider_hand_r: [20, 0, 0]
+  run:
+    base: steed_run
+    pose:
+      rider_spine: [16, 0, 0]
+      rider_chest: [8, 0, 0]
+      rider_neck: [-12, 0, 0]
+      rider_head: [-8, 0, 0]
+      rider_thigh_l: [-58, 0, 32]
+      rider_thigh_r: [-58, 0, -32]
+      rider_shin_l: [80, 0, 0]
+      rider_shin_r: [80, 0, 0]
+      rider_foot_l: [-16, 0, 0]
+      rider_foot_r: [-16, 0, 0]
+      rider_arm_l: [-40, 0, 8]
+      rider_forearm_l: [-44, 0, 0]
+      rider_arm_r: [-20, 0, -12]
+      rider_forearm_r: [-64, 0, 0]
+      rider_hand_r: [40, 0, 0]
+  charge:
+    base: steed_charge
+    hold: 2
+    telegraph:
+      pose:
+        rider_spine: [10, -6, 0]
+        rider_chest: [4, -8, 0]
+        rider_neck: [-8, 6, 0]
+        rider_head: [-6, 6, 0]
+        rider_arm_r: [-22, 2, -8]
+        rider_forearm_r: [-58, 0, 0]
+        rider_hand_r: [70, 0, 0]
+        rider_arm_l: [-40, 0, 10]
+        rider_forearm_l: [-40, 0, 0]
+    active:
+      pose:
+        rider_spine: [18, 0, 0]
+        rider_chest: [10, 0, 0]
+        rider_neck: [-14, 0, 0]
+        rider_head: [-10, 0, 0]
+        rider_arm_r: [-28, 4, -6]
+        rider_forearm_r: [-56, 0, 0]
+        rider_hand_r: [86, 0, 0]
+        rider_arm_l: [-44, 0, 8]
+        rider_forearm_l: [-36, 0, 0]
+        rider_thigh_l: [-56, 0, 32]
+        rider_thigh_r: [-56, 0, -32]
+        rider_shin_l: [82, 0, 0]
+        rider_shin_r: [82, 0, 0]
+    recovery:
+      pose:
+        rider_spine: [-6, 0, 0]
+        rider_chest: [-4, 0, 0]
+        rider_arm_r: [-14, 0, -12]
+        rider_forearm_r: [-70, 0, 0]
+        rider_hand_r: [30, 0, 0]
+        rider_arm_l: [-34, 0, 10]
+        rider_forearm_l: [-50, 0, 0]
+  thrust:
+    hold: 1.5
+    telegraph:
+      pose:
+        neck*: [-6, 0, 0]
+        rider_spine: [-4, -14, 0]
+        rider_chest: [-6, -30, 0]
+        rider_neck: [0, 16, 0]
+        rider_head: [0, 14, 0]
+        rider_arm_r: [12, -10, -22]
+        rider_forearm_r: [-74, 0, 0]
+        rider_hand_r: [64, 0, 0]
+        rider_arm_l: [-40, 0, 14]
+        rider_forearm_l: [-50, 0, 0]
+      rootRot: [-3, -8, 0]
+      root: [0, 0, -0.04]
+    active:
+      pose:
+        neck*: [10, 0, 0]
+        rider_spine: [14, 8, 0]
+        rider_chest: [10, 18, 0]
+        rider_neck: [-8, -10, 0]
+        rider_head: [-8, -8, 0]
+        rider_arm_r: [-80, 6, -4]
+        rider_forearm_r: [-6, 0, 0]
+        rider_hand_r: [88, 0, 0]
+        rider_arm_l: [-20, 0, 20]
+        rider_forearm_l: [-60, 0, 0]
+      rootRot: [4, 6, 0]
+      root: [0, -0.02, 0.12]
+    recovery:
+      pose:
+        rider_spine: [6, 2, 0]
+        rider_chest: [4, 4, 0]
+        rider_arm_r: [-46, 0, -10]
+        rider_forearm_r: [-40, 0, 0]
+        rider_hand_r: [70, 0, 0]
+      root: [0, 0, 0.06]
+  overhead:
+    hold: 3
+    telegraph:
+      pose:
+        neck*: [-22, 0, 0]
+        head*: [-12, 0, 0]
+        jaw*: [16, 0, 0]
+        leg_fl_0: [-56, 0, 0]
+        leg_fl_1: [80, 0, 0]
+        leg_fr_0: [-48, 0, 0]
+        leg_fr_1: [72, 0, 0]
+        leg_bl_0: [-18, 0, 0]
+        leg_br_0: [-18, 0, 0]
+        rider_spine: [-10, 0, 0]
+        rider_chest: [-16, 4, 0]
+        rider_neck: [8, 0, 0]
+        rider_arm_r: [-168, 0, -12]
+        rider_forearm_r: [-28, 0, 0]
+        rider_hand_r: [16, 0, 0]
+        rider_arm_l: [-40, 0, 24]
+        rider_forearm_l: [-40, 0, 0]
+      rootRot: [-24, 0, 0]
+      root: [0, 0.02, -0.06]
+    active:
+      pose:
+        neck*: [22, 0, 0]
+        head*: [8, 0, 0]
+        leg_fl_0: [-30, 0, 0]
+        leg_fl_1: [6, 0, 0]
+        leg_fr_0: [-26, 0, 0]
+        leg_fr_1: [6, 0, 0]
+        rider_spine: [26, 0, 0]
+        rider_chest: [18, -4, 0]
+        rider_neck: [-14, 0, 0]
+        rider_head: [-10, 0, 0]
+        rider_arm_r: [-66, 4, -6]
+        rider_forearm_r: [-8, 0, 0]
+        rider_hand_r: [104, 0, 0]
+        rider_arm_l: [-10, 0, 30]
+        rider_forearm_l: [-30, 0, 0]
+      rootRot: [10, 0, 0]
+      root: [0, -0.08, 0.22]
+    recovery:
+      pose:
+        neck*: [8, 0, 0]
+        rider_spine: [14, 0, 0]
+        rider_chest: [8, 0, 0]
+        rider_arm_r: [-44, 0, -10]
+        rider_forearm_r: [-20, 0, 0]
+        rider_hand_r: [80, 0, 0]
+      rootRot: [3, 0, 0]
+      root: [0, -0.04, 0.12]
+  sweep_r:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [0, 14, 0]
+        rider_spine: [0, -22, 0]
+        rider_chest: [-6, -40, 6]
+        rider_neck: [0, 24, 0]
+        rider_head: [0, 20, 0]
+        rider_arm_r: [-16, -10, -84]
+        rider_forearm_r: [-10, 0, 0]
+        rider_hand_r: [30, 0, 0]
+        rider_arm_l: [-40, 0, 16]
+        rider_forearm_l: [-50, 0, 0]
+      rootRot: [0, -16, 0]
+    active:
+      pose:
+        neck*: [0, -16, 0]
+        rider_spine: [8, 24, 0]
+        rider_chest: [4, 44, -6]
+        rider_neck: [0, -26, 0]
+        rider_head: [0, -20, 0]
+        rider_arm_r: [-70, 30, -40]
+        rider_forearm_r: [-6, 0, 0]
+        rider_hand_r: [80, 0, 0]
+        rider_arm_l: [-10, 0, 34]
+        rider_forearm_l: [-30, 0, 0]
+      rootRot: [0, 22, 0]
+      root: [0, 0, 0.06]
+    recovery:
+      pose:
+        rider_spine: [4, 10, 0]
+        rider_chest: [2, 18, 0]
+        rider_arm_r: [-40, 10, -20]
+        rider_forearm_r: [-30, 0, 0]
+        rider_hand_r: [60, 0, 0]
+      rootRot: [0, 8, 0]
+  sweep_l:
+    mirror: sweep_r
+  rear_stomp:
+    base: steed_rear_stomp
+    telegraph:
+      pose:
+        rider_spine: [22, 0, 0]
+        rider_chest: [12, 0, 0]
+        rider_neck: [-14, 0, 0]
+        rider_arm_r: [-150, 0, -18]
+        rider_forearm_r: [-20, 0, 0]
+        rider_hand_r: [100, 0, 0]
+        rider_arm_l: [-50, 0, 10]
+        rider_forearm_l: [-30, 0, 0]
+        rider_thigh_l: [-50, 0, 34]
+        rider_thigh_r: [-50, 0, -34]
+        rider_shin_l: [86, 0, 0]
+        rider_shin_r: [86, 0, 0]
+    active:
+      pose:
+        rider_spine: [-10, 0, 0]
+        rider_chest: [-8, 0, 0]
+        rider_arm_r: [-60, 0, -14]
+        rider_forearm_r: [-20, 0, 0]
+        rider_hand_r: [100, 0, 0]
+        rider_arm_l: [-30, 0, 20]
+        rider_forearm_l: [-50, 0, 0]
+    recovery:
+      pose:
+        rider_spine: [4, 0, 0]
+        rider_arm_r: [-20, 0, -14]
+        rider_forearm_r: [-60, 0, 0]
+        rider_hand_r: [40, 0, 0]
+  leap:
+    base: steed_leap
+    active:
+      pose:
+        rider_spine: [24, 0, 0]
+        rider_chest: [10, 0, 0]
+        rider_arm_r: [-30, 0, -10]
+        rider_forearm_r: [-56, 0, 0]
+        rider_hand_r: [86, 0, 0]
+        rider_arm_l: [-50, 0, 10]
+        rider_forearm_l: [-30, 0, 0]
+  kick:
+    base: steed_kick
+    active:
+      pose:
+        rider_spine: [-20, 0, 0]
+        rider_chest: [-10, 0, 0]
+        rider_arm_l: [-60, 0, 10]
+        rider_forearm_l: [-30, 0, 0]
+  block:
+    base: idle
+    pose:
+      rider_chest: [-4, 16, 0]
+      rider_arm_l: [-60, 14, 18]
+      rider_forearm_l: [-90, 0, 0]
+      rider_arm_r: [-20, 0, -14]
+      rider_forearm_r: [-70, 0, 0]
+      rider_hand_r: [10, 0, 0]
+  roar:
+    hold: 2.5
+    telegraph:
+      pose:
+        neck*: [16, 0, 0]
+        head*: [10, 0, 0]
+        rider_spine: [14, 0, 0]
+        rider_chest: [10, 0, 0]
+        rider_neck: [8, 0, 0]
+        rider_head: [10, 0, 0]
+        rider_arm_r: [-20, 0, -16]
+        rider_forearm_r: [-70, 0, 0]
+        rider_hand_r: [30, 0, 0]
+      root: [0, -0.06, 0]
+    active:
+      pose:
+        neck*: [-24, 0, 0]
+        head*: [-16, 0, 0]
+        jaw*: [40, 0, 0]
+        leg_fl_0: [-70, 0, 0]
+        leg_fl_1: [92, 0, 0]
+        leg_fr_0: [-60, 0, 0]
+        leg_fr_1: [84, 0, 0]
+        leg_bl_0: [-26, 0, 0]
+        leg_br_0: [-26, 0, 0]
+        rider_spine: [-6, 0, 0]
+        rider_chest: [-12, 0, 0]
+        rider_neck: [-10, 0, 0]
+        rider_head: [-16, 0, 0]
+        rider_arm_r: [-150, 0, -20]
+        rider_forearm_r: [-16, 0, 0]
+        rider_hand_r: [96, 0, 0]
+        rider_arm_l: [-30, 0, 40]
+        rider_forearm_l: [-40, 0, 0]
+      rootRot: [-38, 0, 0]
+      root: [0, 0.02, -0.04]
+      cycle:
+        period: 0.5
+        bones:
+          leg_fl_0: {x: [-12, 0]}
+          leg_fr_0: {x: [-12, 0.5]}
+    recovery:
+      pose:
+        rider_arm_r: [-20, 0, -14]
+        rider_forearm_r: [-70, 0, 0]
+      rootRot: [0, 0, 0]
+  stagger:
+    base: steed_stagger
+    active:
+      pose:
+        rider_spine: [-18, 8, 0]
+        rider_chest: [-16, 10, 4]
+        rider_head: [-14, -10, 6]
+        rider_arm_r: [-10, 0, -34]
+        rider_forearm_r: [-50, 0, 0]
+        rider_arm_l: [-20, 0, 40]
+  spezzato:
+    base: steed_spezzato
+    active:
+      pose:
+        rider_spine: [30, 0, 0]
+        rider_chest: [20, 0, 0]
+        rider_neck: [16, 0, 0]
+        rider_head: [22, 0, 0]
+        rider_arm_r: [-6, 0, -14]
+        rider_forearm_r: [-20, 0, 0]
+        rider_hand_r: [10, 0, 0]
+        rider_arm_l: [-20, 0, 12]
+        rider_forearm_l: [-20, 0, 0]
+  death:
+    base: steed_death
+    active:
+      pose:
+        rider_spine: [24, 0, 0]
+        rider_chest: [20, 0, 0]
+        rider_head: [26, 0, 0]
+        rider_arm_r: [-10, 0, -40]
+        rider_arm_l: [-10, 0, 40]
+  intro:
+    base: roar
+  transition:
+    base: roar
