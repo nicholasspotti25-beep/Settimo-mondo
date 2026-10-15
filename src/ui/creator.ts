@@ -172,7 +172,7 @@ ${grad('cg-boot', '#4a3a32', '#1e1612', 0.5, 1)}
 
   // warm rim light on the left edge of the silhouette
   const rim = `<path d="M${x - sw - 7} 112 Q ${x - cw - 2} 200 ${x - cw} 282" stroke="#ffd9a0" stroke-width="1.4" fill="none" opacity=".55"/>`
-    + `<path d="M${x - 14.4} ${hy + 4} Q ${x - 15} ${hy - 12} ${x - 6} ${hy - 17}" stroke="#ffe6b8" stroke-width="1.1" fill="none" opacity=".6"/>`;
+    + `<path d="M${x - 14.4} ${hy + 4} Q ${x - 15} ${hy - 12} ${x - 6} ${hy - 17}" stroke="#ffe6b8" stroke-width=".9" fill="none" opacity=".35"/>`;
 
   const body = `<g transform="translate(0 ${(296 * (1 - sy)).toFixed(2)}) scale(1 ${sy.toFixed(3)})">${cape}${legs}${hairBack}${arms}${tunic}${mantle}${seed}${neck}${head}${face}${hairFront}${rim}</g>`;
   return `${defs}<ellipse cx="${x}" cy="296" rx="62" ry="9" fill="url(#cg-ground)"/><circle cx="${x}" cy="${(62 * sy + 296 * (1 - sy)).toFixed(1)}" r="64" fill="url(#cg-halo)"/>${body}`;
@@ -300,8 +300,9 @@ export class CharacterCreator {
       field(t('ui.creator.cloak'), swatches(CLOAK_COLORS, () => L.cloak, (i) => { L.cloak = i; }, t('ui.creator.cloak'))));
 
     this.fig = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    this.fig.setAttribute('viewBox', '0 0 200 310');
+    this.fig.setAttribute('viewBox', '22 22 156 284');
     this.fig.setAttribute('aria-hidden', 'true');
+    this.fig.setAttribute('class', 'fig');
     const begin = pill(t('ui.creator.begin'), () => {
       name.blur();
       uiSound(this.ctx, 'confirm');

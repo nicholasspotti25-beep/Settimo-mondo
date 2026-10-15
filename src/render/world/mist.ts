@@ -79,7 +79,7 @@ void main() {
   vec3 ray = vAtmWorld - cameraPosition;
   float dist = length(ray);
   float fa = smFogAmount(ray, dist);
-  float nb = mix(0.8, 1.05, uNight);
+  float nb = mix(0.62, 1.05, uNight);
   // a little stronger seen edge-on so the wall still reads from oblique angles
   gl_FragColor = vec4(col * a * nb * (1.0 - fa * 0.8), 1.0);
 }

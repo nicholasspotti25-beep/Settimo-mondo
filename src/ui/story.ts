@@ -126,6 +126,8 @@ export class StoryLayer {
   }
 
   onEvent(e: SimEvent): void {
+    // lines spoken by the running sequence are drawn from seq.view; only standalone ones become transient subtitles
+    if ((e.type === 'dialogue' || e.type === 'caption' || e.type === 'voce') && this.seqShows(e.key)) return;
     switch (e.type) {
       case 'dialogue':
         this.push({ key: e.key, speaker: e.speaker, kind: e.speaker === 'voce' ? 'voce' : 'say', left: 0 });
@@ -143,6 +145,11 @@ export class StoryLayer {
       default:
         break;
     }
+  }
+
+  private seqShows(key: string): boolean {
+    const seq = this.ctx.game.sim.seq;
+    return seq.running && seq.view.line?.key === key;
   }
 
   private push(tr: Transient): void {

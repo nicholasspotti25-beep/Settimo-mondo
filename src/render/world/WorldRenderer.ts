@@ -20,6 +20,7 @@ import { SkyDome } from './sky';
 import { buildZone } from './zone';
 import { ZoneSites } from './sites';
 import { zoneEnv } from './env';
+import { ZoneParticles, zoneParticleList } from './particles';
 
 const FALLBACK_TOD: TodPreset = { sky: 'act1_giorno', fog: 'thin', ambient: 1 };
 
@@ -30,6 +31,8 @@ export class WorldRenderer {
   zoneVisual: ZoneVisual | null = null;
   /** Altars, fog gates, Reperti, exits and vistas of the current zone (built for every zone, custom or generic). */
   sites: ZoneSites | null = null;
+  /** Ambient particles of the current zone (zone.particles, else the biome's list). */
+  particles: ZoneParticles | null = null;
   arenaVisuals = new Map<string, ArenaVisual>();
   private zoneId = '';
   private builtQuality: QualityLevel;
@@ -40,6 +43,7 @@ export class WorldRenderer {
   private shade = -1;
   private focus = new THREE.Vector3();
   private zoneDef: ZoneDef | null = null;
+  private lastCamera: THREE.Camera | null = null;
 
   constructor(private scene: THREE.Scene, private ctx: RenderCtx) {
     this.group.name = 'world';
@@ -111,6 +115,11 @@ export class WorldRenderer {
   /* ---------------------------------------------------------------------------------------------------------------- */
 
   private disposeZone(): void {
+    if (this.particles) {
+      this.group.remove(this.particles.group);
+      this.particles.dispose();
+      this.particles = null;
+    }
     if (this.sites) {
       this.group.remove(this.sites.group);
       this.sites.dispose();
@@ -167,6 +176,13 @@ export class WorldRenderer {
       } catch (err) {
         console.error(`[world] sites of ${def.id} failed`, err);
       }
+      try {
+        const env = zoneEnv(def, this.ctx);
+        this.particles = new ZoneParticles(env, zoneParticleList(env), (s) => this.atmosphere.lightning(s));
+        this.group.add(this.particles.group);
+      } catch (err) {
+        console.error(`[world] particles of ${def.id} failed`, err);
+      }
       for (const arenaId of def.arenas) {
         const loader = ARENA_BUILDERS[arenaId];
         if (!loader) continue;
@@ -218,7 +234,10 @@ export class WorldRenderer {
         this.retarget(false, 12);
         break;
       case 'cue': {
-        if (e.id === 'lightning' || e.id.startsWith('lightning')) this.atmosphere.lightning(1);
+        if (e.id === 'lightning' || e.id.startsWith('lightning')) {
+          this.atmosphere.lightning(1);
+          if (this.lastCamera) this.particles?.strike(this.lastCamera);
+        }
         const st = e.id.startsWith('arena_state:') ? e.id.slice(12) : null;
         for (const a of this.arenaVisuals.values()) {
           if (st && a.setState) a.setState(st);
@@ -256,6 +275,8 @@ export class WorldRenderer {
     this.sky.update(camera);
     if (this.zoneVisual) this.zoneVisual.update(sim, dt, camera);
     this.sites?.update(sim, dt);
+    this.lastCamera = camera;
+    this.particles?.update(dt, this.focus, camera);
     for (const a of this.arenaVisuals.values()) a.update(sim, dt);
   }
 

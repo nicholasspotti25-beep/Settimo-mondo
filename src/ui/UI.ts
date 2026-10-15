@@ -18,7 +18,7 @@ import { StoryLayer } from './story';
 import { Cards } from './cards';
 import { ControlsView } from './controls';
 import { AltarMenu } from './altar';
-import { defaultCharacter } from '../sim/gamestate';
+import { TitleScreen } from './title';
 
 export class SettimoUI implements GameUI {
   private game!: Game;
@@ -35,7 +35,7 @@ export class SettimoUI implements GameUI {
   private pauseBtn!: HTMLElement;
   private flashEl: HTMLElement | null = null;
   private flashTimer = 0;
-  private title!: HTMLElement;
+  private title!: TitleScreen;
   private fadeEl!: HTMLElement;
   private probe!: HTMLElement;
   private mounted = false;
@@ -45,7 +45,6 @@ export class SettimoUI implements GameUI {
   private lang = '';
   private fadeTimer = 0;
   private fadeDone: (() => void) | null = null;
-  private titleLabel: () => void = () => undefined;
 
   mount(root: HTMLElement, game: Game): void {
     this.game = game;
@@ -60,9 +59,9 @@ export class SettimoUI implements GameUI {
     this.altar = new AltarMenu(this.ctx, { transition: (fn) => this.transition(fn), flash: (t) => this.flash(t) });
     this.pauseBtn = h('button', { class: 'sm-topbtn sm-pausebtn sm-hidden', type: 'button' }, svgIcon(ICONS.pause));
     this.pauseBtn.addEventListener('click', () => this.openPause());
-    this.title = this.buildTitle();
+    this.title = new TitleScreen(this.ctx, { startSession: (run) => this.startSession(run), flash: (t) => this.flash(t), openSettings: null });
     this.fadeEl = h('div', { class: 'sm-fade' });
-    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.title, this.fadeEl);
+    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.title.el, this.fadeEl);
     root.appendChild(this.root);
     this.mounted = true;
 
@@ -79,6 +78,10 @@ export class SettimoUI implements GameUI {
     window.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape' || e.repeat) return;
       if (this.root.querySelector('.sm-dialog')) return;
+      if (this.mode === 'title') {
+        if (!this.transitioning) this.title.back();
+        return;
+      }
       if (this.altar.isOpen) {
         if (!this.transitioning) this.altar.leave();
       } else this.openPause();
@@ -121,40 +124,6 @@ export class SettimoUI implements GameUI {
     this.controls.layout(L);
   }
 
-  /* ------------------------------------------------------------------------------------------------ title */
-
-  private buildTitle(): HTMLElement {
-    const g = this.ctx;
-    const cont = h('button', { class: 'sm-tbtn first', type: 'button' });
-    const fresh = h('button', { class: 'sm-tbtn', type: 'button' });
-    cont.addEventListener('click', () => {
-      this.game.audio?.playUi('confirm');
-      void this.game.continueGame(this.game.slot).then((ok) => {
-        if (!ok) void this.game.newGame(this.game.slot, defaultCharacter());
-      });
-    });
-    fresh.addEventListener('click', () => {
-      this.game.audio?.playUi('confirm');
-      void this.game.newGame(this.game.slot, defaultCharacter());
-    });
-    const h1 = h('h1');
-    const tag = h('div', { class: 'tag' });
-    const el = h('div', { class: 'sm-title sm-hidden' },
-      h('div', { class: 'hz' }),
-      h('div', { class: 'logo' }, h('i', { class: 'seal' }, svgIcon(ICONS.seed)), h1, tag),
-      h('div', { class: 'menu' }, cont, fresh),
-      h('div', { class: 'ver' }, `v${g.game.content.bundle.version}`));
-    const label = () => {
-      h1.textContent = g.t('ui.title');
-      tag.textContent = g.t('ui.menu.tagline');
-      cont.textContent = g.t('ui.menu.continue');
-      fresh.textContent = g.t('ui.menu.new_game');
-    };
-    label();
-    this.titleLabel = label;
-    return el;
-  }
-
   /* ------------------------------------------------------------------------------------------------ pause */
 
   /** Open the pause menu when the game is actually playable (not in title, altar, ending or a transition). */
@@ -192,6 +161,20 @@ export class SettimoUI implements GameUI {
     });
   }
 
+  /** Start or resume a session from the title: fade out, run it, fade in once the zone is built and streaming ends. */
+  private startSession(run: () => Promise<unknown>): void {
+    if (this.transitioning) return;
+    this.transitioning = true;
+    this.controls.touch.releaseAll();
+    void this.fade('out', 0.45).then(async () => {
+      try {
+        await run();
+      } finally {
+        this.pendingFadeIn = true;
+      }
+    });
+  }
+
   /* ------------------------------------------------------------------------------------------------ GameUI */
 
   update(dt: number): void {
@@ -210,7 +193,7 @@ export class SettimoUI implements GameUI {
     this.altar.update(inGame && !story && !sim.endingActive ? sim.altarOpen : null);
     toggle(this.root, 'inmenu', this.altar.isOpen);
     toggle(this.pauseBtn, 'sm-hidden', !(this.mode === 'game' && hudOn && !this.altar.isOpen && sim.player.alive));
-    if (this.pendingFadeIn && !this.loading) {
+    if (this.pendingFadeIn && !this.loading && !game.renderer.world.busy) {
       this.pendingFadeIn = false;
       void this.fade('in', 0.7).then(() => {
         this.transitioning = false;
@@ -229,7 +212,7 @@ export class SettimoUI implements GameUI {
   onMode(m: GameMode): void {
     this.mode = m;
     if (!this.mounted) return;
-    toggle(this.title, 'sm-hidden', m !== 'title');
+    if ((m === 'title') !== this.title.visible) this.title.show(m === 'title');
     if (m === 'game') {
       this.story.reset();
       this.cards.reset();
@@ -279,7 +262,7 @@ export class SettimoUI implements GameUI {
       this.story.relabel();
       this.controls.relabel();
       this.altar.relabel();
-      this.titleLabel();
+      this.title.relabel();
     }
     this.relayout();
   }
