@@ -48,6 +48,7 @@ ui:
     tap_gesture: "Tocca per compiere il gesto"
     trace_gesture: "Traccia il segno, o tocca"
     advance: "Tocca per continuare"
+    skip: "Tieni premuto per saltare"
   touch:
     light: "Attacco leggero"
     heavy: "Attacco pesante"

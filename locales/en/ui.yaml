@@ -48,6 +48,7 @@ ui:
     tap_gesture: "Tap to perform the gesture"
     trace_gesture: "Trace the sign, or tap"
     advance: "Tap to continue"
+    skip: "Hold to skip"
   touch:
     light: "Light attack"
     heavy: "Heavy attack"
