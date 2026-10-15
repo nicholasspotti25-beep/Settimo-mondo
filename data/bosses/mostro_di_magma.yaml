@@ -1,0 +1,282 @@
+# 11. Mostro di Magma — secondary · Fucine Sepolte · D9.
+# A colossus of rock and lava among the giant anvils of the buried forge: glowing cracks, a heart that pulses in its chest.
+# Slow, devastating blows; lava bursts from the ground; an ERUPTION that floods the whole arena with magma (only the black
+# crusts of cooled basalt it raises stay safe: they appear first, run to one). The heart is a weak point in phase 1 when the
+# colossus bends over a slam. Phase 2: it solidifies into an OBSIDIAN CARAPACE (breakable part: damage to the body is
+# reduced until it shatters); shattering it exposes the heart (a far weaker point).
+# Built by the Three Knights to guard the forge where the armor of the Fallen was beaten.
+# Local frame: +Z forward, +Y up, +X = the colossus's LEFT.
+id: mostro_di_magma
+order: 11
+name_key: boss.mostro_di_magma.name
+class: secondary
+difficulty: 9
+act: 2
+arena: fucine_incudini
+zone: fucine_sepolte
+model: {builder: mostro_di_magma, rig: colossus, scale: 1.0, palette: act2_red_blue_black}
+equilibrio_max: 230
+body: {radius: 3.3, height: 11.0, mass: immovable}
+hurtboxes:
+  - {c: [1.7, 1.6, 0], r: 1.55}     # left leg
+  - {c: [-1.7, 1.6, 0], r: 1.55}    # right leg
+  - {c: [0, 3.9, 0], r: 2.1}        # pelvis
+  - {c: [0, 6.4, 0.3], r: 2.6}      # torso
+  - {c: [0, 9.4, 0.7], r: 1.25}     # head
+parts:
+  - {id: heart, name_key: part.mostro_di_magma.heart, hurt: [{c: [0, 6.6, 1.7], r: 1.05}], damage_mult: 1.5, poise_mult: 1.3, lockable: true}
+  - {id: heart_exposed, name_key: part.mostro_di_magma.heart, hurt: [{c: [0, 6.6, 1.7], r: 1.2}], damage_mult: 2.2, poise_mult: 1.6, lockable: true, active: false}
+  - id: carapace
+    name_key: part.mostro_di_magma.carapace
+    hurt:
+      - {c: [1.7, 1.6, 0], r: 1.7}
+      - {c: [-1.7, 1.6, 0], r: 1.7}
+      - {c: [0, 3.9, 0], r: 2.25}
+      - {c: [0, 6.4, 0.3], r: 2.75}
+    hp: 0.15
+    main_share: 0.35
+    poise_mult: 0.6
+    active: false
+move: {walk: 1.9, run: 4.2, turn: 1.15, preferred_range: [3, 9]}
+idle_gap: [0.95, 1.6]
+music: boss_mostro_di_magma
+intro_sequence: magma_intro
+defeat_sequence: magma_defeat
+lore_key: boss.mostro_di_magma.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_mostro_di_magma_p1
+    opener: fist_slam
+    patterns: [fist_slam, double_slam, backhand, stomp, lava_burst, magma_lob, eruption]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_mostro_di_magma_p2
+    on_enter: [obsidian]
+    transition: 3.0
+    speed_mult: 1.05
+    aggression: 1.12
+    opener: shard_nova
+    patterns: [fist_slam, double_slam, backhand, stomp, lava_burst, magma_lob, eruption, obsidian_charge, shard_nova, lava_wave]
+attacks:
+  # The right fist rises over the head and comes down: the colossus stays bent, the heart within reach.
+  - id: fist_slam
+    anim: slam_r
+    telegraph: 1.05
+    active: 0.35
+    recovery: 1.55
+    damage_mult: 1.3
+    poise: 26
+    flags: [knockdown]
+    element: fire
+    range: [0, 9]
+    weight: 1.3
+    cooldown: 2.5
+    track: 1.1
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: cylinder, c: [-1.6, 0, 5.4], r: 3.1, h: 3.5}}
+    spawns:
+      - {t: 0.06, type: shockwave, id: magma_crack, from: [-1.6, 0, 5.4], shape: {type: ring, r0: 3.0, r1: 7.5, width: 1.1, height: 0.7}, active: 0.45, damage_mult: 0.5}
+    sfx: magma_slam
+  # Both fists, high over the head (Colpo Rosso): the floor cracks and a wave of heat races outward. Jump the ring.
+  - id: double_slam
+    anim: slam
+    telegraph: 1.25
+    active: 0.45
+    recovery: 1.7
+    damage_mult: 1.5
+    poise: 30
+    flags: [red, knockdown]
+    element: fire
+    range: [0, 10]
+    weight: 1.0
+    cooldown: 5
+    track: 1.0
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: cylinder, c: [0, 0, 5.2], r: 4.3, h: 3.5}}
+    spawns:
+      - {t: 0.06, type: shockwave, id: magma_wave, from: [0, 0, 5.2], shape: {type: ring, r0: 4.5, r1: 17, width: 1.4, height: 0.9}, active: 1.1, damage_mult: 0.7}
+    sfx: magma_slam_heavy
+  # A slow backhand that sweeps the whole front of the colossus.
+  - id: backhand
+    anim: sweep_l
+    telegraph: 0.95
+    active: 0.38
+    recovery: 1.25
+    damage_mult: 1.15
+    poise: 22
+    flags: [knockback]
+    range: [0, 8]
+    weight: 1.1
+    cooldown: 3
+    track: 1.1
+    track_active: 0.15
+    hits:
+      - {t: 0.03, dur: 0.3, shape: {type: arc, r: 10.5, angle: 200, y: [0, 3.5]}}
+    sfx: magma_sweep
+  # Whoever hides between its legs: a stomp that shakes the forge.
+  - id: stomp
+    anim: stomp
+    telegraph: 0.82
+    active: 0.3
+    recovery: 1.15
+    damage_mult: 1.1
+    poise: 26
+    flags: [knockdown]
+    element: fire
+    range: [0, 2]
+    weight: 1.2
+    cooldown: 3.5
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: cylinder, c: [0, 0, 0], r: 5.8, h: 3}}
+    sfx: magma_stomp
+  # Lava bursts from the ground: under your feet first, then around you.
+  - id: lava_burst
+    anim: summon
+    telegraph: 0.85
+    active: 1.3
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 20
+    flags: [burn]
+    element: fire
+    range: [0, 34]
+    weight: 1.0
+    cooldown: 5
+    spawns:
+      - {t: 0.0, type: hazard, id: magma_geyser, at: target_predict, delay: 1.0, active: 0.6, damage_mult: 1.0, shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 7}}
+      - {t: 0.45, type: hazard, id: magma_geyser, at: around_target, count: 3, dist: 4.6, radius: 2.2, delay: 1.05, active: 0.6, damage_mult: 0.9, shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 7}}
+    sfx: magma_rumble
+  # It tears molten rock from its own chest and hurls it.
+  - id: magma_lob
+    anim: throw
+    telegraph: 0.95
+    active: 0.5
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 16
+    flags: [burn]
+    element: fire
+    range: [8, 40]
+    weight: 1.0
+    cooldown: 4
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: custom, event: magma_lob}
+    sfx: magma_throw
+  # The eruption. It plunges both fists into the floor and the forge's veins flood the arena with magma. Before the flood,
+  # black crusts of basalt rise from the floor: stand on one. (Flood damage is applied by the behavior.)
+  - id: eruption
+    anim: eruption
+    telegraph: 2.3
+    active: 2.8
+    recovery: 1.7
+    damage_mult: 0.8
+    poise: 0
+    flags: [burn, unblockable]
+    element: fire
+    global: true
+    range: [0, 60]
+    weight: 0.9
+    cooldown: 26
+    spawns:
+      - {t: -2.25, type: custom, event: eruption_mark}
+      - {t: 0.0, type: custom, event: eruption_flood}
+    sfx: magma_eruption
+  # Phase 2: the obsidian body charges like a landslide.
+  - id: obsidian_charge
+    anim: charge
+    telegraph: 1.0
+    active: 1.0
+    recovery: 1.45
+    damage_mult: 1.3
+    poise: 28
+    flags: [knockdown]
+    range: [8, 40]
+    weight: 1.0
+    cooldown: 6
+    track: 1.2
+    track_active: 0.1
+    motion:
+      - {t: 0, dur: 0.9, type: forward, speed: 13}
+    hits:
+      - {t: 0, dur: 0.9, shape: {type: capsule, a: [0, 2.0, 1.5], b: [0, 3.0, 4.5], r: 2.6}}
+    sfx: magma_charge
+  # Phase 2: the carapace bristles and shards of obsidian fly out in every direction.
+  - id: shard_nova
+    anim: roar
+    telegraph: 0.95
+    active: 0.45
+    recovery: 1.2
+    damage_mult: 0.8
+    poise: 14
+    flags: []
+    range: [0, 18]
+    weight: 0.9
+    cooldown: 7
+    spawns:
+      - {t: 0.05, type: projectile, id: obsidian_shard, at: ring_self, count: 14, speed: 17, pitch: 0, from: [0, 3.0, 0]}
+    sfx: obsidian_burst
+  # Phase 2: two rings of lava roll out from its fists, one after the other. Jump, then jump again.
+  - id: lava_wave
+    anim: slam
+    telegraph: 1.0
+    active: 1.6
+    recovery: 1.4
+    damage_mult: 0.85
+    poise: 20
+    flags: [burn]
+    element: fire
+    range: [0, 20]
+    weight: 0.9
+    cooldown: 7
+    hits:
+      - {t: 0.04, dur: 0.18, shape: {type: cylinder, c: [0, 0, 5.0], r: 3.8, h: 3.5}}
+    spawns:
+      - {t: 0.06, type: shockwave, id: magma_wave, from: [0, 0, 4.0], shape: {type: ring, r0: 4.0, r1: 18, width: 1.4, height: 0.9}, active: 1.15, damage_mult: 0.8, repeat: 2, interval: 0.75}
+    sfx: magma_slam_heavy
+  # New Game+ (phase 1): the vault of the forge rains molten rock on marked ground.
+  - id: ng_magma_rain
+    anim: roar
+    telegraph: 1.0
+    active: 1.4
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 18
+    flags: [burn]
+    element: fire
+    global: true
+    weight: 0.8
+    cooldown: 10
+    spawns:
+      - {t: 0.0, type: hazard, id: magma_geyser, at: random_arena, count: 6, delay: 1.15, active: 0.5, damage_mult: 0.9, repeat: 2, interval: 0.6, shape: {type: cylinder, c: [0, 0, 0], r: 2.3, h: 7}}
+    sfx: magma_rumble
+  # New Game+ (phase 2): two landslide charges back to back.
+  - id: ng_obsidian_rampage
+    anim: charge
+    telegraph: 0.9
+    active: 1.0
+    recovery: 0.5
+    damage_mult: 1.3
+    poise: 28
+    flags: [knockdown]
+    range: [6, 40]
+    weight: 0.8
+    cooldown: 10
+    track: 1.2
+    track_active: 0.1
+    combo_next: obsidian_charge
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.9, type: forward, speed: 13}
+    hits:
+      - {t: 0, dur: 0.9, shape: {type: capsule, a: [0, 2.0, 1.5], b: [0, 3.0, 4.5], r: 2.6}}
+    sfx: magma_charge
+time_of_day_variants:
+  notte: {opener: lava_burst, note_key: boss.mostro_di_magma.tod.notte}
+dialogue_keys: []
+drops_weapon: fenditura_ardente
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_magma_rain], p2: [ng_magma_rain, ng_obsidian_rampage]}
+  idle_mult: 0.85

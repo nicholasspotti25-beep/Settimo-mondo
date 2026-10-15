@@ -21,4 +21,4 @@ arts:
   # Potatura: a wide scissor cut that prunes Equilibrio away.
   prima: {id: potatura, eco_cost: 100, effect: multi_strike, params: {count: 2, interval: 0.06, reach: 3.6, angle: 170, shape: scissor, poise_bonus: 45, damage_mult: 2.2, step: 0.3, dur: 0.8}, vfx: art_potatura, anim: scissor_cut}
   # Innesto: plant a seed in the enemy; after three seconds it blooms into binding vines.
-  seconda: {id: innesto, eco_cost: 200, effect: bind, params: {plant: true, reach: 2.8, radius: 3.4, delay: 3.0, bind_time: 3.2, damage_mult: 3.0, plant_mult: 0.4, visual: flowers, element: nature, dur: 0.7}, vfx: art_innesto, anim: plant_seed}
+  seconda: {id: innesto, eco_cost: 200, effect: bind, params: {plant: true, reach: 2.8, radius: 3.4, delay: 3.0, bind_time: 3.2, damage_mult: 3.0, plant_share: 0.3, visual: flowers, element: nature, dur: 0.7}, vfx: art_innesto, anim: plant_seed}

@@ -23,4 +23,4 @@ arts:
   # Respiro Primordiale: a cone of primordial light breathed from the ring.
   prima: {id: respiro_primordiale, eco_cost: 100, effect: cone_breath, params: {range: 9.0, angle: 55, ticks: 6, damage_mult: 2.5, dur: 1.2, element: light}, vfx: art_respiro_primordiale, anim: breath_cone}
   # Settimo Anello: a ring of light that pulls enemies in and burns them.
-  seconda: {id: settimo_anello, eco_cost: 200, effect: black_hole, params: {at: front, dist: 4.0, radius: 6.0, time: 3.0, pull: 5.0, dps_mult: 0.85, burst: 1.0, damage_mult: 1.7, visual: light, element: light, ring: true}, vfx: art_settimo_anello, anim: ring_of_light}
+  seconda: {id: settimo_anello, eco_cost: 200, effect: black_hole, params: {at: front, dist: 4.0, radius: 6.0, time: 3.0, pull: 5.0, dps_mult: 0.7, burst: true, damage_mult: 1.7, visual: light, element: light, ring: true}, vfx: art_settimo_anello, anim: ring_of_light}

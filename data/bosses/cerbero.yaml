@@ -30,6 +30,7 @@ parts:
 move: {walk: 3.2, run: 9.0, turn: 1.7, preferred_range: [3, 10]}
 idle_gap: [0.7, 1.4]
 music: boss_cerbero
+intro_sequence: cerbero_intro
 defeat_sequence: cerbero_defeat
 lore_key: boss.cerbero.lore
 phases:

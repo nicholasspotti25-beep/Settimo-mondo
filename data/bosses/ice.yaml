@@ -1,0 +1,383 @@
+# 10. Ice, il Cavaliere di Ghiaccio — secondary · Cocito · D9.
+# Third of the Tre Cavalieri del Giuramento. A slender knight in azure crystal armor with a thin rapier; his breath freezes
+# the air. A precision duelist: very fast thrusts, a guard that PARRIES AND RIPOSTES, and he PUNISHES LIGHT-ATTACK SPAM
+# (the fourth light hit in a quick chain is turned aside and answered with a riposte; heavy blows, Arts and patience are
+# never parried outside his En Garde). The frozen lake slides under your feet (arena surface 'ice').
+# Phase 2: he raises ice mirrors around the lake and re-emerges from them (the mirror he will step out of glows first).
+# Local frame: +Z forward, +Y up, +X = Ice's LEFT. Rapier in the right hand (-X).
+id: ice
+order: 10
+name_key: boss.ice.name
+title_key: boss.ice.title
+class: secondary
+difficulty: 9
+act: 2
+arena: cocito_lago
+zone: cocito
+model: {builder: ice, rig: humanoid, scale: 1.0, palette: act2_red_blue_black}
+equilibrio_max: 150
+body: {radius: 1.15, height: 4.7, mass: heavy}
+hurtboxes:
+  - {c: [0, 0.95, 0], r: 0.95}     # greaves
+  - {c: [0, 2.15, 0], r: 0.95}     # faulds
+  - {c: [0, 3.25, 0.05], r: 0.95}  # crystal cuirass
+  - {c: [0, 4.2, 0.1], r: 0.5}     # helm
+move: {walk: 3.3, run: 8.6, turn: 3.8, preferred_range: [2.5, 6.5]}
+idle_gap: [0.5, 1.05]
+music: boss_ice
+intro_sequence: ice_intro
+defeat_sequence: ice_defeat
+lore_key: boss.ice.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_ice_p1
+    opener: salute_lunge
+    patterns: [lunge, flurry, cut_sweep, en_garde, frost_breath, ice_spikes, glide, frost_ring]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_ice_p2
+    on_enter: [mirrors]
+    transition: 2.6
+    speed_mult: 1.08
+    aggression: 1.12
+    opener: mirror_summon
+    dialogue: boss.ice.mid
+    patterns: [lunge, flurry, cut_sweep, en_garde, frost_breath, ice_spikes, glide, frost_ring, mirror_step, mirror_volley]
+attacks:
+  # Opening: the rapier rises to the visor (a duelist's salute), then a long lunge.
+  - id: salute_lunge
+    anim: salute
+    telegraph: 1.1
+    active: 0.3
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 16
+    flags: []
+    weight: 0
+    track: 1.2
+    track_active: 0.2
+    motion:
+      - {t: -0.05, dur: 0.26, type: forward, speed: 18}
+    hits:
+      - {t: 0.08, dur: 0.18, shape: {type: capsule, a: [-0.4, 2.6, 0.5], b: [-0.3, 2.3, 5.2], r: 0.65}}
+    sfx: rapier_lunge
+  # A single long lunge that closes the distance in a blink.
+  - id: lunge
+    anim: thrust
+    telegraph: 0.58
+    active: 0.3
+    recovery: 0.95
+    damage_mult: 1.0
+    poise: 16
+    flags: []
+    range: [2, 10]
+    weight: 1.25
+    cooldown: 2.2
+    track: 1.3
+    track_active: 0.2
+    motion:
+      - {t: -0.05, dur: 0.26, type: forward, speed: 16}
+    hits:
+      - {t: 0.08, dur: 0.18, shape: {type: capsule, a: [-0.4, 2.6, 0.5], b: [-0.3, 2.3, 5.2], r: 0.65}}
+    sfx: rapier_lunge
+  # Four very fast thrusts, slightly fanned: step out to the side after the first.
+  - id: flurry
+    anim: flurry
+    telegraph: 0.62
+    active: 0.82
+    recovery: 1.05
+    damage_mult: 0.55
+    poise: 8
+    flags: []
+    range: [0, 5.5]
+    weight: 1.1
+    cooldown: 3.5
+    track: 1.2
+    track_active: 0.3
+    motion:
+      - {t: 0, dur: 0.8, type: forward, speed: 3}
+    hits:
+      - {t: 0.0, dur: 0.1, shape: {type: capsule, a: [-0.3, 2.6, 0.5], b: [0.3, 2.2, 4.8], r: 0.55}}
+      - {t: 0.22, dur: 0.1, shape: {type: capsule, a: [-0.3, 2.6, 0.5], b: [-0.9, 2.0, 4.8], r: 0.55}}
+      - {t: 0.44, dur: 0.1, shape: {type: capsule, a: [-0.3, 2.6, 0.5], b: [0.0, 2.4, 5.0], r: 0.55}}
+      - {t: 0.66, dur: 0.12, shape: {type: capsule, a: [-0.3, 2.6, 0.5], b: [-0.2, 2.1, 5.4], r: 0.6}}
+    sfx: rapier_flurry
+  # A wide horizontal cut, sometimes answered by the return cut.
+  - id: cut_sweep
+    anim: sweep_r
+    telegraph: 0.55
+    active: 0.24
+    recovery: 0.85
+    damage_mult: 0.9
+    poise: 14
+    flags: []
+    range: [0, 4.5]
+    weight: 1.0
+    cooldown: 2.5
+    track: 1.2
+    track_active: 0.15
+    combo_next: cut_return
+    combo_chance: 0.5
+    hits:
+      - {t: 0.02, dur: 0.2, shape: {type: arc, r: 5.4, angle: 140, y: [0, 4]}}
+    sfx: rapier_cut
+  - id: cut_return
+    anim: sweep_l
+    telegraph: 0.42
+    active: 0.24
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 14
+    flags: []
+    weight: 0
+    track: 1.6
+    hits:
+      - {t: 0.02, dur: 0.2, shape: {type: arc, r: 5.4, angle: 140, y: [0, 4]}}
+    sfx: rapier_cut
+  # En Garde: he holds the rapier upright and waits. Strike him from the front and he turns your blade aside and ripostes.
+  # Wait it out, circle behind him, or use an Art.
+  - id: en_garde
+    anim: guard
+    telegraph: 0.4
+    active: 1.7
+    recovery: 0.45
+    damage_mult: 0
+    poise: 0
+    flags: []
+    range: [0, 7]
+    weight: 0.8
+    cooldown: 7
+    track: 1.5
+    track_active: 1.0
+    sfx: rapier_guard
+  # The answer to a parried blow: a fast, heavy thrust. Readable by the parry flash and the ring of the blade.
+  - id: riposte
+    anim: thrust_heavy
+    telegraph: 0.46
+    active: 0.3
+    recovery: 1.15
+    damage_mult: 1.45
+    poise: 28
+    flags: [knockdown]
+    weight: 0
+    track: 1.4
+    motion:
+      - {t: -0.04, dur: 0.2, type: forward, speed: 9}
+    hits:
+      - {t: 0.06, dur: 0.18, shape: {type: capsule, a: [-0.3, 2.3, 0.4], b: [-0.2, 1.8, 5.4], r: 0.8}}
+    sfx: rapier_riposte
+  # His breath freezes the air: a cone of frost, then a lingering freezing mist that slows.
+  - id: frost_breath
+    anim: breath
+    telegraph: 0.85
+    active: 0.9
+    recovery: 1.0
+    damage_mult: 0.45
+    poise: 6
+    flags: []
+    element: ice
+    range: [0, 8]
+    weight: 0.8
+    cooldown: 7
+    track: 1.0
+    hits:
+      - {t: 0.0, dur: 0.9, tick: 0.3, shape: {type: arc, c: [0, 0, 0.6], r: 8, angle: 52, y: [0, 4]}, status: {kind: slow, dur: 2.2, power: 0.4}}
+    spawns:
+      - {t: 0.3, type: hazard, id: frost_breath, at: front, dist: 5, delay: 0.4, active: 2.2, flags: [dot], damage_mult: 0.25, status: {kind: slow, dur: 1.5, power: 0.35}, shape: {type: cylinder, c: [0, 0, 0], r: 3.0, h: 3}}
+    sfx: ice_breath
+  # The rapier bites the frozen lake: a line of ice spikes runs toward you.
+  - id: ice_spikes
+    anim: stab_ground
+    telegraph: 0.72
+    active: 0.4
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 18
+    flags: []
+    element: ice
+    range: [3, 24]
+    weight: 1.0
+    cooldown: 4
+    track: 1.1
+    spawns:
+      - {t: 0.04, type: hazard, id: ice_spike_line, at: line_to_target, count: 7, dist: 2.6, delay: 0.55, active: 0.4, damage_mult: 0.9, shape: {type: cylinder, c: [0, 0, 0], r: 1.35, h: 3}}
+    sfx: ice_spikes
+  # He skates across the ice and cuts as he passes: roll sideways.
+  - id: glide
+    anim: glide
+    telegraph: 0.68
+    active: 0.55
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 18
+    flags: [knockback]
+    range: [6, 26]
+    weight: 1.0
+    cooldown: 4
+    track: 1.4
+    track_active: 0.08
+    motion:
+      - {t: 0, dur: 0.5, type: charge_through, speed: 17}
+    hits:
+      - {t: 0, dur: 0.5, shape: {type: capsule, a: [0, 1.6, 0.0], b: [0.6, 1.8, 3.0], r: 1.35}}
+    sfx: ice_glide
+  # Close range: he stamps and a ring of frost races over the ice (jump it).
+  - id: frost_ring
+    anim: stomp
+    telegraph: 0.62
+    active: 0.8
+    recovery: 0.95
+    damage_mult: 0.75
+    poise: 16
+    flags: []
+    element: ice
+    range: [0, 3]
+    weight: 1.0
+    cooldown: 4.5
+    hits:
+      - {t: 0.0, dur: 0.1, shape: {type: cylinder, c: [0, 0, 0], r: 2.6, h: 2.5}}
+    spawns:
+      - {t: 0.0, type: shockwave, id: frost_ring, shape: {type: ring, r0: 2.6, r1: 10, width: 1.2, height: 0.8}, active: 0.8, damage_mult: 0.7, status: {kind: slow, dur: 1.5, power: 0.35}}
+    sfx: ice_stomp
+  # Phase 2: four mirrors of ice rise from the lake (once per phase).
+  - id: mirror_summon
+    anim: cast
+    telegraph: 0.9
+    active: 0.7
+    recovery: 0.8
+    damage_mult: 0
+    poise: 0
+    flags: []
+    element: ice
+    global: true
+    weight: 0
+    spawns:
+      - {t: 0.1, type: custom, event: raise_mirrors}
+    sfx: ice_mirrors
+  # Phase 2: he walks into his reflection and steps out of another mirror (it glows before he emerges), lunging.
+  - id: mirror_step
+    anim: mirror_step
+    telegraph: 0.55
+    active: 1.25
+    recovery: 1.05
+    damage_mult: 1.15
+    poise: 22
+    flags: []
+    element: ice
+    global: true
+    weight: 1.3
+    cooldown: 5
+    track: 1.0
+    combo_next: mirror_step_again
+    combo_chance: 0.35
+    motion:
+      - {t: 0.82, dur: 0.3, type: forward, speed: 17}
+    hits:
+      - {t: 0.84, dur: 0.28, shape: {type: capsule, a: [-0.3, 2.4, 0.4], b: [-0.2, 2.1, 4.8], r: 0.75}}
+    spawns:
+      - {t: 0.0, type: custom, event: mirror_enter}
+      - {t: 0.78, type: custom, event: mirror_exit}
+    sfx: ice_mirror_step
+  - id: mirror_step_again
+    anim: mirror_step
+    telegraph: 0.4
+    active: 1.25
+    recovery: 1.25
+    damage_mult: 1.15
+    poise: 22
+    flags: []
+    element: ice
+    global: true
+    weight: 0
+    motion:
+      - {t: 0.82, dur: 0.3, type: forward, speed: 17}
+    hits:
+      - {t: 0.84, dur: 0.28, shape: {type: capsule, a: [-0.3, 2.4, 0.4], b: [-0.2, 2.1, 4.8], r: 0.75}}
+    spawns:
+      - {t: 0.0, type: custom, event: mirror_enter}
+      - {t: 0.78, type: custom, event: mirror_exit}
+    sfx: ice_mirror_step
+  # Phase 2: every mirror throws a shard of ice at you from its own angle.
+  - id: mirror_volley
+    anim: cast
+    telegraph: 0.8
+    active: 0.7
+    recovery: 1.0
+    damage_mult: 0.75
+    poise: 10
+    flags: []
+    element: ice
+    global: true
+    weight: 0.9
+    cooldown: 6
+    spawns:
+      - {t: 0.05, type: custom, event: mirror_volley}
+    sfx: ice_volley
+  # New Game+ (phase 1): two lunges back to back; the second leaves a line of spikes behind him.
+  - id: ng_glacial_lunge
+    anim: thrust
+    telegraph: 0.55
+    active: 0.3
+    recovery: 0.3
+    damage_mult: 1.0
+    poise: 16
+    flags: []
+    range: [2, 12]
+    weight: 0.9
+    cooldown: 7
+    track: 1.3
+    track_active: 0.2
+    combo_next: ng_glacial_lunge_2
+    combo_chance: 1
+    motion:
+      - {t: -0.05, dur: 0.26, type: forward, speed: 16}
+    hits:
+      - {t: 0.08, dur: 0.18, shape: {type: capsule, a: [-0.4, 2.6, 0.5], b: [-0.3, 2.3, 5.2], r: 0.65}}
+    sfx: rapier_lunge
+  - id: ng_glacial_lunge_2
+    anim: thrust
+    telegraph: 0.45
+    active: 0.4
+    recovery: 1.2
+    damage_mult: 1.0
+    poise: 16
+    flags: []
+    element: ice
+    weight: 0
+    track: 2.0
+    motion:
+      - {t: -0.05, dur: 0.26, type: forward, speed: 16}
+    hits:
+      - {t: 0.08, dur: 0.18, shape: {type: capsule, a: [-0.4, 2.6, 0.5], b: [-0.3, 2.3, 5.2], r: 0.65}}
+    spawns:
+      - {t: 0.1, type: hazard, id: ice_spike_line, at: line_to_target, count: 5, dist: 2.6, delay: 0.6, active: 0.4, damage_mult: 0.8, shape: {type: cylinder, c: [0, 0, 0], r: 1.3, h: 3}}
+    sfx: rapier_lunge
+  # New Game+ (phase 2): the mirrors throw two volleys while he steps through them.
+  - id: ng_mirror_storm
+    anim: cast
+    telegraph: 0.85
+    active: 1.3
+    recovery: 1.1
+    damage_mult: 0.7
+    poise: 10
+    flags: []
+    element: ice
+    global: true
+    weight: 0.8
+    cooldown: 10
+    combo_next: mirror_step
+    combo_chance: 1
+    spawns:
+      - {t: 0.05, type: custom, event: mirror_volley}
+      - {t: 0.75, type: custom, event: mirror_volley}
+    sfx: ice_volley
+time_of_day_variants:
+  alba: {opener: salute_lunge, weights: {en_garde: 1.3}, note_key: boss.ice.tod.alba}
+  notte: {opener: frost_breath, weights: {frost_breath: 1.3}, note_key: boss.ice.tod.notte}
+dialogue_keys: [boss.ice.intro, boss.ice.intro2, boss.ice.mid, boss.ice.defeat]
+drops_weapon: brina_silente
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_glacial_lunge], p2: [ng_glacial_lunge, ng_mirror_storm]}
+  idle_mult: 0.85

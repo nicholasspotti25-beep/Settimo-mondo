@@ -11,7 +11,7 @@ swings:
     - {id: ck_l2, anim: disc_throw, startup: 0.22, active: 0.06, recovery: 0.65, cancel: 0.45, damage_mult: 0.6, poise: 0, projectile: {kind: w_void_chakram, speed: 28, radius: 0.45, life: 1.4, homing: 2.0, returns: true, pierce: true}, arc: {from: [-60, 0], to: [40, 0], roll: -80, hand: r}}
     - {id: ck_l3, anim: disc_backhand_throw, startup: 0.24, active: 0.06, recovery: 0.7, cancel: 0.45, damage_mult: 0.65, poise: 0, projectile: {kind: w_void_chakram, speed: 28, radius: 0.45, life: 1.4, homing: 2.0, returns: true, pierce: true}, arc: {from: [60, 0], to: [-40, 0], roll: 80, hand: r}}
   chakram_heavy:
-    {id: ck_h, anim: orbital_throw, startup: 0.45, active: 0.06, recovery: 0.7, cancel: 0.45, damage_mult: 1.1, poise: 20, projectile: {kind: w_void_chakram, speed: 24, radius: 0.6, life: 2.0, homing: 3.0, returns: true, pierce: true}, arc: {from: [-90, 10], to: [60, 0], roll: -80, hand: r}}
+    {id: ck_h, anim: orbital_throw, startup: 0.45, active: 0.06, recovery: 0.7, cancel: 0.45, damage_mult: 0.95, poise: 20, projectile: {kind: w_void_chakram, speed: 24, radius: 0.6, life: 2.0, homing: 3.0, returns: true, pierce: true}, arc: {from: [-90, 10], to: [60, 0], roll: -80, hand: r}}
   chakram_run:
     {id: ck_r, anim: disc_slash, startup: 0.16, active: 0.12, recovery: 0.4, damage_mult: 1.25, poise: 0, element: void, shape: {type: arc, r: 2.5, angle: 160, y: [0.2, 2.3]}, move: {speed: 8.0, dur: 0.26}, arc: {from: [-90, 10], to: [70, -5], roll: -60, hand: r}}
   chakram_jump:

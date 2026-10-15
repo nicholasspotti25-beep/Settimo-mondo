@@ -1,3 +1,5 @@
+# Mostro della Palude — the Pool of Lanterns: a round shallow pool of black water and mud, ringed by sunken walkways and
+# hundreds of unlit seekers' lanterns hanging from dead trees. The colossus rises from the middle.
 id: palude_pozza
 zone: palude
 name_key: arena.palude_pozza.name
@@ -6,6 +8,7 @@ shape: circle
 radius: 26
 gate: {pos: [-30, 0, 4], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: mud
 obstacles: []
 builder: palude_pozza
+platform: none

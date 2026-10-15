@@ -1,3 +1,5 @@
+# Cavaliere Errante — a wide round clearing of tall grass in the Great Plains, ringed by leaning standing stones.
+# The grass is waist-high (visual only): the knight's horse parts it as it circles you.
 id: pianure_erba_alta
 zone: grandi_pianure
 name_key: arena.pianure_erba_alta.name
@@ -6,6 +8,7 @@ shape: circle
 radius: 34
 gate: {pos: [0, 0, 96], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: grass
 obstacles: []
 builder: pianure_erba_alta
+platform: none

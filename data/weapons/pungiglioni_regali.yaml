@@ -20,6 +20,6 @@ stamina_cost: {light: 12, heavy: 25}
 moveset: {light: pugnali_light, heavy: pugnali_heavy, running: pugnali_run, jumping: pugnali_jump}
 arts:
   # Puntura Acida: a stab that leaves acid burning in the wound.
-  prima: {id: puntura_acida, eco_cost: 100, effect: dot_stab, params: {reach: 2.4, dot_mult: 0.22, dot_time: 7, damage_mult: 1.0, element: poison}, vfx: art_puntura_acida, anim: acid_stab}
+  prima: {id: puntura_acida, eco_cost: 100, effect: dot_stab, params: {reach: 2.4, dps_mult: 0.22, dot_time: 7, damage_mult: 1.0, element: poison}, vfx: art_puntura_acida, anim: acid_stab}
   # Sciame: six very fast strikes, a swarm of stings.
   seconda: {id: sciame, eco_cost: 200, effect: multi_strike, params: {count: 6, interval: 0.075, reach: 2.4, angle: 90, shape: thrust, damage_mult: 3.4, step: 0.12, dur: 0.85, element: poison}, vfx: art_sciame, anim: swarm_stabs}

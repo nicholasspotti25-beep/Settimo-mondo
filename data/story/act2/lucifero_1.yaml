@@ -1,0 +1,55 @@
+# Lucifero I (principal, scripted). The choice: Affronta (a real fight he cannot lose) or Implora (hold five seconds,
+# kneeling under his gaze). Both complete the encounter and lead out by the Scala dei Dannati.
+- id: lucifero_intro
+  skippable: true
+  steps:
+    - {camera: wide, dur: 2.6}
+    - {caption: story.atto2.lucifero_trono, dur: 4.2}
+    - {camera: boss_reveal, dur: 2.4}
+    - {event: cue, params: {id: lucifero_gaze}}
+    - {camera: boss_close, dur: 0.1}
+    - {say: boss.lucifero_1.intro, speaker: lucifero}
+    - choice:
+        - {key: choice.lucifero.affronta, goto: affronta}
+        - {key: choice.lucifero.implora, goto: implora, hold: 5}
+    - {label: affronta}
+    - {camera: player_close, dur: 0.1}
+    - {say: boss.lucifero_1.affronta, speaker: lucifero}
+    - {event: cue, params: {id: lucifero_affronta}}
+    - {event: start_fight}
+    - {end: true}
+    - {label: implora}
+    - {camera: boss_close, dur: 0.1}
+    - {wait: 0.8}
+    - {event: cue, params: {id: lucifero_laugh}}
+    - {caption: story.atto2.lucifero_ride, dur: 2.8}
+    - {say: boss.lucifero_1.implora, speaker: lucifero}
+    - {give_item: piuma_nera}
+    - {set: {lucifero_choice: begged}}
+    - {caption: story.atto2.piuma_nera, dur: 4.0}
+    - {fade: out, dur: 1.8}
+    - {event: end_fight_scripted}
+    - {event: teleport_altar, params: {altar: altare_scala_01}}
+    - {event: player_free}
+    - {wait: 0.8}
+    - {fade: in, dur: 2.4}
+    - {voce: voce.atto2.scala_implora}
+    - {event: autosave, params: {reason: story}}
+    - {end: true}
+# Il Rifiuto: started by the behavior when the unavoidable blow lands. A narrative defeat, not a death.
+- id: lucifero_rifiuto
+  skippable: true
+  steps:
+    - {wait: 1.8}
+    - {camera: boss_close, dur: 0.1}
+    - {say: boss.lucifero_1.rifiuto, speaker: lucifero}
+    - {fade: out, dur: 2.2}
+    - {give_item: cicatrice_del_rifiuto}
+    - {set: {lucifero_choice: fought}}
+    - {event: end_fight_scripted}
+    - {event: teleport_altar, params: {altar: altare_scala_01}}
+    - {wait: 1.2}
+    - {fade: in, dur: 2.6}
+    - {caption: story.atto2.cicatrice, dur: 4.2}
+    - {voce: voce.atto2.scala_affronta}
+    - {event: autosave, params: {reason: story}}

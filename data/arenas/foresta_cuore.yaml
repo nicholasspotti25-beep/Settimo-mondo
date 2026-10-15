@@ -1,3 +1,5 @@
+# Elder Tree — the heart of the Dark Forest: a clearing of black roots under a canopy that has not let light through in
+# centuries. The tree stands on the north side of the clearing (it never moves); luminous mushrooms ring its roots.
 id: foresta_cuore
 zone: foresta_oscura
 name_key: arena.foresta_cuore.name
@@ -6,6 +8,7 @@ shape: circle
 radius: 27
 gate: {pos: [0, 0, 93], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: moss
 obstacles: []
 builder: foresta_cuore
+platform: none

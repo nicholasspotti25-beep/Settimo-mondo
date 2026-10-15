@@ -18,7 +18,7 @@ path:
   - [0, 0, 50]
   - [0, 0, 100]
   - [-60, 0, 140]
-altars: [altare_cattedrale_01, altare_cattedrale_02]
+altars: [altare_cattedrale_01, altare_cattedrale_02, altare_scala_01]
 arenas: [cattedrale_navata]
 exits:
   - {to: bocca_vulcano, at: [-60, 0, 140], radius: 6, requires: [lucifero_1], arrive: spawn, kind: stair, name_key: exit.cattedrale_caduta.bocca_vulcano}

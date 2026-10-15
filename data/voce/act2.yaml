@@ -1,0 +1,8 @@
+# Voce dell'Alba lines at the Act II altars (played once, when meditating there after the listed bosses fall).
+- {key: voce.atto2.dite_altare, altar: altare_dite_01, priority: 1}
+- {key: voce.atto2.roghi_altare, altar: altare_roghi_01, after: [cerbero], priority: 1}
+- {key: voce.atto2.bufera_altare, altar: altare_bufera_01, after: [pyro], priority: 1}
+- {key: voce.atto2.cocito_altare, altar: altare_cocito_01, after: [thunder], priority: 1}
+- {key: voce.atto2.fucine_altare, altar: altare_fucine_01, after: [ice], priority: 1}
+- {key: voce.atto2.cattedrale_altare, altar: altare_cattedrale_01, after: [mostro_di_magma], priority: 1}
+- {key: voce.atto2.scala_altare, altar: altare_scala_01, after: [lucifero_1], priority: 1}

@@ -21,4 +21,4 @@ arts:
   # Fendente Itinerante: slide forward and rise into an upward cut.
   prima: {id: fendente_itinerante, eco_cost: 100, effect: dash_strike, params: {distance: 5.0, reach: 3.0, width: 1.0, rising: true, damage_mult: 2.2, dur: 0.6}, vfx: art_fendente_itinerante, anim: rising_slash}
   # Postura del Viandante: a duelist's guard; any blow that lands during it is turned aside and answered.
-  seconda: {id: postura_del_viandante, eco_cost: 200, effect: counter_stance, params: {reach: 3.6, counter_mult: 4.2, dur: 1.4, angle: 160}, vfx: art_postura_viandante, anim: guard_stance}
+  seconda: {id: postura_del_viandante, eco_cost: 200, effect: counter_stance, params: {reach: 3.6, damage_mult: 4.0, dur: 1.4, angle: 160}, vfx: art_postura_viandante, anim: guard_stance}

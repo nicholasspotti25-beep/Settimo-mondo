@@ -1,0 +1,14 @@
+# Mostro di Magma (secondary): it does not speak. One image before, one Voce dell'Alba line after.
+- id: magma_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 2.2}
+    - {caption: story.atto2.magma_intro, dur: 3.2}
+    - {event: start_fight}
+- id: magma_defeat
+  skippable: true
+  steps:
+    - {wait: 2.0}
+    - {event: cue, params: {id: forge_cools}}
+    - {voce: voce.atto2.magma_caduto}
+    - {caption: story.atto2.fucina_spenta, dur: 3.5}

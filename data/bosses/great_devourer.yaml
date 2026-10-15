@@ -1,0 +1,377 @@
+# 5. Great Devourer — mini boss · La Palude (deep waters) · D6 · no dialogue, no lore.
+# A gigantic green-and-black serpent, long as a river, appearing out of the fog around a rotten pier.
+# It alternates between two postures driven by the behavior: SUBMERGED (hidden under the planks: the only tells are the
+# ripples it raises — attacks from below, coils around the stilts, the tail rising out of the water) and SURFACED (head and neck
+# reared above the pier: bites, low head sweeps; this is when it can be hit). After a few surfaced attacks it dives again.
+# Phase 2: it smashes the pier; the fight continues on the rafts and logs left floating (arena variant pier_destroyed): breaching
+# charges across the rafts, logs flung by the tail, three strikes from below in a row, crushing coils around the raft under you.
+# Behavior: src/content/bosses/great_devourer/behavior.ts (attack `requires`: surfaced, submerged, near_stilt).
+id: great_devourer
+order: 5
+name_key: boss.great_devourer.name
+class: mini
+difficulty: 6
+act: 1
+arena: palude_molo
+zone: palude
+model: {builder: great_devourer, rig: serpent, scale: 1.0, palette: act1_green_gold}
+equilibrio_max: 170
+body: {radius: 1.8, height: 8.0, mass: immovable}
+# The neck rising out of the water (local frame; the head leans toward the pier, +Z).
+hurtboxes:
+  - {c: [0, 1.3, -0.5], r: 1.6}   # neck at the waterline
+  - {c: [0, 3.4, -0.1], r: 1.35}  # neck
+  - {c: [0, 5.5, 0.9], r: 1.45}   # head
+move: {walk: 0, run: 10, turn: 2.2, preferred_range: [3, 9]}
+idle_gap: [0.8, 1.3]
+music: boss_great_devourer
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_great_devourer_p1
+    opener: emerge_from_fog
+    patterns: [bite, double_bite, head_sweep, dive, strike_from_below, emerge_flank, coil_crush, tail_slam]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_great_devourer_p2
+    on_enter: [pier_destroyed]
+    arena_state: pier_destroyed
+    transition: 3.2
+    speed_mult: 1.06
+    aggression: 1.12
+    opener: log_fling
+    patterns: [bite, double_bite, head_sweep, log_fling, dive, strike_from_below, triple_strike, breach_charge, raft_crush, tail_slam]
+attacks:
+  # --- Opener --------------------------------------------------------------------------------------------------------------
+  # Out of the fog at the far end of the pier: a long hiss, then the head rises above the water and roars.
+  - id: emerge_from_fog
+    anim: emerge
+    telegraph: 1.8
+    active: 1.0
+    recovery: 0.6
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    weight: 0
+    track: 0.6
+    requires: submerged
+    spawns:
+      - {t: -1.8, type: custom, event: surface_far}
+      - {t: -1.6, type: sfx, id: devourer_fog_hiss}
+      - {t: -1.4, type: vfx, id: devourer_ripples}
+      - {t: 0.0, type: custom, event: surface}
+      - {t: 0.1, type: sfx, id: devourer_roar}
+  # --- Surfaced ------------------------------------------------------------------------------------------------------------
+  # The head draws back with open jaws, then lunges down onto the planks.
+  - id: bite
+    anim: bite
+    telegraph: 0.85
+    active: 0.35
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 20
+    flags: [knockback]
+    range: [0, 9]
+    weight: 1.2
+    track: 1.3
+    track_active: 0.2
+    requires: surfaced
+    hits:
+      - {t: 0.05, dur: 0.22, shape: {type: capsule, a: [0, 3.6, 1.2], b: [0, 1.0, 8.6], r: 1.35}}
+    spawns:
+      - {t: -0.8, type: sfx, id: devourer_hiss}
+  # Two bites: the second re-aims at where you rolled.
+  - id: double_bite
+    anim: bite
+    telegraph: 0.8
+    active: 0.35
+    recovery: 0.4
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    range: [0, 8]
+    weight: 0.9
+    cooldown: 4
+    track: 1.3
+    track_active: 0.2
+    requires: surfaced
+    combo_next: bite_follow
+    hits:
+      - {t: 0.05, dur: 0.22, shape: {type: capsule, a: [0, 3.6, 1.2], b: [0, 1.0, 8.4], r: 1.3}}
+    spawns:
+      - {t: -0.75, type: sfx, id: devourer_hiss}
+  - id: bite_follow
+    anim: bite
+    telegraph: 0.6
+    active: 0.35
+    recovery: 1.35
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockback]
+    weight: 0
+    track: 2.2
+    track_active: 0.2
+    requires: surfaced
+    hits:
+      - {t: 0.05, dur: 0.22, shape: {type: capsule, a: [0, 3.6, 1.2], b: [0, 1.0, 8.8], r: 1.35}}
+  # The head sweeps low across the planks: roll through it or jump it at the apex.
+  - id: head_sweep
+    anim: head_sweep
+    telegraph: 1.0
+    active: 0.45
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockback]
+    range: [0, 10]
+    weight: 0.9
+    cooldown: 4
+    track: 0.9
+    requires: surfaced
+    hits:
+      - {t: 0.05, dur: 0.35, shape: {type: arc, r: 10.5, r_in: 1.5, angle: 150, yaw: 0, y: [0, 1.0]}}
+    spawns:
+      - {t: -0.95, type: sfx, id: devourer_scales}
+  # Dives back under the planks; the splash ring can be jumped.
+  - id: dive
+    anim: dive
+    telegraph: 0.55
+    active: 0.6
+    recovery: 0.2
+    damage_mult: 0.6
+    poise: 12
+    flags: []
+    global: true
+    weight: 0
+    requires: surfaced
+    spawns:
+      - {t: 0.1, type: shockwave, id: devourer_splash, radius: 6, shape: {type: ring, r0: 1.2, r1: 6, width: 1.1, height: 0.7}, active: 0.4, damage_mult: 0.6}
+      - {t: 0.3, type: custom, event: submerge}
+  # --- Submerged -----------------------------------------------------------------------------------------------------------
+  # Ripples gather under you: the head bursts up through the planks where they boil, and stays reared there.
+  - id: strike_from_below
+    anim: strike_below
+    telegraph: 0.6
+    active: 1.8
+    recovery: 1.4
+    damage_mult: 1.3
+    poise: 28
+    flags: [knockdown]
+    global: true
+    weight: 1.2
+    cooldown: 3
+    requires: submerged
+    spawns:
+      - {t: -0.6, type: sfx, id: devourer_ripple}
+      - {t: 0.0, type: hazard, id: devourer_ripple, at: target_predict, count: 1, delay: 1.25, active: 0.45, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.7, h: 7}}
+      - {t: 0.0, type: custom, event: mark_burst}
+      - {t: 1.22, type: custom, event: burst}
+  # Surfaces beside the pier near you in a ring of spray (jump or roll the ring).
+  - id: emerge_flank
+    anim: emerge
+    telegraph: 1.1
+    active: 0.6
+    recovery: 1.0
+    damage_mult: 0.8
+    poise: 18
+    flags: []
+    global: true
+    weight: 1.0
+    cooldown: 4
+    track: 0.8
+    requires: submerged
+    spawns:
+      - {t: -1.1, type: custom, event: flank_mark}
+      - {t: -1.0, type: vfx, id: devourer_ripples}
+      - {t: 0.0, type: custom, event: surface}
+      - {t: 0.02, type: shockwave, id: devourer_splash, radius: 8, shape: {type: ring, r0: 1.5, r1: 8, width: 1.3, height: 0.8}, active: 0.55, damage_mult: 0.8}
+  # Coils around the stilt nearest to you and crushes that stretch of the pier (the planks crack first), then rears there.
+  - id: coil_crush
+    anim: coil
+    telegraph: 0.8
+    active: 1.9
+    recovery: 1.3
+    damage_mult: 1.35
+    poise: 28
+    flags: [knockdown]
+    global: true
+    weight: 0.9
+    cooldown: 7
+    requires: near_stilt
+    spawns:
+      - {t: -0.8, type: custom, event: coil_stilt}
+      - {t: -0.75, type: sfx, id: devourer_coil_creak}
+      - {t: 0.0, type: hazard, id: devourer_coil, at: target, count: 1, delay: 1.3, active: 0.5, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 4.6, h: 3.2}}
+      - {t: 0.0, type: custom, event: coil_place}
+      - {t: 1.3, type: custom, event: coil_rise}
+  # The tail rises out of the water on the far side and slams across the whole width of the pier: step out of its line.
+  - id: tail_slam
+    anim: tail_slam
+    telegraph: 0.5
+    active: 1.7
+    recovery: 0.5
+    damage_mult: 1.4
+    poise: 28
+    flags: [unblockable, knockdown]
+    global: true
+    weight: 0.8
+    cooldown: 7
+    requires: submerged
+    spawns:
+      - {t: -0.5, type: sfx, id: devourer_tail_rise}
+      - {t: 0.0, type: hazard, id: devourer_tail, at: target_predict, count: 1, delay: 1.35, active: 0.3, flags: [unblockable, knockdown], shape: {type: box, c: [0, 0, 0], half: [14, 2.5, 1.7]}}
+      - {t: 0.0, type: custom, event: tail_across}
+  # --- Phase 2: rafts and logs -----------------------------------------------------------------------------------------------
+  # The tail flings three rotten logs across the rafts.
+  - id: log_fling
+    anim: tail_fling
+    telegraph: 0.95
+    active: 0.5
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    range: [3, 40]
+    weight: 0.9
+    cooldown: 5
+    track: 1.0
+    requires: surfaced
+    spawns:
+      - {t: -0.9, type: sfx, id: devourer_tail_rise}
+      - {t: 0.05, type: projectile, id: devourer_log, count: 3, spread: 34, speed: 13, from: [0, 0.9, 1.5]}
+  # Three strikes from below, each where you stand, the head staying up after the last.
+  - id: triple_strike
+    anim: strike_below
+    telegraph: 0.6
+    active: 2.9
+    recovery: 1.4
+    damage_mult: 1.2
+    poise: 26
+    flags: [knockdown]
+    global: true
+    weight: 1.0
+    cooldown: 7
+    requires: submerged
+    spawns:
+      - {t: -0.6, type: sfx, id: devourer_ripple}
+      - {t: 0.0, type: hazard, id: devourer_ripple, at: target_predict, count: 1, delay: 1.1, active: 0.4, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 7}}
+      - {t: 0.65, type: hazard, id: devourer_ripple, at: target_predict, count: 1, delay: 1.1, active: 0.4, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 7}}
+      - {t: 1.3, type: hazard, id: devourer_ripple, at: target_predict, count: 1, delay: 1.1, active: 0.4, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 7}}
+      - {t: 1.3, type: custom, event: mark_burst}
+      - {t: 2.37, type: custom, event: burst}
+  # Breaches out of the water and races across the rafts through where you stand (its wake shows the line), then dives.
+  - id: breach_charge
+    anim: breach
+    telegraph: 1.2
+    active: 1.2
+    recovery: 0.9
+    damage_mult: 1.3
+    poise: 26
+    flags: [knockback]
+    global: true
+    weight: 0.9
+    cooldown: 6
+    track: 0
+    requires: submerged
+    motion:
+      - {t: 0, dur: 1.15, type: charge_through, speed: 24}
+    hits:
+      - {t: 0, dur: 1.15, shape: {type: capsule, a: [0, 0.8, -4.0], b: [0, 1.8, 3.5], r: 1.6}}
+    spawns:
+      - {t: -1.2, type: custom, event: breach_line}
+      - {t: -1.1, type: vfx, id: devourer_wake}
+      - {t: -0.6, type: sfx, id: devourer_wake}
+      - {t: 0.0, type: custom, event: surface}
+      - {t: 1.15, type: custom, event: submerge}
+  # Coils around the raft under you and crushes it, then rears beside it.
+  - id: raft_crush
+    anim: coil
+    telegraph: 0.7
+    active: 1.9
+    recovery: 1.3
+    damage_mult: 1.35
+    poise: 28
+    flags: [knockdown]
+    global: true
+    weight: 0.9
+    cooldown: 7
+    requires: submerged
+    spawns:
+      - {t: -0.65, type: sfx, id: devourer_coil_creak}
+      - {t: 0.0, type: hazard, id: devourer_coil, at: target, count: 1, delay: 1.3, active: 0.5, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 4.2, h: 3.2}}
+      - {t: 0.0, type: custom, event: mark_coil}
+      - {t: 1.3, type: custom, event: coil_rise}
+  # --- New Game+ (Ciclo dell'Alba) ----------------------------------------------------------------------------------------
+  # Two strikes from below: one where you are, a second where you rolled to.
+  - id: ng_twin_strike
+    anim: strike_below
+    telegraph: 0.6
+    active: 2.2
+    recovery: 1.3
+    damage_mult: 1.2
+    poise: 26
+    flags: [knockdown]
+    global: true
+    weight: 1.0
+    cooldown: 6
+    requires: submerged
+    spawns:
+      - {t: 0.0, type: hazard, id: devourer_ripple, at: target, count: 1, delay: 1.1, active: 0.4, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.5, h: 7}}
+      - {t: 0.6, type: hazard, id: devourer_ripple, at: target_predict, count: 1, delay: 1.1, active: 0.4, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.5, h: 7}}
+      - {t: 0.6, type: custom, event: mark_burst}
+      - {t: 1.67, type: custom, event: burst}
+  # Breaches across the rafts, turns under the water and breaches back.
+  - id: ng_breach_return
+    anim: breach
+    telegraph: 1.1
+    active: 1.2
+    recovery: 0.2
+    damage_mult: 1.2
+    poise: 24
+    flags: [knockback]
+    global: true
+    weight: 0.9
+    cooldown: 9
+    track: 0
+    requires: submerged
+    combo_next: ng_breach_back
+    motion:
+      - {t: 0, dur: 1.15, type: charge_through, speed: 24}
+    hits:
+      - {t: 0, dur: 1.15, shape: {type: capsule, a: [0, 0.8, -4.0], b: [0, 1.8, 3.5], r: 1.6}}
+    spawns:
+      - {t: -1.1, type: custom, event: breach_line}
+      - {t: -1.0, type: vfx, id: devourer_wake}
+      - {t: 0.0, type: custom, event: surface}
+      - {t: 1.15, type: custom, event: submerge}
+  - id: ng_breach_back
+    anim: breach
+    telegraph: 1.0
+    active: 1.2
+    recovery: 0.9
+    damage_mult: 1.2
+    poise: 24
+    flags: [knockback]
+    global: true
+    weight: 0
+    track: 0
+    requires: submerged
+    motion:
+      - {t: 0, dur: 1.15, type: charge_through, speed: 24}
+    hits:
+      - {t: 0, dur: 1.15, shape: {type: capsule, a: [0, 0.8, -4.0], b: [0, 1.8, 3.5], r: 1.6}}
+    spawns:
+      - {t: -1.0, type: custom, event: breach_line}
+      - {t: -0.95, type: vfx, id: devourer_wake}
+      - {t: 0.0, type: custom, event: surface}
+      - {t: 1.15, type: custom, event: submerge}
+time_of_day_variants: {}
+dialogue_keys: []
+drops_weapon: zanna_strisciante
+unlocks_form: null
+metamondo_reaction: null
+ng_plus:
+  add_patterns: {p1: [ng_twin_strike], p2: [ng_twin_strike, ng_breach_return]}
+  speed_mult: 1.08
+  idle_mult: 0.8

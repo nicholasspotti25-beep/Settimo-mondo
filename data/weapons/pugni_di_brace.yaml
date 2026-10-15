@@ -22,4 +22,4 @@ arts:
   # Pugno Cratere: a punch into the ground; a ring of fire races outward.
   prima: {id: pugno_cratere, eco_cost: 100, effect: ground_wave, params: {kind: ring, radius: 7.0, width: 1.6, visual: fire, damage_mult: 2.3, at: 0.36, element: fire, status: burn}, vfx: art_pugno_cratere, anim: ground_punch}
   # Presa Ardente: seize the target with burning hands and hurl it.
-  seconda: {id: presa_ardente, eco_cost: 200, effect: grab_pull, params: {range: 3.4, pull: 2.0, hold: 1.0, throw: true, grab_mult: 0.35, damage_mult: 3.6, dur: 1.1, element: fire}, vfx: art_presa_ardente, anim: grab_throw}
+  seconda: {id: presa_ardente, eco_cost: 200, effect: grab_pull, params: {range: 3.4, pull: 2.0, hold: 1.0, throw: true, grab_share: 0.35, damage_mult: 3.6, dur: 1.1, element: fire}, vfx: art_presa_ardente, anim: grab_throw}

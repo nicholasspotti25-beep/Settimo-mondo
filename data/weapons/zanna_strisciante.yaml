@@ -20,4 +20,4 @@ arts:
   # Sibilo: a hissing forward dash with the blade fully extended.
   prima: {id: sibilo, eco_cost: 100, effect: dash_strike, params: {distance: 5.5, reach: 5.4, width: 0.6, damage_mult: 2.3, dur: 0.6, element: poison}, vfx: art_sibilo, anim: whip_dash}
   # Avvolgimento: the blade coils around the target and drags it in, then snaps.
-  seconda: {id: avvolgimento, eco_cost: 200, effect: grab_pull, params: {range: 8.0, pull: 5.0, hold: 1.4, throw: true, grab_mult: 0.4, damage_mult: 3.4, dur: 1.0, element: poison}, vfx: art_avvolgimento, anim: whip_hook}
+  seconda: {id: avvolgimento, eco_cost: 200, effect: grab_pull, params: {range: 8.0, pull: 5.0, hold: 1.4, throw: true, grab_share: 0.4, damage_mult: 3.4, dur: 1.0, element: poison}, vfx: art_avvolgimento, anim: whip_hook}

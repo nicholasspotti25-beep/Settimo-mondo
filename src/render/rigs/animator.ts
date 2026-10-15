@@ -13,13 +13,18 @@
 import * as THREE from 'three';
 import type { Content } from '../../core/content';
 import type { Model } from '../kit/model';
-import { getClip, resolveKeyword, resolveLibrary, type ClipDef, type ClipLibraryDef, type CycleDef, type Osc, type StagePose, type WaveDef } from './clips';
+import { extendLibrary, getClip, resolveKeyword, resolveLibrary, type ClipDef, type ClipLibraryDef, type CycleDef, type Osc, type StagePose, type WaveDef } from './clips';
 import { SpringChain, type SpringSpec } from './springs';
 import { aimBone, ccdIK } from './ik';
 
 const DEG = Math.PI / 180;
 
-export type AnimStageName = 'idle' | 'move' | 'telegraph' | 'active' | 'recovery' | 'stagger' | 'spezzato' | 'transition' | 'dead' | 'scripted' | 'hidden' | 'intro';
+/**
+ * Sim stages plus the render-only 'action' stage: a one-shot clip played over `dur` seconds, moving through its telegraph ->
+ * active -> recovery poses at the fractions given by the clip's `phases` (default [0.3, 0.65]). Used by the Portatore
+ * (drink, swap, knockdown, grace...) and by content hooks.
+ */
+export type AnimStageName = 'idle' | 'move' | 'telegraph' | 'active' | 'recovery' | 'stagger' | 'spezzato' | 'transition' | 'dead' | 'scripted' | 'hidden' | 'intro' | 'action';
 
 /** Per-frame animation input (mirrors the sim Actor animation exposure). */
 export interface AnimInput {
@@ -64,6 +69,14 @@ export interface RigInfo {
   follow?: { bone: string; target: string; off?: string }[];
   /** Bones hidden (scaled to zero) while a flag is set, e.g. { dismounted: ['body'] } (the steed vanishes). */
   hideOnFlag?: Record<string, string[]>;
+  /** Root bone override while a flag is set, e.g. { dismounted: 'rider_hips' }. */
+  flagRoot?: Record<string, string>;
+}
+
+/** Extra clips/aliases layered over the family library (content-specific moves). */
+export interface AnimatorExtra {
+  clips?: Record<string, ClipDef>;
+  aliases?: Record<string, string>;
 }
 
 interface CStage {
@@ -98,6 +111,8 @@ interface CClip {
   active: CStage | null;
   recovery: CStage | null;
   hold: number;
+  /** 'action' stage: fractions of the duration where telegraph and active end. */
+  phases: [number, number];
 }
 
 const MODE_POS = 1, MODE_NEG = 2, MODE_ABS = 3, MODE_DOUBLE = 4;
@@ -152,6 +167,8 @@ export class Animator {
   private clipCache = new Map<string, CClip | null>();
   private kwCache = new Map<string, string>();
   private rootIdx = -1;
+  private baseRootIdx = -1;
+  private flagRoots: { flag: string; idx: number }[] = [];
   // layers (degrees)
   private loco: Float32Array;
   private locoRoot = new Float32Array(3);
@@ -200,15 +217,20 @@ export class Animator {
   /** Global multiplier on the action layer (content can lower it for custom procedural states). */
   actionScale = 1;
 
-  constructor(model: Model, content: Content | null, family: string, info?: RigInfo) {
+  constructor(model: Model, content: Content | null, family: string, info?: RigInfo, extra?: AnimatorExtra) {
     this.model = model;
     this.info = (info ?? (model.info as RigInfo)) || {};
-    this.lib = resolveLibrary(content, family);
+    this.lib = extendLibrary(resolveLibrary(content, family), extra?.clips, extra?.aliases);
     this.bones = model.boneList;
     this.n = this.bones.length;
     this.bones.forEach((b, i) => this.boneIndex.set(b.name, i));
     const rb = this.info.rootBone ?? (this.boneIndex.has('hips') ? 'hips' : this.boneIndex.has('body') ? 'body' : this.bones[1]?.name);
     this.rootIdx = rb ? this.boneIndex.get(rb) ?? -1 : -1;
+    this.baseRootIdx = this.rootIdx;
+    for (const [flag, bn] of Object.entries(this.info.flagRoot ?? {})) {
+      const i = this.boneIndex.get(bn);
+      if (i !== undefined) this.flagRoots.push({ flag, idx: i });
+    }
     const n = this.n;
     this.loco = new Float32Array(n * 3);
     this.act = new Float32Array(n * 3);
@@ -361,6 +383,7 @@ export class Animator {
         active: this.compileStage(def.active),
         recovery: this.compileStage(def.recovery),
         hold: def.hold ?? 0,
+        phases: (def as ClipDef & { phases?: [number, number] }).phases ?? [0.3, 0.65],
       };
     }
     this.clipCache.set(name, cc);
@@ -571,6 +594,32 @@ export class Animator {
         R.ease = early ? 'out' : 'inout';
         return R;
       }
+      case 'action': {
+        const k = t / dur;
+        const [p0, p1] = c.phases;
+        if (k < p0 || (!act && !rec)) {
+          R.st = tel;
+          R.key = `${c.name}:xt`;
+          R.blend = Math.max(0.06, dur * p0 * (tel?.blend ?? 0.8));
+          R.ease = tel?.ease || 'out';
+          if (c.hold > 0) R.tremble = c.hold * smooth(p0 * 0.6, p0, k);
+        } else if (k < p1) {
+          R.st = act;
+          R.key = `${c.name}:xa`;
+          R.blend = Math.min(0.12, Math.max(0.04, dur * (p1 - p0) * (act?.blend ?? 0.3)));
+          R.ease = act?.ease || 'snap';
+          R.clock = t - dur * p0;
+        } else {
+          R.st = rec;
+          R.key = `${c.name}:xr`;
+          R.blend = Math.max(0.08, dur * (1 - p1) * (rec?.blend ?? 0.6));
+          R.ease = rec?.ease || 'inout';
+          R.clock = t - dur * p1;
+          R.layer = 1 - smooth(0.7, 1.0, k);
+        }
+        if (R.st === tel) R.clock = t;
+        return R;
+      }
       case 'intro': {
         const early = !!c.telegraph && t < Math.max(0.6, dur * 0.4);
         R.st = early ? tel : act;
@@ -593,6 +642,10 @@ export class Animator {
   update(inp: AnimInput, dt: number): void {
     this.time += dt;
     this.ownClock += dt;
+    if (this.flagRoots.length) {
+      this.rootIdx = this.baseRootIdx;
+      for (const fr of this.flagRoots) if (inp.flags?.has(fr.flag)) this.rootIdx = fr.idx;
+    }
     this.evalLocomotion(inp, dt);
     const P = this.pick(inp);
     if (P.key !== this.stageKey) {
@@ -744,8 +797,8 @@ export class Animator {
 
   /**
    * Multi-part rigs: blend the chain tips toward the sim part anchors. `parts` = actor.parts (local hurt c + anchor),
-   * `modelScale` converts actor-local units to model units. Weight rises with the anchor offset so free animation runs
-   * when the behavior does not drive the anchor.
+   * `modelScale` = def.model.scale (actor-local meters -> model units; actor.scale is already in the root matrix).
+   * Weight rises with the anchor offset so free animation runs when the behavior does not drive the anchor.
    */
   followParts(parts: readonly { id: string; anchor: { x: number; y: number; z: number }; def: { hurt: { c: [number, number, number] }[] }; active: boolean; broken: boolean }[], modelScale: number, dt: number): void {
     if (!this.partChains.length) return;

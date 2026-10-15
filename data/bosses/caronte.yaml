@@ -1,0 +1,363 @@
+# 6. Caronte — secondary · Il Fiume delle Anime · D6.
+# A tall thin hooded figure on a black boat; the oar ends in a blade-paddle; the lantern holds the eyes of souls.
+# Phase 1 begins ON THE BOAT (moored at the dock of the arena): oar sweeps across the deck, the blade-paddle cleave (Colpo
+# Rosso), punting lunges, souls from the lantern. At 78% Health he plunges the oar into the river and the drowned souls rise
+# into a BRIDGE OF SOULS from the prow to a landing in the dark: he waits on the landing, the oar sweeps the bridge, souls stream
+# down it and the lantern's gaze scorches its length. Phase 2: the boat sinks and the bridge dissolves into the LUMINOUS CURRENT
+# (arena variant `current`): a duel on the glowing water that drifts you downstream, eddies that pull, hands of souls rising.
+# Souls: by day few but fast, by night many but slow (time_of_day_variants spawn_mult / projectile_speed_mult).
+# He wants no coin: he wants a memory, and you have none. Defeated, he ferries you to the Porta di Dite.
+# Behavior: src/content/bosses/caronte/behavior.ts (attack `requires`: boat, bridge, current, afloat = boat or bridge).
+id: caronte
+order: 6
+name_key: boss.caronte.name
+class: secondary
+difficulty: 6
+act: 1
+arena: fiume_traghetto
+zone: fiume_anime
+model: {builder: caronte, rig: humanoid, scale: 1.0, palette: act1_green_gold}
+equilibrio_max: 170
+body: {radius: 1.3, height: 6.4, mass: heavy}
+hurtboxes:
+  - {c: [0, 1.1, 0], r: 1.05}     # robe hem
+  - {c: [0, 2.9, 0], r: 0.95}     # waist
+  - {c: [0, 4.4, 0.05], r: 0.85}  # chest
+  - {c: [0, 5.7, 0.15], r: 0.55}  # hood
+parts:
+  # The lantern of eyes (hangs from his left hand; lock point for the camera, takes normal damage).
+  - id: lantern
+    name_key: part.caronte.lantern
+    lockable: true
+    hurt:
+      - {c: [1.25, 3.3, 0.6], r: 0.55}
+move: {walk: 2.3, run: 6.0, turn: 2.4, preferred_range: [3, 8]}
+idle_gap: [0.8, 1.4]
+music: boss_caronte
+intro_sequence: caronte_intro
+defeat_sequence: caronte_defeat
+lore_key: boss.caronte.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_caronte_p1
+    patterns: [oar_sweep, oar_cleave, oar_thrust, punt_lunge, soul_volley, lantern_gaze, bridge_sweep, soul_stream, soul_hands_line]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_caronte_p2
+    on_enter: [current, boat_sunk]
+    arena_state: current
+    transition: 3.4
+    speed_mult: 1.08
+    aggression: 1.12
+    dialogue: boss.caronte.mid
+    opener: great_souls
+    patterns: [oar_sweep, oar_cleave, oar_thrust, current_spin, great_souls, soul_volley, eddies, soul_hands_ring, drowning_lunge, lantern_gaze]
+attacks:
+  # --- On the boat and on the bridge (phase 1) -----------------------------------------------------------------------------
+  # The oar sweeps low across the deck: jump it or roll through.
+  - id: oar_sweep
+    anim: oar_sweep
+    telegraph: 1.0
+    active: 0.4
+    recovery: 1.15
+    damage_mult: 1.0
+    poise: 20
+    flags: [knockback]
+    range: [0, 7.5]
+    weight: 1.1
+    cooldown: 2.5
+    track: 1.0
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 8.0, r_in: 0.8, angle: 170, yaw: 10, y: [0, 1.0]}}
+    spawns:
+      - {t: -0.95, type: sfx, id: caronte_oar_creak}
+  # Colpo Rosso: the blade-paddle raised high, then down in a straight line. Dodge it.
+  - id: oar_cleave
+    anim: overhead
+    telegraph: 1.15
+    active: 0.3
+    recovery: 1.5
+    damage_mult: 1.55
+    poise: 30
+    flags: [red, knockdown]
+    range: [0, 7]
+    weight: 0.8
+    cooldown: 5
+    track: 1.1
+    hits:
+      - {t: 0.05, dur: 0.2, shape: {type: box, c: [0, 1.0, 4.4], half: [1.0, 2.2, 3.8]}}
+    spawns:
+      - {t: 0.08, type: hazard, id: caronte_oar_wake, at: front, dist: 8.6, count: 1, delay: 0.0, active: 0.3, damage_mult: 0.5, shape: {type: cylinder, c: [0, 0, 0], r: 1.8, h: 1.2}}
+  # A straight thrust of the paddle-blade.
+  - id: oar_thrust
+    anim: thrust
+    telegraph: 0.8
+    active: 0.35
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 16
+    flags: []
+    range: [0, 7]
+    weight: 1.0
+    track: 1.1
+    track_active: 0.2
+    hits:
+      - {t: 0.03, dur: 0.22, shape: {type: capsule, a: [0, 2.6, 0.6], b: [0, 1.6, 7.6], r: 0.65}}
+  # Punts like a ferryman: the oar pushes off and he glides at you with the blade low.
+  - id: punt_lunge
+    anim: punt
+    telegraph: 0.9
+    active: 0.6
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 20
+    flags: [knockback]
+    range: [4, 16]
+    weight: 0.9
+    cooldown: 4
+    track: 1.2
+    track_active: 0.15
+    requires: boat
+    motion:
+      - {t: 0, dur: 0.5, type: forward, speed: 15}
+    hits:
+      - {t: 0.05, dur: 0.45, shape: {type: capsule, a: [0, 1.4, 0.5], b: [0, 1.0, 4.2], r: 0.85}}
+    spawns:
+      - {t: -0.85, type: sfx, id: caronte_oar_creak}
+  # The lantern opens: souls fly at you (day: few but fast; night: many but slow).
+  - id: soul_volley
+    anim: lantern_raise
+    telegraph: 0.95
+    active: 0.6
+    recovery: 1.0
+    damage_mult: 0.75
+    poise: 10
+    flags: []
+    range: [3, 60]
+    weight: 1.0
+    cooldown: 3.5
+    track: 1.0
+    spawns:
+      - {t: -0.9, type: sfx, id: caronte_lantern_open}
+      - {t: 0.05, type: projectile, id: caronte_soul, count: 5, spread: 44, from: [1.25, 3.3, 0.9]}
+  # The eyes in the lantern stare: a pale line is drawn on the planks, then it scorches. Step out of the line.
+  - id: lantern_gaze
+    anim: lantern_raise
+    telegraph: 0.9
+    active: 1.25
+    recovery: 1.0
+    damage_mult: 1.1
+    poise: 18
+    flags: []
+    range: [4, 40]
+    weight: 0.8
+    cooldown: 6
+    track: 1.0
+    spawns:
+      - {t: -0.85, type: sfx, id: caronte_eyes}
+      - {t: 0.0, type: hazard, id: caronte_lantern_gaze, at: self, count: 1, delay: 0.95, active: 0.3, shape: {type: box, c: [0, 0, 11], half: [1.2, 2.2, 9.5]}}
+  # Bridge of souls: the long oar sweeps the bridge from the landing (jump it or roll through).
+  - id: bridge_sweep
+    anim: oar_sweep
+    telegraph: 1.05
+    active: 0.45
+    recovery: 1.2
+    damage_mult: 1.05
+    poise: 20
+    flags: [knockback]
+    range: [0, 12.5]
+    weight: 1.2
+    cooldown: 3
+    track: 1.0
+    requires: bridge
+    hits:
+      - {t: 0.05, dur: 0.35, shape: {type: arc, r: 13.5, r_in: 1.0, angle: 90, yaw: 0, y: [0, 1.0]}}
+    spawns:
+      - {t: -1.0, type: sfx, id: caronte_oar_creak}
+  # Bridge of souls: souls stream down the bridge in three waves.
+  - id: soul_stream
+    anim: lantern_raise
+    telegraph: 0.9
+    active: 1.2
+    recovery: 1.0
+    damage_mult: 0.7
+    poise: 10
+    flags: []
+    range: [6, 70]
+    weight: 1.0
+    cooldown: 5
+    track: 1.0
+    requires: bridge
+    spawns:
+      - {t: -0.85, type: sfx, id: caronte_lantern_open}
+      - {t: 0.05, type: projectile, id: caronte_soul, count: 2, spread: 14, repeat: 3, interval: 0.4, from: [1.25, 3.3, 0.9]}
+  # Bridge of souls: drowned hands rise along the bridge toward you.
+  - id: soul_hands_line
+    anim: oar_plunge
+    telegraph: 0.8
+    active: 1.2
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 18
+    flags: []
+    range: [5, 70]
+    weight: 0.9
+    cooldown: 5
+    requires: afloat
+    spawns:
+      - {t: -0.75, type: sfx, id: caronte_hands}
+      - {t: 0.0, type: hazard, id: caronte_soul_hands, at: line_to_target, count: 1, dist: 6, delay: 0.8, active: 0.35, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 2.6}}
+      - {t: 0.15, type: hazard, id: caronte_soul_hands, at: line_to_target, count: 1, dist: 10, delay: 0.8, active: 0.35, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 2.6}}
+      - {t: 0.3, type: hazard, id: caronte_soul_hands, at: line_to_target, count: 1, dist: 14, delay: 0.8, active: 0.35, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 2.6}}
+      - {t: 0.45, type: hazard, id: caronte_soul_hands, at: line_to_target, count: 1, dist: 18, delay: 0.8, active: 0.35, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 2.6}}
+      - {t: 0.6, type: hazard, id: caronte_soul_hands, at: line_to_target, count: 1, dist: 22, delay: 0.8, active: 0.35, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 2.6}}
+  # Scripted (78% Health): plunges the oar into the river; the drowned souls rise into a bridge and he steps onto its landing.
+  - id: raise_bridge
+    anim: oar_plunge
+    telegraph: 0.9
+    active: 2.2
+    recovery: 0.6
+    damage_mult: 0.6
+    poise: 14
+    flags: []
+    global: true
+    weight: 0
+    spawns:
+      - {t: -0.9, type: sfx, id: caronte_hands}
+      - {t: 0.0, type: shockwave, id: caronte_oar_wake, radius: 7, shape: {type: ring, r0: 1.2, r1: 7, width: 1.2, height: 0.8}, active: 0.5, damage_mult: 0.6}
+      - {t: 0.05, type: custom, event: raise_bridge}
+  # --- Luminous current (phase 2) ------------------------------------------------------------------------------------------
+  # Spins on the water with the oar held wide: get out of reach or jump the low blade.
+  - id: current_spin
+    anim: spin
+    telegraph: 0.95
+    active: 0.6
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockback]
+    range: [0, 6.5]
+    weight: 1.0
+    cooldown: 4
+    requires: current
+    hits:
+      - {t: 0.05, dur: 0.45, shape: {type: arc, r: 7.5, angle: 360, y: [0, 1.0]}}
+    spawns:
+      - {t: 0.05, type: vfx, id: caronte_current_spray}
+  # Great souls: fewer, heavier, slower, they follow you.
+  - id: great_souls
+    anim: lantern_raise
+    telegraph: 1.0
+    active: 0.6
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 16
+    flags: []
+    range: [2, 60]
+    weight: 0.9
+    cooldown: 5
+    track: 1.0
+    requires: current
+    spawns:
+      - {t: -0.95, type: sfx, id: caronte_lantern_open}
+      - {t: 0.05, type: projectile, id: caronte_great_soul, count: 3, spread: 60, from: [1.25, 3.3, 0.9]}
+  # Eddies open in the current around you and drag you in.
+  - id: eddies
+    anim: oar_plunge
+    telegraph: 0.85
+    active: 1.0
+    recovery: 1.0
+    damage_mult: 0.7
+    poise: 12
+    flags: []
+    global: true
+    weight: 0.8
+    cooldown: 8
+    requires: current
+    spawns:
+      - {t: -0.8, type: sfx, id: caronte_eddy}
+      - {t: 0.0, type: hazard, id: caronte_eddy, at: around_target, count: 3, dist: 5.5, radius: 2.0, delay: 1.0, active: 2.2, pull: 3.2, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 2.0, h: 1.6}}
+  # Hands of souls rise in a ring around you, then under you.
+  - id: soul_hands_ring
+    anim: oar_plunge
+    telegraph: 0.8
+    active: 1.4
+    recovery: 1.0
+    damage_mult: 0.95
+    poise: 20
+    flags: []
+    global: true
+    weight: 0.9
+    cooldown: 6
+    requires: current
+    spawns:
+      - {t: -0.75, type: sfx, id: caronte_hands}
+      - {t: 0.0, type: hazard, id: caronte_soul_hands, at: around_target, count: 5, dist: 4.2, radius: 1.4, delay: 0.95, active: 0.4, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.4, h: 2.6}}
+      - {t: 0.55, type: hazard, id: caronte_soul_hands, at: target, count: 1, delay: 0.95, active: 0.4, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 2.0, h: 2.6}}
+  # Sinks into the current (his lantern dims) and rises behind you with the blade.
+  - id: drowning_lunge
+    anim: emerge_strike
+    telegraph: 1.3
+    active: 0.4
+    recovery: 1.3
+    damage_mult: 1.2
+    poise: 24
+    flags: [knockdown]
+    global: true
+    weight: 0.7
+    cooldown: 8
+    track: 2.4
+    requires: current
+    motion:
+      - {t: -0.45, dur: 0.05, type: teleport_behind, dist: 4.2}
+    hits:
+      - {t: 0.03, dur: 0.25, shape: {type: arc, r: 5.5, angle: 120, y: [0, 4]}}
+    spawns:
+      - {t: -1.3, type: custom, event: sink}
+      - {t: -1.25, type: sfx, id: caronte_sink}
+      - {t: -0.45, type: custom, event: rise}
+  # --- New Game+ (Ciclo dell'Alba) ----------------------------------------------------------------------------------------
+  # Two oar sweeps, the second the other way.
+  - id: ng_double_sweep
+    anim: oar_sweep
+    telegraph: 0.95
+    active: 1.05
+    recovery: 1.2
+    damage_mult: 0.95
+    poise: 18
+    flags: [knockback]
+    range: [0, 7.5]
+    weight: 1.0
+    cooldown: 6
+    track: 1.0
+    track_active: 0.2
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 8.0, r_in: 0.8, angle: 170, yaw: 10, y: [0, 1.0]}}
+      - {t: 0.7, dur: 0.3, shape: {type: arc, r: 8.0, r_in: 0.8, angle: 170, yaw: -10, y: [0, 1.0]}}
+  # A ring of souls released all around him that then turns toward you.
+  - id: ng_soul_crown
+    anim: lantern_raise
+    telegraph: 1.1
+    active: 0.6
+    recovery: 1.1
+    damage_mult: 0.7
+    poise: 10
+    flags: []
+    global: true
+    weight: 0.9
+    cooldown: 8
+    spawns:
+      - {t: -1.0, type: sfx, id: caronte_lantern_open}
+      - {t: 0.05, type: projectile, id: caronte_soul, at: ring_self, count: 8, speed: 9, from: [0, 3.4, 0]}
+time_of_day_variants:
+  giorno: {spawn_mult: 0.6, projectile_speed_mult: 1.45, note_key: boss.caronte.tod.giorno}
+  notte: {spawn_mult: 2.0, projectile_speed_mult: 0.6, opener: soul_volley, note_key: boss.caronte.tod.notte}
+dialogue_keys: [boss.caronte.intro, boss.caronte.intro2, boss.caronte.mid, boss.caronte.defeat, boss.caronte.defeat2]
+drops_weapon: remo_del_traghettatore
+unlocks_form: null
+metamondo_reaction: null
+ng_plus:
+  add_patterns: {p1: [ng_double_sweep], p2: [ng_double_sweep, ng_soul_crown]}
+  speed_mult: 1.08
+  idle_mult: 0.8

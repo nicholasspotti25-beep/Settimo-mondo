@@ -1,0 +1,22 @@
+# Caronte (secondary): he wants a memory, not a coin, and you have none. Defeated, he ferries you to the Porta di Dite
+# (the travel step is last: it may start the Act II intro sequence).
+- id: caronte_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 2.0}
+    - {say: boss.caronte.intro, speaker: caronte}
+    - {say: boss.caronte.intro2, speaker: caronte}
+    - {event: start_fight}
+- id: caronte_defeat
+  skippable: true
+  steps:
+    - {wait: 1.6}
+    - {camera: boss_close, dur: 1.2}
+    - {say: boss.caronte.defeat, speaker: caronte}
+    - {say: boss.caronte.defeat2, speaker: caronte}
+    - {event: cue, params: {id: caronte_ferry}}
+    - {camera: wide, dur: 2.4}
+    - {caption: story.atto1.traghetto, dur: 3.8}
+    - {fade: out, dur: 1.4}
+    - {event: autosave, params: {reason: ferry}}
+    - {event: travel, params: {zone: porta_dite, altar: altare_dite_01}}

@@ -1,0 +1,15 @@
+# Elder Tree (secondary): the bark face speaks once; dying, it lets the first ray of light in centuries reach the forest floor.
+- id: elder_tree_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 2.2}
+    - {say: boss.elder_tree.intro, speaker: elder_tree}
+    - {event: start_fight}
+- id: elder_tree_defeat
+  skippable: true
+  steps:
+    - {wait: 1.2}
+    - {say: boss.elder_tree.defeat, speaker: elder_tree}
+    - {event: cue, params: {id: first_light}}
+    - {camera: vista, dur: 3.2}
+    - {caption: story.atto1.primo_raggio, dur: 4.0}

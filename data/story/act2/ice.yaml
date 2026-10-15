@@ -1,0 +1,15 @@
+# Ice (secondary): two lines before, one after. The last seal of the Cathedral breaks with him.
+- id: ice_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 1.8}
+    - {say: boss.ice.intro, speaker: ice}
+    - {say: boss.ice.intro2, speaker: ice}
+    - {event: start_fight}
+- id: ice_defeat
+  skippable: true
+  steps:
+    - {wait: 1.6}
+    - {say: boss.ice.defeat, speaker: ice}
+    - {event: cue, params: {id: seal_broken_ice}}
+    - {caption: story.atto2.sigillo_gelo, dur: 3.5}

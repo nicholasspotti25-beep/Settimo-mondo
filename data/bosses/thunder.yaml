@@ -175,7 +175,7 @@ attacks:
     cooldown: 4.5
     track: 1.0
     spawns:
-      - {t: 0.0, type: hazard, id: thunder_mark, at: around_target, count: 3, dist: 3.6, delay: 1.15, active: 0.3, damage_mult: 1.0, shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 30}}
+      - {t: 0.0, type: hazard, id: thunder_mark, at: around_target, count: 3, dist: 3.6, delay: 1.15, active: 0.2, damage_mult: 1.0, shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 30}}
     sfx: thunder_call
   # Close: hammer into the ground, the shock spreads in a short ring.
   - id: ground_pound
@@ -208,7 +208,7 @@ attacks:
     weight: 0.9
     cooldown: 11
     spawns:
-      - {t: 0.0, type: hazard, id: thunder_storm, at: random_arena, count: 7, delay: 1.1, active: 0.3, damage_mult: 0.95, repeat: 3, interval: 0.8, shape: {type: cylinder, c: [0, 0, 0], r: 2.3, h: 30}}
+      - {t: 0.0, type: hazard, id: thunder_storm, at: random_arena, count: 7, delay: 1.1, active: 0.2, damage_mult: 0.95, repeat: 3, interval: 0.8, shape: {type: cylinder, c: [0, 0, 0], r: 2.3, h: 30}}
     sfx: thunder_call
   # Phase 2: three bolts thrown from the hammer head.
   - id: chain_bolts

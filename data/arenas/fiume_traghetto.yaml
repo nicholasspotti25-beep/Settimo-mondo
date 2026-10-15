@@ -1,12 +1,25 @@
+# Caronte — the Ferry of the River of Souls. The arena is a polygon (local frame around the center, gate at local z = -40).
+#  default      : the black boat moored at the dock (9 m wide, 30 m long, prow to the north).
+#  soul_bridge  : at 78% Health the drowned souls rise into a bridge from the prow to a round landing in the dark (Caronte waits
+#                 there); the boat stays moored behind.
+#  current      : phase 2 — the boat sinks, the bridge dissolves, the fight continues on the luminous current itself (walkable
+#                 glowing water that drifts the player downstream, toward the north).
 id: fiume_traghetto
 zone: fiume_anime
 name_key: arena.fiume_traghetto.name
 center: [0, 0, -40]
-shape: rect
-half: [10, 40]
+shape: polygon
+polygon: [-4.2, -39.5, 4.2, -39.5, 4.6, -30, 4.6, -19, 3.6, -13.5, 1.8, -10.2, 0, -9, -1.8, -10.2, -3.6, -13.5, -4.6, -19, -4.6, -30]
 gate: {pos: [0, 0, -80], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: wood
 obstacles: []
+variants:
+  soul_bridge:
+    polygon: [-4.2, -39.5, 4.2, -39.5, 4.6, -30, 4.6, -19, 3.6, -13.5, 3.2, -11, 3.2, 10.5, 6.5, 12, 9.2, 16.5, 9.2, 23.5, 6.5, 28, 0, 30, -6.5, 28, -9.2, 23.5, -9.2, 16.5, -6.5, 12, -3.2, 10.5, -3.2, -11, -3.6, -13.5, -4.6, -19, -4.6, -30]
+    surface: water
+  current:
+    polygon: [-14, -38, 14, -38, 15, -20, 15, 18, 13, 30, 0, 33, -13, 30, -15, 18, -15, -20]
+    surface: water
 builder: fiume_traghetto
 platform: boat

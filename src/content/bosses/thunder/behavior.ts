@@ -12,7 +12,7 @@ import type { Sim } from '../../../sim/sim';
 
 const STRIKE_FROM: [number, number, number] = [0, 0, 0];
 const STRIKE: SpawnDef = {
-  t: 0, type: 'hazard', id: 'thunder_storm', at: 'self', from: STRIKE_FROM, delay: 1.25, active: 0.3, damage_mult: 0.8,
+  t: 0, type: 'hazard', id: 'thunder_storm', at: 'self', from: STRIKE_FROM, delay: 1.25, active: 0.2, damage_mult: 0.8,
   shape: { type: 'cylinder', c: [0, 0, 0], r: 2.2, h: 30 },
 };
 const FRONT = new Set(['hammer_sweep', 'overhead_smash', 'chain_bolts']);

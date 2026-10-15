@@ -21,4 +21,4 @@ arts:
   # Lancio Orbitale: throw the chakram on a wide orbit; it returns to the hand.
   prima: {id: lancio_orbitale, eco_cost: 100, effect: throw_return, params: {kind: w_orbital_chakram, speed: 24, distance: 13, damage_mult: 2.4, dur: 0.6, element: void}, vfx: art_lancio_orbitale, anim: orbital_throw}
   # Foro Nero: the chakram hangs still in the air and pulls nearby enemies into its hole.
-  seconda: {id: foro_nero, eco_cost: 200, effect: black_hole, params: {at: front, dist: 5.0, radius: 5.0, time: 3.2, pull: 6.0, dps_mult: 0.7, burst: 1.0, damage_mult: 1.6, visual: void, element: void}, vfx: art_foro_nero, anim: black_hole_cast}
+  seconda: {id: foro_nero, eco_cost: 200, effect: black_hole, params: {at: front, dist: 5.0, radius: 5.0, time: 3.2, pull: 6.0, dps_mult: 0.6, burst: true, damage_mult: 1.6, visual: void, element: void}, vfx: art_foro_nero, anim: black_hole_cast}

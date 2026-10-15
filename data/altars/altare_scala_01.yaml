@@ -1,0 +1,9 @@
+# Altar at the foot of the Scala dei Dannati (exit of the Inferno). Lucifero I's narrative defeat wakes you here, and the
+# Implora path leads here too.
+id: altare_scala_01
+zone: cattedrale_caduta
+name_key: altar.altare_scala_01.name
+pos: [-52, 0, 126]
+yaw: -0.59
+before_boss: null
+voice_line_key: null

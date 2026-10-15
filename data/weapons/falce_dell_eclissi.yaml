@@ -20,6 +20,6 @@ stamina_cost: {light: 17, heavy: 33}
 moveset: {light: falce_light, heavy: falce_heavy, running: falce_run, jumping: falce_jump}
 arts:
   # Falciata Eclissi: an arc cut that leaves a Void trail eating at whoever stands in it.
-  prima: {id: falciata_eclissi, eco_cost: 100, effect: hazard_zone, params: {trail: true, reach: 5.0, angle: 180, trail_count: 5, radius: 1.6, time: 4.5, visual: void, dps_mult: 0.3, damage_mult: 1.6, element: void}, vfx: art_falciata_eclissi, anim: eclipse_reap}
+  prima: {id: falciata_eclissi, eco_cost: 100, effect: hazard_zone, params: {trail: true, reach: 5.0, angle: 180, trail_count: 5, radius: 1.6, time: 4.5, visual: void, dps_mult: 0.09, damage_mult: 1.6, element: void}, vfx: art_falciata_eclissi, anim: eclipse_reap}
   # Raccolto d'Ombra: a spinning harvest; if it lands it gives back one Eco segment.
   seconda: {id: raccolto_d_ombra, eco_cost: 200, effect: spin, params: {radius: 5.0, r_in: 0.8, hits: 2, eco_refund: 100, damage_mult: 3.0, dur: 0.95, element: void}, vfx: art_raccolto_ombra, anim: shadow_harvest}

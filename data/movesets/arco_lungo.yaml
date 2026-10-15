@@ -11,7 +11,7 @@ swings:
     - {id: ar_l2, anim: draw_shot, startup: 0.38, active: 0.06, recovery: 0.3, cancel: 0.18, damage_mult: 0.9, poise: 0, projectile: {kind: w_golden_arrow, speed: 42, radius: 0.2, life: 2.5, gravity: 9, homing: 0.7}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
     - {id: ar_l3, anim: draw_shot_quick, startup: 0.42, active: 0.06, recovery: 0.32, cancel: 0.18, damage_mult: 1.0, poise: 0, projectile: {kind: w_golden_arrow, speed: 46, radius: 0.22, life: 2.5, gravity: 8, homing: 0.7}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
   arco_lungo_heavy:
-    {id: ar_h, anim: full_draw, startup: 0.75, active: 0.06, recovery: 0.35, cancel: 0.2, damage_mult: 2.2, poise: 20, projectile: {kind: w_golden_arrow, speed: 62, radius: 0.26, life: 2.2, gravity: 4, homing: 0.5, pierce: true}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
+    {id: ar_h, anim: full_draw, startup: 0.75, active: 0.06, recovery: 0.35, cancel: 0.2, damage_mult: 1.9, poise: 20, projectile: {kind: w_golden_arrow, speed: 62, radius: 0.26, life: 2.2, gravity: 4, homing: 0.5, pierce: true}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
   arco_lungo_run:
     {id: ar_r, anim: hip_shot, startup: 0.22, active: 0.06, recovery: 0.4, damage_mult: 0.9, poise: 0, projectile: {kind: w_golden_arrow, speed: 38, radius: 0.22, life: 2.2, gravity: 9, homing: 1.0}, arc: {from: [0, 0], to: [0, 0], roll: 0, hand: both}}
   arco_lungo_jump:

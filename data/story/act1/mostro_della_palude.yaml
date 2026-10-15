@@ -1,0 +1,14 @@
+# Mostro della Palude (secondary): the thousand voices speak through the bubbles; at the end they ask to sink, and whisper the
+# clue about the ferryman one last time.
+- id: mostro_della_palude_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 1.8}
+    - {say: boss.mostro_della_palude.intro, speaker: mostro_della_palude}
+    - {event: start_fight}
+- id: mostro_della_palude_defeat
+  skippable: true
+  steps:
+    - {wait: 1.6}
+    - {say: boss.mostro_della_palude.defeat, speaker: mostro_della_palude}
+    - {caption: boss.mostro_della_palude.voices.clue, dur: 3.4}

@@ -19,3 +19,4 @@
 - {id: lucifero_embers, visual: embers, color: '#ff3a2a', element: fire}
 - {id: lucifero_wing, visual: shadow, color: '#3a0e12', element: void}
 - {id: lucifero_rifiuto, visual: light, color: '#fff0d0', element: light}
+- {id: lucifero_gaze, visual: circle, color: '#ff2a1a', element: fire}

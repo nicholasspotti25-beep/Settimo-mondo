@@ -1,0 +1,15 @@
+# Thunder (secondary): two lines before, one after. The second seal of the Cathedral breaks with him.
+- id: thunder_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 1.8}
+    - {say: boss.thunder.intro, speaker: thunder}
+    - {say: boss.thunder.intro2, speaker: thunder}
+    - {event: start_fight}
+- id: thunder_defeat
+  skippable: true
+  steps:
+    - {wait: 1.6}
+    - {say: boss.thunder.defeat, speaker: thunder}
+    - {event: cue, params: {id: seal_broken_thunder}}
+    - {caption: story.atto2.sigillo_tuono, dur: 3.5}

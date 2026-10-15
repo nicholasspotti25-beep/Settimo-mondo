@@ -1,0 +1,203 @@
+# 12. Lucifero, l'Arcangelo Caduto (first encounter) — principal · Cattedrale Caduta · scripted: cannot be won · no weapon.
+# Burned black wings, cracked golden armor, a throne of swords in the overturned nave. He sits like someone with no more
+# hurry. Once the three seals are open he speaks: "Sei vivo, piccolo seme. Cosa vuoi da me?" — Affronta / Implora.
+#  - Affronta: a real fight; you can dodge and hit, but he is invulnerable (canDie false). The Metamondo is shattered with one
+#    finger. After about two minutes he rises from the throne for the first time: an unavoidable attack (Il Rifiuto) ends the
+#    fight as a narrative defeat; you wake by the Scala dei Dannati with full Health and Lacrime and the Cicatrice del Rifiuto.
+#  - Implora: hold for five seconds, kneeling under his gaze; he laughs, tired, and lets you go with the Piuma Nera.
+# He spares you because he recognized the seed. The model supports both looks (lucifero_1 seated, lucifero_2 standing).
+# Local frame: +Z forward, +Y up, +X = Lucifero's LEFT. He never leaves the throne until Il Rifiuto.
+id: lucifero_1
+order: 12
+name_key: boss.lucifero_1.name
+title_key: boss.lucifero_1.title
+class: principal
+difficulty: 9
+act: 2
+arena: cattedrale_navata
+zone: cattedrale_caduta
+model: {builder: lucifero_1, rig: humanoid, scale: 1.0, palette: act2_red_blue_black}
+equilibrio_max: 300
+body: {radius: 2.6, height: 7.6, mass: immovable}
+hurtboxes:
+  - {c: [0, 1.3, 1.6], r: 1.2}     # greaves on the throne step
+  - {c: [0, 2.9, 1.2], r: 1.45}    # knees
+  - {c: [0, 4.4, 0.2], r: 1.6}     # cracked golden cuirass
+  - {c: [0, 6.2, 0.2], r: 0.85}    # head
+move: {walk: 0, run: 0, turn: 0, preferred_range: [0, 60]}
+idle_gap: [1.1, 1.9]
+music: boss_lucifero_1
+intro_sequence: lucifero_intro
+scripted: true
+hp_override: 9999
+metamondo_reaction: shatter
+phases:
+  - id: p1
+    hp_range: [1.0, 0.0]
+    music: boss_lucifero_1_p1
+    opener: gaze
+    patterns: [wing_sweep_l, wing_sweep_r, wings_fold, feather_blades, sword_rain, sword_line, ember_orbs, gaze, finger]
+attacks:
+  # He looks at you. A red ring leaves the throne and crosses the whole nave, slowly: jump it.
+  - id: gaze
+    anim: gaze
+    telegraph: 1.3
+    active: 2.4
+    recovery: 0.8
+    damage_mult: 0.8
+    poise: 18
+    flags: []
+    element: fire
+    global: true
+    weight: 0.7
+    cooldown: 9
+    spawns:
+      - {t: 0.0, type: shockwave, id: lucifero_gaze, shape: {type: ring, r0: 3.0, r1: 44, width: 1.4, height: 0.9}, active: 2.6, damage_mult: 0.8}
+    sfx: lucifero_gaze
+  # The left wing (his left, +X) sweeps the floor of its side of the nave.
+  - id: wing_sweep_l
+    anim: wing_l
+    telegraph: 1.0
+    active: 0.42
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    range: [0, 12]
+    weight: 1.0
+    cooldown: 3
+    hits:
+      - {t: 0.03, dur: 0.34, shape: {type: arc, r: 13, angle: 150, yaw: 55, y: [0, 3.2]}}
+    sfx: wing_sweep
+  - id: wing_sweep_r
+    anim: wing_r
+    telegraph: 1.0
+    active: 0.42
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    range: [0, 12]
+    weight: 1.0
+    cooldown: 3
+    hits:
+      - {t: 0.03, dur: 0.34, shape: {type: arc, r: 13, angle: 150, yaw: -55, y: [0, 3.2]}}
+    sfx: wing_sweep
+  # Both wings fold around the throne: nobody stands beside him.
+  - id: wings_fold
+    anim: wings_fold
+    telegraph: 1.05
+    active: 0.4
+    recovery: 1.1
+    damage_mult: 1.05
+    poise: 24
+    flags: [knockback]
+    range: [0, 4]
+    weight: 1.1
+    cooldown: 4
+    hits:
+      - {t: 0.03, dur: 0.32, shape: {type: arc, r: 8.5, angle: 360, y: [0, 3.5]}}
+    sfx: wing_fold
+  # Burned feathers flung like blades.
+  - id: feather_blades
+    anim: wing_cast
+    telegraph: 0.9
+    active: 0.5
+    recovery: 1.0
+    damage_mult: 0.7
+    poise: 10
+    flags: []
+    element: void
+    range: [4, 60]
+    weight: 1.1
+    cooldown: 3.5
+    spawns:
+      - {t: 0.05, type: projectile, id: lucifero_feather, count: 7, spread: 56, speed: 21, from: [0, 5.6, 1.2]}
+    sfx: feathers
+  # Swords leave the throne and fall around you.
+  - id: sword_rain
+    anim: raise_hand
+    telegraph: 0.85
+    active: 1.0
+    recovery: 0.9
+    damage_mult: 0.95
+    poise: 18
+    flags: []
+    element: light
+    global: true
+    weight: 1.0
+    cooldown: 5
+    spawns:
+      - {t: 0.0, type: hazard, id: lucifero_blade, at: target_predict, delay: 1.0, active: 0.35, damage_mult: 0.95, shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 8}}
+      - {t: 0.3, type: hazard, id: lucifero_blade, at: around_target, count: 4, dist: 3.6, radius: 1.5, delay: 1.0, active: 0.35, damage_mult: 0.85, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 8}}
+    sfx: swords_rise
+  # A line of swords falls along the nave, from the throne to you.
+  - id: sword_line
+    anim: point
+    telegraph: 0.8
+    active: 0.6
+    recovery: 1.0
+    damage_mult: 0.95
+    poise: 18
+    flags: []
+    element: light
+    range: [5, 60]
+    weight: 0.9
+    cooldown: 5
+    spawns:
+      - {t: 0.0, type: hazard, id: lucifero_blade, at: line_to_target, count: 9, dist: 4.2, delay: 0.85, active: 0.35, damage_mult: 0.95, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 8}}
+    sfx: swords_rise
+  # Embers of the Cathedral drift toward you, slow and stubborn.
+  - id: ember_orbs
+    anim: raise_hand
+    telegraph: 0.9
+    active: 0.6
+    recovery: 0.9
+    damage_mult: 0.75
+    poise: 12
+    flags: [burn]
+    element: fire
+    range: [6, 60]
+    weight: 0.8
+    cooldown: 7
+    spawns:
+      - {t: 0.05, type: projectile, id: lucifero_ember, count: 3, spread: 70, speed: 11, from: [0, 6.4, 0.8]}
+    sfx: embers
+  # One finger: a column of pale fire falls where you stand.
+  - id: finger
+    anim: finger
+    telegraph: 0.75
+    active: 1.0
+    recovery: 0.8
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockdown]
+    element: light
+    global: true
+    weight: 0.9
+    cooldown: 4
+    spawns:
+      - {t: 0.0, type: hazard, id: lucifero_rifiuto, at: target, delay: 0.95, active: 0.35, damage_mult: 1.1, shape: {type: cylinder, c: [0, 0, 0], r: 2.6, h: 12}}
+    sfx: lucifero_finger
+  # Il Rifiuto (behavior only, after about two minutes): he rises from the throne for the first time and the wings open over
+  # the whole nave. It cannot be dodged, parried or blocked. The fight ends as a narrative defeat (not a death).
+  - id: il_rifiuto
+    anim: rifiuto
+    telegraph: 3.4
+    active: 0.6
+    recovery: 4.0
+    damage_mult: 0
+    poise: 60
+    flags: [unavoidable, red, knockdown]
+    element: light
+    global: true
+    weight: 0
+    hits:
+      - {t: 0.1, dur: 0.45, shape: {type: box, c: [0, 4, -40], half: [32, 8, 52]}}
+    spawns:
+      - {t: 0.12, type: custom, event: rifiuto}
+    sfx: lucifero_rifiuto
+time_of_day_variants: {}
+dialogue_keys: [boss.lucifero_1.intro, boss.lucifero_1.affronta, boss.lucifero_1.implora, boss.lucifero_1.rifiuto, boss.lucifero_1.shatter]
+drops_weapon: null
+unlocks_form: null

@@ -1,3 +1,7 @@
+# Great Devourer — the Rotten Pier: a long pier of black planks over the deep water, 24 m wide, reaching north into the fog.
+# Thick stilts rise above the deck along both edges (colliders; the serpent coils around them to crush the planks).
+# Phase 2 (pier_destroyed): the serpent smashes the pier; the fight continues on rafts and logs lashed together by the wreck
+# (same footprint, no stilts left standing; the dressing rocks the rafts).
 id: palude_molo
 zone: palude
 name_key: arena.palude_molo.name
@@ -6,7 +10,17 @@ shape: rect
 half: [12, 26]
 gate: {pos: [60, 0, 114], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
-obstacles: []
+surface: wood
+obstacles:
+  - {type: cylinder, c: [49.2, 0, 122], r: 0.55, h: 3.2}
+  - {type: cylinder, c: [49.2, 0, 134], r: 0.55, h: 3.2}
+  - {type: cylinder, c: [49.2, 0, 146], r: 0.55, h: 3.2}
+  - {type: cylinder, c: [49.2, 0, 158], r: 0.55, h: 3.2}
+  - {type: cylinder, c: [70.8, 0, 122], r: 0.55, h: 3.2}
+  - {type: cylinder, c: [70.8, 0, 134], r: 0.55, h: 3.2}
+  - {type: cylinder, c: [70.8, 0, 146], r: 0.55, h: 3.2}
+  - {type: cylinder, c: [70.8, 0, 158], r: 0.55, h: 3.2}
+variants:
+  pier_destroyed: {half: [12, 25], obstacles: [], surface: wood}
 builder: palude_molo
 platform: deck

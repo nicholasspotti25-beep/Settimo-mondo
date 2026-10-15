@@ -75,9 +75,20 @@ export interface ClipDef extends StagePose {
   /** Only these bones (prefix* globs) are driven; others keep locomotion (upper-body attacks while moving). */
   mask?: string[];
 }
+/** Import every clip of another library, renaming bones (`bonePrefix`) and clips (`clipPrefix`). */
+export interface ClipInclude {
+  family: string;
+  /** Prefix added to every bone key / chain name (e.g. 'rider_' for a humanoid rider inside the mounted rig). */
+  bonePrefix?: string;
+  /** Prefix added to every imported clip name (e.g. 'foot_' for the dismounted rider). */
+  clipPrefix?: string;
+  /** Only these clips (before prefixing). */
+  only?: string[];
+}
 export interface ClipLibraryDef {
   family: string;
   extends?: string;
+  includes?: ClipInclude[];
   clips: Record<string, ClipDef>;
   aliases?: Record<string, string>;
 }
@@ -101,17 +112,97 @@ export const GLOBAL_ALIASES: Record<string, string> = {
   pincer: 'grab', mandible: 'bite', sting: 'thrust', shoot: 'cast', volley: 'cast', rain: 'summon', drum: 'cast', water: 'cast',
   cut: 'sweep_r', shear: 'grab', snip: 'grab', fan: 'sweep_r', double_slash: 'sweep_r', cross_slash: 'overhead', uppercut: 'sweep_l',
   backhand: 'sweep_l', stomp_l: 'stomp', stomp_r: 'stomp', walk_back: 'walk', retreat: 'walk', strafe: 'walk', gallop: 'run', sprint: 'run',
+  riposte: 'thrust', combo: 'sweep_r', stance: 'block', counter: 'block', reach: 'thrust', long_reach: 'thrust', pulse: 'roar',
+  shake: 'roar', quiver: 'roar', wave: 'slam', arms: 'grab', tremor: 'stomp', thunder: 'slam', hammer: 'overhead', drill: 'thrust',
+  barrage: 'cast', storm: 'summon', blizzard: 'breath', frost: 'breath', flame: 'breath', inferno: 'summon', meteor: 'summon',
+  nova: 'roar', burst: 'roar', explode: 'roar', flurry: 'sweep_r', rend: 'claw_r', gore: 'charge', horn: 'charge', butt: 'charge',
+  peck: 'bite', strike: 'thrust', fang: 'bite', tongue: 'thrust', squeeze: 'coil', crush_coil: 'coil', ink: 'breath', web: 'cast',
+  mark: 'cast', curse: 'cast', pray: 'cast', song: 'howl', sing: 'howl', vanish: 'burrow', appear: 'emerge', ambush: 'emerge',
+  lift: 'grab', carry: 'grab', drop: 'slam', fall: 'slam', crash: 'slam', land: 'stomp', hover_slam: 'dive', wing: 'swoop',
+  gust: 'hover', tornado: 'spin', whirlwind: 'spin', cyclone: 'spin', bolt: 'cast', ray: 'breath', laser: 'breath', duel: 'sweep_r',
 };
 
-/** Merge a family library with its `extends` chain (child overrides parent). */
-export function resolveLibrary(content: Content | null, family: string, depth = 0): ClipLibraryDef {
-  const raw = (content?.bundle.anim?.[family] ?? null) as ClipLibraryDef | null;
-  const own: ClipLibraryDef = raw && typeof raw === 'object' ? { family, extends: raw.extends, clips: { ...(raw.clips ?? {}) }, aliases: { ...(raw.aliases ?? {}) } } : { family, clips: {}, aliases: {} };
-  if (own.extends && depth < 4) {
-    const parent = resolveLibrary(content, own.extends, depth + 1);
-    return { family, clips: { ...parent.clips, ...own.clips }, aliases: { ...(parent.aliases ?? {}), ...(own.aliases ?? {}) } };
+/** Prefix bone keys (names, globs, chain names) of a stage. */
+function prefixStage(s: StagePose | undefined, bp: string): StagePose | undefined {
+  if (!s || !bp) return s;
+  const out: StagePose = { ...s };
+  if (s.pose) {
+    out.pose = {};
+    for (const [k, v] of Object.entries(s.pose)) out.pose[bp + k] = v;
   }
-  return own;
+  if (s.cycle?.bones) {
+    const b: Record<string, CycleTerm> = {};
+    for (const [k, v] of Object.entries(s.cycle.bones)) b[bp + k] = v;
+    out.cycle = { ...s.cycle, bones: b };
+  }
+  if (s.waves) out.waves = s.waves.map((w) => ({ ...w, chain: bp + w.chain }));
+  return out;
+}
+
+function prefixClip(c: ClipDef, bp: string, cp: string): ClipDef {
+  return {
+    ...prefixStage(c, bp),
+    telegraph: prefixStage(c.telegraph, bp),
+    active: prefixStage(c.active, bp),
+    recovery: prefixStage(c.recovery, bp),
+    mirror: c.mirror ? cp + c.mirror : undefined,
+    base: c.base ? cp + c.base : undefined,
+    hold: c.hold,
+    mask: c.mask?.map((m) => bp + m),
+  };
+}
+
+const libCache = new WeakMap<object, Map<string, ClipLibraryDef>>();
+
+/**
+ * Merge a family library with its `extends` chain and `includes` (child overrides parent; includes sit between the parent
+ * and the library's own clips). Results are cached per content bundle; callers must not mutate them.
+ */
+export function resolveLibrary(content: Content | null, family: string, depth = 0): ClipLibraryDef {
+  const anim = (content?.bundle.anim ?? null) as Record<string, unknown> | null;
+  if (anim && depth === 0) {
+    let m = libCache.get(anim);
+    if (!m) libCache.set(anim, (m = new Map()));
+    const hit = m.get(family);
+    if (hit) return hit;
+    const r = resolveLibraryRaw(anim, family, 0);
+    m.set(family, r);
+    return r;
+  }
+  return resolveLibraryRaw(anim, family, depth);
+}
+
+function resolveLibraryRaw(anim: Record<string, unknown> | null, family: string, depth: number): ClipLibraryDef {
+  const raw = (anim?.[family] ?? null) as ClipLibraryDef | null;
+  const own: ClipLibraryDef = raw && typeof raw === 'object'
+    ? { family, extends: raw.extends, includes: raw.includes, clips: { ...(raw.clips ?? {}) }, aliases: { ...(raw.aliases ?? {}) } }
+    : { family, clips: {}, aliases: {} };
+  let clips: Record<string, ClipDef> = {};
+  let aliases: Record<string, string> = {};
+  if (own.extends && depth < 4) {
+    const parent = resolveLibraryRaw(anim, own.extends, depth + 1);
+    clips = { ...parent.clips };
+    aliases = { ...(parent.aliases ?? {}) };
+  }
+  for (const inc of own.includes ?? []) {
+    if (depth >= 4) break;
+    const lib = resolveLibraryRaw(anim, inc.family, depth + 1);
+    const bp = inc.bonePrefix ?? '', cp = inc.clipPrefix ?? '';
+    for (const [name, c] of Object.entries(lib.clips)) {
+      if (inc.only && !inc.only.includes(name)) continue;
+      clips[cp + name] = bp || cp ? prefixClip(c, bp, cp) : c;
+    }
+    for (const [a, t] of Object.entries(lib.aliases ?? {})) aliases[cp + a] = cp + t;
+  }
+  Object.assign(clips, own.clips);
+  Object.assign(aliases, own.aliases ?? {});
+  return { family, extends: own.extends, includes: own.includes, clips, aliases };
+}
+
+/** A library extended in code (content models add custom clips/aliases on top of a family library). */
+export function extendLibrary(base: ClipLibraryDef, clips?: Record<string, ClipDef>, aliases?: Record<string, string>): ClipLibraryDef {
+  if (!clips && !aliases) return base;
+  return { family: base.family, clips: { ...base.clips, ...(clips ?? {}) }, aliases: { ...(base.aliases ?? {}), ...(aliases ?? {}) } };
 }
 
 /** Mirror a bone name (_l <-> _r, also l/r tokens like leg_fl -> leg_fr, arm_l_0 -> arm_r_0). */

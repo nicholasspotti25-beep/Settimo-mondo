@@ -22,4 +22,4 @@ arts:
   # Onda Incandescente: a cut that sends a wave of fire racing along the ground.
   prima: {id: onda_incandescente, eco_cost: 100, effect: ground_wave, params: {kind: line, length: 14, width: 2.4, speed: 17, visual: fire, damage_mult: 2.4, at: 0.32, element: fire, status: burn, cut: true}, vfx: art_onda_incandescente, anim: wave_cut}
   # Lama Rovente: the blade drinks the core's fire: flaming edge for 10 seconds.
-  seconda: {id: lama_rovente, eco_cost: 200, effect: buff_self, params: {element: fire, time: 10, bonus: 0.4, burst: 1.4, radius: 3.2, dur: 0.8}, vfx: art_lama_rovente, anim: imbue}
+  seconda: {id: lama_rovente, eco_cost: 200, effect: buff_self, params: {element: fire, time: 10, bonus: 0.4, burst: true, damage_mult: 1.4, radius: 3.2, dur: 0.8}, vfx: art_lama_rovente, anim: imbue}

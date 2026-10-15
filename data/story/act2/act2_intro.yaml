@@ -1,0 +1,13 @@
+# Act II intro: the ferryman leaves you on the far bank, before the Porta di Dite.
+- id: act2_intro
+  skippable: true
+  steps:
+    - {fade: out, dur: 0.1}
+    - {camera: vista, dur: 0.1}
+    - {wait: 0.6}
+    - {fade: in, dur: 3.0}
+    - {title: story.atto2.titolo, dur: 4.2}
+    - {caption: story.atto2.intro.01, dur: 5.0}
+    - {caption: story.atto2.intro.02, dur: 5.0}
+    - {voce: voce.atto2.intro}
+    - {event: autosave, params: {reason: act}}

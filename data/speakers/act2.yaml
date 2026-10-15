@@ -1,2 +1,6 @@
-# Act II speakers (synth vocal tones). Cerbero does not speak.
+# Act II speakers (synth vocal tones). Cerbero and the Mostro di Magma do not speak.
 - {id: pyro, name_key: boss.pyro.name, color: '#ff7a3a', voice: {base: 98, formant: 1.0, wave: sawtooth, vibrato: 0.015, breath: 0.35}}
+- {id: thunder, name_key: boss.thunder.name, color: '#9fd8ff', voice: {base: 110, formant: 1.1, wave: square, vibrato: 0.03, breath: 0.25}}
+- {id: ice, name_key: boss.ice.name, color: '#cfefff', voice: {base: 150, formant: 1.35, wave: triangle, vibrato: 0.006, breath: 0.45}}
+# Lucifero speaks in both encounters (Act VI reuses this speaker id).
+- {id: lucifero, name_key: boss.lucifero_1.name, color: '#e8c070', voice: {base: 82, formant: 0.85, wave: sawtooth, vibrato: 0.01, breath: 0.55}}

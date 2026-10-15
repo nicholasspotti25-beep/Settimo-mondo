@@ -11,7 +11,7 @@ swings:
     - {id: as_l2, anim: ring_cast_l, startup: 0.25, active: 0.06, recovery: 0.36, cancel: 0.2, damage_mult: 0.75, poise: 0, projectile: {kind: w_star_bolt, speed: 28, radius: 0.3, life: 1.6, homing: 3.0}, arc: {from: [30, 20], to: [0, 0], roll: 0, hand: r}}
     - {id: as_l3, anim: ring_volley, startup: 0.32, active: 0.08, recovery: 0.48, cancel: 0.28, damage_mult: 0.85, poise: 0, projectile: {kind: w_star_bolt, speed: 30, radius: 0.3, life: 1.6, count: 3, spread: 24, homing: 3.0}, arc: {from: [0, 40], to: [0, 0], roll: 0, hand: both}}
   astrolabio_heavy:
-    {id: as_h, anim: orbit_release, startup: 0.62, active: 0.1, recovery: 0.5, cancel: 0.3, damage_mult: 1.9, poise: 22, projectile: {kind: w_orbit_star, speed: 14, radius: 0.6, life: 2.4, homing: 4.0, explode_radius: 3.0}, arc: {from: [0, 80], to: [0, 0], roll: 0, hand: both}}
+    {id: as_h, anim: orbit_release, startup: 0.62, active: 0.1, recovery: 0.5, cancel: 0.3, damage_mult: 1.2, poise: 22, projectile: {kind: w_orbit_star, speed: 14, radius: 0.6, life: 2.4, homing: 4.0, explode_radius: 3.0}, arc: {from: [0, 80], to: [0, 0], roll: 0, hand: both}}
   astrolabio_run:
     {id: as_r, anim: ring_cast_r, startup: 0.2, active: 0.06, recovery: 0.4, damage_mult: 1.0, poise: 0, projectile: {kind: w_star_bolt, speed: 32, radius: 0.32, life: 1.4, homing: 3.0}, move: {speed: 3.0, dur: 0.2}, arc: {from: [-30, 0], to: [0, 0], roll: 0, hand: r}}
   astrolabio_jump:

@@ -19,6 +19,6 @@ stamina_cost: {light: 16, heavy: 30}
 moveset: {light: naginata_light, heavy: naginata_heavy, running: naginata_run, jumping: naginata_jump}
 arts:
   # Falciata Glaciale: a wide cut that leaves a trail of ice on the ground.
-  prima: {id: falciata_glaciale, eco_cost: 100, effect: hazard_zone, params: {trail: true, reach: 4.8, angle: 170, trail_count: 4, radius: 1.5, time: 4.0, visual: ice, dps_mult: 0.18, status: slow, damage_mult: 1.6, element: ice}, vfx: art_falciata_glaciale, anim: glacial_sweep}
+  prima: {id: falciata_glaciale, eco_cost: 100, effect: hazard_zone, params: {trail: true, reach: 4.8, angle: 170, trail_count: 4, radius: 1.5, time: 4.0, visual: ice, dps_mult: 0.09, status: slow, damage_mult: 1.6, element: ice}, vfx: art_falciata_glaciale, anim: glacial_sweep}
   # Punta di Cristallo: a crystal thrust that shatters Equilibrio.
   seconda: {id: punta_di_cristallo, eco_cost: 200, effect: dash_strike, params: {distance: 5.0, reach: 5.2, width: 0.6, poise_bonus: 60, damage_mult: 3.2, dur: 0.75, element: ice, shatter: true}, vfx: art_punta_cristallo, anim: crystal_thrust}

@@ -145,8 +145,9 @@ attacks:
     weight: 0.7
     cooldown: 8
     spawns:
-      - {t: 1.0, type: custom, event: erupt_mark, delay: 1.1}
+      - {t: -0.85, type: sfx, id: palude_bubbling}
       - {t: 1.0, type: hazard, id: palude_bubbles, at: target_predict, count: 1, delay: 1.1, active: 0.35, flags: [knockdown], damage_mult: 1.3, shape: {type: cylinder, c: [0, 0, 0], r: 3.1, h: 6}}
+      - {t: 1.0, type: custom, event: erupt_mark}
   # New Game+: mud balls rain on the pool (decals mark them).
   - id: ng_mud_rain
     anim: mud_wave
@@ -234,6 +235,22 @@ minions:
         track: 1.0
         hits:
           - {t: 0.15, dur: 0.25, shape: {type: capsule, a: [0, 2.0, 1.0], b: [0, 1.0, 9.5], r: 0.8}}
+      # New Game+ only: the chain of lanterns whirls twice around the figure.
+      - id: ng_lantern_whirl
+        anim: spin
+        telegraph: 0.95
+        active: 0.9
+        recovery: 1.2
+        damage_mult: 0.85
+        poise: 16
+        flags: []
+        range: [0, 4.4]
+        weight: 1.0
+        cooldown: 6
+        requires: ng
+        hits:
+          - {t: 0.05, dur: 0.3, shape: {type: arc, r: 4.6, angle: 360, y: [0, 3.4]}}
+          - {t: 0.55, dur: 0.3, shape: {type: arc, r: 4.6, angle: 360, y: [0, 3.4]}}
   # 2. The reed-spear: lanky and fast, throws reed javelins.
   - id: annegato_canne
     name_key: minion.mostro_della_palude.annegato_canne
@@ -296,6 +313,22 @@ minions:
         track: 1.0
         spawns:
           - {t: 0.05, type: projectile, id: palude_reed, count: 3, spread: 24, speed: 20, from: [0, 3.0, 1.0]}
+      # New Game+ only: reeds thrown high fall in a ring around you, then on you.
+      - id: ng_reed_rain
+        anim: throw
+        telegraph: 0.9
+        active: 1.4
+        recovery: 1.0
+        damage_mult: 0.85
+        poise: 14
+        flags: []
+        global: true
+        weight: 0.9
+        cooldown: 7
+        requires: ng
+        spawns:
+          - {t: 0.0, type: hazard, id: palude_mire_arm, at: around_target, count: 4, dist: 3.6, radius: 1.3, delay: 1.0, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.3, h: 3}}
+          - {t: 0.45, type: hazard, id: palude_mire_arm, at: target_predict, count: 1, delay: 1.0, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 3}}
   # 3. The bone-heap: heavy, charges, calls the mire.
   - id: annegato_ossa
     name_key: minion.mostro_della_palude.annegato_ossa
@@ -355,12 +388,30 @@ minions:
         cooldown: 4
         spawns:
           - {t: 0.0, type: hazard, id: palude_mire_arm, at: target_predict, count: 1, delay: 1.0, active: 0.5, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.7, h: 3.4}}
+      # New Game+ only: a bone-heavy slam whose mud ring runs across the pool (jump it).
+      - id: ng_bone_quake
+        anim: double_slam
+        telegraph: 1.1
+        active: 0.9
+        recovery: 1.3
+        damage_mult: 1.1
+        poise: 22
+        flags: [knockdown]
+        range: [0, 9]
+        weight: 0.9
+        cooldown: 7
+        requires: ng
+        hits:
+          - {t: 0.05, dur: 0.2, shape: {type: box, c: [0, 0, 2.9], half: [1.7, 2.2, 1.9]}}
+        spawns:
+          - {t: 0.08, type: shockwave, id: palude_slam_ring, radius: 10, shape: {type: ring, r0: 2, r1: 10, width: 1.2, height: 0.7}, active: 0.75, damage_mult: 0.7}
 time_of_day_variants: {}
 dialogue_keys: [boss.mostro_della_palude.defeat]
 drops_weapon: randello_del_pantano
 unlocks_form: null
 metamondo_reaction: null
+# NG+: new colossus patterns in phase 1; in phase 2 each drowned figure gains a new attack (minion attacks `requires: ng`).
 ng_plus:
-  add_patterns: {p1: [ng_mud_rain, ng_double_wave]}
+  add_patterns: {p1: [ng_mud_rain, ng_double_wave], p2: [ng_lantern_whirl, ng_reed_rain, ng_bone_quake]}
   speed_mult: 1.08
   idle_mult: 0.8

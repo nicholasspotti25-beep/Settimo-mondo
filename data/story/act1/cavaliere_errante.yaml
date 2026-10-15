@@ -1,0 +1,17 @@
+# Cavaliere Errante (secondary): one exchange before the duel, his last words as he falls; he leaves the lantern.
+- id: cavaliere_errante_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 1.8}
+    - {say: boss.cavaliere_errante.intro, speaker: cavaliere_errante}
+    - {say: boss.cavaliere_errante.intro2, speaker: cavaliere_errante}
+    - {event: start_fight}
+- id: cavaliere_errante_defeat
+  skippable: true
+  steps:
+    - {wait: 1.5}
+    - {camera: boss_close, dur: 1.2}
+    - {say: boss.cavaliere_errante.defeat, speaker: cavaliere_errante}
+    - {say: boss.cavaliere_errante.defeat2, speaker: cavaliere_errante}
+    - {event: cue, params: {id: cavaliere_lantern_given}}
+    - {caption: story.atto1.lanterna, dur: 3.6}

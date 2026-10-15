@@ -8,11 +8,11 @@ reach: 3.1
 guard: {absorption: 0.75}
 swings:
   martello_da_guerra_light:
-    - {id: mh_l1, anim: hammer_swing_rl, startup: 0.45, active: 0.16, recovery: 0.55, cancel: 0.3, damage_mult: 1.5, poise: 0, element: lightning, shape: {type: arc, r: 3.0, angle: 120, y: [0, 2.5]}, move: {speed: 2.0, dur: 0.28}, arc: {from: [-110, 30], to: [60, -20], roll: -20, hand: both}}
-    - {id: mh_l2, anim: hammer_swing_lr, startup: 0.45, active: 0.16, recovery: 0.55, cancel: 0.3, damage_mult: 1.5, poise: 0, element: lightning, shape: {type: arc, r: 3.0, angle: 120, y: [0, 2.5]}, move: {speed: 2.0, dur: 0.28}, arc: {from: [70, 0], to: [-100, 25], roll: 20, hand: both}}
-    - {id: mh_l3, anim: hammer_overhead, startup: 0.55, active: 0.16, recovery: 0.7, cancel: 0.36, damage_mult: 2.0, poise: 0, element: lightning, shape: {type: cylinder, c: [0, -0.3, 2.0], r: 1.7, h: 3.2}, move: {speed: 2.2, dur: 0.3}, arc: {from: [0, 120], to: [0, -60], roll: 0, hand: both}}
+    - {id: mh_l1, anim: hammer_swing_rl, startup: 0.45, active: 0.16, recovery: 0.55, cancel: 0.3, damage_mult: 1.38, poise: 0, element: lightning, shape: {type: arc, r: 3.0, angle: 120, y: [0, 2.5]}, move: {speed: 2.0, dur: 0.28}, arc: {from: [-110, 30], to: [60, -20], roll: -20, hand: both}}
+    - {id: mh_l2, anim: hammer_swing_lr, startup: 0.45, active: 0.16, recovery: 0.55, cancel: 0.3, damage_mult: 1.38, poise: 0, element: lightning, shape: {type: arc, r: 3.0, angle: 120, y: [0, 2.5]}, move: {speed: 2.0, dur: 0.28}, arc: {from: [70, 0], to: [-100, 25], roll: 20, hand: both}}
+    - {id: mh_l3, anim: hammer_overhead, startup: 0.55, active: 0.16, recovery: 0.7, cancel: 0.36, damage_mult: 1.84, poise: 0, element: lightning, shape: {type: cylinder, c: [0, -0.3, 2.0], r: 1.7, h: 3.2}, move: {speed: 2.2, dur: 0.3}, arc: {from: [0, 120], to: [0, -60], roll: 0, hand: both}}
   martello_da_guerra_heavy:
-    {id: mh_h, anim: thunder_slam, startup: 0.8, active: 0.18, recovery: 0.75, cancel: 0.38, damage_mult: 2.7, poise: 35, element: lightning, shape: {type: cylinder, c: [0, -0.4, 2.0], r: 3.0, h: 3.0}, move: {speed: 1.6, dur: 0.4}, arc: {from: [0, 140], to: [0, -65], roll: 0, hand: both}}
+    {id: mh_h, anim: thunder_slam, startup: 0.8, active: 0.18, recovery: 0.75, cancel: 0.38, damage_mult: 2.7, poise: 42, element: lightning, shape: {type: cylinder, c: [0, -0.4, 2.0], r: 3.0, h: 3.0}, move: {speed: 1.6, dur: 0.4}, arc: {from: [0, 140], to: [0, -65], roll: 0, hand: both}}
   martello_da_guerra_run:
     {id: mh_r, anim: hammer_swing_rl, startup: 0.36, active: 0.18, recovery: 0.65, damage_mult: 1.7, poise: 0, element: lightning, shape: {type: arc, r: 3.0, angle: 140, y: [0, 2.5]}, move: {speed: 5.5, dur: 0.36}, arc: {from: [-120, 20], to: [60, -20], roll: -20, hand: both}}
   martello_da_guerra_jump:

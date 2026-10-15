@@ -20,6 +20,6 @@ stamina_cost: {light: 18, heavy: 35}
 moveset: {light: martello_da_guerra_light, heavy: martello_da_guerra_heavy, running: martello_da_guerra_run, jumping: martello_da_guerra_jump}
 arts:
   # Schianto Tonante: a vertical blow that splits the ground with a thunder shockwave.
-  prima: {id: schianto_tonante, eco_cost: 100, effect: slam, params: {radius: 4.6, impact: 0.48, damage_mult: 2.6, element: lightning, ring: true, ring_radius: 7.0, ring_mult: 0.35, dur: 0.95}, vfx: art_schianto_tonante, anim: hammer_slam}
+  prima: {id: schianto_tonante, eco_cost: 100, effect: slam, params: {radius: 4.6, impact: 0.48, damage_mult: 2.6, element: lightning, ring: true, ring_radius: 7.0, ring_share: 0.35, dur: 0.95}, vfx: art_schianto_tonante, anim: hammer_slam}
   # Catena di Fulmini: a bolt that leaps between targets, bouncing three times.
   seconda: {id: catena_di_fulmini, eco_cost: 200, effect: chain_lightning, params: {bounces: 3, range: 16, damage_mult: 2.6, element: lightning, dur: 0.75}, vfx: art_catena_fulmini, anim: cast_lightning}

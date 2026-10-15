@@ -22,4 +22,4 @@ arts:
   # Alba Spezzata: hurl the star at long range; it bursts into rays.
   prima: {id: alba_spezzata, eco_cost: 100, effect: projectile, params: {kind: w_morning_star, count: 1, speed: 26, explode_radius: 4.8, homing: 1.4, life: 1.4, damage_mult: 2.6, delay: 0.36, rays: 8, element: light}, vfx: art_alba_spezzata, anim: star_throw}
   # Caduta: the Fall — leap and slam with a red shockwave.
-  seconda: {id: caduta, eco_cost: 200, effect: slam, params: {leap: true, leap_dist: 7.5, impact: 0.62, radius: 5.0, damage_mult: 3.6, element: blood, ring: true, ring_radius: 9.0, ring_mult: 0.3, dur: 1.1}, vfx: art_caduta, anim: fall_slam}
+  seconda: {id: caduta, eco_cost: 200, effect: slam, params: {leap: true, leap_dist: 7.5, impact: 0.62, radius: 5.0, damage_mult: 3.6, element: blood, ring: true, ring_radius: 9.0, ring_share: 0.3, dur: 1.1}, vfx: art_caduta, anim: fall_slam}

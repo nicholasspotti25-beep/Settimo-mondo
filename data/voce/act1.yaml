@@ -1,0 +1,12 @@
+# Voce dell'Alba — Act I lines at the altars of the Great Plains, the Dark Forest, the Swamp and the River of Souls, plus lines
+# unlocked by the bosses defeated (played at the next altar, higher priority).
+- {key: voce.atto1.pianure_vista, altar: altare_pianure_vista}
+- {key: voce.atto1.pianure, altar: altare_pianure_01}
+- {key: voce.atto1.cavaliere_lanterna, after: [cavaliere_errante], priority: 2}
+- {key: voce.atto1.foresta, altar: altare_foresta_01}
+- {key: voce.atto1.primo_raggio, after: [elder_tree], priority: 2}
+- {key: voce.atto1.palude, altar: altare_palude_01}
+- {key: voce.atto1.annegati, after: [mostro_della_palude], priority: 2}
+- {key: voce.atto1.molo, altar: altare_palude_02}
+- {key: voce.atto1.fiume, altar: altare_fiume_01}
+- {key: voce.atto1.senza_ricordi, after: [caronte], priority: 1}
