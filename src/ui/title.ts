@@ -201,6 +201,12 @@ export class TitleScreen {
 
   /* ------------------------------------------------------------------------------------------------ journeys screen */
 
+  /** Open the save-code import panel (from Settings > Salvataggio on the title). */
+  openImportPanel(): void {
+    this.creator.close();
+    this.openGames('import');
+  }
+
   private openGames(section: 'load' | 'new' | 'import'): void {
     toggle(this.front, 'sm-hidden', true);
     this.credits.hide();

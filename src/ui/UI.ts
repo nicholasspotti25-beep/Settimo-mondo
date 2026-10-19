@@ -19,6 +19,7 @@ import { Cards } from './cards';
 import { ControlsView } from './controls';
 import { AltarMenu } from './altar';
 import { TitleScreen } from './title';
+import { SettingsScreen } from './settings';
 
 export class SettimoUI implements GameUI {
   private game!: Game;
@@ -36,6 +37,7 @@ export class SettimoUI implements GameUI {
   private flashEl: HTMLElement | null = null;
   private flashTimer = 0;
   private title!: TitleScreen;
+  private settings!: SettingsScreen;
   private fadeEl!: HTMLElement;
   private probe!: HTMLElement;
   private mounted = false;
@@ -56,12 +58,18 @@ export class SettimoUI implements GameUI {
     this.controls = new ControlsView(this.ctx);
     this.story = new StoryLayer(this.ctx);
     this.cards = new Cards(this.ctx);
-    this.altar = new AltarMenu(this.ctx, { transition: (fn) => this.transition(fn), flash: (t) => this.flash(t) });
+    this.altar = new AltarMenu(this.ctx, { transition: (fn) => this.transition(fn), flash: (t) => this.flash(t), openSettings: () => this.openSettings() });
     this.pauseBtn = h('button', { class: 'sm-topbtn sm-pausebtn sm-hidden', type: 'button' }, svgIcon(ICONS.pause));
     this.pauseBtn.addEventListener('click', () => this.openPause());
-    this.title = new TitleScreen(this.ctx, { startSession: (run) => this.startSession(run), flash: (t) => this.flash(t), openSettings: null });
+    this.title = new TitleScreen(this.ctx, { startSession: (run) => this.startSession(run), flash: (t) => this.flash(t), openSettings: () => this.openSettings() });
+    this.settings = new SettingsScreen(this.ctx, {
+      flash: (t) => this.flash(t),
+      closed: () => undefined,
+      openImport: () => this.title.openImportPanel(),
+      openLayoutEditor: null,
+    });
     this.fadeEl = h('div', { class: 'sm-fade' });
-    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.title.el, this.fadeEl);
+    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.title.el, this.settings.screen.el, this.fadeEl);
     root.appendChild(this.root);
     this.mounted = true;
 
@@ -78,6 +86,10 @@ export class SettimoUI implements GameUI {
     window.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape' || e.repeat) return;
       if (this.root.querySelector('.sm-dialog')) return;
+      if (this.settings.visible) {
+        this.settings.close();
+        return;
+      }
       if (this.mode === 'title') {
         if (!this.transitioning) this.title.back();
         return;
@@ -134,6 +146,13 @@ export class SettimoUI implements GameUI {
     this.game.input.clear();
     this.game.audio?.playUi('confirm');
     this.altar.openPause();
+  }
+
+  /** Settings over the title or over the pause menu (the sim stays paused). */
+  private openSettings(): void {
+    if (this.settings.visible) return;
+    this.controls.touch.releaseAll();
+    this.settings.open();
   }
 
   /** Small transient confirmation pill (copy, save). */
@@ -212,6 +231,7 @@ export class SettimoUI implements GameUI {
   onMode(m: GameMode): void {
     this.mode = m;
     if (!this.mounted) return;
+    this.settings.close();
     if ((m === 'title') !== this.title.visible) this.title.show(m === 'title');
     if (m === 'game') {
       this.story.reset();
@@ -245,7 +265,7 @@ export class SettimoUI implements GameUI {
   }
 
   paused(): boolean {
-    return this.mounted && this.altar.paused;
+    return this.mounted && (this.altar.paused || (this.settings.visible && this.mode === 'game'));
   }
 
   applySettings(s: Settings): void {
@@ -263,6 +283,7 @@ export class SettimoUI implements GameUI {
       this.controls.relabel();
       this.altar.relabel();
       this.title.relabel();
+      this.settings.relabel();
     }
     this.relayout();
   }

@@ -460,6 +460,22 @@ export const CSS = /* css */ `
 .sm-credits .body { display: flex; flex-direction: column; align-items: center; gap: clamp(6px, 2.2vh, 20px); }
 .sm-credits .end { margin-top: 4vh; }
 
+/* settings */
+.sm-screen.settings .sm-range { width: clamp(120px, 24vw, 260px); }
+.sm-subprev { margin: 8px 0 4px; padding: 14px 10px; text-align: center; border-radius: 6px; background: radial-gradient(ellipse 80% 120% at 50% 120%, rgba(240,170,110,.45), transparent 70%), linear-gradient(180deg, #4a3560, #241a36); box-shadow: 0 0 0 1px var(--line-3); }
+.sm-subprev span { display: inline-block; padding: .35em .9em .45em; border-radius: 6px; font: calc(17px * var(--sub)) var(--serif); line-height: 1.3; color: var(--ivory); text-shadow: 0 1px 3px rgba(0,0,0,.95), 0 0 12px rgba(0,0,0,.6); }
+.sm-subprev.bg span { background: rgba(10,6,18,.62); }
+.sm-taptest .box { text-align: center; }
+.sm-taptest .pad { position: relative; height: clamp(120px, 34vh, 220px); display: flex; align-items: center; justify-content: center; touch-action: none; }
+.sm-taptest .ring { --ph: 0; position: absolute; left: 50%; top: 50%; width: clamp(80px, 22vh, 140px); height: clamp(80px, 22vh, 140px); margin: calc(clamp(80px, 22vh, 140px) / -2) 0 0 calc(clamp(80px, 22vh, 140px) / -2); border-radius: 50%; box-shadow: 0 0 0 2px var(--gold), inset 0 0 0 calc(var(--ph) * 60px) rgba(234,208,154,.10); }
+.sm-taptest .ring::after { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 1.5px var(--gold-hi); transform: scale(calc(2.2 - var(--ph) * 1.2)); opacity: calc(var(--ph) * .9); }
+.sm-taptest .ring.beat { animation: sm-beat .32s ease-out; }
+.sm-taptest .ring.hit::before { content: ""; position: absolute; inset: 18%; border-radius: 50%; background: radial-gradient(circle, rgba(255,240,200,.85), transparent 70%); animation: sm-tapfx .35s ease-out forwards; }
+.sm-taptest .ring.done { opacity: .35; }
+.sm-taptest .cnt { position: relative; font: 500 clamp(22px, 5vh, 36px) var(--serif); color: var(--gold-hi); font-variant-numeric: tabular-nums; pointer-events: none; }
+@keyframes sm-beat { 0% { box-shadow: 0 0 0 2px var(--gold-hi), 0 0 30px rgba(255,214,140,.8); } 100% { box-shadow: 0 0 0 2px var(--gold), 0 0 0 rgba(255,214,140,0); } }
+@keyframes sm-tapfx { from { opacity: 1; transform: scale(.6); } to { opacity: 0; transform: scale(1.3); } }
+
 /* creator */
 .sm-creator { display: flex; gap: clamp(12px, 3vw, 36px); flex: 1; min-height: 0; }
 .sm-creator .form { flex: 1.25; min-width: 0; overflow-y: auto; touch-action: pan-y; overscroll-behavior: contain; padding-right: 4px; }

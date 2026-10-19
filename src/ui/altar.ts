@@ -34,6 +34,8 @@ export interface AltarHost {
   transition(fn: () => void): void;
   /** Small transient confirmation at the bottom of the screen. */
   flash(text: string): void;
+  /** Open the settings screen over the pause menu. */
+  openSettings(): void;
 }
 
 export class AltarMenu {
@@ -132,6 +134,7 @@ export class AltarMenu {
         { id: 'armory', icon: ICONS.armory, label: t('ui.altar.armory') },
         { id: 'forms', icon: ICONS.forms, label: t('ui.altar.forms') },
         { id: 'reperti', icon: ICONS.relic, label: t('ui.altar.reperti') },
+        { id: 'settings', icon: ICONS.gear, label: t('ui.menu.settings') },
         { id: 'save', icon: ICONS.save, label: t('ui.pause.save') },
         { id: 'quit', icon: ICONS.exit, label: t('ui.pause.quit') },
       ]);
@@ -182,6 +185,11 @@ export class AltarMenu {
       case 'resume':
         uiSound(this.ctx, 'back');
         this.leave();
+        break;
+      case 'settings':
+        uiSound(this.ctx, 'confirm');
+        this.screen.select('journey');
+        this.host.openSettings();
         break;
       case 'quit':
         this.screen.select('journey');

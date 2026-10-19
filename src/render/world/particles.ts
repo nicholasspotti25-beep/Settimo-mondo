@@ -66,31 +66,31 @@ const SPECS: Record<Exclude<ParticleKind, 'lightning'>, Spec> = {
   },
   embers: {
     count: 230, mode: RISE, shape: EMBER, blend: GLOW, radius: 24, band: [0, 10], vel: [0, 1.25, 0], speedVar: 0.5, windK: 1.3,
-    wander: 0.55, wanderHz: 0.22, size: [0.09, 0.17], colA: '#ff8a32', colB: '#ffd27a', intensity: 1.2, dayVis: 0.75, blink: 0.35,
+    wander: 0.55, wanderHz: 0.22, size: [0.14, 0.26], colA: '#ff8a32', colB: '#ffd27a', intensity: 1.2, dayVis: 0.75, blink: 0.35,
   },
   snow: {
-    count: 1100, mode: FALL, shape: FLAKE, blend: LIT, radius: 22, band: [0, 17], vel: [0, -1.05, 0], speedVar: 0.35, windK: 1.25,
-    wander: 0.45, wanderHz: 0.12, size: [0.05, 0.1], colA: '#ffffff', colB: '#e6ecff', intensity: 0.95, dayVis: 1, blink: 0,
+    count: 1300, mode: FALL, shape: FLAKE, blend: LIT, radius: 22, band: [0, 17], vel: [0, -1.05, 0], speedVar: 0.35, windK: 1.25,
+    wander: 0.45, wanderHz: 0.12, size: [0.11, 0.2], colA: '#ffffff', colB: '#e6ecff', intensity: 0.95, dayVis: 1, blink: 0,
   },
   pollen: {
     count: 300, mode: GROUND, shape: DOT, blend: GLOW, radius: 22, band: [0.3, 5], vel: [0, 0.06, 0], speedVar: 0.5, windK: 0.7,
-    wander: 0.9, wanderHz: 0.05, size: [0.1, 0.17], colA: '#ffe6a0', colB: '#fff4cc', intensity: 0.42, dayVis: 1, blink: 0.25,
+    wander: 0.9, wanderHz: 0.05, size: [0.13, 0.22], colA: '#ffe6a0', colB: '#fff4cc', intensity: 0.42, dayVis: 1, blink: 0.25,
   },
   ash: {
     count: 650, mode: FALL, shape: FLAKE, blend: LIT, radius: 24, band: [0, 16], vel: [0, -0.5, 0], speedVar: 0.4, windK: 1,
-    wander: 0.8, wanderHz: 0.08, size: [0.06, 0.12], colA: '#3e383c', colB: '#7a7276', intensity: 0.85, dayVis: 1, blink: 0,
+    wander: 0.8, wanderHz: 0.08, size: [0.12, 0.22], colA: '#3e383c', colB: '#7a7276', intensity: 0.85, dayVis: 1, blink: 0,
   },
   souls: {
-    count: 230, mode: WATER, shape: DOT, blend: GLOW, radius: 32, band: [0.05, 4.5], vel: [0, 0.2, 0], speedVar: 0.5, windK: 0.25,
-    wander: 1.1, wanderHz: 0.04, size: [0.32, 0.55], colA: '#b8e2ff', colB: '#eef6ff', intensity: 0.95, dayVis: 0.65, blink: 0.3,
+    count: 260, mode: WATER, shape: DOT, blend: GLOW, radius: 32, band: [0.05, 4.5], vel: [0, 0.2, 0], speedVar: 0.5, windK: 0.25,
+    wander: 1.1, wanderHz: 0.04, size: [0.4, 0.7], colA: '#b8e2ff', colB: '#eef6ff', intensity: 0.95, dayVis: 0.65, blink: 0.3,
   },
   stars: {
     count: 220, mode: SKY, shape: STAR, blend: GLOW, radius: 30, band: [1.5, 15], vel: [0, 0.05, 0], speedVar: 0.3, windK: 0.1,
-    wander: 0.6, wanderHz: 0.03, size: [0.2, 0.42], colA: '#fff2d6', colB: '#cfe0ff', intensity: 0.9, dayVis: 0.5, blink: 0.7,
+    wander: 0.6, wanderHz: 0.03, size: [0.26, 0.5], colA: '#fff2d6', colB: '#cfe0ff', intensity: 0.9, dayVis: 0.5, blink: 0.7,
   },
   rain: {
     count: 1800, mode: FALL, shape: STREAK, blend: LIT, radius: 18, band: [0, 18], vel: [0, -15, 0], speedVar: 0.15, windK: 3.5,
-    wander: 0, wanderHz: 0, size: [0.014, 0.022], colA: '#c4ccdc', colB: '#e2e8f2', intensity: 0.3, dayVis: 1, blink: 0, stretch: 0.075,
+    wander: 0, wanderHz: 0, size: [0.025, 0.04], colA: '#c4ccdc', colB: '#e2e8f2', intensity: 0.34, dayVis: 1, blink: 0, stretch: 0.075,
     near: [0.8, 2.5],
   },
   mist: {
@@ -100,11 +100,11 @@ const SPECS: Record<Exclude<ParticleKind, 'lightning'>, Spec> = {
   },
   dust: {
     count: 260, mode: GROUND, shape: DOT, blend: GLOW, radius: 18, band: [0.2, 4.5], vel: [0, 0.03, 0], speedVar: 0.5, windK: 0.9,
-    wander: 0.7, wanderHz: 0.05, size: [0.06, 0.1], colA: '#fff0d4', colB: '#ffe4c0', intensity: 0.32, dayVis: 1, blink: 0.2,
+    wander: 0.7, wanderHz: 0.05, size: [0.1, 0.16], colA: '#fff0d4', colB: '#ffe4c0', intensity: 0.4, dayVis: 1, blink: 0.2,
   },
   spores: {
     count: 240, mode: GROUND, shape: DOT, blend: GLOW, radius: 22, band: [0.2, 7], vel: [0, 0.12, 0], speedVar: 0.5, windK: 0.3,
-    wander: 0.8, wanderHz: 0.05, size: [0.11, 0.2], colA: '#90ffd4', colB: '#d2ffac', intensity: 0.7, dayVis: 0.45, blink: 0.5,
+    wander: 0.8, wanderHz: 0.05, size: [0.14, 0.24], colA: '#90ffd4', colB: '#d2ffac', intensity: 0.7, dayVis: 0.45, blink: 0.5,
   },
 };
 
