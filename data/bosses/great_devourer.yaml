@@ -17,8 +17,8 @@ zone: palude
 model: {builder: great_devourer, rig: serpent, scale: 1.0, palette: act1_green_gold}
 equilibrio_max: 170
 # The serpent spends a third of the fight under the planks (untouchable): the formula HP (5654, which assumes reference uptime)
-# is reduced so a clean fight ends inside the 240 s target.
-hp_override: 5200
+# is reduced so a clean fight ends inside the 240 s target with margin (also in New Game+, x1.15 Health).
+hp_override: 4800
 body: {radius: 1.8, height: 8.0, mass: immovable}
 # The neck rising out of the water (local frame; the head leans toward the pier, +Z).
 hurtboxes:

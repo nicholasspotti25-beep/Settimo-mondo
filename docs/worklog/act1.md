@@ -12,17 +12,17 @@ tests/act1*.test.ts, docs/requests/act1.md.
 | # | Deliverable | Status | Files |
 |---|---|---|---|
 | 1 | Boss data, all card elements (phases, attacks, music ids, parts/minions, grants, lore_key, mounted, drops_weapon) | done | data/bosses/*.yaml |
-| 2 | Behaviors for scripted mechanics (mounted/dismount + counter stance + night dark; elder front cone + heart weak point + first_light; palude hidden/emerge + voices + 3-figure split; devourer surfaced/submerged + stilts + pier smash; caronte boat → soul bridge → current) | done (bot-verified; unit tests missing) | src/content/bosses/*/behavior.ts, mostro_della_palude/{voices,minion_*}.ts |
-| 3 | Time-of-day variants (cavaliere alba/notte, caronte giorno/notte) | done | boss yamls |
-| 4 | NG+ `ng_plus` blocks, new attack per phase | partial: data done; bot run with ngCycle=1 not yet done | boss yamls |
+| 2 | Behaviors for scripted mechanics (mounted/dismount + counter stance + night dark; elder front cone + heart weak point + first_light; palude hidden/emerge + voices + 3-figure split; devourer surfaced/submerged + stilts + pier smash; caronte boat → soul bridge → current) | done (bot-verified + unit-tested) | src/content/bosses/*/behavior.ts, mostro_della_palude/{voices,minion_*}.ts |
+| 3 | Time-of-day variants (cavaliere alba/notte, caronte giorno/notte) | done (bot + unit-tested chunk 2) | boss yamls |
+| 4 | NG+ `ng_plus` blocks, new attack per phase | done (chunk 2): data + unit tests + bot at ngCycle=1 (all 5 perfect 3/3) | boss yamls |
 | 5 | Story sequences intro/defeat (devourer none: mini) incl. lantern grant caption, first_light cue, ferry travel | done | data/story/act1/*.yaml |
 | 6 | Speakers, Voce dell'Alba lines (altars + after-boss) | done | data/speakers/act1.yaml, data/voce/act1.yaml |
 | 7 | Locales IT+EN (dialogue, verbatim canon quotes, lore, ToD notes, parts, minions, 24 voice whispers + clue, captions, voce) | done (chunk 1) | locales/{it,en}/act1_bosses.yaml |
 | 8 | Projectile + hazard kinds | done | data/projectiles/act1.yaml, data/hazards/act1.yaml |
 | 9 | Arena data (bounds, obstacles, variants pier_destroyed / soul_bridge / current) | done | data/arenas/*.yaml |
-| 10 | Balance bot: perfect wins inside 120+20×D with few hits; sloppy not trivial | partial: all 5 PASS; mostro_della_palude perfect still 4.7 hits (double_slam, see Notes) | tools/bot/hooks/* |
+| 10 | Balance bot: perfect wins inside 120+20×D with few hits; sloppy not trivial | done (chunk 2): all 5 PASS base; NG+ and ToD variants all won by the perfect bot | tools/bot/hooks/*, data/bosses/great_devourer.yaml |
 | 11 | Bot hooks for scripted mechanics | done (chunk 1): all 5 hooks; shared act1Defense (box hazards, charge lines, ring jumps, round-hazard escape) | tools/bot/hooks/{cavaliere_errante,elder_tree,mostro_della_palude,great_devourer,caronte}.ts |
-| 12 | Unit tests tests/act1*.test.ts | missing | tests/act1*.test.ts |
+| 12 | Unit tests tests/act1*.test.ts | done (chunk 2): 27 tests, all pass | tests/act1.test.ts |
 | 13 | Canon audit clean for act1 bosses | partial: only "no music theme data" (audio stream) and "no model builder" (item 14) remain; canon quotes OK | — |
 | 14 | Boss models (5) | missing — blocked: docs/RENDER_KIT.md not present / not READY | src/content/bosses/<id>/model.ts |
 | 15 | Arena dressing (5) incl. first_light, pier_destroyed, soul_bridge/current, caronte_ferry cues | missing — blocked: docs/WORLD_KIT.md not present / not READY | src/content/bosses/<id>/arena.ts |
@@ -30,18 +30,13 @@ tests/act1*.test.ts, docs/requests/act1.md.
 
 ## Next
 
-1. tests/act1.test.ts: cavaliere dismount at 50% + counter stance riposte + night dark; elder heart part active only in p2 +
-   bark poise mult + first_light cue on death; palude voices announce before attack (sfx `voices_<fam>` + caption key present in
-   both locales) + split into 3 figures in sequence + clue caption; devourer pier_destroyed variant on p2 + surfaced streak;
-   caronte soul_bridge at 78% + current in p2 + ToD spawn/speed mults; NG+ patterns only with ngCycle ≥ 1.
-2. Mostro della Palude double_slam: the generic bot dodges only at active 0.00 (too late) when standing ~3.2 m from the center
-   (between the legs); trace with a slamdbg-style script (bot threats() during telegraph vs. the box at c z=5) — decide whether
-   the box should start further out (fairness: an unreadable hit under the body?) or the bot needs a telegraph-aware dodge.
-3. Bot pass with `sim.state.ngCycle = 1` for all five (NG+ fairness), and bot with tod alba/notte (cavaliere) and
-   giorno/notte (caronte) via runFight opts.tod.
-4. Great Devourer margin: 229 s avg of 240 s; re-check after tests (consider `hp_override` 5000 if any seed nears 240).
-5. When RENDER_KIT.md / WORLD_KIT.md say STATUS: READY: 5 boss models + 5 arena dressings, headless screenshots on port 5181,
+1. When RENDER_KIT.md / WORLD_KIT.md say STATUS: READY (still absent on 2026-11-03): 5 boss models
+   (src/content/bosses/<id>/model.ts) + 5 arena dressings (arena.ts, incl. cues first_light, arena_state:pier_destroyed /
+   soul_bridge / current, caronte_ferry, palude_split, cavaliere_dismount), headless screenshots on port 5181 at 1280x576,
    iterate; then canon audit should only show the audio stream's themes.
+2. Optional polish while blocked: Caronte NG+ perfect bot 3.7 hits (base attacks overlapping under NG+ rhythm: soul
+   projectiles, lantern_gaze, raise_bridge wake ring at jump apex 0.79 m vs ring height 0.8); Great Devourer perfect
+   3.3–3.6 hits (one seed 7: splash rings jumped late, raft_crush coils) — both bot timing, data matches the reference rings.
 
 ## Notes
 
@@ -67,3 +62,33 @@ tests/act1*.test.ts, docs/requests/act1.md.
   sloppy 0/3 (14.7 hits); caronte 181 s/240, 1.3 hits, sloppy 0/3.
 - `npx tsc --noEmit -p tsconfig.json`: clean (whole tree) at end of chunk 1. `SM_PARTIAL=1 npm run data`: ok.
 - Diagnostic scripts live in the session scratchpad (not in the repo).
+- Chunk 2 (2026-11-03): tests/act1.test.ts (27 tests, `npx vitest run tests/act1.test.ts` 27/27 pass, ~0.5 s): cavaliere
+  dismount at 50% (flags, parts off, foot radius, cue, lunge opener), guard_dive only on an open guard, counter stance
+  (frontal hit parried → riposte, back hit → stagger + cue), notte dark (hidden+untargetable, visible before active), alba
+  salute + no attacks on a drinking/knocked-down player, grants/canon line; elder front cone, heart inactive in p1 / active
+  in p2, bark x0.5 vs heart x2.5 poise (4 heavy blows to Spezzato on the heart vs 16 on the bark), first_light on death;
+  palude every voice key IT+EN + clue, emerge opener, every telegraph preceded by its family's sfx + caption ≥ VOICE_LEAD
+  before, split → 3 figures in order, one at a time, shared HP, boss dies with the third; devourer submerged ⇒
+  hidden+untargetable, surfaced streak ≤ 4 between dives, p2 pier_destroyed variant + cue + no stilts; caronte bridge at
+  78% (variant soul_bridge, waits on the landing), p2 current variant + drift ≈ 0.85 m/s, ToD souls (giorno 3 fast /
+  tramonto 5 / notte 10 slow); NG+ per boss: ng ids defined, not in base patterns, never available/used at ngCycle 0,
+  available+used at ngCycle 1; palude figures' `requires: ng` attacks only in NG+.
+- Chunk 2, double_slam: not a fairness problem. Trace (scratchpad act1/slam2.ts): bot.threats() saw the fist box all through
+  the last 0.25 s of the telegraph (t=0.08 at active -0.03, player 3.2 m from the center, dead ahead), but the shared
+  `ringJump` returned a hold-still input for any wind-up that spawns a low ring, so the generic roll never ran. Fix in
+  tools/bot/hooks/cavaliere_errante.ts: while holding for a ring, a non-jumpable threat ≤ 0.1 s away hands control back to the
+  generic dodge. Bot (seeds=3, all PASS): palude 149 s/220, 0.7 hits (was 4.7), sloppy 0/3 (5.3 hits); cavaliere 111 s/180,
+  0.0, sloppy 3/3 with 11.7 hits; elder 95 s/200, 2.3, sloppy 1/3; devourer 229 s/240, 2.0, sloppy 0/3; caronte 181 s/240,
+  1.3, sloppy 0/3.
+- Chunk 2, variant bot passes (scratchpad act1/variants.ts = runFight with opts.tod / sim.state.ngCycle=1, seeds=3; target is
+  the base-game 120+20×D, NG+ has x1.15 Health): NG+ cavaliere 155/142/154 s, 1.7 hits, sloppy 0/3; elder 125/118/120,
+  2.7, sloppy 0/3; palude 187/186/197, 3.0, sloppy 1/3 (8 hits); devourer (after HP fix) 249/229/281, 1.0, sloppy 0/3;
+  caronte 183/190/172, 3.7, sloppy 0/3 — hit attribution shows no NG+-only attack among the hits. ToD: cavaliere alba
+  102–107 s, 0.0 hits, sloppy 2/3 (13.7 hits); notte 124–148 s, 1.3 hits, sloppy 3/3 (17 hits); caronte giorno 163–177 s,
+  0.3 hits; notte 184–190 s, 1.7 hits, sloppy 1/3 (10.3 hits). All perfect runs won, 0 deaths.
+- Great Devourer `hp_override` 5200 → 4800 (margin): base perfect 223/226/213/224/227 s (5 seeds) of 240, sloppy 0/5;
+  balance-bot seeds=3: PASS 220 s, 3.3 hits, sloppy 0/3 (14.3 hits).
+- End of chunk 2: `npx tsc --noEmit -p tsconfig.json` clean (whole tree); eslint clean on tests/act1.test.ts +
+  tools/bot/hooks/cavaliere_errante.ts; `npm run registry && SM_PARTIAL=1 npm run data` ok (1026 it / 1026 en); canon audit for
+  act1 bosses: only "no music theme data" (audio stream) and "no model builder" (blocked on RENDER_KIT.md).
+

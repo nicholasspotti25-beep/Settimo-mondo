@@ -140,6 +140,10 @@ export function ringJump(sim: Sim, bot: Bot, base: PlayerInput): PlayerInput | n
   const perfect = bot.profile === 'perfect';
   // a ring is coming (the boss winds up a shockwave): stop starting swings so the jump is free when the wave arrives
   if (perfect && ringWindup(sim) && (pl.state === 'idle' || pl.state === 'move')) {
+    // the same wind-up may also land a melee blow first (the Mostro's double slam: fists, then the mud ring): let the
+    // generic logic roll out of it on time instead of holding still into it
+    const blow = bot.threats(sim, 0.6).find((t) => !t.jumpable);
+    if (blow && blow.t <= 0.1) return null;
     if (!ringSoon(sim, 0.3)) return base;
   }
   if (!(pl.state === 'idle' || pl.state === 'move' || pl.state === 'guard') || pl.fiato < 12) return null;

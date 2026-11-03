@@ -48,6 +48,8 @@ async function main(): Promise<void> {
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
   await page.goto(`http://127.0.0.1:${port}/`);
   await page.waitForFunction(() => !!(window as any).__game, null, { timeout: 30000 });
+  // Let boot finish (service worker claim, title screen) before driving the game: evaluating during it was flaky.
+  await page.waitForTimeout(2500);
   await page.evaluate(async (q) => {
     const g = (window as any).__game;
     g.applySettings({ ...g.settings, quality: q, language: 'it' });
