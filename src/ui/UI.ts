@@ -20,6 +20,7 @@ import { ControlsView } from './controls';
 import { AltarMenu } from './altar';
 import { TitleScreen } from './title';
 import { SettingsScreen } from './settings';
+import { LayoutEditor } from './editor';
 
 export class SettimoUI implements GameUI {
   private game!: Game;
@@ -38,6 +39,7 @@ export class SettimoUI implements GameUI {
   private flashTimer = 0;
   private title!: TitleScreen;
   private settings!: SettingsScreen;
+  private editor!: LayoutEditor;
   private fadeEl!: HTMLElement;
   private probe!: HTMLElement;
   private mounted = false;
@@ -66,10 +68,21 @@ export class SettimoUI implements GameUI {
       flash: (t) => this.flash(t),
       closed: () => toggle(this.root, 'setopen', false),
       openImport: () => this.title.openImportPanel(),
-      openLayoutEditor: null,
+      openLayoutEditor: () => this.openEditor(),
+    });
+    this.editor = new LayoutEditor(this.ctx, {
+      geometry: () => {
+        const view = { w: window.innerWidth, h: window.innerHeight };
+        return { view, safe: this.safeArea(view) };
+      },
+      flash: (t) => this.flash(t),
+      closed: () => {
+        toggle(this.root, 'editopen', false);
+        this.settings.refreshSection();
+      },
     });
     this.fadeEl = h('div', { class: 'sm-fade' });
-    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.title.el, this.settings.screen.el, this.fadeEl);
+    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.title.el, this.settings.screen.el, this.editor.el, this.fadeEl);
     root.appendChild(this.root);
     this.mounted = true;
 
@@ -86,6 +99,10 @@ export class SettimoUI implements GameUI {
     window.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape' || e.repeat) return;
       if (this.root.querySelector('.sm-dialog')) return;
+      if (this.editor.visible) {
+        this.editor.close();
+        return;
+      }
       if (this.settings.visible) {
         this.settings.close();
         return;
@@ -132,6 +149,7 @@ export class SettimoUI implements GameUI {
     const k = clamp(0.94 + (Math.min(view.w, view.h) - 390) * 0.0008, 0.92, 1.28);
     this.root.style.setProperty('--k', k.toFixed(3));
     this.hud.layout(L, this.touchOn);
+    this.editor?.relayout();
     toggle(this.pauseBtn, 'mir', s.leftHanded);
     this.controls.layout(L);
   }
@@ -154,6 +172,13 @@ export class SettimoUI implements GameUI {
     this.controls.touch.releaseAll();
     toggle(this.root, 'setopen', true); // the screen under it (title front / pause) is hidden, not shown through
     this.settings.open();
+  }
+
+  /** Touch layout editor over the settings screen (the game world, when in game, shows through it). */
+  private openEditor(): void {
+    if (this.editor.visible) return;
+    toggle(this.root, 'editopen', true);
+    this.editor.open();
   }
 
   /** Small transient confirmation pill (copy, save). */
@@ -232,6 +257,7 @@ export class SettimoUI implements GameUI {
   onMode(m: GameMode): void {
     this.mode = m;
     if (!this.mounted) return;
+    this.editor.close();
     this.settings.close();
     if ((m === 'title') !== this.title.visible) this.title.show(m === 'title');
     if (m === 'game') {
@@ -285,6 +311,7 @@ export class SettimoUI implements GameUI {
       this.altar.relabel();
       this.title.relabel();
       this.settings.relabel();
+      this.editor.relabel();
     }
     this.relayout();
   }

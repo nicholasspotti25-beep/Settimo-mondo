@@ -59,6 +59,11 @@ export class SettingsScreen {
     this.host.closed();
   }
 
+  /** Re-fill the open section (after the layout editor closes). */
+  refreshSection(): void {
+    if (this.visible) this.screen.refresh();
+  }
+
   relabel(): void {
     if (!this.visible) return;
     this.head();
