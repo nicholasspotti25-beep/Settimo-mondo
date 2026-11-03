@@ -22,6 +22,7 @@ import { TitleScreen } from './title';
 import { SettingsScreen } from './settings';
 import { LayoutEditor } from './editor';
 import { CreditsView } from './credits';
+import { HitboxOverlay } from './debug';
 
 export class SettimoUI implements GameUI {
   private game!: Game;
@@ -43,6 +44,7 @@ export class SettimoUI implements GameUI {
   private editor!: LayoutEditor;
   private endCredits!: CreditsView;
   private letterbox!: HTMLElement;
+  private hitboxes!: HitboxOverlay;
   private fadeEl!: HTMLElement;
   private probe!: HTMLElement;
   private mounted = false;
@@ -66,6 +68,7 @@ export class SettimoUI implements GameUI {
     this.altar = new AltarMenu(this.ctx, { transition: (fn) => this.transition(fn), flash: (t) => this.flash(t), openSettings: () => this.openSettings(), startNgPlus: () => this.startNgPlus() });
     this.endCredits = new CreditsView(this.ctx, 'over');
     this.letterbox = h('div', { class: 'sm-letterbox' }, h('i', { class: 't' }), h('i', { class: 'b' }));
+    this.hitboxes = new HitboxOverlay(this.ctx);
     this.pauseBtn = h('button', { class: 'sm-topbtn sm-pausebtn sm-hidden', type: 'button' }, svgIcon(ICONS.pause));
     this.pauseBtn.addEventListener('click', () => this.openPause());
     this.title = new TitleScreen(this.ctx, { startSession: (run) => this.startSession(run), flash: (t) => this.flash(t), openSettings: () => this.openSettings() });
@@ -87,7 +90,7 @@ export class SettimoUI implements GameUI {
       },
     });
     this.fadeEl = h('div', { class: 'sm-fade' });
-    this.root.append(this.probe, this.letterbox, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.endCredits.el, this.title.el, this.settings.screen.el, this.editor.el, this.fadeEl);
+    this.root.append(this.probe, this.hitboxes.el, this.letterbox, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.endCredits.el, this.title.el, this.settings.screen.el, this.editor.el, this.fadeEl);
     root.appendChild(this.root);
     this.mounted = true;
 
@@ -251,6 +254,7 @@ export class SettimoUI implements GameUI {
     const story = inGame && sim.seq.running;
     const hudOn = inGame && !story && !sim.altarOpen && !sim.endingActive;
     this.hud.update(dt, hudOn);
+    this.hitboxes.update(inGame && sim.debug.showHitboxes);
     const controlsOn = this.mode === 'game' && this.touchOn && hudOn && !sim.inputLocked && sim.player.alive;
     this.controls.grace = this.hud.graceLevel === 2;
     this.controls.update(dt, controlsOn);

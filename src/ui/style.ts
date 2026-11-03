@@ -594,6 +594,11 @@ export const CSS = /* css */ `
 .sm-collline b .ck { width: 15px; height: 15px; color: var(--gold-hi); }
 .sm-collline span { display: block; font: 12px/1.45 var(--sans); color: var(--ivory-dim); margin-top: 2px; }
 .sm-detail.veiled .big i { color: rgba(246,239,226,.3); }
+
+/* debug */
+.sm-hitbox { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
+.sm-dbgz { margin: 10px 0 5px; letter-spacing: .08em; }
+.sm-chip.done { box-shadow: 0 0 0 1px var(--gold); color: var(--gold-hi); }
 .sm-detail.veiled .sm-h2 { color: var(--ivory-dim); font-style: italic; }
 `;
 

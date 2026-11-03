@@ -15,6 +15,7 @@ import { clear, fmtPlaytime, h, svgIcon } from './dom';
 import { ICONS, TOD_ICONS, weaponGlyph } from './icons';
 import { MenuScreen, confirmDialog, listItem, pill, pips, row, toggleCtl, uiSound } from './screen';
 import { CollectionsView } from './collections';
+import { fillDebug } from './debug';
 
 export const TODS: readonly TimeOfDay[] = ['alba', 'giorno', 'tramonto', 'notte'];
 
@@ -55,12 +56,31 @@ export class AltarMenu {
   private memChal: Record<ChalKey, boolean> = { noDamage: false, singleWeapon: false, noLacrime: false, noMetamondo: false };
   private repSel: string | null = null;
   private coll: CollectionsView;
+  private dbgTab: { v: 'altars' | 'bosses' } = { v: 'altars' };
+  private titleTaps: number[] = [];
 
   constructor(private ctx: UiCtx, private host: AltarHost) {
     this.screen = new MenuScreen(ctx, 'altar');
     this.coll = new CollectionsView(ctx, { weaponDetail: (w) => this.weaponDetail(w), formDetail: (f) => this.formDetail(f), refresh: () => this.screen.refresh() });
     this.screen.onBack = () => this.leave();
     this.screen.onSelect = (id) => this.fill(id);
+    // hidden gesture: five quick taps on the pause title toggle the debug menu (settings.debugMenu)
+    this.screen.el.querySelector('.sm-head .ttl')?.addEventListener('click', () => {
+      if (this.mode !== 'pause') return;
+      const now = performance.now();
+      this.titleTaps = this.titleTaps.filter((x) => now - x < 2500);
+      this.titleTaps.push(now);
+      if (this.titleTaps.length < 5) return;
+      this.titleTaps = [];
+      const game = this.ctx.game;
+      const on = !game.settings.debugMenu;
+      game.applySettings({ ...game.settings, debugMenu: on });
+      uiSound(this.ctx, 'confirm');
+      this.host.flash(this.ctx.t(on ? 'ui.debug.on' : 'ui.debug.off'));
+      this.head();
+      if (on) this.screen.select('debug');
+      else if (this.screen.current === 'debug') this.screen.select('journey');
+    });
   }
 
   private get sim() {
@@ -142,6 +162,7 @@ export class AltarMenu {
         { id: 'collections', icon: ICONS.collection, label: t('ui.coll.title') },
         { id: 'settings', icon: ICONS.gear, label: t('ui.menu.settings') },
         { id: 'save', icon: ICONS.save, label: t('ui.pause.save') },
+        ...(this.ctx.game.settings.debugMenu ? [{ id: 'debug', icon: ICONS.debug, label: t('ui.debug.title') }] : []),
         { id: 'quit', icon: ICONS.exit, label: t('ui.pause.quit') },
       ]);
       return;
@@ -187,6 +208,9 @@ export class AltarMenu {
       case 'reperti': this.reperti(p); break;
       case 'journey': this.journey(p); break;
       case 'collections': this.coll.fill(p); break;
+      case 'debug':
+        fillDebug(this.ctx, p, { closePause: () => this.closePause(), transition: (fn) => this.host.transition(fn), flash: (x) => this.host.flash(x), relabel: () => this.relabel() }, this.dbgTab, () => this.screen.refresh());
+        break;
       case 'save': this.save(p); break;
       case 'leave':
       case 'resume':
