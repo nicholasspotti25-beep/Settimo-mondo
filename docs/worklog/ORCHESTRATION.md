@@ -30,3 +30,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - act2#1 done: work log, all 6 act2 encounters pass the bot (thunder ring timing, magma hook + early-eruption guard, ice surface); request to sim: one hit per attack for overlapping same-spawn hazards (integration pass)
 - started: ui#4 (collections, credits mode, ending overlay, debug menu)
 - 2026-11-03 ~19:00 usage limit stopped ui#4 and world#2 mid-chunk; 22:18 both resumed via SendMessage
+- world#2 done: wash-out fixed (uHazeK on all additive layers, fog-gate wall camera fades), docs/WORLD_KIT.md STATUS: READY, altars/gates/reperti/exits/vistas/particles confirmed; started render-kit#3 (RENDER_KIT.md first, then FxRenderer)

@@ -537,10 +537,10 @@ export const CSS = /* css */ `
 .sm-credits .end .note { max-width: min(640px, 80vw); margin: 0; color: var(--ivory-dim); text-shadow: 0 1px 8px rgba(0,0,0,.6); }
 /* end-of-game credits over the last shot: the sunrise stays visible above a soft veil */
 .sm-credits.over { justify-content: flex-end; padding: calc(var(--st) + 5vh) calc(var(--sr) + 8vw) calc(var(--sb) + 7vh) calc(var(--sl) + 8vw);
-  background: linear-gradient(180deg, rgba(12,8,22,0) 0%, rgba(12,8,22,.18) 30%, rgba(14,9,24,.62) 62%, rgba(14,9,24,.86) 100%); animation: sm-in 2.4s ease both; }
+  background: radial-gradient(ellipse 80% 64% at 50% 54%, rgba(14,9,24,.6), rgba(14,9,24,.3) 62%, rgba(14,9,24,0) 100%), linear-gradient(180deg, rgba(12,8,22,.12), rgba(14,9,24,.42) 60%, rgba(14,9,24,.82)); animation: sm-in 2.4s ease both; }
 .sm-credits.over .body { gap: clamp(4px, 1.6vh, 14px); }
 .sm-credits.over .ln { text-shadow: 0 1px 12px rgba(0,0,0,.55); }
-.sm-credits.over .ln.title { font-size: clamp(26px, 8vh, 72px); filter: drop-shadow(0 2px 14px rgba(255,190,110,.35)); }
+.sm-credits.over .ln.title { font-size: clamp(26px, 8vh, 72px); filter: drop-shadow(0 1px 1px rgba(40,20,30,.75)) drop-shadow(0 0 16px rgba(20,10,30,.6)); }
 .sm-credits.over .end { margin-top: 3vh; }
 @keyframes sm-in { from { opacity: 0; } }
 
@@ -552,6 +552,7 @@ export const CSS = /* css */ `
 #sm-ui.ending .sm-letterbox i { height: 9vh; }
 #sm-ui.ending .sm-toasts, #sm-ui.ending .sm-pausebtn { display: none; }
 #sm-ui.ending .sm-subs { bottom: calc(9vh + 18px); }
+#sm-ui.ending .sm-capcenter { text-shadow: 0 0 2px rgba(20,12,28,.7), 0 0 22px rgba(20,12,28,.75), 0 0 48px rgba(20,12,28,.45); }
 
 /* collections */
 .sm-colltabs { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(5px, 1vw, 10px); margin-top: 2px; }

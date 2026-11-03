@@ -283,7 +283,7 @@ export class ControlsView {
 }
 
 /** Minimal projection vector (avoids importing three into the UI just for Vector3). */
-class ProjVec {
+export class ProjVec {
   x = 0;
   y = 0;
   z = 0;

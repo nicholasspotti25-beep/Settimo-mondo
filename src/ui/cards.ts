@@ -94,7 +94,7 @@ export class Cards {
     const c = game.content;
     switch (e.type) {
       case 'zoneEnter': {
-        if (!c.hasZone(e.zone)) break;
+        if (!c.hasZone(e.zone) || game.sim.endingActive) break; // the ending's last shots carry no zone or act card
         const z = c.zone(e.zone);
         const act = c.bundle.progression.acts.find((a) => a.n === z.act);
         const actName = act ? tOpt(act.name_key) : '';
