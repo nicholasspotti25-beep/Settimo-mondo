@@ -34,3 +34,6 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - ui#4 done: collections, NG+ start, credits mode, ending letterbox, debug menu; requests to audio (titoli cue) and sim (attack shapes for hitbox overlay)
 - started: act1#3 (arena dressing + models for cavaliere_errante, elder_tree)
 - render-kit#3 done: docs/RENDER_KIT.md STATUS: READY, FxRenderer v1 (telegraph decals, shockwaves, projectiles, combat FX, particles), model clips/minion hooks, render_models test
+- act1#3 done: Cavaliere Errante model (mounted + dismount, lantern), hit spheres re-aligned, act1_models test; arenas + elder tree next
+- deployed (FX v1, haze fix, ui#4, Cavaliere model)
+- started: integrate#1 (engine), ui#5 (game)

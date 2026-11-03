@@ -109,7 +109,8 @@ tests/act1*.test.ts, docs/requests/act1.md.
   'mounted') restores rider + horse; a load straight into p2 shows no horse. FX uniforms copied from the mounted model to the
   foot model every frame (hit flash, Spezzato, dissolve, aura). Lantern on a 2-bone spring chain (saddle, then belt) with an
   ember surface that warms only while dying (canon: lit for real only in the ending); road-line glow on the blade brightens
-  in counter_stance / riposte. 26.9k triangles high (both models), 13 + 9 surfaces.
+  in counter_stance / riposte. ~33k triangles on high for both models before trimming the blade-line boxes (measured), 13 + 9
+  surfaces; tests/act1_models.test.ts asserts < 80k on every preset.
 - Data: Cavaliere steed/rider part spheres moved onto the model (measured bones: steed chest y 2.46 z 1.27, body y 2.36
   z -1.27, head y 3.83 z 2.35, rider chest y 3.91, rider head y 4.49): steed [0,2.2,1.15] r1.2, [0,2.15,-1.05] r1.25,
   [0,3.5,2.3] r0.65; rider [0,3.7,-0.15] r0.75, [0,4.6,-0.1] r0.5. Body hurtboxes (on foot) unchanged — foot bones hips
