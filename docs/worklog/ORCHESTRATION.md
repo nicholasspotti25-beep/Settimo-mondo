@@ -29,3 +29,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - started: world#2 (haze fix + WORLD_KIT.md first), act2#1 (create work log, sim-side bosses). Next engine: render-kit#3 must publish docs/RENDER_KIT.md (STATUS: READY) first, then integration pass.
 - act2#1 done: work log, all 6 act2 encounters pass the bot (thunder ring timing, magma hook + early-eruption guard, ice surface); request to sim: one hit per attack for overlapping same-spawn hazards (integration pass)
 - started: ui#4 (collections, credits mode, ending overlay, debug menu)
+- 2026-11-03 ~19:00 usage limit stopped ui#4 and world#2 mid-chunk; 22:18 both resumed via SendMessage
