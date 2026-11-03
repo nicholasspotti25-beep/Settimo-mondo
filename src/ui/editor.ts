@@ -10,11 +10,11 @@
 import type { TouchLayoutDef } from '../core/types';
 import type { UiCtx } from './ctx';
 import { h, setText, svgIcon, toggle } from './dom';
-import { ICONS } from './icons';
+import { ICONS, weaponGlyph } from './icons';
 import { ICON_FOR } from './controls';
 import {
   circlesOverlap, clamp, hitButton, normalizeLayout, pickPresetId, resolveLayout, round3, toFraction,
-  type ExtButtonDef, type PresetId, type Rect, type ResolvedButton, type ResolvedLayout,
+  type Circle, type ExtButtonDef, type PresetId, type Rect, type ResolvedButton, type ResolvedLayout,
 } from './layout';
 import { pill, rangeCtl, uiSound } from './screen';
 
@@ -35,16 +35,34 @@ const PRESETS: { id: PresetId; key: string }[] = [
   { id: 'touch_tablet', key: 'ui.editor.preset_tablet' },
 ];
 
-/** Which horizontal half the panel should dock on: the one holding fewer control centers (ties: the left). Pure. */
-export function panelSide(buttons: readonly { cx: number; anchor: string | null }[], safe: Rect): 'left' | 'right' {
-  const mid = safe.x + safe.w / 2;
-  let l = 0, r = 0;
-  for (const b of buttons) {
-    if (b.anchor) continue;
-    if (b.cx < mid) l++;
-    else r++;
+/** Does an axis-aligned rect come within pad px of a circle? Pure. */
+export function rectHitsCircle(x: number, y: number, w: number, hgt: number, c: Circle, pad = 0): boolean {
+  const px = clamp(c.cx, x, x + w), py = clamp(c.cy, y, y + hgt);
+  return Math.hypot(c.cx - px, c.cy - py) < c.r + pad;
+}
+
+/**
+ * Where the control panel goes: of the spots (left / right / center) x (middle / bottom / top) inside the safe area, the
+ * first one whose rect touches the fewest controls, so no control is hidden under it. Pure.
+ */
+export function panelSpot(circles: readonly Circle[], safe: Rect, pw: number, ph: number, margin = 10): { x: number; y: number } {
+  const xs = [safe.x + margin, safe.x + safe.w - pw - margin, safe.x + (safe.w - pw) / 2];
+  // preferred heights first (middle, bottom, top), then every 12 px in between
+  const ys: number[] = ph + margin * 2 >= safe.h ? [safe.y + margin] : [safe.y + (safe.h - ph) / 2, safe.y + safe.h - ph - margin, safe.y + margin];
+  for (let y = safe.y + margin + 12; y < safe.y + safe.h - ph - margin; y += 12) ys.push(y);
+  let best = { x: xs[0], y: ys[0] };
+  let bestN = Infinity;
+  for (const x of xs) {
+    for (const y of ys) {
+      let n = 0;
+      for (const c of circles) if (rectHitsCircle(x, y, pw, ph, c, 6)) n++;
+      if (n < bestN) {
+        bestN = n;
+        best = { x, y };
+      }
+    }
   }
-  return r < l ? 'right' : 'left';
+  return best;
 }
 
 /** Ids of the controls that overlap another control or the HUD ring (pad px of clearance). Pure. */
@@ -82,6 +100,11 @@ export class LayoutEditor {
   private mirrorBtn: HTMLElement;
   private insp: HTMLElement;
   private warn: HTMLElement;
+  private ttl: HTMLElement = h('div');
+  private globals: HTMLElement = h('div');
+  private hintEl: HTMLElement = h('div');
+  /** The how-to line is shown until the first control is selected. */
+  private hinted = false;
 
   constructor(private readonly ctx: UiCtx, private readonly host: EditorHost) {
     this.zoneStick = h('div', { class: 'zone' });
@@ -127,9 +150,10 @@ export class LayoutEditor {
     this.mirror = s.leftHanded;
     this.sel = null;
     this.drag = null;
+    this.hinted = false;
+    toggle(this.el, 'sm-hidden', false); // visible first: the panel is measured to be placed
     this.buildPanel();
     this.rebuild();
-    toggle(this.el, 'sm-hidden', false);
   }
 
   close(): void {
@@ -167,9 +191,12 @@ export class LayoutEditor {
       if (b.anchor) continue;
       const cls = b.id.startsWith('slot_') ? 'slot' : b.id.startsWith('art_') ? 'art' : '';
       const el = h('div', { class: `sm-b ${b.id} ${cls}` });
-      const icon = ICON_FOR[b.id] ?? (cls === 'slot' ? ICONS.armory : ICONS.examine);
-      el.appendChild(svgIcon(icon));
-      if (cls === 'slot') el.appendChild(h('div', { class: 'num' }, b.id.slice(5)));
+      if (cls === 'slot') {
+        // the weapon equipped in that slot, as in game; an empty slot shows its number
+        const w = this.ctx.game.sim.state.equipped[Number(b.id.slice(5)) - 1] ?? null;
+        const def = w && this.ctx.game.content.hasWeapon(w) ? this.ctx.game.content.weapon(w) : null;
+        el.appendChild(def ? svgIcon(weaponGlyph(def.type)) : h('div', { class: 'numc' }, b.id.slice(5)));
+      } else el.appendChild(svgIcon(ICON_FOR[b.id] ?? ICONS.examine));
       el.appendChild(h('div', { class: 'cap' }, this.name(b.id)));
       el.setAttribute('aria-label', this.name(b.id));
       this.stage.appendChild(el);
@@ -207,15 +234,24 @@ export class LayoutEditor {
     };
     z(this.zoneStick, L.stick.zone);
     z(this.zoneCam, L.camera.zone);
+    // zone names sit on the edge facing the screen center, clear of the HUD corner and Lacrime
+    toggle(this.zoneStick, 'inner-r', !L.mirrored);
+    toggle(this.zoneCam, 'inner-r', L.mirrored);
     const rs = this.ring.style;
     rs.left = `${L.ring.cx}px`;
     rs.top = `${L.ring.cy}px`;
     rs.width = rs.height = `${L.ring.r * 2}px`;
     toggle(this.warn, 'sm-hidden', bad.size === 0);
-    // dock the panel away from the controls; keep it inside the safe area
-    const side = panelSide(L.buttons, L.safe);
-    toggle(this.pnl, 'right', side === 'right');
-    this.pnl.style.setProperty('--px', `${side === 'left' ? L.safe.x + 10 : L.view.w - (L.safe.x + L.safe.w) + 10}px`);
+    if (!this.drag) this.place(L);
+  }
+
+  /** Put the panel where it hides no control (re-placed on open, after each drop and on inspector changes). */
+  private place(L: ResolvedLayout): void {
+    const circles: Circle[] = L.buttons.filter((b) => !b.anchor);
+    circles.push(L.ring);
+    const spot = panelSpot(circles, L.safe, this.pnl.offsetWidth, this.pnl.offsetHeight);
+    this.pnl.style.left = `${Math.round(spot.x)}px`;
+    this.pnl.style.top = `${Math.round(spot.y)}px`;
   }
 
   private name(id: string): string {
@@ -256,12 +292,15 @@ export class LayoutEditor {
     });
     const save = pill(t('ui.editor.save'), () => this.save(), { icon: ICONS.check, cls: 'gold' });
     setText(this.warn, t('ui.editor.overlap'));
-    this.pnl.append(
-      h('div', { class: 'ttl' }, t('ui.set.layout_edit')),
-      h('div', { class: 'lab' }, t('ui.editor.preset')), this.presetSeg,
-      h('div', { class: 'sm-pills' }, this.mirrorBtn, reset),
-      this.insp, this.warn,
-      h('div', { class: 'sm-pills acts' }, cancel, save));
+    // two states keep the panel short enough for a 375 px tall phone: globals (presets, mirror, reset) when nothing is
+    // selected, the inspector (size, opacity) of the selected control otherwise
+    this.ttl = h('div', { class: 'ttl' }, t('ui.set.layout_edit'));
+    this.hintEl = h('div', { class: 'hint' }, t('ui.editor.hint'));
+    this.globals = h('div', { class: 'globals' },
+      this.hintEl,
+      this.presetSeg,
+      h('div', { class: 'sm-pills' }, this.mirrorBtn, reset));
+    this.pnl.append(this.ttl, this.globals, this.insp, this.warn, h('div', { class: 'sm-pills acts' }, cancel, save));
   }
 
   /** Preset highlight, mirror state and the inspector of the selected control. */
@@ -276,8 +315,14 @@ export class LayoutEditor {
     this.mirrorBtn.setAttribute('aria-pressed', String(this.mirror));
     this.insp.textContent = '';
     const b = this.sel ? (this.def.buttons[this.sel] as ExtButtonDef | undefined) : undefined;
-    if (!this.sel || !b || 'anchor' in b) {
-      this.insp.append(h('div', { class: 'hint' }, t('ui.editor.hint')));
+    const selected = !!this.sel && !!b && !('anchor' in b);
+    toggle(this.globals, 'sm-hidden', selected);
+    if (selected) this.hinted = true;
+    toggle(this.hintEl, 'sm-hidden', this.hinted);
+    toggle(this.insp, 'sm-hidden', !selected);
+    setText(this.ttl, selected && this.sel ? this.name(this.sel) : t('ui.set.layout_edit'));
+    if (!selected || !this.sel || !b || 'anchor' in b) {
+      if (this.L) this.place(this.L);
       return;
     }
     const id = this.sel;
@@ -291,8 +336,10 @@ export class LayoutEditor {
       this.touched();
       this.paint();
     });
+    requestAnimationFrame(() => {
+      if (this.visible && !this.drag && this.L) this.place(this.L);
+    });
     this.insp.append(
-      h('div', { class: 'nm' }, this.name(id)),
       h('label', null, h('span', null, t('ui.editor.size')), size.el, size.val),
       h('label', null, h('span', null, t('ui.editor.opacity')), alpha.el, alpha.val));
   }

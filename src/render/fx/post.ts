@@ -5,12 +5,15 @@
  * - High / Medium: the scene renders into a half-float target (MSAA x4 on High). A 32x16 luminance probe is downsampled
  *   from it, a bright-pass + mip chain builds the bloom, and one composite pass applies exposure, bloom, ACES, grading,
  *   vignette, dithering and the sRGB output transform.
- * - Low (or no renderable half-float): the scene renders straight to the canvas with the renderer's ACES tone mapping;
+ * - Low: same HDR path without MSAA and bloom (one extra full-screen pass), so exposure, dehaze and grading match.
+ * - No renderable half-float (fallback): the scene renders straight to the canvas with the renderer's ACES tone mapping;
  *   every PROBE_DT seconds a 32x16 render of the scene (no shadow update) feeds the same luminance probe.
  * Exposure: the world's atmosphere sets the base exposure (renderer.toneMappingExposure in scene.onBeforeRender); the
  * probe measures the center-weighted log-average luminance (1x1 RGBA8 reduction, read back asynchronously, no stalls)
  * and the CPU eases a correction factor so the exposed key stays inside a comfort band: bright dawn/sunset scenes facing
  * the glow are pulled down (they washed out to near-white), dark scenes are lifted only a little (night stays night).
+ * Dehaze: the probe also measures a soft minimum (the veil every pixel shares: haze, mist, glare); when it dominates the
+ * average, up to 60% of it is subtracted before tone mapping so silhouettes and the HUD keep their contrast.
  */
 import * as THREE from 'three';
 import type { QualityLevel } from '../types';
@@ -60,7 +63,9 @@ varying vec2 vUv;
 void main() {
   vec3 c = texture2D(tSrc, vUv + uStep * vec2(-1.0, -1.0)).rgb + texture2D(tSrc, vUv + uStep * vec2(1.0, -1.0)).rgb
          + texture2D(tSrc, vUv + uStep * vec2(-1.0, 1.0)).rgb + texture2D(tSrc, vUv + uStep * vec2(1.0, 1.0)).rgb;
-  gl_FragColor = vec4(min(c * 0.25, vec3(64.0)), 1.0);
+  c *= 0.25;
+  if (any(isnan(c)) || any(isinf(c))) c = vec3(0.0);
+  gl_FragColor = vec4(min(c, vec3(64.0)), 1.0);
 }`;
 
 /** 32x16 probe -> 1x1: center-weighted log2 average (R,G = 16-bit encoded) + clipped fraction (B). */
@@ -69,7 +74,7 @@ ${LUM}
 uniform sampler2D tProbe;
 uniform float uExposure;
 void main() {
-  float sumL = 0.0, sumW = 0.0, hot = 0.0;
+  float sumL = 0.0, sumW = 0.0, hot = 0.0, sumInv = 0.0;
   for (int y = 0; y < ${PROBE_H}; y++) {
     for (int x = 0; x < ${PROBE_W}; x++) {
       vec3 c = texelFetch(tProbe, ivec2(x, y), 0).rgb;
@@ -77,6 +82,7 @@ void main() {
       float w = exp(-(p.x * p.x) / 0.09 - (p.y * p.y) / 0.07) + 0.08;
       float l = dot(c, LUMW);
       sumL += w * log2(max(l, 1e-5));
+      sumInv += w * pow(max(l, 1e-4), -1.5);
       hot += w * step(1.6, l * uExposure);
       sumW += w;
     }
@@ -84,7 +90,9 @@ void main() {
   float v = clamp((sumL / sumW + 14.0) / 20.0, 0.0, 1.0);
   float hi = floor(v * 255.0) / 255.0;
   float lo = fract(v * 255.0);
-  gl_FragColor = vec4(hi, lo, hot / sumW, 1.0);
+  // soft minimum (power mean p = -1.5 ~ a low-ish percentile): the additive veil (haze, mist, glare) every pixel shares
+  float fl = pow(sumInv / sumW, -1.0 / 1.5);
+  gl_FragColor = vec4(hi, lo, hot / sumW, clamp((log2(max(fl, 1e-5)) + 14.0) / 20.0, 0.0, 1.0));
 }`;
 
 /** Bright pass (full res -> half res, 4 bilinear taps) with a soft knee, in exposed space. */
@@ -97,6 +105,8 @@ varying vec2 vUv;
 void main() {
   vec3 c = texture2D(tSrc, vUv + uTexel * vec2(-0.5, -0.5)).rgb + texture2D(tSrc, vUv + uTexel * vec2(0.5, -0.5)).rgb
          + texture2D(tSrc, vUv + uTexel * vec2(-0.5, 0.5)).rgb + texture2D(tSrc, vUv + uTexel * vec2(0.5, 0.5)).rgb;
+  // a single NaN/Inf pixel (half-float overflow in additive layers) would smear across the whole bloom chain
+  if (any(isnan(c)) || any(isinf(c))) c = vec3(0.0);
   c = min(c * 0.25 * uExposure, vec3(uThreshold.z));
   float br = max(c.r, max(c.g, c.b));
   float soft = clamp(br - uThreshold.x + uThreshold.y, 0.0, 2.0 * uThreshold.y);
@@ -146,6 +156,7 @@ uniform float uContrast;
 uniform vec3 uLift;
 uniform vec3 uGain;
 uniform float uVignette;
+uniform float uBlack;
 uniform float uAspect;
 uniform float uTime;
 varying vec2 vUv;
@@ -162,9 +173,14 @@ vec3 aces(vec3 color) {
   return clamp(color, 0.0, 1.0);
 }
 void main() {
-  vec3 c = texture2D(tScene, vUv).rgb * uExposure;
+  vec3 c = texture2D(tScene, vUv).rgb;
+  if (any(isnan(c))) c = vec3(0.0);
+  c = min(c, vec3(256.0)) * uExposure;
+  // dehaze: remove part of the shared veil so forms keep their contrast when facing the glow
+  c = max(c - vec3(uBlack), vec3(0.0));
   #ifdef BLOOM
-  c += texture2D(tBloom, vUv).rgb * uBloom;
+  vec3 bl = texture2D(tBloom, vUv).rgb;
+  if (!any(isnan(bl))) c += bl * uBloom;
   #endif
   c = aces(c);
   // grading in a perceptual (gamma 2.2) space
@@ -231,14 +247,14 @@ export class PostPipeline {
     g.setAttribute('position', new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
     this.mCopy = pass(PROBE_COPY, { tSrc: { value: null }, uStep: { value: new THREE.Vector2() } });
     this.mReduce = pass(REDUCE, { tProbe: { value: this.probe.texture }, uExposure: { value: 1 } });
-    this.mPre = pass(PREFILTER, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() }, uExposure: { value: 1 }, uThreshold: { value: new THREE.Vector3(1.0, 0.55, 24) } });
+    this.mPre = pass(PREFILTER, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() }, uExposure: { value: 1 }, uThreshold: { value: new THREE.Vector3(1.5, 0.7, 8) } });
     this.mDown = pass(DOWN, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() } });
     this.mUp = pass(UP, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() }, uScatter: { value: 0.85 } });
     this.mUp.blending = THREE.AdditiveBlending;
     this.mUp.transparent = true;
     const compU = () => ({
       tScene: { value: null }, tBloom: { value: null }, uExposure: { value: 1 }, uBloom: { value: 0.3 }, uSat: { value: 1 }, uContrast: { value: 1 },
-      uLift: { value: new THREE.Vector3() }, uGain: { value: new THREE.Vector3(1, 1, 1) }, uVignette: { value: 0.2 }, uAspect: { value: 2 }, uTime: { value: 0 },
+      uLift: { value: new THREE.Vector3() }, uGain: { value: new THREE.Vector3(1, 1, 1) }, uVignette: { value: 0.2 }, uBlack: { value: 0 }, uAspect: { value: 2 }, uTime: { value: 0 },
     });
     this.mComp = pass(COMPOSITE, compU());
     this.mCompBloom = pass(COMPOSITE, compU(), { BLOOM: '' });
@@ -265,9 +281,9 @@ export class PostPipeline {
     if (!force && key === this.builtKey) return;
     this.builtKey = key;
     this.freeTargets();
-    if (this.quality === 'low' || !this.halfFloat || this.disposed) return;
+    if (!this.halfFloat || this.disposed) return;
     this.hdr = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: this.quality === 'high' ? 4 : 0, depthBuffer: true });
-    const levels = this.quality === 'high' ? 5 : 3;
+    const levels = this.quality === 'high' ? 5 : this.quality === 'medium' ? 3 : 0;
     let mw = w, mh = h;
     for (let i = 0; i < levels; i++) {
       mw = Math.max(1, Math.floor(mw / 2));
@@ -362,12 +378,13 @@ export class PostPipeline {
     U.tScene.value = hdr.texture;
     U.tBloom.value = bloom ? this.mips[0].texture : null;
     U.uExposure.value = E;
-    U.uBloom.value = (this.quality === 'high' ? 0.32 : 0.22) * G.bloom;
+    U.uBloom.value = (this.quality === 'high' ? 0.24 : 0.17) * G.bloom;
     U.uSat.value = G.sat;
     U.uContrast.value = G.contrast;
     (U.uLift.value as THREE.Vector3).set(G.lift[0], G.lift[1], G.lift[2]);
     (U.uGain.value as THREE.Vector3).set(G.gain[0], G.gain[1], G.gain[2]);
     U.uVignette.value = 0.24;
+    U.uBlack.value = this.veilCut * E;
     U.uAspect.value = hdr.width / Math.max(1, hdr.height);
     U.uTime.value = time % 100;
     this.blit(m, null);
@@ -405,11 +422,20 @@ export class PostPipeline {
     const logL = v * 20 - 14;
     this.key = Math.pow(2, logL) * this.exposure;
     this.hot = b[2] / 255;
-    // the reading was taken at the exposure used then; express the key at base exposure for the controller
-    this.lumBase = Math.pow(2, logL) * this.baseExposure;
+    const L = Math.pow(2, logL);
+    this.floor = Math.pow(2, (b[3] / 255) * 20 - 14);
+    // veil = share of the average brightness every pixel has (haze/glare); cut up to 60% of it when it dominates
+    const veil = Math.min(1, this.floor / Math.max(1e-5, L));
+    this.veilTarget = this.hdr ? this.floor * 0.6 * THREE.MathUtils.smoothstep(veil, 0.25, 0.65) : 0;
+    // the controller meters the full image at base exposure (the cut only restores contrast, it never brightens)
+    this.lumBase = L * this.baseExposure;
   }
 
   private lumBase = 0.14;
+  /** Soft-minimum luminance of the metered area (unexposed) and the veil amount removed in the composite. */
+  floor = 0;
+  veilCut = 0;
+  private veilTarget = 0;
 
   /** Ease the exposure correction toward the comfort band. */
   private ease(dt: number): void {
@@ -420,6 +446,7 @@ export class PostPipeline {
     // many clipped pixels in the metered area: pull down a little more
     s *= 1 - 0.22 * THREE.MathUtils.smoothstep(this.hot, 0.2, 0.6);
     s = THREE.MathUtils.clamp(s, 0.3, 1.3);
+    this.veilCut += (this.veilTarget - this.veilCut) * (1 - Math.exp(-dt * 1.5));
     const rate = s < this.exposureScale ? 2.4 : 1.1;
     this.exposureScale += (s - this.exposureScale) * (1 - Math.exp(-dt * rate));
   }

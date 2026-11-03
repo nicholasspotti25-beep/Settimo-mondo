@@ -498,29 +498,32 @@ export const CSS = /* css */ `
 .sm-editor .sm-b.bad { box-shadow: 0 0 0 2px var(--red-soft), 0 0 14px rgba(255,90,60,.5); }
 .sm-editor.sm-hidden { display: none; }
 .sm-editor .zone { pointer-events: none; }
+.sm-editor .zone.inner-r { text-align: right; }
 .sm-editor .ringg { position: absolute; transform: translate(-50%,-50%); border-radius: 50%; border: 1px dashed rgba(234,208,154,.45); pointer-events: none; }
 .sm-editor .sm-b { background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.16), rgba(40,30,50,.5)); box-shadow: 0 0 0 1.2px rgba(246,239,226,.55); transition: box-shadow .15s; }
 .sm-editor .sm-b .cap { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 3px; font: 600 11px var(--sans); letter-spacing: .04em; white-space: nowrap; color: rgba(246,239,226,.8); text-shadow: 0 1px 4px rgba(0,0,0,.8); }
-.sm-editor .sm-b .num { position: absolute; right: 8%; bottom: 4%; font: 600 11px var(--serif); color: var(--gold-hi); }
-.sm-editor .pnl { position: absolute; top: 50%; left: var(--px, 12px); transform: translateY(-50%); width: min(300px, 44vw); max-height: calc(100% - var(--st) - var(--sb) - 16px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 10px; background: var(--glass-3); box-shadow: 0 0 0 1px var(--line), 0 12px 40px rgba(0,0,0,.45); z-index: 3; transition: opacity .2s; }
-.sm-editor .pnl.right { left: auto; right: var(--px, 12px); }
+.sm-editor .sm-b .numc { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 600 18px var(--serif); color: var(--gold-hi); }
+.sm-editor .pnl { position: absolute; top: 10px; left: 10px; width: min(300px, 44vw); max-height: calc(100% - var(--st) - var(--sb) - 16px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: var(--glass-3); box-shadow: 0 0 0 1px var(--line), 0 12px 40px rgba(0,0,0,.45); z-index: 3; transition: opacity .2s; }
 .sm-editor.dragging .pnl { opacity: .18; pointer-events: none; }
-.sm-editor .pnl .ttl { font: 500 17px var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--ivory); }
-.sm-editor .pnl .lab, .sm-editor .insp .nm { font: 600 11px var(--sans); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+.sm-editor .pnl .ttl { font: 500 16px var(--serif); letter-spacing: .14em; text-transform: uppercase; color: var(--gold-hi); }
 .sm-editor .pnl .sm-seg { align-self: flex-start; }
 .sm-editor .pnl .sm-seg button { padding: 6px 10px; }
 .sm-editor .pnl .sm-pills { gap: 6px; flex-wrap: wrap; }
 .sm-editor .pnl .sm-pill { padding: 8px 12px; letter-spacing: .12em; }
 .sm-editor .pnl .sm-pill.on { box-shadow: 0 0 0 1.4px var(--gold-hi); color: var(--gold-hi); }
-.sm-editor .insp { display: flex; flex-direction: column; gap: 2px; padding-top: 6px; border-top: 1px solid var(--line-3); }
+.sm-editor .insp, .sm-editor .globals { display: flex; flex-direction: column; gap: 6px; }
+.sm-editor .insp { gap: 0; }
+.sm-editor .insp.sm-hidden, .sm-editor .globals.sm-hidden { display: none; }
 .sm-editor .insp label { display: flex; align-items: center; gap: 8px; font: 12px var(--sans); color: var(--ivory-dim); }
 .sm-editor .insp label > span:first-child { flex: 0 0 74px; }
 .sm-editor .insp .sm-range { flex: 1; width: auto; min-width: 0; }
 .sm-editor .insp .val { flex: 0 0 40px; text-align: right; font: 600 12px var(--sans); color: var(--gold); font-variant-numeric: tabular-nums; }
-.sm-editor .insp .hint { font: italic 13px/1.4 var(--serif); color: var(--ivory-dim); }
-.sm-editor .warn { font: 12px/1.35 var(--sans); color: #ffc4b4; }
+.sm-editor .globals .hint { font: italic 12.5px/1.35 var(--serif); color: var(--ivory-dim); }
+.sm-editor .warn { font: 12px/1.3 var(--sans); color: #ffc4b4; }
+.sm-editor .warn.sm-hidden { display: none; }
 .sm-editor .acts { justify-content: flex-end; }
-#sm-ui.editopen .sm-screen.settings { visibility: hidden; }
+#sm-ui.editopen .sm-screen.settings, #sm-ui.editopen .sm-hud, #sm-ui.editopen .sm-touch, #sm-ui.editopen .sm-pausebtn { visibility: hidden; }
+.sm-editor .globals .hint.sm-hidden { display: none; }
 
 /* credits */
 .sm-credits { position: absolute; inset: 0; pointer-events: auto; background: radial-gradient(ellipse 110% 70% at 50% 120%, rgba(255,190,120,.55), rgba(140,70,90,.25) 35%, transparent 65%), linear-gradient(180deg, #0c0816, #1d1430 60%, #3a2440); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8vh 10vw; }

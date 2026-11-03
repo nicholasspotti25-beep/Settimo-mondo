@@ -21,3 +21,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - engine: world#1 done, render-kit#1 done, world#2 interrupted (partial work on disk)
 - game: ui#1 done, act1#1 done, ui#2 done, act1#2 interrupted
 - 2026-11-03 17:15 started: render-kit#2 (engine), ui#3 (game)
+- ui#3 done: title + slots + import, character creator, settings, touch layout editor (touch-audited at 3 viewports)
+- act1#2 started
