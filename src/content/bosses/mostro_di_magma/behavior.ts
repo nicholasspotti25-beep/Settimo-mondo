@@ -23,6 +23,8 @@ export const MAGMA_FLOOD_TICK = 0.4;
 /** Lava depth: a player whose feet are higher than this above the floor (jumping) is not burned. */
 const FLOOD_DEPTH = 0.55;
 export const CARAPACE_BODY_MULT = 0.3;
+/** The eruption is never called before this many seconds of real fight (the first exchanges teach the slams). */
+export const ERUPTION_EARLIEST = 20;
 
 export interface MagmaIsland {
   x: number;
@@ -116,9 +118,11 @@ export default defineBehavior(() => ({
     a.bstate.floodTick = 0;
     a.bstate.warn = 0;
     a.bstate.bend = 0;
+    a.bstate.fightT = 0;
   },
 
   update(a: Actor, sim: Sim, dt: number) {
+    if (sim.fight?.active && !sim.fight.intro && !sim.seq.running) a.bstate.fightT += dt;
     // the heart lowers as the colossus bends over its fists
     const target = bendTarget(a);
     a.bstate.bend += (target - a.bstate.bend) * (1 - Math.exp(-(target > a.bstate.bend ? 7 : 2.5) * dt));
@@ -177,6 +181,7 @@ export default defineBehavior(() => ({
   },
 
   canUseAttack(a: Actor, sim: Sim, def: AttackDef) {
+    if (def.id === 'eruption' && a.bstate.fightT < ERUPTION_EARLIEST) return false;
     if (FRONT.has(def.id)) {
       const rel = Math.abs(Math.atan2(Math.sin(yawTo(a.pos, sim.player.pos) - a.yaw), Math.cos(yawTo(a.pos, sim.player.pos) - a.yaw)));
       if (rel > 1.3) return false;

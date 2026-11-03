@@ -8,8 +8,9 @@ import h4 from './great_devourer';
 import h5 from './ice';
 import h6 from './lucifero_1';
 import h7 from './mostro_della_palude';
-import h8 from './pyro';
-import h9 from './thunder';
+import h8 from './mostro_di_magma';
+import h9 from './pyro';
+import h10 from './thunder';
 
 export const BOT_HOOKS: Record<string, BotHook> = {
   "caronte": h0,
@@ -20,6 +21,7 @@ export const BOT_HOOKS: Record<string, BotHook> = {
   "ice": h5,
   "lucifero_1": h6,
   "mostro_della_palude": h7,
-  "pyro": h8,
-  "thunder": h9,
+  "mostro_di_magma": h8,
+  "pyro": h9,
+  "thunder": h10,
 };

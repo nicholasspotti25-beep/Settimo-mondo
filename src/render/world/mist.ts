@@ -3,7 +3,10 @@
  * fight is running, plus the same dawn-light material shaped as a disk for portal exits.
  * The wall follows the arena boundary (an arc for circular arenas, a straight curtain otherwise), hugs the terrain at its
  * foot, billows gently, and is drawn with flowing layered noise: a warm gold core, lilac edges, rising bright streaks
- * and sparks. Additive, display-space, dimmed by the shared atmosphere fog; `opacity` fades it in and out.
+ * and sparks. Additive, display-space, dimmed by the shared atmosphere fog and scaled by ATMOS.uHazeK; `opacity` fades it
+ * in and out. The wall seals the arena from the inside: when the follow camera backs out through it (player fighting near
+ * the gate) the sheet between the camera and the player thins to a faint shimmer, and it always fades within a few
+ * meters of the camera, so it never veils the arena floor, the boss or the player.
  */
 import * as THREE from 'three';
 import { ATMOS } from './atmosphere';
@@ -14,8 +17,10 @@ uniform float uTime;
 uniform float uShape;
 varying vec2 vUv;
 varying vec3 vAtmWorld;
+varying vec3 vOut;
 void main() {
   vUv = uv;
+  vOut = normalize(mat3(modelMatrix) * normal);
   vec3 p = position;
   if (uShape < 0.5) {
     float w = sin(uv.x * 9.0 + uTime * 1.1) * 0.14 + sin(uv.y * 5.0 - uTime * 1.6 + uv.x * 4.0) * 0.1;
@@ -35,8 +40,10 @@ uniform float uShape;
 uniform vec2 uSize;
 uniform vec3 uCore;
 uniform vec3 uEdge;
+uniform float uHazeK;
 varying vec2 vUv;
 varying vec3 vAtmWorld;
+varying vec3 vOut;
 ${GLSL_NOISE}
 ${GLSL_ATMOS_PARS}
 void main() {
@@ -79,9 +86,15 @@ void main() {
   vec3 ray = vAtmWorld - cameraPosition;
   float dist = length(ray);
   float fa = smFogAmount(ray, dist);
-  float nb = mix(0.62, 1.05, uNight);
-  // a little stronger seen edge-on so the wall still reads from oblique angles
-  gl_FragColor = vec4(col * a * nb * (1.0 - fa * 0.8), 1.0);
+  float nb = mix(0.5, 0.95, uNight);
+  // near-camera fade, and a thin shimmer only when seen from outside the sealed arena (camera behind the wall)
+  a *= smoothstep(2.0, 12.0, dist);
+  if (uShape < 0.5) {
+    a *= mix(1.0, 0.15, smoothstep(-1.5, 1.5, dot(cameraPosition.xz - vAtmWorld.xz, vOut.xz)));
+    // grazing views: a sheet seen edge-on would draw a hard bright seam
+    a *= smoothstep(0.06, 0.4, abs(dot(ray / max(dist, 1e-3), vOut)));
+  }
+  gl_FragColor = vec4(col * a * nb * uHazeK * (1.0 - fa * 0.8), 1.0);
 }
 `;
 

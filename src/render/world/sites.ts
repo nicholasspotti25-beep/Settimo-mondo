@@ -231,8 +231,8 @@ export class ZoneSites {
     const gx = a.gate.pos[0], gz = a.gate.pos[2];
     const gy = this.ground(gx, gz);
     const glows = [
-      this.glow({ pos: [gx, gy + 0.08, gz], color: '#ffd2a0', size: w * 2.2, intensity: 0.35, mode: 'pool', on: 0 }),
-      this.glow({ pos: [gx, gy + 1.6, gz], color: '#ffe2b8', size: w * 1.6, intensity: 0.16, mode: 'orb', on: 0 }),
+      this.glow({ pos: [gx, gy + 0.08, gz], color: '#ffd2a0', size: w * 2.0, intensity: 0.2, mode: 'pool', on: 0 }),
+      this.glow({ pos: [gx, gy + 1.6, gz], color: '#ffe2b8', size: w * 1.4, intensity: 0.11, mode: 'orb', on: 0 }),
     ];
     this.gates.push({ arena: a, mist, glows });
   }

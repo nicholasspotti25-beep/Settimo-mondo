@@ -2,7 +2,8 @@
  * GlowSet: every small light of a zone's sites in ONE draw call — camera-facing glow orbs, flickering lantern flames,
  * vertical light beams (cylindrical billboards), flat light pools on the ground and pulsing star glints (Reperti, vista
  * cairns). No real lights (the forward renderer would recompile every material per light): the glows are additive,
- * display-space, brighter at night (ATMOS.uNight), dimmed by the shared atmosphere fog and occluded by the depth buffer.
+ * display-space, brighter at night (ATMOS.uNight), scaled by ATMOS.uHazeK (auto exposure / HDR path), dimmed by the shared
+ * atmosphere fog, faded when the camera is inside a glow, and occluded by the depth buffer.
  * Each glow fades smoothly toward its target visibility (setOn), so a lantern being lit or a Reperto being taken eases.
  */
 import * as THREE from 'three';
@@ -37,9 +38,12 @@ varying vec4 vCol;
 varying float vMode;
 varying float vPhase;
 varying vec3 vAtmWorld;
+varying float vNear;
 void main() {
   vUv = position.xy + 0.5;
   float mode = aGlow.z;
+  // camera inside the glow (pool underfoot, orb around a lantern held close): fade instead of filling the screen
+  vNear = smoothstep(0.3, 0.95, distance(cameraPosition, aCenter) / max(mode > 1.5 && mode < 2.5 ? aGlow.x * 0.5 : aGlow.x, 0.4));
   vec3 c = aCenter;
   vec3 camR = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
   vec3 camU = vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
@@ -68,11 +72,13 @@ void main() {
 const frag = /* glsl */ `
 uniform float uTime;
 uniform float uNight;
+uniform float uHazeK;
 varying vec2 vUv;
 varying vec4 vCol;
 varying float vMode;
 varying float vPhase;
 varying vec3 vAtmWorld;
+varying float vNear;
 ${GLSL_ATMOS_PARS}
 void main() {
   vec2 p = vUv - 0.5;
@@ -105,7 +111,7 @@ void main() {
   float dist = length(ray);
   float fa = smFogAmount(ray, dist);
   float nb = mix(1.0, 1.65, uNight);
-  vec3 col = vCol.rgb * (a * vCol.a * nb * (1.0 - fa * 0.85));
+  vec3 col = vCol.rgb * (a * vCol.a * nb * uHazeK * vNear * (1.0 - fa * 0.85));
   if (max(col.r, max(col.g, col.b)) < 0.003) discard;
   gl_FragColor = vec4(min(col, vec3(1.6)), 1.0);
 }

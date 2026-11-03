@@ -10,6 +10,7 @@ import { shapeHits, type TargetVol } from '../../../src/sim/shapes';
 import { Btn, type PlayerInput } from '../../../src/sim/types';
 import type { Bot } from '../bot';
 import type { BotHook } from '../hooks';
+import { boxHazardDodge, chargeDodge, hazardEscape, ringJump as act1RingJump } from './cavaliere_errante';
 
 const vol: TargetVol = { x: 0, y: 0, z: 0, r: 0, h: 0 };
 const probe = { x: 0, y: 0, z: 0 };
@@ -79,10 +80,22 @@ export function waveDodge(sim: Sim, bot: Bot, base: PlayerInput): PlayerInput | 
   return null;
 }
 
-/** All Act II defensive helpers in priority order. */
+/**
+ * All Act II defensive helpers in priority order. The Act I helpers (tools/bot/hooks/cavaliere_errante.ts) cover the
+ * generic shapes Act II shares: box hazards across their short axis, through-charges (Thunder's dashes) read during the
+ * telegraph, ring wind-ups (hold swings so the jump is free) and round ground hazards (lightning marks, the storm, fire
+ * pillars) left during their telegraph instead of being rolled at the last frame of a swing.
+ */
 export function act2Defense(sim: Sim, bot: Bot, base: PlayerInput): PlayerInput | null {
   if (sim.seq.running || !sim.boss) return null;
-  return waveDodge(sim, bot, base) ?? ringJump(sim, bot, base);
+  return (
+    waveDodge(sim, bot, base) ??
+    boxHazardDodge(sim, bot, base) ??
+    chargeDodge(sim, bot, base) ??
+    ringJump(sim, bot, base) ??
+    act1RingJump(sim, bot, base) ??
+    hazardEscape(sim, bot, base)
+  );
 }
 
 const hook: BotHook = {

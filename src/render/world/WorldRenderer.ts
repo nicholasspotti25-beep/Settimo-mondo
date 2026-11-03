@@ -13,7 +13,7 @@ import type { Sim } from '../../sim/sim';
 import type { SimEvent } from '../../sim/types';
 import type { ArenaBuilder, ArenaVisual, QualityLevel, RenderCtx, ZoneBuilder, ZoneVisual } from '../types';
 import { ARENA_BUILDERS, ZONE_BUILDERS } from '../../generated/registry.render';
-import { Atmosphere } from './atmosphere';
+import { ATMOS, Atmosphere, HDR_HAZE_K } from './atmosphere';
 import { biomeOf } from './biomes';
 import { createZoneEnv, releaseZoneEnv } from './env';
 import { SkyDome } from './sky';
@@ -44,6 +44,7 @@ export class WorldRenderer {
   private focus = new THREE.Vector3();
   private zoneDef: ZoneDef | null = null;
   private lastCamera: THREE.Camera | null = null;
+  private lastBaseExposure = 0;
 
   constructor(private scene: THREE.Scene, private ctx: RenderCtx) {
     this.group.name = 'world';
@@ -53,13 +54,32 @@ export class WorldRenderer {
     scene.add(this.sky.mesh);
     scene.background = new THREE.Color('#2a2238');
     this.builtQuality = ctx.quality;
-    // exposure follows the atmosphere (applied right before the scene renders)
+    // exposure follows the atmosphere (applied right before the scene renders; the Renderer's post pipeline multiplies
+    // its auto correction on top afterwards). The haze scale of the toneMapped:false layers is derived here too.
     const prev = scene.onBeforeRender;
     scene.onBeforeRender = (renderer, sc, cam, geo, mat, grp) => {
       prev.call(scene, renderer, sc, cam, geo, mat, grp);
+      this.updateHaze(renderer);
       renderer.toneMappingExposure = this.atmosphere.exposure;
+      this.lastBaseExposure = this.atmosphere.exposure;
     };
     this.applyQuality();
+  }
+
+  /**
+   * ATMOS.uHazeK for this frame. Direct path: the renderer still holds last frame's final exposure (atmosphere base x the
+   * post pipeline's auto correction), so the correction is final / base; the additive layers follow it (dimming fully,
+   * brightening a little) so they never out-shine the tone-mapped floor, boss and player when the camera faces the glow.
+   * HDR path (a half-float target is bound): the layers already pass exposure + ACES, only the linear-blend scale applies.
+   */
+  private updateHaze(renderer: THREE.WebGLRenderer): void {
+    const rt = renderer.getRenderTarget();
+    if (rt && rt.texture.type === THREE.HalfFloatType) {
+      ATMOS.uHazeK.value = HDR_HAZE_K;
+      return;
+    }
+    const auto = this.lastBaseExposure > 0 ? renderer.toneMappingExposure / this.lastBaseExposure : 1;
+    ATMOS.uHazeK.value = THREE.MathUtils.clamp(auto < 1 ? Math.pow(auto, 1.15) : Math.pow(auto, 0.5), 0.25, 1.12);
   }
 
   /* ---------------------------------------------------------------------------------------------------------------- */

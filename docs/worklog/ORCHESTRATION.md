@@ -27,3 +27,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - act1#2 done: 27 act1 tests, double_slam bot fix, NG+/ToD bot passes, devourer hp 4800; models blocked on RENDER_KIT.md/WORLD_KIT.md
 - deployed a22cf27+ (ui#3 + render-kit#2); smoke waits 2.5 s for boot (was flaky)
 - started: world#2 (haze fix + WORLD_KIT.md first), act2#1 (create work log, sim-side bosses). Next engine: render-kit#3 must publish docs/RENDER_KIT.md (STATUS: READY) first, then integration pass.
+- act2#1 done: work log, all 6 act2 encounters pass the bot (thunder ring timing, magma hook + early-eruption guard, ice surface); request to sim: one hit per attack for overlapping same-spawn hazards (integration pass)
+- started: ui#4 (collections, credits mode, ending overlay, debug menu)

@@ -208,6 +208,7 @@ uniform vec3 uColA;
 uniform vec3 uColB;
 uniform vec3 uLightColor;
 uniform vec3 uHemiSky;
+uniform float uHazeK;
 varying vec2 vUv;
 varying float vAlpha;
 varying float vSeed;
@@ -241,7 +242,7 @@ void main() {
   float fa = smFogAmount(ray, dist);
   vec3 col = mix(uColA, uColB, vSeed);
   if (uBlend < 0.5) {
-    vec3 o = col * a * uIntensity * mix(1.0, 1.45, uNight) * (1.0 - fa * 0.9);
+    vec3 o = col * a * uIntensity * uHazeK * mix(1.0, 1.45, uNight) * (1.0 - fa * 0.9);
     gl_FragColor = vec4(min(o, vec3(2.0)), 1.0);
   } else if (uBlend < 1.5) {
     gl_FragColor = vec4(col * (uHemiSky * 0.85 + uLightColor * 0.4), min(1.0, a * uIntensity));
@@ -249,7 +250,7 @@ void main() {
     #include <colorspace_fragment>
     gl_FragColor.rgb = mix(gl_FragColor.rgb, smFogColor(ray / max(dist, 1e-3)), fa);
   } else {
-    gl_FragColor = vec4(smFogColor(ray / max(dist, 1e-3)) * 1.04, min(1.0, a * uIntensity * (1.0 - fa * 0.5)));
+    gl_FragColor = vec4(smFogColor(ray / max(dist, 1e-3)) * mix(1.04, 0.92, uNight), min(1.0, a * uIntensity * min(1.0, uHazeK) * (1.0 - fa * 0.5)));
   }
 }
 `;
@@ -495,7 +496,7 @@ export class ZoneParticles {
         uniforms: {
           uFogColor: ATMOS.uFogColor, uFogGlow: ATMOS.uFogGlow, uGlowDir: ATMOS.uGlowDir, uFogParams: ATMOS.uFogParams,
           uFogMax: ATMOS.uFogMax, uFogScale: { value: 1 },
-          uWind: ATMOS.uWind, uNight: ATMOS.uNight, uLightColor: ATMOS.uLightColor, uHemiSky: ATMOS.uHemiSky,
+          uWind: ATMOS.uWind, uNight: ATMOS.uNight, uLightColor: ATMOS.uLightColor, uHemiSky: ATMOS.uHemiSky, uHazeK: ATMOS.uHazeK,
           ...env.field.uniforms,
           uPT: this.pt,
           uFocus: this.focusU,

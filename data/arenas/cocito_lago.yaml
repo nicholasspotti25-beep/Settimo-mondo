@@ -1,3 +1,5 @@
+# Ice — the frozen lake of Cocito: a round sheet of blue ice with shadows trapped underneath. The surface is ice: footing
+# slides (low ground acceleration in the sim). Phase 2 mirrors are raised by the behavior as arena colliders.
 id: cocito_lago
 zone: cocito
 name_key: arena.cocito_lago.name
@@ -6,6 +8,6 @@ shape: circle
 radius: 30
 gate: {pos: [0, 0, 50], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: ice
 obstacles: []
 builder: cocito_lago

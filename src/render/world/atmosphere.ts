@@ -40,7 +40,17 @@ export const ATMOS = {
   uCoverColor: { value: new THREE.Color(0.3, 0.4, 0.2) },
   uCoverAmount: { value: 0 },
   uGlowBoost: { value: 1 },
+  /**
+   * Energy scale of every additive / display-space haze layer (site glows, Nebbia dell'Alba, glowing and fog particles).
+   * Set each frame by the WorldRenderer: on the direct path it follows the post pipeline's auto-exposure correction (those
+   * layers are toneMapped:false, so they would not dim with the tone-mapped geometry when the camera faces the glow); on the
+   * HDR path it is HDR_HAZE_K (the layers then blend in linear space and pass exposure + ACES like everything else).
+   */
+  uHazeK: { value: 1 },
 };
+
+/** uHazeK on the HDR path: additive haze blended in linear space reads ~2.2x stronger than on the sRGB canvas. */
+export const HDR_HAZE_K = 0.45;
 
 interface AtmosParams {
   zenith: THREE.Vector3;
