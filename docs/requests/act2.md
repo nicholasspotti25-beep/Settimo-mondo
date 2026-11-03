@@ -29,3 +29,13 @@ per step.
 +        if (group >= 0) { this.hazardHitGroup = group; this.hazardHitTime = this.time; }
 ```
 with two fields on Sim: `private hazardHitGroup = -1; private hazardHitTime = -1;`.
+
+### DONE (integration #1, 2026-11-03)
+Implemented per spawn rather than per frame: every hazard placed by one `bossSpawn` call with more than one position gets
+`h.group` (src/sim/pools.ts, id of the spawn's first hazard). When one of them resolves against the player (hit / blocked /
+parried / dodged / absorbed; not plain i-frame `avoided`), `spendHazardGroup` marks the rest of that spawn as spent, so a
+line / cluster / grid is ONE blow for its whole life, not just on the same frame (also one perfect dodge, not one per
+footprint). Separate spawns of the same attack (a second wave, the 2nd lava ring) stay separate groups and can still land;
+`dot` (tick) hazards and static arena hazards are unchanged. Tests: tests/sim_integration.test.ts. Bot after the change:
+all 6 Act II encounters pass (ice perfect hits 6.7 -> 6.3).
+

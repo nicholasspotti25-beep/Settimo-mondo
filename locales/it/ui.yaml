@@ -43,6 +43,10 @@ ui:
     line: "La luce si ritira, ma non si spegne."
     sub: "Ritorno all'altare"
   loading: "Il mondo si compone"
+  portrait:
+    title: "Ruota il dispositivo"
+    touch: "Il Settimo Mondo si percorre in orizzontale."
+    desk: "Allarga la finestra: il Settimo Mondo si percorre in orizzontale."
   story:
     hold: "Tieni premuto"
     tap_gesture: "Tocca per compiere il gesto"

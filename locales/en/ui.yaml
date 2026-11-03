@@ -43,6 +43,10 @@ ui:
     line: "The light withdraws, but it does not go out."
     sub: "Returning to the altar"
   loading: "The world takes shape"
+  portrait:
+    title: "Turn your device"
+    touch: "The Seventh World is walked in landscape."
+    desk: "Widen the window: the Seventh World is walked in landscape."
   story:
     hold: "Hold"
     tap_gesture: "Tap to perform the gesture"

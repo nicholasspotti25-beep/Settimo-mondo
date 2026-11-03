@@ -10,7 +10,7 @@ import type { SimEvent } from '../sim/types';
 import type { StatusKind } from '../core/types';
 import { h, s, svgIcon, setText, toggle, StyleCache, clamp01 } from './dom';
 import { ICONS, STATUS_ICONS, weaponGlyph, promptIcon } from './icons';
-import type { ResolvedLayout } from './layout';
+import { clamp, type ResolvedLayout } from './layout';
 import { replay, type UiCtx } from './ctx';
 
 const STATUS_KINDS: StatusKind[] = ['slow', 'freeze', 'burn', 'blind', 'mute', 'madness', 'poison', 'void', 'root'];
@@ -191,6 +191,8 @@ export class Hud {
       this.pbarsCss.set('left', `${r.cx + r.r + gap}px`);
     }
     this.pbarsCss.set('top', `${r.cy - r.r * 0.62}px`);
+    // vials and status icons follow the ring (which grows with the safe height up to tablets), not only --k
+    this.pbarsCss.set('--hk', clamp(r.r / 29, 0.92, 1.6).toFixed(3));
     // boss bar: centered in the widest free span of the bottom band (touch buttons must not cover it)
     let lo = L.safe.x + L.safe.w * 0.2, hi = L.safe.x + L.safe.w * 0.8;
     if (touchOn) {
@@ -304,7 +306,7 @@ export class Hud {
 
     // --- vials
     while (this.vialEls.length < p.lacrimeMax) {
-      const v = h('div', { class: 'sm-vial' }, svgIcon(ICONS.lacrime));
+      const v = h('div', { class: 'sm-vial' }, svgIcon(ICONS.lacrime, 'sm-ico', '5.4 2 13.2 19.6')); // viewBox fitted to the flask
       this.vialEls.push(v);
       this.vials.appendChild(v);
     }
@@ -389,7 +391,7 @@ export class Hud {
         if (glyph !== t.glyph) {
           t.glyph = glyph;
           t.el.textContent = '';
-          if (glyph) t.el.appendChild(svgIcon(weaponGlyph(glyph)));
+          t.el.appendChild(glyph ? svgIcon(weaponGlyph(glyph)) : h('i', { class: 'numc' }, String(i + 1)));
         }
         toggle(t.el, 'cur', i === p.activeSlot);
         toggle(t.el, 'empty', !def);

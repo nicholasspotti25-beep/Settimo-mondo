@@ -344,7 +344,7 @@ export function runFight(sim: Sim, bossId: string, profile: BotProfile, opts: { 
       else if (e.type === 'hit' && e.source === -1) res.damageDealt += e.amount;
       else if (e.type === 'bossPhase') res.phaseReached = Math.max(res.phaseReached, e.phase);
       else if (e.type === 'playerDied') res.deaths++;
-      else if (e.type === 'fightEnd' && e.boss === bossId) res.won = e.won || (bot.hook?.countsAsWin?.(sim) ?? false);
+      else if (e.type === 'fightEnd' && e.boss === bossId && !e.abandoned) res.won = e.won || (bot.hook?.countsAsWin?.(sim) ?? false);
     }
     if (sim.boss) res.bossHpFrac = sim.boss.hpFrac;
     if (res.won && !sim.seq.running) break;

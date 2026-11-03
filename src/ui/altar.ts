@@ -13,7 +13,7 @@ import { isDefeated } from '../sim/gamestate';
 import type { UiCtx } from './ctx';
 import { clear, fmtPlaytime, h, svgIcon } from './dom';
 import { ICONS, TOD_ICONS, weaponGlyph } from './icons';
-import { MenuScreen, confirmDialog, listItem, pill, pips, row, toggleCtl, uiSound } from './screen';
+import { MenuScreen, confirmDialog, listItem, pill, pips, row, toggleCtl, toggleRow, uiSound } from './screen';
 import { CollectionsView } from './collections';
 import { fillDebug } from './debug';
 
@@ -521,8 +521,8 @@ export class AltarMenu {
     d.appendChild(h('div', { class: 'sm-h3' }, t('ui.altar.challenges')));
     for (const ch of CHALLENGES) {
       const done = st.challenges[ch.id]?.includes(b.id) ?? false;
-      d.appendChild(row(t(`ui.hud.challenge.${ch.key}`), done ? t('ui.altar.done') : t(`ui.altar.chal_d.${ch.key}`),
-        toggleCtl(this.ctx, this.memChal[ch.key], (v) => { this.memChal[ch.key] = v; })));
+      d.appendChild(toggleRow(this.ctx, t(`ui.hud.challenge.${ch.key}`), done ? t('ui.altar.done') : t(`ui.altar.chal_d.${ch.key}`),
+        this.memChal[ch.key], (v) => { this.memChal[ch.key] = v; }));
     }
     d.appendChild(h('div', { class: 'sm-pills' }, pill(t('ui.altar.relive'), () => {
       uiSound(this.ctx, 'confirm');

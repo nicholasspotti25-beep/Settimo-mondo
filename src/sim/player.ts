@@ -5,7 +5,7 @@
 import { DEG, clamp, dist2D, forward, len2D, turnToward, v3, wrapAngle, yawTo, yawOf, type Vec3 } from '../core/math';
 import type { MovesetDef, StatusKind, SwingDef, TransitionDef, WeaponDef } from '../core/types';
 import { weaponDamage } from '../core/formulas';
-import { shapeHits, scaleShape, shapeReach, type TargetVol } from './shapes';
+import { scaleShape, shapeReach, type TargetVol } from './shapes';
 import { Btn, type AttackKind, type PlayerInput, type PlayerStateId } from './types';
 import type { Actor, PartRuntime } from './actor';
 import type { Sim } from './sim';
@@ -39,7 +39,6 @@ const ATTACK_STATES: PlayerStateId[] = ['light', 'heavy', 'running', 'jumping', 
 
 const tmp = v3();
 const tmp2 = v3();
-const contact = v3();
 let swingUid = 1_000_000;
 
 export class Player {
@@ -192,7 +191,7 @@ export class Player {
   }
 
   /** i-frames currently active? */
-  invulnerable(sim: Sim): boolean {
+  invulnerable(_sim: Sim): boolean {
     if (this.invuln > 0) return true;
     if (this.state === 'grace' || this.state === 'locked' || this.state === 'dead') return true;
     if (this.state === 'dodge') return this.stateTime >= this.iframes[0] && this.stateTime <= this.iframes[1];
@@ -944,7 +943,7 @@ export class Player {
     a.behavior?.onGraceStrike?.(a, sim, part);
   }
 
-  private updateGrace(sim: Sim, dt: number): void {
+  private updateGrace(sim: Sim, _dt: number): void {
     const g = this.graceTarget;
     const T = sim.bal.equilibrio.grace_time;
     if (g && !g.hitDone && this.stateTime >= T * 0.56) {

@@ -143,7 +143,8 @@ export type SimEvent =
   | { type: 'gateLock'; arena: string }
   | { type: 'gateOpen'; arena: string }
   | { type: 'fightStart'; boss: string; arena: string }
-  | { type: 'fightEnd'; boss: string; won: boolean }
+  /** `abandoned`: the fight was dropped unfinished (zone change, another fight started) — not a defeat of either side. */
+  | { type: 'fightEnd'; boss: string; won: boolean; abandoned?: boolean }
   | { type: 'altarRest'; altar: string }
   | { type: 'altarDiscovered'; altar: string }
   | { type: 'footstep'; surface: string; pos: Vec3; sprint: boolean }

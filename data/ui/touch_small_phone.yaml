@@ -12,9 +12,9 @@ buttons:
   art_seconda: {pos: [0.71, 0.43], size: 0.075}
   lacrime:     {pos: [0.06, 0.27], size: 0.075}
   lock:        {pos: [0.95, 0.29], size: 0.075}
-  slot_1:      {pos: [0.57, 0.10], size: 0.065}
-  slot_2:      {pos: [0.655, 0.10], size: 0.065}
-  slot_3:      {pos: [0.74, 0.10], size: 0.065}
+  slot_1:      {pos: [0.57, 0.10], size: 0.068}
+  slot_2:      {pos: [0.655, 0.10], size: 0.068}
+  slot_3:      {pos: [0.74, 0.10], size: 0.068}
   interact:    {pos: [0.60, 0.645], size: 0.095}
   metamondo:   {anchor: eco_ring}
 opacity: {active: 0.85, idle: 0.35}

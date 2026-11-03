@@ -11,7 +11,7 @@ import type { TouchLayoutDef } from '../core/types';
 import { injectStyle } from './style';
 import { h, svgIcon, toggle } from './dom';
 import { ICONS } from './icons';
-import { clamp, normalizeLayout, pickPresetId, resolveLayout, type Rect, type ResolvedLayout } from './layout';
+import { clamp, isPortrait, normalizeLayout, pickPresetId, resolveLayout, type Rect, type ResolvedLayout } from './layout';
 import { makeCtx, type UiCtx } from './ctx';
 import { Hud } from './hud';
 import { StoryLayer } from './story';
@@ -47,6 +47,9 @@ export class SettimoUI implements GameUI {
   private hitboxes!: HitboxOverlay;
   private fadeEl!: HTMLElement;
   private probe!: HTMLElement;
+  private portraitEl!: HTMLElement;
+  private portraitText!: HTMLElement;
+  private portrait = false;
   private mounted = false;
   private mode: GameMode = 'boot';
   private layoutRes: ResolvedLayout | null = null;
@@ -90,7 +93,9 @@ export class SettimoUI implements GameUI {
       },
     });
     this.fadeEl = h('div', { class: 'sm-fade' });
-    this.root.append(this.probe, this.hitboxes.el, this.letterbox, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.endCredits.el, this.title.el, this.settings.screen.el, this.editor.el, this.fadeEl);
+    this.portraitText = h('div', { class: 's' });
+    this.portraitEl = h('div', { class: 'sm-portrait sm-hidden', role: 'alert' }, h('i', null, svgIcon(ICONS.rotate)), h('div', { class: 't' }), this.portraitText);
+    this.root.append(this.probe, this.hitboxes.el, this.letterbox, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.endCredits.el, this.title.el, this.settings.screen.el, this.editor.el, this.fadeEl, this.portraitEl);
     root.appendChild(this.root);
     this.mounted = true;
 
@@ -98,6 +103,7 @@ export class SettimoUI implements GameUI {
     window.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'touch' && !this.touchOn) {
         this.touchOn = true;
+        if (this.portrait) this.relabelPortrait();
         this.relayout();
       }
     }, { capture: true, passive: true });
@@ -150,6 +156,7 @@ export class SettimoUI implements GameUI {
   relayout(): void {
     if (!this.mounted) return;
     const view = { w: window.innerWidth, h: window.innerHeight };
+    this.setPortrait(isPortrait(view.w, view.h));
     const safe = this.safeArea(view);
     const s = this.game.settings;
     const L = resolveLayout(this.layoutDef(view), view, safe, { mirror: s.leftHanded, large: s.largeButtons });
@@ -160,6 +167,24 @@ export class SettimoUI implements GameUI {
     this.editor?.relayout();
     toggle(this.pauseBtn, 'mir', s.leftHanded);
     this.controls.layout(L);
+  }
+
+  /** Portrait hint: covers the whole UI (and swallows touches) until the device is turned; a running game pauses under it. */
+  private setPortrait(on: boolean): void {
+    if (on === this.portrait) return;
+    this.portrait = on;
+    toggle(this.portraitEl, 'sm-hidden', !on);
+    if (!on) return;
+    this.relabelPortrait();
+    this.controls.touch.releaseAll();
+    this.game.input.clear();
+    this.openPause();
+  }
+
+  private relabelPortrait(): void {
+    const { t } = this.ctx;
+    this.portraitEl.querySelector('.t')!.textContent = t('ui.portrait.title');
+    this.portraitText.textContent = t(this.touchOn ? 'ui.portrait.touch' : 'ui.portrait.desk');
   }
 
   /* ------------------------------------------------------------------------------------------------ pause */
@@ -343,6 +368,7 @@ export class SettimoUI implements GameUI {
       this.title.relabel();
       this.settings.relabel();
       this.editor.relabel();
+      if (this.portrait) this.relabelPortrait();
       if (this.mode === 'credits' && this.endCredits.visible) this.showEndCredits();
     }
     this.relayout();

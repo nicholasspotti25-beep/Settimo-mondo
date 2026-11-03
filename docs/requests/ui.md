@@ -16,3 +16,8 @@ forEachActiveShape(fn: (shape: ShapeDef, origin: Vec3, yaw: number, scale: numbe
 ```
 called where `shapeHits(h.shape, origin, this.yaw, this.scale, progress, vol, contact)` is evaluated. The UI would then draw
 spheres/sectors/lines in red.
+
+**DONE (integration #1, 2026-11-03):** `Actor.forEachActiveShape(fn)` in src/sim/actor.ts, exactly the proposed signature.
+It mirrors the hit-window test (same window timing, part origin, yaw, scale, progress; skips inactive/broken parts), loops
+without allocating, and passes a scratch origin vector (copy it to keep it). Call it per actor (`sim.actors`). Test:
+tests/sim_integration.test.ts.

@@ -49,6 +49,8 @@ export type TouchButtonId = (typeof BUTTON_IDS)[number];
 
 export const LARGE_SCALE = 1.22;
 export const MIN_ALPHA = 0.2;
+/** Smallest on-screen button diameter (css px), whatever the preset, the editor size or the safe area (touch target floor). */
+export const MIN_BUTTON_PX = 36;
 
 export function clamp(v: number, lo: number, hi: number): number {
   return v < lo ? lo : v > hi ? hi : v;
@@ -85,7 +87,7 @@ export function resolveLayout(def: TouchLayoutDef, view: { w: number; h: number 
       continue;
     }
     const eb = b as ExtButtonDef;
-    const r = (eb.size * unit * k) / 2;
+    const r = Math.max(MIN_BUTTON_PX / 2, (eb.size * unit * k) / 2);
     const fx = mirror ? 1 - eb.pos[0] : eb.pos[0];
     const cx = clamp(safe.x + fx * safe.w, safe.x + r, safe.x + safe.w - r);
     const cy = clamp(safe.y + eb.pos[1] * safe.h, safe.y + r, safe.y + safe.h - r);
@@ -212,6 +214,14 @@ export function pickPresetId(viewW: number, viewH: number): PresetId {
   if (hgt >= 600) return 'touch_tablet';
   if (w < 720 || hgt < 350) return 'touch_small_phone';
   return 'touch_default';
+}
+
+/**
+ * The game is landscape-only: the "turn your device" hint covers everything while the viewport is taller than wide. A
+ * square-ish window (split screen, desktop) keeps playing; only a clearly portrait one (h > w * 1.05) shows the hint.
+ */
+export function isPortrait(viewW: number, viewH: number): boolean {
+  return viewH > viewW * 1.05;
 }
 
 /** Convert a pixel center back to stored (right-handed) fractions, clamped inside the safe area. */

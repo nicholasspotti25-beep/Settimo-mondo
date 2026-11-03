@@ -10,7 +10,7 @@ import type { Settings } from '../app/settings';
 import type { UiCtx } from './ctx';
 import { h, setText, toggle } from './dom';
 import { ICONS } from './icons';
-import { MenuScreen, pill, rangeCtl, row, segCtl, toggleCtl, uiSound } from './screen';
+import { MenuScreen, pill, rangeCtl, row, segCtl, toggleCtl, toggleRow, uiSound } from './screen';
 import { BUFFER_MAX, BUFFER_MIN, LATENCY_MAX, estimateLatency, snap } from './calib';
 
 export interface SettingsHost {
@@ -108,13 +108,7 @@ export class SettingsScreen {
 
   /** Toggle row: the whole row is the touch target (the switch alone is small for a thumb). */
   private tog(label: string, sub: string, on: boolean, set: (v: boolean) => void): HTMLElement {
-    const sw = toggleCtl(this.ctx, on, set);
-    const r = row(label, sub, sw);
-    r.classList.add('tap');
-    r.addEventListener('click', (e) => {
-      if (!sw.contains(e.target as Node)) sw.click();
-    });
-    return r;
+    return toggleRow(this.ctx, label, sub, on, set);
   }
 
   /** Slider row: `live` runs while dragging, `commit` on release. */

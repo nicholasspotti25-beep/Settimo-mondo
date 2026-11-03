@@ -9,7 +9,7 @@ import { Rng } from '../core/rng';
 import { insideArena } from '../core/terrain';
 import type { BalanceDef, BossDef, ColliderDef, MinionDef, ShapeDef, SpawnDef, StatusKind, SwingDef, TimeOfDay } from '../core/types';
 import { Actor, nextAttackUid, resetActorIds, spawnYawSpread, type AttackRuntime, type PartRuntime } from './actor';
-import type { ArtRuntime } from './arts';
+import { clearArtEffects, updateArtEffects, type ArtRuntime } from './arts';
 import type { BehaviorRegistry } from './behavior';
 import { applyDamageToActor, damagePlayer, killActor, type HitResult } from './combat';
 import { isDefeated, newGameState, playerBaseScale, skyShade, themeNotes, type CharacterLook, type GameStateData } from './gamestate';
@@ -103,6 +103,8 @@ export class Sim {
   fightInteractables: Interactable[] = [];
   /** Memory fight return point (Specchio dei Ricordi). */
   memoryReturn: { zone: string; altar: string } | null = null;
+  /** The fight whose fightEnd was already emitted (so an abandoned fight is announced once). */
+  private fightClosed: FightRuntime | null = null;
   /** Ending reached (presentation runs the sunrise). */
   endingActive = false;
 
@@ -168,6 +170,7 @@ export class Sim {
     }
     this.updateProjectiles(dt);
     this.updateHazards(dt);
+    updateArtEffects(this, dt); // lingering Art effects (Innesto's seed rides its victim...): docs/requests/weapons.md #5
     this.barriers.forEachActive((b) => {
       b.life -= dt;
       if (b.life <= 0) b.active = false;
@@ -213,6 +216,7 @@ export class Sim {
   /* ---------------------------------------------------------------------------------------------------------------- */
 
   loadZone(zoneId: string, altarId?: string): void {
+    this.abandonFight();
     this.clearCombat();
     this.zone = new ZoneRuntime(this.c, zoneId);
     for (const a of this.zone.arenas) {
@@ -352,6 +356,7 @@ export class Sim {
     if (!this.zone) this.loadZone(this.c.boss(bossId).zone);
     const def = this.c.boss(bossId);
     const arena = this.c.arena(def.arena);
+    this.abandonFight();
     this.clearCombat();
     this.zone!.setActiveArena(arena);
     resetActorIds();
@@ -444,6 +449,7 @@ export class Sim {
     this.projectiles.clear();
     this.hazards.clear();
     this.barriers.clear();
+    clearArtEffects();
     this.coopGrace = false;
     this.fightPaused = false;
     this.fightInteractables = [];
@@ -465,6 +471,17 @@ export class Sim {
       f.endTimer += dt;
       return;
     }
+  }
+
+  /**
+   * A fight still running is being dropped (zone change, another fight started: debug teleport, story `start_fight_direct`,
+   * the smoke tool): tell presentation so its captions, cards, boss bar and music for that fight end with it.
+   */
+  private abandonFight(): void {
+    const f = this.fight;
+    if (!f || this.fightClosed === f) return;
+    this.fightClosed = f;
+    this.emit({ type: 'fightEnd', boss: f.boss, won: false, abandoned: true });
   }
 
   /** Called when the main boss dies. */
@@ -507,6 +524,7 @@ export class Sim {
       if (f && !tods.includes(f.tod)) tods.push(f.tod);
       if (memory) this.recordChallenges(def.id);
     }
+    if (f) this.fightClosed = f;
     this.emit({ type: 'fightEnd', boss: def.id, won });
     this.emit({ type: 'bossDefeated', boss: def.id, actor: this.boss?.id ?? -1 });
     const defeatSeq = def.defeat_sequence;
@@ -1004,11 +1022,13 @@ export class Sim {
       case 'shockwave': {
         const positions = this.spawnPositions(a, s, origin, target);
         const kind = s.id ? this.c.hazard(s.id) : undefined;
+        const group = positions.length > 1 ? this.hazIds : -1;
         positions.forEach((pp, i) => {
           const h = this.hazards.alloc();
           resetHazard(h);
           h.active = true;
           h.id = this.hazIds++;
+          h.group = group;
           h.kind = s.id ?? (s.type === 'shockwave' ? 'shockwave' : s.type === 'beam' ? 'beam' : 'crack');
           h.visual = kind?.visual ?? (s.type === 'shockwave' ? 'circle' : 'crack');
           h.color = kind?.color ?? '#ff9a5a';
@@ -1670,7 +1690,11 @@ export class Sim {
           flags: h.flags, pos: { ...contact }, instance: h.instance, part: -1, status: h.status, mult: h.mult,
         });
         if (h.tick > 0) h.lastHit.set(-1, h.age);
-        else if (res === 'dodged' || res === 'hit' || res === 'blocked' || res === 'parried' || res === 'absorbed') h.hitOnce.add(-1);
+        else if (res === 'dodged' || res === 'hit' || res === 'blocked' || res === 'parried' || res === 'absorbed') {
+          h.hitOnce.add(-1);
+          // the rest of this spawn's line / cluster is spent on the player too: one attack, one blow
+          if (h.group >= 0) this.spendHazardGroup(h.group);
+        }
       } else {
         this.hitActorWithShape(h.pos, h.yaw, 1, h.shape, progress, (id) => {
           if (h.tick > 0) return h.age - (h.lastHit.get(id) ?? -999) < h.tick;
@@ -1697,6 +1721,15 @@ export class Sim {
         });
       }
     });
+  }
+
+  /** Mark every single-hit enemy hazard of a spawn group as already resolved against the player (no allocation). */
+  private spendHazardGroup(group: number): void {
+    const items = this.hazards.items;
+    for (let i = 0; i < items.length; i++) {
+      const o = items[i];
+      if (o.active && o.group === group && o.team === 'enemy' && o.tick === 0) o.hitOnce.add(-1);
+    }
   }
 
   /** Static arena hazards (lava pools etc.) — spawned at fight start or phase change by behaviors. */
@@ -2100,6 +2133,7 @@ export class Sim {
         if (b) {
           if (!this.state.defeated.includes(b.id)) this.state.defeated.push(b.id);
           const arena = this.fight?.arena;
+          if (this.fight) this.fightClosed = this.fight;
           this.clearCombat();
           if (arena) this.emit({ type: 'gateOpen', arena });
           this.emit({ type: 'fightEnd', boss: b.id, won: false });
@@ -2281,6 +2315,7 @@ function resetHazard(h: Hazard): void {
   h.tick = 0;
   h.flags = [];
   h.mult = 1;
+  h.group = -1;
 }
 
 function lockedInput(i: PlayerInput): PlayerInput {

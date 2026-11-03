@@ -5,10 +5,10 @@
 import {
   DEG, angleDiff, clamp, dist2D, forward, localToWorld, turnToward, v3, wrapAngle, yawTo, type Vec3,
 } from '../core/math';
-import type { AttackDef, BossDef, HitFlag, MinionDef, PartDef, PhaseDef, SpawnDef, TodVariantDef } from '../core/types';
+import type { AttackDef, BossDef, HitFlag, MinionDef, PartDef, PhaseDef, ShapeDef, SpawnDef, TodVariantDef } from '../core/types';
 import { bossHitDamage } from '../core/formulas';
 import type { BossBehavior } from './behavior';
-import { shapeHits, type TargetVol } from './shapes';
+import { shapeHits } from './shapes';
 import type { ActorKind, ActorStateId, AnimStage, DamageEvent, Team } from './types';
 import type { Sim } from './sim';
 
@@ -73,6 +73,7 @@ export function nextAttackUid(): number {
 const tmp = v3();
 const tmp2 = v3();
 const contact = v3();
+const dbgOrigin = v3();
 
 export class Actor {
   readonly id: number;
@@ -207,6 +208,28 @@ export class Actor {
     this.state = s;
     this.stateTime = 0;
     this.stateDur = dur;
+  }
+
+  /**
+   * Debug (hitbox overlay, docs/requests/ui.md #2): call `fn` for every attack hit shape that is live this tick, with the
+   * same origin / yaw / scale / progress the hit test uses. Read-only; the origin vector is scratch (copy it to keep it).
+   */
+  forEachActiveShape(fn: (shape: ShapeDef, origin: Vec3, yaw: number, scale: number, progress: number) => void): void {
+    const atk = this.attack;
+    if (!atk || !this.alive) return;
+    const hits = atk.def.hits;
+    if (!hits) return;
+    for (let i = 0; i < hits.length; i++) {
+      const h = hits[i];
+      if (atk.activeTime < h.t || atk.activeTime > h.t + h.dur) continue;
+      let origin = this.pos;
+      if (h.part) {
+        const p = this.part(h.part);
+        if (!p || !p.active || p.broken) continue;
+        origin = this.partOrigin(h.part, dbgOrigin);
+      }
+      fn(h.shape, origin, this.yaw, this.scale, (atk.activeTime - h.t) / Math.max(1e-3, h.dur));
+    }
   }
 
   /** Main body hurt spheres in world space (def.hurtboxes or a default stack along the body). */

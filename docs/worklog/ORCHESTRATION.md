@@ -37,3 +37,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - act1#3 done: Cavaliere Errante model (mounted + dismount, lantern), hit spheres re-aligned, act1_models test; arenas + elder tree next
 - deployed (FX v1, haze fix, ui#4, Cavaliere model)
 - started: integrate#1 (engine), ui#5 (game)
+- integrate#1 done: one-hit-per-spawn hazards, forEachActiveShape, art effect hooks, installWeaponFx wired, abandoned fightEnd; caption/card carry-over -> ui request; build/smoke ok, bot 12/12, tests 111/113 (strict gates)
+- started: world#3 (landmarks, Act I zones, vetta arena dressing)

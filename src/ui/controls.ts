@@ -224,8 +224,9 @@ export class ControlsView {
         const glyph = def ? def.type : '';
         if (glyph !== v.glyph) {
           v.glyph = glyph;
-          v.el.querySelector('svg')?.remove();
-          v.el.insertBefore(svgIcon(glyph ? weaponGlyph(glyph) : ICONS.armory), v.el.firstChild);
+          v.el.querySelector(':scope > svg, :scope > .numc')?.remove();
+          // an empty slot shows its number in a dim ring (as in the layout editor), not a crossed-swords glyph
+          v.el.insertBefore(glyph ? svgIcon(weaponGlyph(glyph)) : h('div', { class: 'numc' }, id.slice(5)), v.el.firstChild);
         }
         toggle(v.el, 'cur', i === p.activeSlot);
         toggle(v.el, 'empty', !def);

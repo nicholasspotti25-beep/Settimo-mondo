@@ -11,6 +11,7 @@ import { Kit } from './kit/index';
 import { WorldRenderer } from './world/WorldRenderer';
 import { ActorRenderer } from './actors/ActorRenderer';
 import { FxRenderer } from './fx/FxRenderer';
+import { installWeaponFx } from './weapons/index';
 import { PostPipeline } from './fx/post';
 import type { QualityLevel, RenderCtx } from './types';
 
@@ -77,6 +78,7 @@ export class Renderer {
     this.fx = new FxRenderer(this.scene, this.ctx);
     this.fx.camera = () => this.rig.camera;
     this.fx.playerModel = () => this.actors.player?.model ?? null;
+    installWeaponFx(this.fx); // weapon Art / Transizione / swing visuals (docs/requests/weapons.md #2, wired by the integrator)
     canvas.addEventListener('webglcontextlost', (e) => {
       e.preventDefault();
       this.contextLost = true;

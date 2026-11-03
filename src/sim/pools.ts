@@ -69,6 +69,11 @@ export interface Hazard {
   lastHit: Map<number, number>;
   hitOnce: Set<number>;
   instance: number;
+  /**
+   * Spawn group (id of the first hazard placed by the same spawn; -1 = none): a line / cluster / grid of one spawn lands as
+   * ONE blow on the player, even where neighbouring footprints overlap (docs/requests/act2.md #1).
+   */
+  group: number;
   mult: number;
   /** Player-team hazards: bind enemies inside for this long. */
   bind: number;
@@ -127,7 +132,7 @@ export function makeHazard(): Hazard {
   return {
     active: false, id: 0, kind: '', visual: 'circle', color: '#ffffff', team: 'enemy', owner: 0, pos: v3(), vel: v3(), yaw: 0,
     shape: { type: 'cylinder', c: [0, 0, 0], r: 1, h: 2 }, delay: 0, activeDur: 0, age: 0, damage: 0, poise: 0, flags: [], element: 'physical',
-    status: undefined, tick: 0, lastHit: new Map(), hitOnce: new Set(), instance: 0, mult: 1, bind: 0, pull: 0, art: '', eco: 0, permanent: false, tag: '',
+    status: undefined, tick: 0, lastHit: new Map(), hitOnce: new Set(), instance: 0, group: -1, mult: 1, bind: 0, pull: 0, art: '', eco: 0, permanent: false, tag: '',
   };
 }
 

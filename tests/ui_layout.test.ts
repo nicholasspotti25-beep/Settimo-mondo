@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import contentJson from '../src/generated/content.json';
 import type { ContentBundle, TouchLayoutDef } from '../src/core/types';
 import {
-  BUTTON_IDS, circlesOverlap, clampBase, classifyFlick, controlsOpacity, followBase, hitButton, hudRing, isDoubleTap, isTap,
+  BUTTON_IDS, circlesOverlap, clampBase, classifyFlick, controlsOpacity, followBase, hitButton, hudRing, isDoubleTap, isPortrait, isTap, MIN_BUTTON_PX,
   normalizeLayout, pickPresetId, resolveLayout, stickVector, toFraction, unitFor, type Rect,
 } from '../src/ui/layout';
 
@@ -153,5 +153,34 @@ describe('gesture math', () => {
     expect(controlsOpacity(0, op, true)).toBe(0.85);
     expect(controlsOpacity(10, op, true)).toBeCloseTo(0.35, 5);
     expect(controlsOpacity(10, op, false)).toBe(0.85);
+  });
+});
+
+describe('portrait hint', () => {
+  it('shows only for clearly portrait viewports', () => {
+    for (const [w, h] of VIEWS) {
+      expect(isPortrait(w, h), `${w}x${h}`).toBe(false);
+      expect(isPortrait(h, w), `${h}x${w}`).toBe(true);
+    }
+    expect(isPortrait(800, 820)).toBe(false); // square-ish split screen keeps playing
+    expect(isPortrait(800, 900)).toBe(true);
+  });
+});
+
+describe('touch target floor', () => {
+  it('every button is at least 36 px at every viewport, with and without safe-area insets, normal and large', () => {
+    const cases: [number, number, Rect][] = [];
+    for (const [w, h] of VIEWS) cases.push([w, h, full(w, h)], [w, h, { x: 47, y: 0, w: w - 94, h: h - 21 }]);
+    cases.push([640, 320, { x: 32, y: 0, w: 576, h: 300 }]); // small Android with a cutout and gesture bar
+    for (const [w, h, safe] of cases) {
+      const def = normalizeLayout(layouts[pickPresetId(w, h)], layouts.touch_default);
+      for (const large of [false, true]) {
+        const L = resolveLayout(def, { w, h }, safe, { mirror: false, large });
+        for (const b of L.buttons) if (!b.anchor) expect(b.r * 2, `${w}x${h} ${b.id}`).toBeGreaterThanOrEqual(MIN_BUTTON_PX);
+      }
+      // the editor's smallest size still resolves to the floor
+      const tiny = normalizeLayout({ ...def, buttons: { ...def.buttons, jump: { pos: [0.6, 0.9], size: 0.06 } } } as TouchLayoutDef, layouts.touch_default);
+      expect(resolveLayout(tiny, { w, h }, safe, { mirror: false, large: false }).byId.jump.r * 2).toBeGreaterThanOrEqual(MIN_BUTTON_PX);
+    }
   });
 });

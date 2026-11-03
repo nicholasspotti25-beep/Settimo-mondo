@@ -122,6 +122,17 @@ export function toggleCtl(ctx: UiCtx, on: boolean, set: (v: boolean) => void): H
   return b;
 }
 
+/** Toggle row: the whole row is the touch target (the 52x30 switch alone is small for a thumb). */
+export function toggleRow(ctx: UiCtx, label: string, sub: string, on: boolean, set: (v: boolean) => void): HTMLElement {
+  const sw = toggleCtl(ctx, on, set);
+  const r = row(label, sub, sw);
+  r.classList.add('tap');
+  r.addEventListener('click', (e) => {
+    if (!sw.contains(e.target as Node)) sw.click();
+  });
+  return r;
+}
+
 export function segCtl<T extends string | number>(ctx: UiCtx, options: { v: T; label: string }[], cur: T, set: (v: T) => void): HTMLElement {
   const el = h('div', { class: 'sm-seg' });
   for (const o of options) {

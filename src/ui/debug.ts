@@ -10,7 +10,7 @@ import type { UiCtx } from './ctx';
 import { h } from './dom';
 import { ICONS } from './icons';
 import { ProjVec } from './controls';
-import { pill, rangeCtl, row, segCtl, toggleCtl, uiSound } from './screen';
+import { pill, rangeCtl, row, segCtl, toggleCtl, toggleRow, uiSound } from './screen';
 
 const TODS: readonly TimeOfDay[] = ['alba', 'giorno', 'tramonto', 'notte'];
 
@@ -35,15 +35,7 @@ export function fillDebug(ctx: UiCtx, p: HTMLElement, host: DebugHost, tab: { v:
 
   // toggles
   p.append(h('div', { class: 'sm-h3' }, t('ui.debug.player')));
-  const dtog = (label: string, sub: string, on: boolean, set: (v: boolean) => void) => {
-    const r = row(label, sub, toggleCtl(ctx, on, set));
-    r.classList.add('tap');
-    r.addEventListener('click', (e) => {
-      const tg = r.querySelector('.sm-tog') as HTMLElement | null;
-      if (tg && !(e.target as HTMLElement).closest('.sm-tog')) tg.click();
-    });
-    return r;
-  };
+  const dtog = (label: string, sub: string, on: boolean, set: (v: boolean) => void) => toggleRow(ctx, label, sub, on, set);
   p.append(
     dtog(t('ui.debug.invincible'), t('ui.debug.invincible_d'), sim.debug.invincible, (v) => { sim.debug.invincible = v; }),
     dtog(t('ui.debug.one_hit'), t('ui.debug.one_hit_d'), sim.debug.oneHitKill, (v) => { sim.debug.oneHitKill = v; }),
