@@ -1,6 +1,7 @@
 /**
  * Credits view: the `credits.NN` lines (story_core locale) revealed one after another over a dawn horizon, then a row of
- * end actions. Used from the title (Riconoscimenti); the end-of-game credits mode reuses it with its own actions.
+ * end actions. Used from the title (Riconoscimenti); the end-of-game credits mode (GameMode 'credits') reuses it over the
+ * last shot of the ending (`over`: a translucent veil, the sunrise stays visible) with the Ciclo dell'Alba / title actions.
  */
 import type { UiCtx } from './ctx';
 import { h } from './dom';
@@ -17,8 +18,8 @@ export class CreditsView {
   readonly el: HTMLElement;
   private timers: number[] = [];
 
-  constructor(private ctx: UiCtx) {
-    this.el = h('div', { class: 'sm-credits sm-hidden' });
+  constructor(private ctx: UiCtx, cls = '') {
+    this.el = h('div', { class: `sm-credits${cls ? ` ${cls}` : ''} sm-hidden` });
   }
 
   get visible(): boolean {
@@ -37,15 +38,17 @@ export class CreditsView {
     return out;
   }
 
-  /** Show the credits; `step` is the delay between lines (s); actions appear after the last line. Tap skips ahead. */
-  show(actions: CreditsAction[], step = 1.1): void {
+  /** Show the credits; `step` is the delay between lines (s); actions (and an optional note under them) appear after the
+   * last line. Tap skips ahead. */
+  show(actions: CreditsAction[], step = 1.1, note = ''): void {
     this.hide();
     const lines = this.lines();
     const els = lines.map((s, i) => h('div', { class: `ln${i === 0 ? ' title' : ''}` }, s));
     const end = h('div', { class: 'end' }, h('div', { class: 'sm-pills' }, ...actions.map((a) => pill(a.label, () => {
+      if (!end.classList.contains('on')) return;
       uiSound(this.ctx, a.gold ? 'confirm' : 'back');
       a.run();
-    }, { icon: a.icon, cls: a.gold ? 'gold' : '' }))));
+    }, { icon: a.icon, cls: a.gold ? 'gold' : '' }))), note ? h('div', { class: 'sm-p it note' }, note) : null);
     this.el.textContent = '';
     this.el.append(h('div', { class: 'body' }, ...els), end);
     this.el.classList.remove('sm-hidden');

@@ -21,6 +21,7 @@ import { AltarMenu } from './altar';
 import { TitleScreen } from './title';
 import { SettingsScreen } from './settings';
 import { LayoutEditor } from './editor';
+import { CreditsView } from './credits';
 
 export class SettimoUI implements GameUI {
   private game!: Game;
@@ -40,6 +41,8 @@ export class SettimoUI implements GameUI {
   private title!: TitleScreen;
   private settings!: SettingsScreen;
   private editor!: LayoutEditor;
+  private endCredits!: CreditsView;
+  private letterbox!: HTMLElement;
   private fadeEl!: HTMLElement;
   private probe!: HTMLElement;
   private mounted = false;
@@ -60,7 +63,9 @@ export class SettimoUI implements GameUI {
     this.controls = new ControlsView(this.ctx);
     this.story = new StoryLayer(this.ctx);
     this.cards = new Cards(this.ctx);
-    this.altar = new AltarMenu(this.ctx, { transition: (fn) => this.transition(fn), flash: (t) => this.flash(t), openSettings: () => this.openSettings() });
+    this.altar = new AltarMenu(this.ctx, { transition: (fn) => this.transition(fn), flash: (t) => this.flash(t), openSettings: () => this.openSettings(), startNgPlus: () => this.startNgPlus() });
+    this.endCredits = new CreditsView(this.ctx, 'over');
+    this.letterbox = h('div', { class: 'sm-letterbox' }, h('i', { class: 't' }), h('i', { class: 'b' }));
     this.pauseBtn = h('button', { class: 'sm-topbtn sm-pausebtn sm-hidden', type: 'button' }, svgIcon(ICONS.pause));
     this.pauseBtn.addEventListener('click', () => this.openPause());
     this.title = new TitleScreen(this.ctx, { startSession: (run) => this.startSession(run), flash: (t) => this.flash(t), openSettings: () => this.openSettings() });
@@ -82,7 +87,7 @@ export class SettimoUI implements GameUI {
       },
     });
     this.fadeEl = h('div', { class: 'sm-fade' });
-    this.root.append(this.probe, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.title.el, this.settings.screen.el, this.editor.el, this.fadeEl);
+    this.root.append(this.probe, this.letterbox, this.hud.el, this.controls.el, this.cards.el, this.pauseBtn, this.altar.screen.el, this.story.el, this.endCredits.el, this.title.el, this.settings.screen.el, this.editor.el, this.fadeEl);
     root.appendChild(this.root);
     this.mounted = true;
 
@@ -220,6 +225,22 @@ export class SettimoUI implements GameUI {
     });
   }
 
+  /** Begin the Ciclo dell'Alba (New Game+) from the current, completed journey (credits mode or the pause journey). */
+  private startNgPlus(): void {
+    this.game.input.clear();
+    this.startSession(() => this.game.startNewGamePlus());
+  }
+
+  /** Credits mode (after the ending's last shot): the credits over the sunrise, then Ciclo dell'Alba or the title. */
+  private showEndCredits(): void {
+    const { t } = this.ctx;
+    const st = this.game.sim.state;
+    this.endCredits.show([
+      { label: t('ui.menu.back_title'), icon: ICONS.exit, run: () => this.startSession(async () => this.game.quitToTitle()) },
+      { label: t('ui.end.ng_begin'), icon: ICONS.dawn, gold: true, run: () => this.startNgPlus() },
+    ], 2.2, `${t('ui.end.ng_title', { n: st.ngCycle + 1 })} · ${t('ui.end.ng_desc')}`);
+  }
+
   /* ------------------------------------------------------------------------------------------------ GameUI */
 
   update(dt: number): void {
@@ -237,6 +258,7 @@ export class SettimoUI implements GameUI {
     this.cards.update(dt);
     this.altar.update(inGame && !story && !sim.endingActive ? sim.altarOpen : null);
     toggle(this.root, 'inmenu', this.altar.isOpen);
+    toggle(this.root, 'ending', this.mode === 'ending' || (inGame && sim.endingActive));
     toggle(this.pauseBtn, 'sm-hidden', !(this.mode === 'game' && hudOn && !this.altar.isOpen && sim.player.alive));
     if (this.pendingFadeIn && !this.loading && !game.renderer.world.busy) {
       this.pendingFadeIn = false;
@@ -260,6 +282,11 @@ export class SettimoUI implements GameUI {
     this.editor.close();
     this.settings.close();
     if ((m === 'title') !== this.title.visible) this.title.show(m === 'title');
+    if (m === 'credits') {
+      this.controls.touch.releaseAll();
+      this.cards.reset();
+      this.showEndCredits();
+    } else if (this.endCredits.visible) this.endCredits.hide();
     if (m === 'game') {
       this.story.reset();
       this.cards.reset();
@@ -312,6 +339,7 @@ export class SettimoUI implements GameUI {
       this.title.relabel();
       this.settings.relabel();
       this.editor.relabel();
+      if (this.mode === 'credits' && this.endCredits.visible) this.showEndCredits();
     }
     this.relayout();
   }

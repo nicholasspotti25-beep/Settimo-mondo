@@ -14,6 +14,7 @@ import type { UiCtx } from './ctx';
 import { clear, fmtPlaytime, h, svgIcon } from './dom';
 import { ICONS, TOD_ICONS, weaponGlyph } from './icons';
 import { MenuScreen, confirmDialog, listItem, pill, pips, row, toggleCtl, uiSound } from './screen';
+import { CollectionsView } from './collections';
 
 export const TODS: readonly TimeOfDay[] = ['alba', 'giorno', 'tramonto', 'notte'];
 
@@ -36,6 +37,8 @@ export interface AltarHost {
   flash(text: string): void;
   /** Open the settings screen over the pause menu. */
   openSettings(): void;
+  /** Begin the Ciclo dell'Alba (New Game+) from a completed journey, behind a fade. */
+  startNgPlus(): void;
 }
 
 export class AltarMenu {
@@ -51,9 +54,11 @@ export class AltarMenu {
   private memForm = '';
   private memChal: Record<ChalKey, boolean> = { noDamage: false, singleWeapon: false, noLacrime: false, noMetamondo: false };
   private repSel: string | null = null;
+  private coll: CollectionsView;
 
   constructor(private ctx: UiCtx, private host: AltarHost) {
     this.screen = new MenuScreen(ctx, 'altar');
+    this.coll = new CollectionsView(ctx, { weaponDetail: (w) => this.weaponDetail(w), formDetail: (f) => this.formDetail(f), refresh: () => this.screen.refresh() });
     this.screen.onBack = () => this.leave();
     this.screen.onSelect = (id) => this.fill(id);
   }
@@ -134,6 +139,7 @@ export class AltarMenu {
         { id: 'armory', icon: ICONS.armory, label: t('ui.altar.armory') },
         { id: 'forms', icon: ICONS.forms, label: t('ui.altar.forms') },
         { id: 'reperti', icon: ICONS.relic, label: t('ui.altar.reperti') },
+        { id: 'collections', icon: ICONS.collection, label: t('ui.coll.title') },
         { id: 'settings', icon: ICONS.gear, label: t('ui.menu.settings') },
         { id: 'save', icon: ICONS.save, label: t('ui.pause.save') },
         { id: 'quit', icon: ICONS.exit, label: t('ui.pause.quit') },
@@ -180,6 +186,7 @@ export class AltarMenu {
       case 'mirror': this.mirror(p); break;
       case 'reperti': this.reperti(p); break;
       case 'journey': this.journey(p); break;
+      case 'collections': this.coll.fill(p); break;
       case 'save': this.save(p); break;
       case 'leave':
       case 'resume':
@@ -525,7 +532,15 @@ export class AltarMenu {
       h('div', { class: 'sm-pills' }, pill(t('ui.pause.resume'), () => {
         uiSound(this.ctx, 'confirm');
         this.closePause();
-      }, { icon: ICONS.continue, cls: 'gold' })));
+      }, { icon: ICONS.continue, cls: 'gold' }),
+      // a journey that brought the Dawn can begin the Ciclo dell'Alba (New Game+) at any time
+      st.gameCompleted ? pill(t('ui.end.ng_begin'), () => {
+        void confirmDialog(this.ctx, this.screen.el, t('ui.end.ng_q'), `${t('ui.end.ng_d')} ${t('ui.end.ng_desc')}`, t('ui.end.ng_begin'), t('ui.pause.cancel')).then((ok) => {
+          if (!ok) return;
+          this.closePause();
+          this.host.startNgPlus();
+        });
+      }, { icon: ICONS.dawn, cls: 'ng' }) : null));
   }
 
   private save(p: HTMLElement): void {
@@ -596,6 +611,7 @@ export class AltarMenu {
     this.mode = null;
     this.memBoss = null;
     this.repSel = null;
+    this.coll.reset();
     this.screen.show(false);
     clear(this.screen.panel);
   }
