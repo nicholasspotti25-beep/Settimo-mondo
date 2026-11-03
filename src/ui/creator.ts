@@ -109,12 +109,13 @@ ${grad('cg-boot', '#4a3a32', '#1e1612', 0.5, 1)}
       + `<path d="M${lx - 8} 250 L ${lx + 8} 250 L ${lx + 9 + s * 2} 292 Q ${lx + s * 3} 297 ${lx - 9 + s * 2} 292 Z" fill="url(#cg-boot)"/>`;
   }).join('');
 
-  // arms (sleeves + hands)
+  // arms (sleeves + hands), mirrored: outer edge from the shoulder cap to the wrist, inner edge back along the body
   const arms = [-1, 1].map((s) => {
-    const ax = x + s * (sw + 1);
-    const hx = x + s * (sw + 9);
-    return `<path d="M${ax - 7} 102 Q ${ax + s * 9} 140 ${hx + 6} 184 L ${hx - 6} 186 Q ${ax - s * 5} 146 ${ax - s * 9 + 2} 112 Z" fill="url(#cg-cloth)"/>`
-      + `<ellipse cx="${hx}" cy="${191}" rx="6" ry="7.5" fill="url(#cg-skin)"/>`;
+    const o = (d: number) => (x + s * (sw + d)).toFixed(1);
+    const hx = x + s * (sw + 8.5);
+    return `<path d="M${o(6)} 106 Q ${o(13)} 146 ${o(14)} 184 L ${o(3)} 186 Q ${o(1)} 148 ${o(-6)} 112 Z" fill="url(#cg-cloth)"/>`
+      + `<path d="M${o(14)} 181 L ${o(3)} 183" stroke="${dark(cloth, 0.35)}" stroke-width="1.6" opacity=".7"/>`
+      + `<ellipse cx="${hx.toFixed(1)}" cy="191" rx="5.6" ry="7" fill="url(#cg-skin)"/>`;
   }).join('');
 
   // tunic: shoulders -> belt -> flared hem
@@ -152,15 +153,28 @@ ${grad('cg-boot', '#4a3a32', '#1e1612', 0.5, 1)}
     case 1: // short locks over the brow
       hairFront = cap(1.04) + `<path d="M${x - 12} ${hy - 9} Q ${x - 9} ${hy - 2} ${x - 4} ${hy - 4} Q ${x - 1} ${hy - 10} ${x + 4} ${hy - 7} Q ${x + 8} ${hy - 3} ${x + 12} ${hy - 6} L ${x + 10} ${hy - 13} L ${x - 10} ${hy - 14} Z" fill="url(#cg-hair)"/>`;
       break;
-    case 2: // long tail falling behind the shoulders
-      hairBack = `<path d="M${x - 16} ${hy - 4} Q ${x - 22} ${hy + 30} ${x - 14} ${hy + 64} L ${x + 14} ${hy + 64} Q ${x + 22} ${hy + 30} ${x + 16} ${hy - 4} Z" fill="url(#cg-hair)"/>`;
-      hairFront = cap(1.06);
+    case 2: { // tail tied at the nape, swung forward over the left shoulder (the 3D model's hair chain)
+      hairFront = cap(1.06)
+        + `<path d="M${x - 15.5} ${hy + 5} Q ${x - 25} ${hy + 34} ${x - 19} ${hy + 70} Q ${x - 16} ${hy + 40} ${x - 11} ${hy + 13} Z" fill="url(#cg-hair)"/>`
+        + `<path d="M${x - 17} ${hy + 22} Q ${x - 20} ${hy + 42} ${x - 19} ${hy + 62}" stroke="${dark(hair, 0.32)}" stroke-width=".8" fill="none" opacity=".7"/>`
+        + `<ellipse cx="${x - 14.6}" cy="${hy + 15}" rx="4.4" ry="2" transform="rotate(-24 ${x - 14.6} ${hy + 15})" fill="#d8b870" stroke="#fff3d2" stroke-width=".5"/>`;
       break;
-    case 3: // braid over the right shoulder, gold ring
-      hairFront = cap(1.05) + `<path d="M${x + 13} ${hy + 4} Q ${x + 22} ${hy + 30} ${x + 18} ${hy + 70}" stroke="url(#cg-hair)" stroke-width="7" fill="none" stroke-linecap="round"/>`
-        + [0, 1, 2, 3, 4].map((i) => `<path d="M${x + 14 + i * 1.2} ${hy + 12 + i * 11} l 5 4" stroke="${dark(hair, 0.35)}" stroke-width="1" fill="none"/>`).join('')
-        + `<ellipse cx="${x + 18.6}" cy="${hy + 62}" rx="4.6" ry="2.2" fill="#d8b870" stroke="#fff3d2" stroke-width=".6"/>`;
+    }
+    case 3: { // plaited braid falling from behind the right ear over the shoulder, gold ring
+      const seg = 8;
+      const q = (t: number, a: number, c: number, b: number) => (1 - t) * (1 - t) * a + 2 * (1 - t) * t * c + t * t * b;
+      let braid = '';
+      for (let i = 0; i < seg; i++) {
+        const t = i / (seg - 1);
+        const bx = q(t, x + 14.5, x + 21, x + 17.5), by = q(t, hy + 11, hy + 34, hy + 62);
+        const r = 1 - t * 0.28;
+        braid += `<ellipse cx="${bx.toFixed(1)}" cy="${by.toFixed(1)}" rx="${(3.7 * r).toFixed(2)}" ry="${(4.9 * r).toFixed(2)}" transform="rotate(${i % 2 ? 22 : -22} ${bx.toFixed(1)} ${by.toFixed(1)})" fill="url(#cg-hair)" stroke="${dark(hair, 0.36)}" stroke-width=".7"/>`;
+      }
+      hairFront = cap(1.05) + braid
+        + `<ellipse cx="${x + 17.6}" cy="${hy + 66}" rx="3.6" ry="1.8" fill="#d8b870" stroke="#fff3d2" stroke-width=".5"/>`
+        + `<path d="M${x + 15.4} ${hy + 67} Q ${x + 17.6} ${hy + 76} ${x + 19.8} ${hy + 67} Z" fill="url(#cg-hair)"/>`;
       break;
+    }
     case 4: // tousled
       hairBack = `<path d="M${x - 19} ${hy + 8} Q ${x - 24} ${hy - 6} ${x - 16} ${hy - 20} Q ${x} ${hy - 32} ${x + 16} ${hy - 20} Q ${x + 24} ${hy - 6} ${x + 19} ${hy + 8} Q ${x + 12} ${hy + 18} ${x} ${hy - 4} Q ${x - 12} ${hy + 18} ${x - 19} ${hy + 8} Z" fill="url(#cg-hair)"/>`;
       hairFront = cap(1.1) + [-12, -6, 0, 6, 12].map((o, i) => `<path d="M${x + o - 3} ${hy - 12} Q ${x + o + (i % 2 ? 4 : -4)} ${hy - 3} ${x + o + 2} ${hy - 1} Q ${x + o + 1} ${hy - 8} ${x + o + 4} ${hy - 13} Z" fill="url(#cg-hair)"/>`).join('');
@@ -170,11 +184,11 @@ ${grad('cg-boot', '#4a3a32', '#1e1612', 0.5, 1)}
       break;
   }
 
-  // warm rim light on the left edge of the silhouette
-  const rim = `<path d="M${x - sw - 7} 112 Q ${x - cw - 2} 200 ${x - cw} 282" stroke="#ffd9a0" stroke-width="1.4" fill="none" opacity=".55"/>`
-    + `<path d="M${x - 14.4} ${hy + 4} Q ${x - 15} ${hy - 12} ${x - 6} ${hy - 17}" stroke="#ffe6b8" stroke-width=".9" fill="none" opacity=".35"/>`;
+  // warm rim light: along the lit (left) edge of the cape, and on the head
+  const capeRim = `<path d="M${x - sw + 2} 100 C ${x - sw - 10} 150, ${x - cw - 4} 220, ${x - cw} 282" stroke="#ffd9a0" stroke-width="1.3" fill="none" opacity=".5"/>`;
+  const rim = `<path d="M${x - 14.4} ${hy + 4} Q ${x - 15} ${hy - 12} ${x - 6} ${hy - 17}" stroke="#ffe6b8" stroke-width=".9" fill="none" opacity=".35"/>`;
 
-  const body = `<g transform="translate(0 ${(296 * (1 - sy)).toFixed(2)}) scale(1 ${sy.toFixed(3)})">${cape}${legs}${hairBack}${arms}${tunic}${mantle}${seed}${neck}${head}${face}${hairFront}${rim}</g>`;
+  const body = `<g transform="translate(0 ${(296 * (1 - sy)).toFixed(2)}) scale(1 ${sy.toFixed(3)})">${cape}${capeRim}${legs}${hairBack}${arms}${tunic}${mantle}${seed}${neck}${head}${face}${hairFront}${rim}</g>`;
   return `${defs}<ellipse cx="${x}" cy="296" rx="62" ry="9" fill="url(#cg-ground)"/><circle cx="${x}" cy="${(62 * sy + 296 * (1 - sy)).toFixed(1)}" r="64" fill="url(#cg-halo)"/>${body}`;
 }
 

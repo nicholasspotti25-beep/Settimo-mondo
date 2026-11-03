@@ -13,8 +13,8 @@ Brief: docs/briefs/ui.md. Owned: src/ui/**, src/input/touch.ts, data/ui/**, loca
 | 2c | Cards: zone card, act card, boss name card, "dawn advances" banner, toasts (weapon + Arts, Form, key item, altar, reperto, vista; held while a big card is on), gentle death screen, loading spinner, GameUI.fade | done | src/ui/cards.ts, src/ui/UI.ts |
 | 3a | Altar menu (sim.altarOpen): Medita (4 ToD cards via game.meditate behind a fade, "beyond the mist" ToD note of the next boss), Armeria (3 slots, owned-weapon grid, detail: type, damage 18+4D via weaponDamage, parry, stamina, both Arts with Eco pips + descs, flavor; equip/swap/remove via sim.setLoadout; Lama dell'Abisso locked until NG+), Forme (7, locked ones dormant; sim.setForm), Viaggio (visited altars by route order, disabled when !canFastTravel; fade + waits for zone streaming), Specchio dei Ricordi (defeated non-scripted bosses, lore, ToD chips with defeated marks + variant note, owned Forms, 4 challenges with completed marks -> sim.startMemoryFight), Reperti (found list + reader), leave (sim.closeAltar; back button / Escape) | done | src/ui/altar.ts, src/ui/screen.ts |
 | 3b | Pause menu: top pause button (mirrors with left-handed), Escape, auto-open on visibilitychange (background); Il cammino summary (name, zone, NG cycle, playtime, foes, weapons, Forms, reperti, deaths), Armeria/Forme/Reperti read-only, save export (code + copy + save now), quit to title with confirm; paused() true only here | done (settings entry to add with the settings screen) | src/ui/altar.ts (pause mode), src/ui/UI.ts |
-| 3c | Title (dawn horizon + logo; Continua = most recent save, Carica, Nuova partita, Importa codice, Riconoscimenti; journeys screen with 3 slots: name, zone, hour, playtime, bosses, last-step date, delete with confirm, overwrite confirm; text-code import with paste, slot choice, validation), character creator (name, build, height, skin, 6 hair styles, hair color, eyes, cloak; code-drawn SVG preview with the Portatore palettes), credits from the title | done (title, slots, import, creator, title credits) / missing (credits MODE after the ending, ending overlay, collections) | src/ui/title.ts, src/ui/creator.ts, src/ui/credits.ts |
-| 4 | Settings screen (all options, applySettings, save export/import) | missing (applySettings already honours subtitles, reduce flashing, language live, handedness, large buttons, quality lowfx) | |
+| 3c | Title (dawn horizon + logo; Continua = most recent save, Carica, Nuova partita, Importa codice, Impostazioni, Riconoscimenti; journeys screen with 3 slots: name, resume zone (last visited altar, as Game.loadState), hour, playtime, bosses, last-step date, delete with confirm, overwrite confirm; text-code import with paste, slot choice, validation), character creator (name, build, height, skin, 6 hair styles, hair color, eyes, cloak; code-drawn SVG preview with the Portatore palettes; shrinks to fit 375 px tall), credits from the title | done (title, slots, import, creator, title credits; verified chunk 3) / missing (credits MODE after the ending, ending overlay, collections) | src/ui/title.ts, src/ui/creator.ts, src/ui/credits.ts |
+| 4 | Settings screen from title AND pause (Generale: language live, subtitle size/background + live sample, show FPS; Grafica: quality Low/Medium/High/Auto (+ current auto level), 30/60 FPS; Audio: 5 volumes with live preview; Controlli: camera sensitivity, invert Y, toggle guard, aim assist, input buffer 0.15-0.20, latency 0-0.04 + tap test estimate; Tocco: large buttons, left hand, controls fade, haptics + strength, layout reset; Accessibilita: reduce shake/flashing, leniency (off by default); Salvataggio: export code + copy + save now in game, import from the title), all via game.applySettings | done except the layout editor entry (openLayoutEditor is null until 1b exists) | src/ui/settings.ts, src/ui/calib.ts |
 | 5 | Debug menu | missing (FPS/memory overlay done in HUD) | |
 | 6 | Safe areas (env() probe -> layout safe rect), phone -> tablet scaling (--k, ring), portrait hint, pause overlay after background, paused() semantics | partial (all done except the portrait hint) | src/ui/UI.ts |
 | 7 | docs/UI.md + unit tests for pure layout math | partial (tests/ui_layout.test.ts, 22 tests; docs/UI.md missing) | tests/ui_layout.test.ts |
@@ -22,17 +22,16 @@ Brief: docs/briefs/ui.md. Owned: src/ui/**, src/input/touch.ts, data/ui/**, loca
 
 ## Next
 
-1. Title screen with 3 load slots (zone, playtime, bosses; continue / new / delete), import code (game.importSave),
-   credits entry; character creator (CharacterLook: name, build, height, skin, hair, hair color, eyes, cloak swatches +
-   code-drawn preview) before newGame.
-2. Settings screen (all options of the brief, latency tap test, applySettings) reachable from title AND pause (add a
-   'settings' nav item to the pause mode in altar.ts) + layout editor (CSS already in style.ts).
-3. Collections (38 weapons, 7 Forms, ToD variants from state.todDefeats, challenges) in pause; credits mode
+1. Touch layout editor (1b): drag, scale, opacity per control, reset, small-phone/tablet presets, mirror, saved as
+   settings.touchLayout; wire SettingsHost.openLayoutEditor (UI.ts passes null today). CSS (.sm-editor) exists in style.ts.
+2. Collections (38 weapons, 7 Forms, ToD variants from state.todDefeats, challenges) in pause; credits mode
    (-> Ciclo dell'Alba via game.startNewGamePlus / title), ending overlay.
-4. Debug menu (hidden gesture + settings.debugMenu): teleport, invincible, give all, ToD, meter, kill boss, hitboxes, FPS.
-5. Portrait hint; tablet HUD polish (vials/status icons are small at 1366x1024).
-6. docs/UI.md (conventions, layout units, components, input ownership, menu modes) + tests for any new pure math.
-7. Final verification pass at 844x390, 932x430, 667x375 (dsf 3), 1180x820, 1366x1024 incl. CDP multi-touch.
+3. Debug menu (hidden gesture + settings.debugMenu): teleport, invincible, give all, ToD, meter, kill boss, hitboxes, FPS.
+4. Portrait hint; tablet HUD polish (vials/status icons are small at 1366x1024); altar/pause small labels (.sm-sum span,
+   .sm-art .ac 9.5 px, .sm-tile .tn 10 px) up to >= 11 px like the title/settings ones.
+5. docs/UI.md (conventions, layout units, components, input ownership, menu modes) + tests for any new pure math
+   (calib.ts estimateLatency/snap, creator sanitizeLook/wrapIndex, title latestSlot are pure and untested).
+6. Final verification pass at 844x390, 932x430, 667x375 (dsf 3), 1180x820, 1366x1024 incl. CDP multi-touch.
 
 ## Notes
 
@@ -90,3 +89,35 @@ Brief: docs/briefs/ui.md. Owned: src/ui/**, src/input/touch.ts, data/ui/**, loca
     calling shell).
 - Known: Android hardware back is not wired (platform.ts is not ours; Escape covers desktop). No reperti exist in the
   content yet, so the Reperti reader was only seen in its empty state.
+
+### Chunk 3 (2026-11-03)
+- Title/slots/import/creator and the settings screen (written in an unlogged session, snapshot 377187a) verified and fixed:
+  - Touch targets: title second-row buttons 31 -> 44 px (min-height on .sm-tbtn), seg buttons 36 -> 40, chips 34 -> 40,
+    swatches 34 -> 40, sliders 32 -> 40 px tall (24 px thumb), slot delete 36 -> 40; toggles 52x30 with an expanded hit
+    area AND the whole settings row toggles (`.sm-row.tap`). Small text raised to >= 11 px (version, slot date, creator
+    field labels, settings section headings).
+  - Slot description shows the zone the journey RESUMES in (last visited altar's zone, else start zone, as Game.loadState)
+    instead of the zone at save time (a save in castello_della_culla resumed at vetta_attesa).
+  - Settings opened over the title or the pause menu hides the screen under it (`#sm-ui.setopen`): the blurred logo and
+    the pause menu's gold pill showed through the backdrop. Horizon line dims behind the journeys list / creator.
+  - Creator figure: symmetric sleeves (the left one was a wide wedge), cape rim light follows the cape edge (was a
+    detached line that looked like a staff), braid is now plaited (8 rotated links) from behind the right ear over the
+    shoulder instead of a stick across the face, "Coda" is a tail tied at the nape over the left shoulder (the 3D model
+    uses a hair chain for styles 2/3). Preview column shrinks (svg flex) so "Inizia il cammino" stays on screen at
+    667x375; the form scrolls with a bottom fade.
+  - Not exposed in settings: toggleSprint, slowerBosses, autoLock (no system reads them yet; a toggle would be fake).
+- Verification:
+  - `npx tsc --noEmit -p tsconfig.json`: 0 errors (whole tree). `npm run registry && SM_PARTIAL=1 npm run data`: ok,
+    1013 it / 1013 en strings.
+  - Headless with touch emulation and real taps (scratchpad `ui/title.mjs`, `ui/settings.mjs`, `ui/creator.mjs`, audit
+    helper `ui/audit.mjs`: every visible control of the topmost screen/dialog must be >= 36 px on its short side, scroll
+    into view, not be covered at its center, and all text >= 11 px): 1280x576 dsf2 (it + en), 667x375 dsf3 (en),
+    844x390 dsf3: 0 issues on fresh title, creator, title with saves, load, import, imported, delete dialog, new,
+    overwrite dialog, credits, all 7 settings sections, tap test, in-game settings > save.
+  - Flows: fresh title -> Nuova partita -> creator (name, skin, hair, colors, build) -> game slot 0 with that look; quit
+    -> Continua/Carica/Nuova; bad code -> error note; good code -> slot 3; delete slot 3 with confirm; overwrite confirm
+    cancel; Escape -> front; credits; Continua -> slot 0 playtime 4000 resumed. Settings: language EN live, XL subtitles,
+    quality Low, master 0.5, tap test -> 40 ms applied (latencyAuto), left-handed, in-game settings: paused() true,
+    sim.time frozen, Escape -> back to pause. No page errors. Screenshots reviewed.
+  - Gotcha: run vite from the repo root (`./node_modules/.bin/vite --config <scratchpad>/ui/vite.ui.config.mjs`); npx
+    from the scratchpad fetched a different vite into ~/.npm/_npx and both fought over 5175.

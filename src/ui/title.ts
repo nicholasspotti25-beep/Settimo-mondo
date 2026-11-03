@@ -141,6 +141,7 @@ export class TitleScreen {
     this.creator.close();
     this.credits.hide();
     toggle(this.front, 'sm-hidden', false);
+    toggle(this.el, 'sub', false);
   }
 
   private buildMenu(): void {
@@ -209,6 +210,7 @@ export class TitleScreen {
 
   private openGames(section: 'load' | 'new' | 'import'): void {
     toggle(this.front, 'sm-hidden', true);
+    toggle(this.el, 'sub', true); // the horizon line dims behind the journeys list
     this.credits.hide();
     this.importErr = '';
     this.headGames(section);
@@ -239,7 +241,10 @@ export class TitleScreen {
   private slotDesc(s: GameStateData): string {
     const { t } = this.ctx;
     const c = this.ctx.game.content;
-    const zone = c.hasZone(s.zone) ? t(c.zone(s.zone).name_key) : '';
+    // where the journey resumes (mirrors Game.loadState): the last visited altar's zone, else the starting zone
+    const altar = c.hasAltar(s.lastAltar) && s.visitedAltars.includes(s.lastAltar) ? c.altar(s.lastAltar) : null;
+    const zid = altar ? altar.zone : c.bundle.progression.start_zone;
+    const zone = c.hasZone(zid) ? t(c.zone(zid).name_key) : '';
     const foes = c.bosses.filter((b) => s.defeated.includes(b.id)).length;
     return [zone, t(`ui.tod.${s.timeOfDay}`), fmtPlaytime(s.playtime), t('ui.slots.bosses', { n: foes, m: c.bosses.length })]
       .filter(Boolean).join(' · ');
@@ -406,6 +411,7 @@ export class TitleScreen {
 
   private openCreator(): void {
     toggle(this.front, 'sm-hidden', true);
+    toggle(this.el, 'sub', true);
     this.games.show(false);
     this.creator.open(defaultCharacter());
   }

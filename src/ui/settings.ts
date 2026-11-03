@@ -101,8 +101,15 @@ export class SettingsScreen {
 
   /* ------------------------------------------------------------------------------------------------ helpers */
 
+  /** Toggle row: the whole row is the touch target (the switch alone is small for a thumb). */
   private tog(label: string, sub: string, on: boolean, set: (v: boolean) => void): HTMLElement {
-    return row(label, sub, toggleCtl(this.ctx, on, set));
+    const sw = toggleCtl(this.ctx, on, set);
+    const r = row(label, sub, sw);
+    r.classList.add('tap');
+    r.addEventListener('click', (e) => {
+      if (!sw.contains(e.target as Node)) sw.click();
+    });
+    return r;
   }
 
   /** Slider row: `live` runs while dragging, `commit` on release. */

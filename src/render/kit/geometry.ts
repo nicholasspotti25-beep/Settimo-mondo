@@ -277,7 +277,7 @@ export function sweep(centers: THREE.Vector3[], radii: number[], opts: SweepOpts
   for (let i = 0; i < n - 1; i++) {
     for (let j = 0; j < radial; j++) {
       const a = i * ringVerts + j, b = a + 1, c = a + ringVerts, d = c + 1;
-      idx.push(a, c, b, b, c, d);
+      idx.push(a, b, c, b, d, c);
     }
   }
   if (capS) {
@@ -287,7 +287,7 @@ export function sweep(centers: THREE.Vector3[], radii: number[], opts: SweepOpts
     nor[ci * 3] = -T[0].x; nor[ci * 3 + 1] = -T[0].y; nor[ci * 3 + 2] = -T[0].z;
     uv[ci * 2] = 0.5; uv[ci * 2 + 1] = 0;
     ringT[ci] = 0;
-    for (let j = 0; j < radial; j++) idx.push(ci, j, j + 1);
+    for (let j = 0; j < radial; j++) idx.push(ci, j + 1, j);
     vi++;
   }
   if (capE) {
@@ -298,7 +298,7 @@ export function sweep(centers: THREE.Vector3[], radii: number[], opts: SweepOpts
     uv[ci * 2] = 0.5; uv[ci * 2 + 1] = 1;
     ringT[ci] = 1;
     const base = L * ringVerts;
-    for (let j = 0; j < radial; j++) idx.push(ci, base + j + 1, base + j);
+    for (let j = 0; j < radial; j++) idx.push(ci, base + j, base + j + 1);
     vi++;
   }
   const g = new THREE.BufferGeometry();

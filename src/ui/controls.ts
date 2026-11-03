@@ -22,7 +22,8 @@ interface BtnView {
   lbl: HTMLElement | null;
 }
 
-const ICON_FOR: Record<string, string> = {
+/** Glyph of each fixed touch button (slots draw the equipped weapon, interact the prompt icon). */
+export const ICON_FOR: Record<string, string> = {
   light: ICONS.light, heavy: ICONS.heavy, dodge: ICONS.dodge, guard: ICONS.guard, jump: ICONS.jump,
   art_prima: ICONS.art_prima, art_seconda: ICONS.art_seconda, lacrime: ICONS.lacrime, lock: ICONS.lock,
 };

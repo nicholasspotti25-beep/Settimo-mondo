@@ -64,7 +64,7 @@ export class SettimoUI implements GameUI {
     this.title = new TitleScreen(this.ctx, { startSession: (run) => this.startSession(run), flash: (t) => this.flash(t), openSettings: () => this.openSettings() });
     this.settings = new SettingsScreen(this.ctx, {
       flash: (t) => this.flash(t),
-      closed: () => undefined,
+      closed: () => toggle(this.root, 'setopen', false),
       openImport: () => this.title.openImportPanel(),
       openLayoutEditor: null,
     });
@@ -152,6 +152,7 @@ export class SettimoUI implements GameUI {
   private openSettings(): void {
     if (this.settings.visible) return;
     this.controls.touch.releaseAll();
+    toggle(this.root, 'setopen', true); // the screen under it (title front / pause) is hidden, not shown through
     this.settings.open();
   }
 

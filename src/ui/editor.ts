@@ -1,0 +1,362 @@
+/**
+ * Touch layout editor (Settings > Tocco > Modifica disposizione). Works on a copy of the active layout
+ * (settings.touchLayout ?? the device preset): drag any control with one finger, tap it to adjust its size and opacity,
+ * switch between the small-phone / standard / tablet presets, mirror for the left hand, reset to the device preset. Save
+ * writes settings.touchLayout (null when the device preset is kept untouched) and settings.leftHanded through
+ * game.applySettings; cancel discards. The control panel docks on the half of the screen with fewer controls, so every
+ * control stays reachable, and fades while a control is being dragged. Overlapping controls are outlined in red.
+ * Positions go through the same pure math as the game (resolveLayout / toFraction), so what you place is what you get.
+ */
+import type { TouchLayoutDef } from '../core/types';
+import type { UiCtx } from './ctx';
+import { h, setText, svgIcon, toggle } from './dom';
+import { ICONS } from './icons';
+import { ICON_FOR } from './controls';
+import {
+  circlesOverlap, clamp, hitButton, normalizeLayout, pickPresetId, resolveLayout, round3, toFraction,
+  type ExtButtonDef, type PresetId, type Rect, type ResolvedButton, type ResolvedLayout,
+} from './layout';
+import { pill, rangeCtl, uiSound } from './screen';
+
+export interface EditorHost {
+  /** Current viewport and safe area (px). */
+  geometry(): { view: { w: number; h: number }; safe: Rect };
+  /** Small transient confirmation pill. */
+  flash(text: string): void;
+  /** The editor closed (saved or not). */
+  closed(): void;
+}
+
+export const SIZE_MIN = 0.06;
+export const SIZE_MAX = 0.18;
+const PRESETS: { id: PresetId; key: string }[] = [
+  { id: 'touch_small_phone', key: 'ui.editor.preset_small' },
+  { id: 'touch_default', key: 'ui.editor.preset_std' },
+  { id: 'touch_tablet', key: 'ui.editor.preset_tablet' },
+];
+
+/** Which horizontal half the panel should dock on: the one holding fewer control centers (ties: the left). Pure. */
+export function panelSide(buttons: readonly { cx: number; anchor: string | null }[], safe: Rect): 'left' | 'right' {
+  const mid = safe.x + safe.w / 2;
+  let l = 0, r = 0;
+  for (const b of buttons) {
+    if (b.anchor) continue;
+    if (b.cx < mid) l++;
+    else r++;
+  }
+  return r < l ? 'right' : 'left';
+}
+
+/** Ids of the controls that overlap another control or the HUD ring (pad px of clearance). Pure. */
+export function overlapping(L: ResolvedLayout, pad = 2): Set<string> {
+  const out = new Set<string>();
+  const bs = L.buttons.filter((b) => !b.anchor);
+  for (let i = 0; i < bs.length; i++) {
+    if (circlesOverlap(bs[i], L.ring, pad)) out.add(bs[i].id);
+    for (let j = i + 1; j < bs.length; j++) {
+      if (circlesOverlap(bs[i], bs[j], pad)) {
+        out.add(bs[i].id);
+        out.add(bs[j].id);
+      }
+    }
+  }
+  return out;
+}
+
+export class LayoutEditor {
+  readonly el: HTMLElement;
+  private def!: TouchLayoutDef;
+  private mirror = false;
+  /** True while the layout is the untouched device preset (saved as null, so it keeps following the device). */
+  private pristine = true;
+  private L: ResolvedLayout | null = null;
+  private sel: string | null = null;
+  private drag: { id: string; pointer: number; dx: number; dy: number } | null = null;
+  private views = new Map<string, HTMLElement>();
+  private stage: HTMLElement;
+  private zoneStick: HTMLElement;
+  private zoneCam: HTMLElement;
+  private ring: HTMLElement;
+  private pnl: HTMLElement;
+  private presetSeg: HTMLElement;
+  private mirrorBtn: HTMLElement;
+  private insp: HTMLElement;
+  private warn: HTMLElement;
+
+  constructor(private readonly ctx: UiCtx, private readonly host: EditorHost) {
+    this.zoneStick = h('div', { class: 'zone' });
+    this.zoneCam = h('div', { class: 'zone' });
+    this.ring = h('div', { class: 'ringg' });
+    this.stage = h('div', { class: 'stage' }, this.zoneStick, this.zoneCam, this.ring);
+    this.presetSeg = h('div', { class: 'sm-seg' });
+    this.mirrorBtn = h('div');
+    this.insp = h('div', { class: 'insp' });
+    this.warn = h('div', { class: 'warn sm-hidden' });
+    this.pnl = h('div', { class: 'pnl' });
+    this.el = h('div', { class: 'sm-editor sm-hidden' }, this.stage, this.pnl);
+    this.el.addEventListener('pointerdown', (e) => this.down(e));
+    this.el.addEventListener('pointermove', (e) => this.move(e));
+    this.el.addEventListener('pointerup', (e) => this.up(e));
+    this.el.addEventListener('pointercancel', (e) => this.up(e));
+    this.el.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  get visible(): boolean {
+    return !this.el.classList.contains('sm-hidden');
+  }
+
+  private get bundle() {
+    return this.ctx.game.content.bundle.touch_layouts;
+  }
+
+  private preset(id: PresetId): TouchLayoutDef {
+    const base = this.bundle.touch_default ?? Object.values(this.bundle)[0];
+    return normalizeLayout(this.bundle[id] ?? base, base);
+  }
+
+  private devicePreset(): PresetId {
+    const { view } = this.host.geometry();
+    return pickPresetId(view.w, view.h);
+  }
+
+  open(): void {
+    const s = this.ctx.game.settings;
+    const base = this.bundle.touch_default ?? Object.values(this.bundle)[0];
+    this.def = s.touchLayout ? normalizeLayout(s.touchLayout, base) : this.preset(this.devicePreset());
+    this.pristine = !s.touchLayout;
+    this.mirror = s.leftHanded;
+    this.sel = null;
+    this.drag = null;
+    this.buildPanel();
+    this.rebuild();
+    toggle(this.el, 'sm-hidden', false);
+  }
+
+  close(): void {
+    if (!this.visible) return;
+    toggle(this.el, 'sm-hidden', true);
+    this.drag = null;
+    this.host.closed();
+  }
+
+  relabel(): void {
+    if (!this.visible) return;
+    this.buildPanel();
+    this.rebuild();
+  }
+
+  /** Window resized / rotated while editing. */
+  relayout(): void {
+    if (this.visible) this.rebuild();
+  }
+
+  /* ------------------------------------------------------------------------------------------------ drawing */
+
+  private resolve(): ResolvedLayout {
+    const { view, safe } = this.host.geometry();
+    return resolveLayout(this.def, view, safe, { mirror: this.mirror, large: this.ctx.game.settings.largeButtons });
+  }
+
+  /** Recreate the control views (preset change, mirror, open). */
+  private rebuild(): void {
+    for (const v of this.views.values()) v.remove();
+    this.views.clear();
+    const { t } = this.ctx;
+    const L = this.resolve();
+    for (const b of L.buttons) {
+      if (b.anchor) continue;
+      const cls = b.id.startsWith('slot_') ? 'slot' : b.id.startsWith('art_') ? 'art' : '';
+      const el = h('div', { class: `sm-b ${b.id} ${cls}` });
+      const icon = ICON_FOR[b.id] ?? (cls === 'slot' ? ICONS.armory : ICONS.examine);
+      el.appendChild(svgIcon(icon));
+      if (cls === 'slot') el.appendChild(h('div', { class: 'num' }, b.id.slice(5)));
+      el.appendChild(h('div', { class: 'cap' }, this.name(b.id)));
+      el.setAttribute('aria-label', this.name(b.id));
+      this.stage.appendChild(el);
+      this.views.set(b.id, el);
+    }
+    setText(this.zoneStick, t('ui.editor.zone_stick'));
+    setText(this.zoneCam, t('ui.editor.zone_camera'));
+    this.ring.setAttribute('aria-label', t('ui.touch.metamondo'));
+    this.paint(L);
+    this.paintPanel();
+  }
+
+  /** Move / size every view to the resolved layout and mark overlaps. Called on every drag move (13 elements). */
+  private paint(L = this.resolve()): void {
+    this.L = L;
+    const bad = overlapping(L);
+    const op = L.opacity.active;
+    for (const b of L.buttons) {
+      const el = this.views.get(b.id);
+      if (!el) continue;
+      const st = el.style;
+      st.left = `${b.cx}px`;
+      st.top = `${b.cy}px`;
+      st.width = `${b.r * 2}px`;
+      st.height = `${b.r * 2}px`;
+      st.opacity = String(clamp(op * b.alpha + 0.12, 0.25, 1));
+      toggle(el, 'sel', b.id === this.sel);
+      toggle(el, 'bad', bad.has(b.id));
+    }
+    const z = (el: HTMLElement, r: Rect) => {
+      el.style.left = `${r.x}px`;
+      el.style.top = `${r.y}px`;
+      el.style.width = `${r.w}px`;
+      el.style.height = `${r.h}px`;
+    };
+    z(this.zoneStick, L.stick.zone);
+    z(this.zoneCam, L.camera.zone);
+    const rs = this.ring.style;
+    rs.left = `${L.ring.cx}px`;
+    rs.top = `${L.ring.cy}px`;
+    rs.width = rs.height = `${L.ring.r * 2}px`;
+    toggle(this.warn, 'sm-hidden', bad.size === 0);
+    // dock the panel away from the controls; keep it inside the safe area
+    const side = panelSide(L.buttons, L.safe);
+    toggle(this.pnl, 'right', side === 'right');
+    this.pnl.style.setProperty('--px', `${side === 'left' ? L.safe.x + 10 : L.view.w - (L.safe.x + L.safe.w) + 10}px`);
+  }
+
+  private name(id: string): string {
+    return this.ctx.t(id.startsWith('slot_') ? 'ui.touch.slot' : `ui.touch.${id}`, { n: id.slice(5) });
+  }
+
+  /* ------------------------------------------------------------------------------------------------ panel */
+
+  private buildPanel(): void {
+    const { t } = this.ctx;
+    this.pnl.textContent = '';
+    this.presetSeg = h('div', { class: 'sm-seg' });
+    for (const p of PRESETS) {
+      const b = h('button', { type: 'button', 'data-id': p.id }, t(p.key));
+      b.addEventListener('click', () => {
+        uiSound(this.ctx, 'move');
+        this.def = this.preset(p.id);
+        this.pristine = p.id === this.devicePreset();
+        this.sel = null;
+        this.rebuild();
+      });
+      this.presetSeg.appendChild(b);
+    }
+    this.mirrorBtn = pill(t('ui.editor.mirror'), () => {
+      this.mirror = !this.mirror;
+      this.rebuild();
+    }, { icon: ICONS.rotate });
+    const reset = pill(t('ui.editor.reset'), () => {
+      this.def = this.preset(this.devicePreset());
+      this.pristine = true;
+      this.sel = null;
+      this.rebuild();
+      this.host.flash(t('ui.set.layout_reset_done'));
+    }, { icon: ICONS.back });
+    const cancel = pill(t('ui.pause.cancel'), () => {
+      uiSound(this.ctx, 'back');
+      this.close();
+    });
+    const save = pill(t('ui.editor.save'), () => this.save(), { icon: ICONS.check, cls: 'gold' });
+    setText(this.warn, t('ui.editor.overlap'));
+    this.pnl.append(
+      h('div', { class: 'ttl' }, t('ui.set.layout_edit')),
+      h('div', { class: 'lab' }, t('ui.editor.preset')), this.presetSeg,
+      h('div', { class: 'sm-pills' }, this.mirrorBtn, reset),
+      this.insp, this.warn,
+      h('div', { class: 'sm-pills acts' }, cancel, save));
+  }
+
+  /** Preset highlight, mirror state and the inspector of the selected control. */
+  private paintPanel(): void {
+    const { t } = this.ctx;
+    const devId = this.devicePreset();
+    for (const c of Array.from(this.presetSeg.children)) {
+      const id = (c as HTMLElement).dataset.id as PresetId;
+      toggle(c, 'sel', this.pristine ? id === devId : JSON.stringify(this.preset(id).buttons) === JSON.stringify(this.def.buttons));
+    }
+    toggle(this.mirrorBtn, 'on', this.mirror);
+    this.mirrorBtn.setAttribute('aria-pressed', String(this.mirror));
+    this.insp.textContent = '';
+    const b = this.sel ? (this.def.buttons[this.sel] as ExtButtonDef | undefined) : undefined;
+    if (!this.sel || !b || 'anchor' in b) {
+      this.insp.append(h('div', { class: 'hint' }, t('ui.editor.hint')));
+      return;
+    }
+    const id = this.sel;
+    const size = rangeCtl(SIZE_MIN, SIZE_MAX, 0.005, clamp(b.size, SIZE_MIN, SIZE_MAX), (v) => `${Math.round((v / 0.1) * 100)}%`, (v) => {
+      b.size = round3(v);
+      this.touched();
+      this.paint();
+    });
+    const alpha = rangeCtl(0.2, 1, 0.05, clamp(b.alpha ?? 1, 0.2, 1), (v) => `${Math.round(v * 100)}%`, (v) => {
+      b.alpha = round3(v);
+      this.touched();
+      this.paint();
+    });
+    this.insp.append(
+      h('div', { class: 'nm' }, this.name(id)),
+      h('label', null, h('span', null, t('ui.editor.size')), size.el, size.val),
+      h('label', null, h('span', null, t('ui.editor.opacity')), alpha.el, alpha.val));
+  }
+
+  private touched(): void {
+    if (!this.pristine) return;
+    this.pristine = false;
+    for (const c of Array.from(this.presetSeg.children)) toggle(c, 'sel', false);
+  }
+
+  private save(): void {
+    const { t } = this.ctx;
+    const game = this.ctx.game;
+    uiSound(this.ctx, 'confirm');
+    game.applySettings({ ...game.settings, touchLayout: this.pristine ? null : JSON.parse(JSON.stringify(this.def)) as TouchLayoutDef, leftHanded: this.mirror });
+    this.host.flash(t('ui.editor.saved'));
+    this.close();
+  }
+
+  /* ------------------------------------------------------------------------------------------------ dragging */
+
+  private down(e: PointerEvent): void {
+    if ((e.target as HTMLElement).closest('.pnl') || !this.L) return;
+    e.preventDefault();
+    if (this.drag) return; // one control at a time
+    const hit: ResolvedButton | null = hitButton(this.L.buttons, e.clientX, e.clientY, 6, (b) => !b.anchor);
+    if (!hit) {
+      if (this.sel) {
+        this.sel = null;
+        this.paint();
+        this.paintPanel();
+      }
+      return;
+    }
+    if (this.sel !== hit.id) {
+      this.sel = hit.id;
+      uiSound(this.ctx, 'move');
+      this.ctx.game.platform.haptic('light');
+      this.paintPanel();
+    }
+    this.drag = { id: hit.id, pointer: e.pointerId, dx: e.clientX - hit.cx, dy: e.clientY - hit.cy };
+    try {
+      this.el.setPointerCapture(e.pointerId);
+    } catch {
+      /* synthetic pointer */
+    }
+    toggle(this.el, 'dragging', true);
+    this.paint();
+  }
+
+  private move(e: PointerEvent): void {
+    const d = this.drag;
+    if (!d || e.pointerId !== d.pointer || !this.L) return;
+    const b = this.def.buttons[d.id] as ExtButtonDef | undefined;
+    if (!b || 'anchor' in b) return;
+    b.pos = toFraction(e.clientX - d.dx, e.clientY - d.dy, this.L.safe, this.mirror);
+    this.touched();
+    this.paint();
+  }
+
+  private up(e: PointerEvent): void {
+    if (!this.drag || e.pointerId !== this.drag.pointer) return;
+    this.drag = null;
+    toggle(this.el, 'dragging', false);
+    this.paint();
+  }
+}

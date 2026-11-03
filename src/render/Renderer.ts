@@ -11,6 +11,7 @@ import { Kit } from './kit/index';
 import { WorldRenderer } from './world/WorldRenderer';
 import { ActorRenderer } from './actors/ActorRenderer';
 import { FxRenderer } from './fx/FxRenderer';
+import { PostPipeline } from './fx/post';
 import type { QualityLevel, RenderCtx } from './types';
 
 export type QualitySetting = QualityLevel | 'auto';
@@ -29,6 +30,8 @@ export class Renderer {
   world: WorldRenderer;
   actors: ActorRenderer;
   fx: FxRenderer;
+  /** Auto exposure, bloom, tone mapping, act grading (src/render/fx/post.ts). */
+  readonly post: PostPipeline;
   quality: QualityLevel = 'medium';
   qualitySetting: QualitySetting = 'auto';
   /** Dynamic resolution scale 0.6..1.0. */
@@ -38,7 +41,7 @@ export class Renderer {
   private stableT = 0;
   targetFrameMs = 1000 / 60;
   contextLost = false;
-  stats = { fps: 60, frameMs: 16.7, calls: 0, triangles: 0, geometries: 0, textures: 0 };
+  stats = { fps: 60, frameMs: 16.7, calls: 0, triangles: 0, geometries: 0, textures: 0, exposure: 1, key: 0 };
   private fpsAcc = 0;
   private fpsFrames = 0;
 
@@ -48,6 +51,9 @@ export class Renderer {
     this.gl.toneMapping = THREE.ACESFilmicToneMapping;
     this.gl.toneMappingExposure = 1.0;
     this.gl.shadowMap.type = THREE.PCFShadowMap;
+    // stats cover every pass of a frame (scene + probe + bloom + composite)
+    this.gl.info.autoReset = false;
+    this.post = new PostPipeline(this.gl);
     const kit = new Kit();
     this.ctx = {
       content,
@@ -58,7 +64,15 @@ export class Renderer {
       skyShade: 0,
     };
     this.rig = new CameraRig(canvas.clientWidth / Math.max(1, canvas.clientHeight));
+    this.ctx.registerShot = (id, fn) => this.rig.registerShot(id, fn);
     this.world = new WorldRenderer(this.scene, this.ctx);
+    // the atmosphere sets the base exposure right before the scene renders; the post pipeline adds its auto correction
+    const prevBefore = this.scene.onBeforeRender;
+    this.scene.onBeforeRender = (r, sc, cam, g, m, gr) => {
+      prevBefore.call(this.scene, r, sc, cam, g, m, gr);
+      this.post.baseExposure = r.toneMappingExposure;
+      r.toneMappingExposure = this.post.exposure;
+    };
     this.actors = new ActorRenderer(this.scene, this.ctx);
     this.fx = new FxRenderer(this.scene, this.ctx);
     canvas.addEventListener('webglcontextlost', (e) => {
@@ -68,6 +82,7 @@ export class Renderer {
     canvas.addEventListener('webglcontextrestored', () => {
       this.contextLost = false;
       this.applyQuality();
+      this.post.rebuild(true);
     });
     this.setQuality('auto');
     this.resize();
@@ -96,6 +111,7 @@ export class Renderer {
     this.gl.shadowMap.enabled = Q.shadows;
     this.resScale = 1;
     this.resize();
+    this.post.setQuality(this.quality);
   }
 
   resize(): void {
@@ -106,7 +122,20 @@ export class Renderer {
     this.gl.setSize(w, h, false);
     this.rig.camera.aspect = w / Math.max(1, h);
     this.rig.camera.updateProjectionMatrix();
+    this.post?.rebuild();
   }
+
+  /** Project a world position to CSS pixels of the canvas (x right, y down); z > 1 or < -1 = off screen / behind. */
+  screenPoint(world: { x: number; y: number; z: number }, out = { x: 0, y: 0, z: 0, visible: false }): { x: number; y: number; z: number; visible: boolean } {
+    const v = this.tmpProj.set(world.x, world.y, world.z).project(this.rig.camera);
+    const w = this.canvas.clientWidth || window.innerWidth, h = this.canvas.clientHeight || window.innerHeight;
+    out.x = (v.x * 0.5 + 0.5) * w;
+    out.y = (-v.y * 0.5 + 0.5) * h;
+    out.z = v.z;
+    out.visible = v.z > -1 && v.z < 1 && v.x >= -1 && v.x <= 1 && v.y >= -1 && v.y <= 1;
+    return out;
+  }
+  private tmpProj = new THREE.Vector3();
 
   onEvent(e: SimEvent, sim: Sim): void {
     if (e.type === 'shake') this.rig.addShake(e.strength, e.dur);
@@ -124,7 +153,13 @@ export class Renderer {
     this.world.update(sim, dt, this.rig.camera);
     this.actors.update(sim, alpha, dt);
     this.fx.update(sim, alpha, dt);
+    this.gl.info.reset();
+    this.post.updateGrade(sim.zone?.def.act ?? 0, dt);
+    this.post.begin();
     this.gl.render(this.scene, this.rig.camera);
+    this.post.end(this.scene, this.rig.camera, dt, this.ctx.time);
+    this.stats.exposure = this.post.exposure;
+    this.stats.key = this.post.key;
     const info = this.gl.info;
     this.stats.calls = info.render.calls;
     this.stats.triangles = info.render.triangles;

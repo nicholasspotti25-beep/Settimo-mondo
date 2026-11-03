@@ -13,15 +13,12 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
 | 4 | FxRenderer: pooled particles, projectile/hazard visuals, combat FX, fallbacks, Metamondo warp, debug hitboxes | missing (sphere/disc stub) | src/render/fx/FxRenderer.ts |
 | 5 | Renderer/camera: registerShot hook, screenPoint, bloom/outline, act grading, shadow presets, lock-on framing, gravity roll, shake | partial: quality/watchdog/dynamic res, lock-on framing fixed (chunk 1), shadow map type fixed; registerShot not wired into ctx, no screenPoint, no post/grading | src/render/Renderer.ts, camera.ts |
 | 6 | data/anim/*.yaml pose libraries | partial: humanoid (35 clips), quadruped, mounted (steed + seated rider + foot_ dismounted), portatore (player actions) done; colossus, serpent, dragon, bird, insect, tree, tentacled missing | data/anim/ |
-| 7 | Guardiano del Regno reference model | missing (the generic mounted model from its data shows meanwhile) | src/content/bosses/guardiano_del_regno/model.ts |
+| 7 | Guardiano del Regno reference model | done (chunk 2): barded slate destrier (dagged green-gold caparison with crown heraldry, peytral, crinet, chanfron, saddle), dull-silver knight (broken-crown great helm, layered pauldrons, tabard, faults, cape), Lancia del Custode (white shaft, vamplate, leaf head with crown socket); 'spectral_aura' wraps only the steed | src/content/bosses/guardiano_del_regno/model.ts |
 | 8 | docs/RENDER_KIT.md | missing | docs/RENDER_KIT.md |
 | — | tests/render*.test.ts | partial: tests/render_anim.test.ts (9 tests) | tests/render_anim.test.ts |
 
 ## Next
 
-1. Guardiano del Regno model (mounted rig: barded steed, dull-silver knight, broken-crown helm, white lance with
-   leaf-shaped head, 'spectral_aura' flag aura on the horse; line up with hurtboxes) + `npm run registry`. Check the
-   overhead telegraph rear angle (it looks steeper than rootRot -24 in screenshots) and lance pitch per clip.
 2. FxRenderer: GPU particle system (fx.particles), projectile visuals per ProjectileKindDef.visual with trails, hazard
    telegraph decals + actives per HazardKindDef.visual, rings, hit sparks, dodge/parry/guard/Spezzato/Grazia FX,
    generic fallback ('collider_add:<id>', 'ally_wing_shield'), debug hitboxes.
@@ -70,3 +67,20 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
   HUD loses contrast. Tone mapping / exposure / bloom threshold need a pass so the brightest act still reads on a phone.
 - Smoke scenes captured during the boss intro title card are fully black behind the card (boss_04..): fine during the
   intro, but check the intro fade does not leave the arena black after the card.
+
+### Chunk 2 (2026-11-03)
+- FIXED a kit-wide bug: `sweep()` (every mb.tube: limbs, barrels, necks, tails) had inward triangle winding with outward
+  normals, so FrontSide drew the far inner wall and the rim term saturated (smNV = 1): tubes rendered as flat near-white
+  silhouettes (the "white horse / white Portatore limbs" in chunk-1 shots). Walls + caps now wind outward (checked by a
+  face-normal vs radial test: 32/32 wall + 48/48 cap faces outward). No other stream uses sweep/geo.tube.
+- Guardiano del Regno model (src/content/bosses/guardiano_del_regno/model.ts, registry: 1 model). Mounted skeleton
+  (horse 2.2 m withers, rider 2.29 m), separate 'steed_' / 'knight_' surface sets so the spectral aura (flag
+  'spectral_aura', pale blue fresnel, flow) wraps only the horse; 'enraged' tint also steed-only.
+- data/anim/mounted.yaml: overhead telegraph lance now raised high (relative pitch -90, was -180 = pointing down-back once
+  the steed rears), overhead active strikes down-forward to the ground ~5 m ahead (was straight down), recovery and thrust
+  active pitched up ~20 deg so the couched lance travels at hitbox height (y 2.0-2.6).
+- CameraRig.inspect {yaw,pitch,distance,height,target} — an orbit view of the boss for headless captures/debug.
+- Verification: tsc 0 errors in owned files; registry + SM_PARTIAL data ok; headless 1280x576 high (scratchpad rk2/g4_*):
+  front/profile idle, thrust active (lance forward), overhead telegraph (lance raised, red diamond + vignette),
+  spectral aura on the steed only. Stats with the model in frame (high): ~65-71 calls, 167-188k tris (scene total).
+

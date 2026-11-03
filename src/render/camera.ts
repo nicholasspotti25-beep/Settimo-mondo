@@ -34,6 +34,11 @@ export class CameraRig {
   private lockDir = new THREE.Vector3();
   private lockAhead = 0;
   private lockRise = 0;
+  /**
+   * Inspection view (debug tools, headless captures): when set, the camera orbits `target` (a fixed world point, or the
+   * boss's interpolated position when null) at yaw/pitch (radians, yaw 0 = looking toward +Z) and distance (meters).
+   */
+  inspect: { yaw: number; pitch: number; distance: number; height: number; target: { x: number; y: number; z: number } | null } | null = null;
 
   constructor(aspect: number) {
     this.camera = new THREE.PerspectiveCamera(this.baseFov, aspect, 0.03, 4000);
@@ -82,6 +87,18 @@ export class CameraRig {
       return;
     }
     this.shotId = null;
+
+    if (this.inspect) {
+      const I = this.inspect, b = sim.boss;
+      const t = I.target ?? (b ? { x: b.prevPos.x + (b.pos.x - b.prevPos.x) * alpha, y: b.prevPos.y + (b.pos.y - b.prevPos.y) * alpha, z: b.prevPos.z + (b.pos.z - b.prevPos.z) * alpha } : { x: px, y: py, z: pz });
+      this.tmpLook.set(t.x, t.y + I.height, t.z);
+      const cp = Math.cos(I.pitch);
+      this.camera.position.set(t.x - Math.sin(I.yaw) * cp * I.distance, t.y + I.height + Math.sin(I.pitch) * I.distance, t.z - Math.cos(I.yaw) * cp * I.distance);
+      this.camera.lookAt(this.tmpLook);
+      this.camera.fov = this.baseFov;
+      this.camera.updateProjectionMatrix();
+      return;
+    }
 
     const sens = this.sensitivity;
     const lock = pl.lock ? sim.lockPointPos(pl.lock.actor, pl.lock.part, { x: 0, y: 0, z: 0 }) : null;
