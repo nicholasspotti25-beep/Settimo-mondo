@@ -559,7 +559,7 @@ export class AltarMenu {
       }, { icon: ICONS.continue, cls: 'gold' }),
       // a journey that brought the Dawn can begin the Ciclo dell'Alba (New Game+) at any time
       st.gameCompleted ? pill(t('ui.end.ng_begin'), () => {
-        void confirmDialog(this.ctx, this.screen.el, t('ui.end.ng_q'), `${t('ui.end.ng_d')} ${t('ui.end.ng_desc')}`, t('ui.end.ng_begin'), t('ui.pause.cancel')).then((ok) => {
+        void confirmDialog(this.ctx, this.screen.el, t('ui.end.ng_q'), t('ui.end.ng_d'), t('ui.end.ng_begin'), t('ui.pause.cancel')).then((ok) => {
           if (!ok) return;
           this.closePause();
           this.host.startNgPlus();

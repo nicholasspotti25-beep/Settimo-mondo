@@ -12,25 +12,26 @@ Brief: docs/briefs/ui.md. Owned: src/ui/**, src/input/touch.ts, data/ui/**, loca
 | 2b | Story layer: subtitles for seq lines + transient dialogue/caption/voce events (speaker colors, size/background), centered captions, title cards, seq fades, choices with Implora HOLD + kneel ring, ritual gestures (tap/trace), tap-to-advance, hold-to-skip | done (gesture traces untested with real data: no story file authors a gesture step yet) | src/ui/story.ts |
 | 2c | Cards: zone card, act card, boss name card, "dawn advances" banner, toasts (weapon + Arts, Form, key item, altar, reperto, vista; held while a big card is on), gentle death screen, loading spinner, GameUI.fade | done | src/ui/cards.ts, src/ui/UI.ts |
 | 3a | Altar menu (sim.altarOpen): Medita (4 ToD cards via game.meditate behind a fade, "beyond the mist" ToD note of the next boss), Armeria (3 slots, owned-weapon grid, detail: type, damage 18+4D via weaponDamage, parry, stamina, both Arts with Eco pips + descs, flavor; equip/swap/remove via sim.setLoadout; Lama dell'Abisso locked until NG+), Forme (7, locked ones dormant; sim.setForm), Viaggio (visited altars by route order, disabled when !canFastTravel; fade + waits for zone streaming), Specchio dei Ricordi (defeated non-scripted bosses, lore, ToD chips with defeated marks + variant note, owned Forms, 4 challenges with completed marks -> sim.startMemoryFight), Reperti (found list + reader), leave (sim.closeAltar; back button / Escape) | done | src/ui/altar.ts, src/ui/screen.ts |
-| 3b | Pause menu: top pause button (mirrors with left-handed), Escape, auto-open on visibilitychange (background); Il cammino summary (name, zone, NG cycle, playtime, foes, weapons, Forms, reperti, deaths), Armeria/Forme/Reperti read-only, save export (code + copy + save now), quit to title with confirm; paused() true only here | done (settings entry to add with the settings screen) | src/ui/altar.ts (pause mode), src/ui/UI.ts |
-| 3c | Title (dawn horizon + logo; Continua = most recent save, Carica, Nuova partita, Importa codice, Impostazioni, Riconoscimenti; journeys screen with 3 slots: name, resume zone (last visited altar, as Game.loadState), hour, playtime, bosses, last-step date, delete with confirm, overwrite confirm; text-code import with paste, slot choice, validation), character creator (name, build, height, skin, 6 hair styles, hair color, eyes, cloak; code-drawn SVG preview with the Portatore palettes; shrinks to fit 375 px tall), credits from the title | done (title, slots, import, creator, title credits; verified chunk 3) / missing (credits MODE after the ending, ending overlay, collections) | src/ui/title.ts, src/ui/creator.ts, src/ui/credits.ts |
+| 3b | Pause menu: top pause button (mirrors with left-handed), Escape, auto-open on visibilitychange (background); Il cammino summary (name, zone, NG cycle, playtime, foes, weapons, Forms, reperti, deaths) + "Inizia il Ciclo dell'Alba" (with confirm) once the game is completed, Armeria/Forme/Reperti read-only, Collezioni, Impostazioni, save export (code + copy + save now), quit to title with confirm; paused() true only here | done | src/ui/altar.ts (pause mode), src/ui/UI.ts |
+| 3d | Collections (pause > Collezioni): 4 counters that are the tabs (Armi n/38, Forme n/7, Ore n/(4 x replayable bosses), Sfide n/(4 x replayable bosses)) with progress bars; weapon catalogue (owned: glyph + name + the read-only Armeria detail; unknown: dim silhouette + number, veiled detail with hint; Lama dell'Abisso owned but NG-locked marked violet); Forms I..VII (dormant ones veiled); Ore / Sfide: every non-scripted boss by order (unmet = "Ricordo non ancora vissuto", no spoilers) with 4 ToD / 4 challenge marks from state.todDefeats / state.challenges, detail with each variant's note and done checks; detail column sticky while the list scrolls | done | src/ui/collections.ts, src/ui/altar.ts |
+| 3e | Credits mode (GameMode 'credits'): credits.NN lines over the last shot of the ending (translucent veil, the sunrise visible), tap skips ahead, then "Torna al titolo" (quitToTitle behind a fade) or "Inizia il Ciclo dell'Alba" (game.startNewGamePlus behind a fade, waits for zone streaming) with the cycle note; Ending overlay (mode 'ending' / sim.endingActive): cinematic letterbox, HUD/controls/pause/toasts/zone+act cards hidden, stronger caption shadow on the white shots | done | src/ui/UI.ts, src/ui/credits.ts, src/ui/cards.ts, src/ui/style.ts |
+| 3c | Title (dawn horizon + logo; Continua = most recent save, Carica, Nuova partita, Importa codice, Impostazioni, Riconoscimenti; journeys screen with 3 slots: name, resume zone (last visited altar, as Game.loadState), hour, playtime, bosses, last-step date, delete with confirm, overwrite confirm; text-code import with paste, slot choice, validation), character creator (name, build, height, skin, 6 hair styles, hair color, eyes, cloak; code-drawn SVG preview with the Portatore palettes; shrinks to fit 375 px tall), credits from the title | done | src/ui/title.ts, src/ui/creator.ts, src/ui/credits.ts |
 | 4 | Settings screen from title AND pause (Generale: language live, subtitle size/background + live sample, show FPS; Grafica: quality Low/Medium/High/Auto (+ current auto level), 30/60 FPS; Audio: 5 volumes with live preview; Controlli: camera sensitivity, invert Y, toggle guard, aim assist, input buffer 0.15-0.20, latency 0-0.04 + tap test estimate; Tocco: large buttons, left hand, controls fade, haptics + strength, layout reset; Accessibilita: reduce shake/flashing, leniency (off by default); Salvataggio: export code + copy + save now in game, import from the title), all via game.applySettings | done | src/ui/settings.ts, src/ui/calib.ts |
-| 5 | Debug menu | missing (FPS/memory overlay done in HUD) | |
+| 5 | Debug menu: hidden gesture (5 quick taps on the pause title toggles settings.debugMenu) -> pause > Debug: invincible, one-hit kill, hitbox overlay, FPS + memory overlay, Metamondo meter slider, full Eco, give all weapons + Forms (straight into the state, no toast flood), kill boss (debugKillBoss), time of day (game.meditate), teleport to any altar (grouped by zone in route order, sim.travel) or boss (startFightDirect skipIntro) behind a fade; hitbox overlay canvas: enemy hurt spheres (bodyHurt) cyan, player feet/head rings green, projectiles + hazards red | done (melee attack shapes not drawn: request 2 in docs/requests/ui.md) | src/ui/debug.ts, src/ui/altar.ts, src/ui/UI.ts |
 | 6 | Safe areas (env() probe -> layout safe rect), phone -> tablet scaling (--k, ring), portrait hint, pause overlay after background, paused() semantics | partial (all done except the portrait hint) | src/ui/UI.ts |
-| 7 | docs/UI.md + unit tests for pure layout math | partial (tests/ui_layout.test.ts 22 tests, tests/ui_screens.test.ts 10 tests: editor panelSpot/rectHitsCircle/overlapping, calib estimateLatency/snap, latestSlot, sanitizeLook/wrapIndex/mixHex; docs/UI.md missing) | tests/ui_layout.test.ts, tests/ui_screens.test.ts |
-| L | locales/{it,en}/ui.yaml | partial (HUD, touch, story, cards, prompts, title, slots, import, creator, tod, altar, wtype, pause, set.*, editor.* done; collections/debug/credits-mode keys to add with their screens) | locales/*/ui.yaml |
+| 7 | docs/UI.md + unit tests for pure layout math | partial (tests/ui_layout.test.ts 22, tests/ui_screens.test.ts 10, tests/ui_collections.test.ts 5: collectionStats/memoryCatalogue; docs/UI.md missing) | tests/ui_*.test.ts |
+| L | locales/{it,en}/ui.yaml | done for every screen built (HUD, touch, story, cards, prompts, title, slots, import, creator, tod, altar, wtype, pause, set.*, editor.*, coll.*, end.*, debug.*); 1071 it / 1071 en strings | locales/*/ui.yaml |
 
 ## Next
 
-1. Collections (38 weapons, 7 Forms, ToD variants from state.todDefeats, challenges) in pause; credits mode
-   (-> Ciclo dell'Alba via game.startNewGamePlus / title), ending overlay.
-2. Debug menu (hidden gesture + settings.debugMenu): teleport, invincible, give all, ToD, meter, kill boss, hitboxes, FPS.
-3. Portrait hint; tablet HUD polish (vials/status icons are small at 1366x1024); altar/pause small labels (.sm-sum span,
-   .sm-art .ac 9.5 px, .sm-tile .tn 10 px) up to >= 11 px like the title/settings ones (run ui/audit.mjs on the altar);
-   in-game empty weapon slots draw ICONS.armory, which reads as an "X" at that size (editor shows the slot number).
-4. docs/UI.md (conventions, layout units, components, input ownership, menu modes, editor placement rule).
-5. Final verification pass at 844x390, 932x430, 667x375 (dsf 3), 1180x820, 1366x1024 incl. CDP multi-touch (title,
-   creator, settings and editor were checked at 1280x576, 844x390 and 667x375 in chunk 3).
+1. Portrait hint (deliverable 6, the last missing piece of it).
+2. Tablet HUD polish (vials/status icons are small at 1366x1024); in-game empty weapon slots draw ICONS.armory, which
+   reads as an "X" at that size (editor shows the slot number: do the same or a dim ring); run ui/audit.mjs on the
+   altar menu sections (pause sections and collections are at 0 issues now).
+3. docs/UI.md (conventions, layout units, components, input ownership, menu modes, editor placement rule, debug gesture).
+4. Final verification pass at 844x390, 932x430, 667x375 (dsf 3), 1180x820, 1366x1024 incl. CDP multi-touch (collections,
+   credits and debug were checked at 844x390 and 667x375 only; check them at the tablet sizes too).
+5. When the sim offers it (request 2), draw active melee attack shapes in the hitbox overlay.
 
 ## Notes
 
@@ -133,3 +134,36 @@ Brief: docs/briefs/ui.md. Owned: src/ui/**, src/input/touch.ts, data/ui/**, loca
     back in game ui.layout is mirrored with dodge at the saved spot; Ripristina + Salva -> touchLayout null. paused()
     true while editing in game. No page errors. Screenshots reviewed (open, selected, overlap, mirror, game after save).
   - `npx vitest run tests/ui_screens.test.ts tests/ui_layout.test.ts`: 32/32. tsc 0 errors. Data: 1026 it / 1026 en.
+
+### Chunk 4 (2026-11-03)
+- New: src/ui/collections.ts (CollectionsView + pure collectionStats / memoryCatalogue), src/ui/debug.ts (fillDebug section
+  + HitboxOverlay canvas), tests/ui_collections.test.ts, docs/requests/ui.md (audio: titoli music in credits mode; sim:
+  active attack shapes for the overlay). ProjVec in controls.ts is now exported (shared by lock picking and the overlay).
+- Pause: Collezioni + (when debugMenu) Debug sections; the journey shows "Inizia il Ciclo dell'Alba" next to Riprendi once
+  state.gameCompleted (confirm dialog -> closePause -> UI.startNgPlus = startSession(game.startNewGamePlus)).
+- Credits mode: UI.onMode('credits') shows a second CreditsView ('over' class) bottom-anchored over the frozen last shot;
+  its `.body` uses margin-top:auto in a scrollable column so it never clips at 375 px tall. Actions are inert until revealed
+  (`.end:not(.on)` has no pointer events, a tap there skips ahead instead). onMode away from credits hides it.
+- Ending: `#sm-ui.ending` while mode 'ending' or sim.endingActive: letterbox 9vh bars, subtitles above the bottom bar,
+  toasts/pause hidden; Cards skips zone/act cards while sim.endingActive (the finale's zone change showed "L'Alba").
+- Small labels fixed: .sm-sum span 9.5 -> 11 px, .sm-art .ac 9.5 -> 11 px, .sm-tile .tn 10 -> 11 px.
+- Verification:
+  - `npx tsc --noEmit -p tsconfig.json`: 0 errors in src/ui (the only errors are tests/world_kit.test.ts, world stream).
+    `npx vitest run tests/ui_collections.test.ts tests/ui_screens.test.ts tests/ui_layout.test.ts`: 37/37.
+    `npm run registry && SM_PARTIAL=1 npm run data`: ok, 1071 it / 1071 en strings.
+  - Headless, touch emulation, real taps (scratchpad `ui/coll.mjs`, `ui/dbg.mjs`, audit `ui/audit.mjs`), vite without HMR
+    from the repo root: 844x390 dsf3 (it, NG+ route) and 667x375 dsf3 (en, title route): audit 0 issues on journey,
+    collections weapons/forms/hours/challenges, NG+ dialog, credits, debug, debug teleport list. Counters with a seeded
+    state: 11/38 weapons, 3/7 Forms, 7/44 hours, 3/44 challenges (11 replayable bosses in the current content).
+    Finale sequence -> mode 'ending', `#sm-ui.ending`, letterbox 35 px; setMode('credits') -> credits over the sunrise;
+    "Inizia il Ciclo dell'Alba" -> mode game, ngCycle 1, weapons/Forms carried (11/3), hour alba, opening sequence running,
+    credits hidden; "Torna al titolo" -> mode title, slot 0 saved with gameCompleted true. Debug: 5 taps on the title ->
+    debugMenu true + section open; whole-row toggles -> invincible/hitboxes on; give all -> 38 weapons / 7 Forms; Notte ->
+    timeOfDay notte + head subtitle updated; teleport boss 2 -> fight with cavaliere_errante, overlay visible (cyan hurt
+    spheres on the boss, green player rings); Abbatti -> boss dead, defeated recorded. No page errors. Screenshots
+    reviewed (collections tabs + veiled details + sticky detail, NG dialog, ending letterbox + caption, credits mid/end at
+    both sizes, debug panel, fight with hitboxes, after NG+).
+  - Fixed after review: the NG+ entry sat below the fold (now beside Riprendi); the collection detail scrolled away from a
+    long grid (sticky column); the gold title washed out on the bright sunrise and clipped at 375 px (centered dark veil,
+    dark drop-shadow, scrollable bottom-anchored layout, smaller lines); the NG dialog repeated a sentence.
+

@@ -58,17 +58,36 @@ export class ActorRenderer {
 
   onEvent(_e: SimEvent, _sim: Sim): void {}
 
-  /** Start loading a content model module (idempotent). */
+  /** Boss id that owns a minion id (minion models live in the owner's model.ts `minions` export). */
+  private ownerOf(defId: string): string | null {
+    if (!this.minionOwner) {
+      this.minionOwner = new Map();
+      for (const b of this.ctx.content.bosses) for (const m of b.minions ?? []) if (!this.minionOwner.has(m.id)) this.minionOwner.set(m.id, b.id);
+    }
+    return this.minionOwner.get(defId) ?? null;
+  }
+  private minionOwner: Map<string, string> | null = null;
+
+  /**
+   * Start loading a content model module (idempotent). Bosses (and their clones): BOSS_MODELS[defId].default.
+   * Minions: BOSS_MODELS[minionId] if a folder exists, else the owner boss module's named export
+   * `minions: Record<minionId, BossModelBuilder>`; otherwise the generic family model.
+   */
   private loadBuilder(defId: string): void {
     if (this.builders.has(defId)) return;
-    const loader = BOSS_MODELS[defId];
+    const own = BOSS_MODELS[defId] as (() => Promise<unknown>) | undefined;
+    const owner = own ? null : this.ownerOf(defId);
+    const loader = own ?? (owner ? BOSS_MODELS[owner] : undefined);
     if (!loader) {
       this.resolved.set(defId, null);
       this.builders.set(defId, Promise.resolve(null));
       return;
     }
     const pr = loader()
-      .then((m: { default?: BossModelBuilder }) => m?.default ?? null)
+      .then((mod: unknown) => {
+        const m = mod as { default?: BossModelBuilder; minions?: Record<string, BossModelBuilder> } | null;
+        return own ? m?.default ?? null : m?.minions?.[defId] ?? null;
+      })
       .catch((err: unknown) => {
         console.warn(`[render] model module for ${defId} failed to load, using the generic model`, err);
         return null;

@@ -12,6 +12,7 @@ import type { Sim } from '../../sim/sim';
 import type { ActorVisual, RenderCtx } from '../types';
 import type { Model } from '../kit/model';
 import { Animator, type AnimInput, type AnimStageName, type RigInfo } from './animator';
+import type { ClipDef } from './clips';
 
 export interface FlagAura {
   color: string;
@@ -39,6 +40,10 @@ export interface RigVisualOpts {
   extras?: { update(dt: number, time: number): void }[];
   /** Override rig info (else model.info). */
   info?: RigInfo;
+  /** Model-specific clips layered over the family library (same format as data/anim/<family>.yaml `clips`). */
+  clips?: Record<string, ClipDef>;
+  /** Model-specific keyword aliases (attack anim -> clip name), checked before the family and global aliases. */
+  aliases?: Record<string, string>;
 }
 
 const _v = new THREE.Vector3();
@@ -66,7 +71,7 @@ export class RigVisual implements ActorVisual {
     this.model = model;
     this.root = model.root;
     this.modelScale = def.model?.scale ?? 1;
-    this.animator = new Animator(model, ctx.content, opts.family, opts.info);
+    this.animator = new Animator(model, ctx.content, opts.family, opts.info, opts.clips || opts.aliases ? { clips: opts.clips, aliases: opts.aliases } : undefined);
     this.height = (opts.height ?? model.height * 0.55) * this.modelScale;
     for (const [flag, a] of Object.entries(opts.flagAuras ?? {})) {
       const meshes = model.addAura(a.color, { surfaces: a.surfaces, inflate: a.inflate ?? model.size * 0.05, strength: a.strength ?? 1.3, power: a.power ?? 2.0, flow: a.flow ?? 0.7, time: ctx.kit.globals.time });

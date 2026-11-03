@@ -366,7 +366,7 @@ ui:
     ng_desc: "Foes return with new, fiercer patterns; weapons, Forms and relics stay with you, and the sky is already golden."
     ng_begin: "Begin the Cycle of Dawn"
     ng_q: "Begin the Cycle of Dawn?"
-    ng_d: "The journey starts again from the awakening in this slot. Weapons, Forms, relics and collections stay with you."
+    ng_d: "The journey starts again from the awakening in this slot and foes return fiercer. Weapons, Forms, relics and collections stay with you."
   debug:
     title: "Debug"
     on: "Debug menu enabled"

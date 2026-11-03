@@ -536,12 +536,12 @@ export const CSS = /* css */ `
 .sm-credits .end:not(.on) { pointer-events: none; }
 .sm-credits .end .note { max-width: min(640px, 80vw); margin: 0; color: var(--ivory-dim); text-shadow: 0 1px 8px rgba(0,0,0,.6); }
 /* end-of-game credits over the last shot: the sunrise stays visible above a soft veil */
-.sm-credits.over { justify-content: flex-end; padding: calc(var(--st) + 5vh) calc(var(--sr) + 8vw) calc(var(--sb) + 7vh) calc(var(--sl) + 8vw);
+.sm-credits.over { justify-content: flex-start; overflow-y: auto; touch-action: pan-y; padding: calc(var(--st) + 3vh) calc(var(--sr) + 8vw) calc(var(--sb) + 4vh) calc(var(--sl) + 8vw);
   background: radial-gradient(ellipse 80% 64% at 50% 54%, rgba(14,9,24,.6), rgba(14,9,24,.3) 62%, rgba(14,9,24,0) 100%), linear-gradient(180deg, rgba(12,8,22,.12), rgba(14,9,24,.42) 60%, rgba(14,9,24,.82)); animation: sm-in 2.4s ease both; }
-.sm-credits.over .body { gap: clamp(4px, 1.6vh, 14px); }
-.sm-credits.over .ln { text-shadow: 0 1px 12px rgba(0,0,0,.55); }
+.sm-credits.over .body { margin-top: auto; gap: clamp(4px, 1.6vh, 14px); } /* bottom-anchored, but never clipped at the top when taller than the screen */
+.sm-credits.over .ln { font-size: clamp(14px, 2.6vh + 5px, 24px); text-shadow: 0 1px 12px rgba(0,0,0,.55); }
 .sm-credits.over .ln.title { font-size: clamp(26px, 8vh, 72px); filter: drop-shadow(0 1px 1px rgba(40,20,30,.75)) drop-shadow(0 0 16px rgba(20,10,30,.6)); }
-.sm-credits.over .end { margin-top: 3vh; }
+.sm-credits.over .end { flex: none; margin-top: 3vh; gap: 10px; }
 @keyframes sm-in { from { opacity: 0; } }
 
 /* ending: cinematic letterbox, nothing else on screen but the story layer */

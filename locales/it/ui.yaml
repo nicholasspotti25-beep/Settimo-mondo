@@ -366,7 +366,7 @@ ui:
     ng_desc: "Gli avversari tornano con schemi nuovi e più feroci; armi, Forme e reperti restano con te, e il cielo è già dorato."
     ng_begin: "Inizia il Ciclo dell'Alba"
     ng_q: "Iniziare il Ciclo dell'Alba?"
-    ng_d: "Il cammino ricomincia dal risveglio in questo slot. Armi, Forme, reperti e collezioni restano con te."
+    ng_d: "Il cammino ricomincia dal risveglio in questo slot e gli avversari tornano più feroci. Armi, Forme, reperti e collezioni restano con te."
   debug:
     title: "Debug"
     on: "Menu di debug attivo"
