@@ -23,3 +23,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - 2026-11-03 17:15 started: render-kit#2 (engine), ui#3 (game)
 - ui#3 done: title + slots + import, character creator, settings, touch layout editor (touch-audited at 3 viewports)
 - act1#2 started
+- render-kit#2 done: Guardiano model, tube winding fix, auto exposure (HDR path built but off), screenPoint/registerShot; request to world re haze

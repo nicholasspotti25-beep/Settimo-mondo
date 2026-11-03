@@ -23,6 +23,18 @@ const PROBE_W = 32, PROBE_H = 16;
 const PROBE_DT = 0.3;
 /** Exposed log-average key comfort band (linear, pre tone mapping). */
 const KEY_LO = 0.075, KEY_HI = 0.21;
+/**
+ * Bloom mip levels per tier. Held at 0 until the kit rim / emissive terms are calibrated for linear HDR (at 5/3 levels the
+ * rim highlights of thin limbs bloom into white sparkles, see docs/worklog/render-kit.md); the passes are complete.
+ */
+const BLOOM_LEVELS: Record<QualityLevel, number> = { low: 0, medium: 0, high: 0 };
+/**
+ * HDR path switch. Off for now: (1) the world's additive / toneMapped:false layers were tuned for blending on the sRGB
+ * canvas and read much hazier when blended in linear HDR; (2) the kit rim term overflows half floats on some thin parts
+ * (white blocks after the MSAA resolve); (3) the dehaze cut crushes the frame to black when the view turns away from the
+ * glow faster than it eases. Until those are fixed every tier uses the direct path + probe-driven auto exposure.
+ */
+const HDR_ENABLED = false;
 
 export interface ActGrade {
   sat: number;
@@ -281,9 +293,9 @@ export class PostPipeline {
     if (!force && key === this.builtKey) return;
     this.builtKey = key;
     this.freeTargets();
-    if (!this.halfFloat || this.disposed) return;
+    if (!HDR_ENABLED || !this.halfFloat || this.disposed) return;
     this.hdr = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: this.quality === 'high' ? 4 : 0, depthBuffer: true });
-    const levels = this.quality === 'high' ? 5 : this.quality === 'medium' ? 3 : 0;
+    const levels = BLOOM_LEVELS[this.quality];
     let mw = w, mh = h;
     for (let i = 0; i < levels; i++) {
       mw = Math.max(1, Math.floor(mw / 2));

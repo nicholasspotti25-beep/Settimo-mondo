@@ -11,7 +11,7 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
 | 2 | Rigs: animator, clip libraries + keyword resolution, springs, IK, part anchors, 10 family builders, generic-from-data builder | partial: core + generic builder done and verified for humanoid/quadruped/mounted; the other 7 families have no pose library yet (they hold their rest pose) | src/render/rigs/**, rigs/generic.ts |
 | 3 | ActorRenderer: Portatore, player states, weapons + trails, bosses (BOSS_MODELS + generic fallback), clones/decoy/ally, overlays | partial (v1): Portatore from CharacterLook (cloak, seed glow, vial of light, no shadow, smooth scale, every player state mapped, dodge roll pivot, lock look-at); weapon via buildWeapon on grip sockets; bosses via lazy BOSS_MODELS or generic family model; clone/decoy/ally/echo tints; hit flash, pulsing red flash + red warning icon; Spezzato cracks; transition aura; death dissolve; hidden; blob shadows on Low. Missing: swing-arc generator + trails, part highlight constellation lines, two-hand IK | src/render/actors/ActorRenderer.ts, actors/portatore.ts |
 | 4 | FxRenderer: pooled particles, projectile/hazard visuals, combat FX, fallbacks, Metamondo warp, debug hitboxes | missing (sphere/disc stub) | src/render/fx/FxRenderer.ts |
-| 5 | Renderer/camera: registerShot hook, screenPoint, bloom/outline, act grading, shadow presets, lock-on framing, gravity roll, shake | partial: quality/watchdog/dynamic res, lock-on framing fixed (chunk 1), shadow map type fixed; registerShot not wired into ctx, no screenPoint, no post/grading | src/render/Renderer.ts, camera.ts |
+| 5 | Renderer/camera: registerShot hook, screenPoint, bloom/outline, act grading, shadow presets, lock-on framing, gravity roll, shake | partial: quality/watchdog/dynamic res, lock-on framing, ctx.registerShot wired, renderer.screenPoint(), post pipeline src/render/fx/post.ts: probe-driven auto exposure ACTIVE on all tiers (direct path); HDR path (half-float target, MSAA x4 High, dehaze, ACES, per-act grading, vignette, dither, bloom mips) written but switched OFF (HDR_ENABLED=false, see Notes); CameraRig.inspect; no outline yet | src/render/Renderer.ts, camera.ts, fx/post.ts |
 | 6 | data/anim/*.yaml pose libraries | partial: humanoid (35 clips), quadruped, mounted (steed + seated rider + foot_ dismounted), portatore (player actions) done; colossus, serpent, dragon, bird, insect, tree, tentacled missing | data/anim/ |
 | 7 | Guardiano del Regno reference model | done (chunk 2): barded slate destrier (dagged green-gold caparison with crown heraldry, peytral, crinet, chanfron, saddle), dull-silver knight (broken-crown great helm, layered pauldrons, tabard, faults, cape), Lancia del Custode (white shaft, vamplate, leaf head with crown socket); 'spectral_aura' wraps only the steed | src/content/bosses/guardiano_del_regno/model.ts |
 | 8 | docs/RENDER_KIT.md | missing | docs/RENDER_KIT.md |
@@ -19,18 +19,22 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
 
 ## Next
 
-2. FxRenderer: GPU particle system (fx.particles), projectile visuals per ProjectileKindDef.visual with trails, hazard
-   telegraph decals + actives per HazardKindDef.visual, rings, hit sparks, dodge/parry/guard/Spezzato/Grazia FX,
-   generic fallback ('collider_add:<id>', 'ally_wing_shield'), debug hitboxes.
-3. Renderer: `ctx.registerShot = (id, fn) => this.rig.registerShot(id, fn)`, `screenPoint(worldPos)`, bloom/outline/
-   grading per quality and act, blob vs real shadow per preset.
-4. Remaining pose libraries: colossus, serpent, dragon, bird, insect, tree, tentacled (+ extend render_anim tests to them).
-5. ActorRenderer v2: swing-arc generator from SwingDef.arc + weapon trails (base/tip), left-hand IK for two-handed grips,
-   part.highlight constellation lines, multi-part lock markers; Portatore cloak drape polish (reads a bit plank-like).
-6. Generic model polish: steed coat detail reads blotchy at distance, rider small vs steed; humanoid sword clips need
-   hand_r pitch tuning (blade follows the swing arc).
-7. docs/RENDER_KIT.md (STATUS: READY when stable), full screenshot pass (title → new game → Guardiano: idle, attacks,
-   red telegraph, Spezzato, grace) low/high.
+1. FxRenderer (top for gameplay): GPU particle system (fx.particles), hazard telegraph decals + active visuals per
+   HazardKindDef.visual, shockwave rings (Guardiano heavy_overhead / ng_spectral_ring), projectile visuals with trails
+   (spectral_lance), hit sparks, dodge/parry/guard/Spezzato/Grazia FX, generic fallback ('collider_add:<id>',
+   'ally_wing_shield'), debug hitboxes. Replaces the stub's white spheres (they show as white blobs on fighters).
+2. Exposure part 2 (src/render/fx/post.ts, HDR_ENABLED=false today): clamp kit rim/specular for half floats (white
+   blocks after MSAA resolve), make the dehaze cut follow view changes instantly (crushed rk2/final_1_boss_high), then
+   enable HDR + per-act grading + vignette, and bloom (BLOOM_LEVELS high 5 / medium 3) once the world stream re-tunes its
+   additive layers (request filed). Re-shoot vetta_attesa alba/tramonto/notte; outline pass; shadow preset check.
+3. Remaining pose libraries: colossus, serpent, dragon, bird, insect, tree, tentacled (+ extend render_anim tests).
+4. ActorRenderer v2: swing-arc generator from SwingDef.arc + weapon trails (base/tip), left-hand IK for two-handed grips,
+   part.highlight constellation lines, multi-part lock markers; Portatore cloak drape polish.
+5. Guardiano polish: hind thigh still grazes the caparison rear in some poses; chanfron reads boxy from the front; add a
+   model triangle-count assert (< 80k) to tests/render_anim.test.ts for BOSS_MODELS entries.
+6. Generic model polish: humanoid sword clips need hand_r pitch tuning (blade follows the swing arc).
+7. docs/RENDER_KIT.md (STATUS: READY when stable; Guardiano model.ts is the worked example), full screenshot pass
+   (title -> new game -> Guardiano: idle, attacks, red telegraph, Spezzato, grace) low/high.
 
 ## Notes
 
@@ -83,4 +87,34 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
 - Verification: tsc 0 errors in owned files; registry + SM_PARTIAL data ok; headless 1280x576 high (scratchpad rk2/g4_*):
   front/profile idle, thrust active (lance forward), overhead telegraph (lance raised, red diamond + vignette),
   spectral aura on the steed only. Stats with the model in frame (high): ~65-71 calls, 167-188k tris (scene total).
+- Exposure fix (lead note): root causes found — (1) the white tubes above (rim saturation), (2) the world's transparent
+  layers (glows.ts / mist.ts / particles, toneMapped:false, additive) ignore exposure on the direct path and dominate the
+  frame when the camera faces the tramonto/alba glow, so lowering toneMappingExposure alone changed nothing (measured:
+  exposure 0.42 looked identical to 1.0). New src/render/fx/post.ts (all tiers, half-float HDR target; direct path only as
+  fallback): center-weighted log-average luminance probe (32x16 -> 1x1 RGBA8, async readback, no stalls), CPU-eased
+  correction keeping the exposed key in [0.075, 0.21] (partial, exponent 0.85: dark scenes lift at most x1.3), soft-min
+  dehaze (cuts up to 60% of a dominating veil), NaN/Inf sanitising, ACES, per-act grade (ACT_GRADES, eased on act change),
+  vignette 0.24 (helps the corner HUD), dither. Renderer: gl.info.autoReset=false + reset per frame (stats count all
+  passes), stats.exposure / stats.key, scene.onBeforeRender wrapper reads the atmosphere's base exposure.
+  Evidence (1280x576, scratchpad rk2/): before = tools/out/smoke/boss_01 and rk2/basehi_0 (tramonto, near-white floor,
+  boss/player bleached, HUD bars low contrast); after = rk2/e4lo_0_tramonto (low: exposure 1.0 -> 0.71, floor tiles,
+  gate, boss and Portatore read, HUD bars stand out). Side effect: transparent layers now blend in linear space, so alba
+  reads a bit hazier than before (rk2/e4hi_1_alba) -> request sent to the world stream (docs/requests/render-kit.md).
+  Bloom (threshold 1.5 / knee 0.7 / clamp 8, dual-filter mips) produced white sparkles on character rims at High ->
+  held at 0 levels (Next 3). Stats tramonto: high 68 calls / 159k tris, low 50 calls / 54k tris.
+- Verification chunk 2: `npx tsc --noEmit -p tsconfig.json` 0 errors in owned files; `npm run registry` (1 model) and
+  `SM_PARTIAL=1 npm run data` ok; `npx vitest run tests/render_anim.test.ts` (see final run); captures use a private Vite
+  (scratchpad vite-rk.mjs: port 5174, hmr off, no watcher) because the ui stream's edits reloaded the page mid-capture.
+- FINAL STATE of the exposure work this chunk: the full HDR path was tried on all tiers and then switched off
+  (HDR_ENABLED=false) after rk2/final_1_boss_high showed white blocks on character rims (half-float overflow through the
+  MSAA resolve) and a crushed near-black frame when the camera turned away from the glow (dehaze cut eased too slowly).
+  Shipped now: the direct path on every tier (as before the chunk) + the probe-driven auto exposure (32x16 scene probe
+  every 0.3 s, no shadow re-render, async 1x1 readback) multiplying the atmosphere's exposure (tramonto measured ~0.42-0.7).
+  This darkens tone-mapped geometry but NOT the world's toneMapped:false haze/glow layers, which are the main cause of
+  the vetta_attesa washout -> the world-stream request in docs/requests/render-kit.md is the remaining fix.
+- Shipped-state check (rk2/ship_*, high, tramonto): facing the glow avg RGB (185,166,148), exposure 0.86, key 0.11 (in band);
+  facing away the arena is very dark red with bright white blobs around the fighting actors — exposure is 0.86 there too,
+  so the darkness comes from the world's tramonto lighting (low ambient, red key light), and the blobs are most likely the
+  FxRenderer stub's white hit/parry spheres while the boss keeps hitting the invincible player (FxRenderer is Next 1).
+  Both to re-check first thing next chunk with HDR_ENABLED=false (current) before touching post.ts again.
 
