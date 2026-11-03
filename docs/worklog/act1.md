@@ -22,21 +22,29 @@ tests/act1*.test.ts, docs/requests/act1.md.
 | 9 | Arena data (bounds, obstacles, variants pier_destroyed / soul_bridge / current) | done | data/arenas/*.yaml |
 | 10 | Balance bot: perfect wins inside 120+20×D with few hits; sloppy not trivial | done (chunk 2): all 5 PASS base; NG+ and ToD variants all won by the perfect bot | tools/bot/hooks/*, data/bosses/great_devourer.yaml |
 | 11 | Bot hooks for scripted mechanics | done (chunk 1): all 5 hooks; shared act1Defense (box hazards, charge lines, ring jumps, round-hazard escape) | tools/bot/hooks/{cavaliere_errante,elder_tree,mostro_della_palude,great_devourer,caronte}.ts |
-| 12 | Unit tests tests/act1*.test.ts | done (chunk 2): 27 tests, all pass | tests/act1.test.ts |
+| 12 | Unit tests tests/act1*.test.ts | done for sim (27); model tests started chunk 3 (3: Cavaliere budget, hurtbox alignment, dismount/horse leaves/retry) | tests/act1.test.ts, tests/act1_models.test.ts |
 | 13 | Canon audit clean for act1 bosses | partial: only "no music theme data" (audio stream) and "no model builder" (item 14) remain; canon quotes OK | — |
-| 14 | Boss models (5) | missing — blocked: docs/RENDER_KIT.md not present / not READY | src/content/bosses/<id>/model.ts |
-| 15 | Arena dressing (5) incl. first_light, pier_destroyed, soul_bridge/current, caronte_ferry cues | missing — blocked: docs/WORLD_KIT.md not present / not READY | src/content/bosses/<id>/arena.ts |
+| 14 | Boss models (5) | partial (chunk 3): cavaliere_errante first pass (mounted + on-foot composite, horse gallops off on dismount, lantern ember on death; screenshots checked) — needs a volume pass on the knight's body; elder_tree, palude, devourer, caronte missing | src/content/bosses/cavaliere_errante/model.ts |
+| 15 | Arena dressing (5) incl. first_light, pier_destroyed, soul_bridge/current, caronte_ferry cues | missing (unblocked: WORLD_KIT.md and RENDER_KIT.md both STATUS: READY) | src/content/bosses/<id>/arena.ts |
 | 16 | Requests to other streams | none needed so far | docs/requests/act1.md |
 
 ## Next
 
-1. When RENDER_KIT.md / WORLD_KIT.md say STATUS: READY (still absent on 2026-11-03): 5 boss models
-   (src/content/bosses/<id>/model.ts) + 5 arena dressings (arena.ts, incl. cues first_light, arena_state:pier_destroyed /
-   soul_bridge / current, caronte_ferry, palude_split, cavaliere_dismount), headless screenshots on port 5181 at 1280x576,
-   iterate; then canon audit should only show the audio stream's themes.
-2. Optional polish while blocked: Caronte NG+ perfect bot 3.7 hits (base attacks overlapping under NG+ rhythm: soul
-   projectiles, lantern_gaze, raise_bridge wake ring at jump apex 0.79 m vs ring height 0.8); Great Devourer perfect
-   3.3–3.6 hits (one seed 7: splash rings jumped late, raft_crush coils) — both bot timing, data matches the reference rings.
+1. Cavaliere model, volume pass: the plate-style humanoid body reads as a thin mannequin (ball joints, stick limbs) up close and
+   on foot. Add a long surcoat/tabard skinned over chest/hips/thighs (cloth over the plate), thicker greaves/vambraces, make
+   the cloak hang wider over the horse's rump; check the hood frames the sallet from the front (on foot, outside the
+   transition aura). Then check `counter_stance` / `salute` clips read (pose screenshots with fightPaused during the
+   telegraph), and the night charge out of the dark.
+2. Arena dressing pianure_erba_alta (src/content/bosses/cavaliere_errante/arena.ts): ring of leaning standing stones at
+   r ≈ 36 leaving the gate (z 96) and the north exit path (z 164 → 195) open; taller golden grass band (render-only
+   PropField tall_grass) outside r 30; GlowSet; cues cavaliere_dismount (trampled ring / dust), cavaliere_into_dark /
+   out_of_dark (night), cavaliere_lantern (a warm glint on death). The biome cover already grows inside the arena.
+3. Elder Tree: model (tree family; pose clips for root_call, branch_whip_l/r, branch_slam, shake_canopy, root_stomp,
+   heart_pulse via RigVisualOpts.clips since data/anim has no tree.yaml yet; heart part sphere [0, 2.3, 2.95] with flag
+   heart_open showing the light) + arena foresta_cuore (black canopy, luminous mushrooms, roots; cue first_light = a shaft
+   of dawn light through the canopy on death, elder_heart_open). Boss spawns at z ≈ 132 (north side).
+4. Then palude, devourer (arena_state pier_destroyed), caronte (soul_bridge / current, caronte_ferry).
+5. Optional bot polish (unchanged): Caronte NG+ 3.7 hits, Devourer 3.3–3.6 hits.
 
 ## Notes
 
@@ -92,3 +100,25 @@ tests/act1*.test.ts, docs/requests/act1.md.
   tools/bot/hooks/cavaliere_errante.ts; `npm run registry && SM_PARTIAL=1 npm run data` ok (1026 it / 1026 en); canon audit for
   act1 bosses: only "no music theme data" (audio stream) and "no model builder" (blocked on RENDER_KIT.md).
 
+- Chunk 3 (2026-11-03): docs/RENDER_KIT.md appeared with STATUS: READY during the chunk (read in full; WORLD_KIT.md READY too).
+  Cavaliere model src/content/bosses/cavaliere_errante/model.ts: own ActorVisual composing two kit models — mounted
+  (mountedSkeleton, horse withers 2.6 m, knight 3.6 m, seat 0.82 w; family 'mounted') and on foot (humanoidSkeleton 3.6 m,
+  family 'humanoid'); both get model-specific clips `salute` and `counter_stance` (RigVisualOpts-style extra clips on the
+  Animator). On 'dismounted' the rider vaults down (0.55 s), the horse rears (rear_stomp telegraph) then gallops away from
+  the player (≤ 11 m/s, drawn in actor-local space from its own world track) and is hidden after 7 s; a retry (flags back to
+  'mounted') restores rider + horse; a load straight into p2 shows no horse. FX uniforms copied from the mounted model to the
+  foot model every frame (hit flash, Spezzato, dissolve, aura). Lantern on a 2-bone spring chain (saddle, then belt) with an
+  ember surface that warms only while dying (canon: lit for real only in the ending); road-line glow on the blade brightens
+  in counter_stance / riposte. 26.9k triangles high (both models), 13 + 9 surfaces.
+- Data: Cavaliere steed/rider part spheres moved onto the model (measured bones: steed chest y 2.46 z 1.27, body y 2.36
+  z -1.27, head y 3.83 z 2.35, rider chest y 3.91, rider head y 4.49): steed [0,2.2,1.15] r1.2, [0,2.15,-1.05] r1.25,
+  [0,3.5,2.3] r0.65; rider [0,3.7,-0.15] r0.75, [0,4.6,-0.1] r0.5. Body hurtboxes (on foot) unchanged — foot bones hips
+  1.88 / chest 2.64 / head 3.21 sit inside them. Bot after the change (seeds=3): PASS perfect 3/3 avg 110 s / 180, 0.3
+  hits; sloppy wins 2/3 with 12.3 hits.
+- Screenshots (port 5181, 1280x576, scratchpad shots/cav2..cav4, alba / tramonto / notte, mounted + phase 2): mounted reads
+  as a hooded green-cloaked rider on a grey horse with the lantern and saddlebag visible at follow distance; on foot the
+  knight reads as a thin mannequin (Next 1). Note: with Vite watch off, restart the server after every edit (stale
+  transforms otherwise; the first shot set showed a green horse from a stale module).
+- End of chunk 3: `npx tsc --noEmit -p tsconfig.json` clean (whole tree); `npx vitest run tests/act1.test.ts
+  tests/act1_models.test.ts tests/render_models.test.ts` 34/34 pass; `npm run registry && SM_PARTIAL=1 npm run data` ok
+  (1071 it / 1071 en).

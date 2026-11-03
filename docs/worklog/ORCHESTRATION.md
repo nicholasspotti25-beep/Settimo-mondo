@@ -33,3 +33,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - world#2 done: wash-out fixed (uHazeK on all additive layers, fog-gate wall camera fades), docs/WORLD_KIT.md STATUS: READY, altars/gates/reperti/exits/vistas/particles confirmed; started render-kit#3 (RENDER_KIT.md first, then FxRenderer)
 - ui#4 done: collections, NG+ start, credits mode, ending letterbox, debug menu; requests to audio (titoli cue) and sim (attack shapes for hitbox overlay)
 - started: act1#3 (arena dressing + models for cavaliere_errante, elder_tree)
+- render-kit#3 done: docs/RENDER_KIT.md STATUS: READY, FxRenderer v1 (telegraph decals, shockwaves, projectiles, combat FX, particles), model clips/minion hooks, render_models test

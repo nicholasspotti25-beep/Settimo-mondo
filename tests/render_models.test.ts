@@ -77,7 +77,7 @@ describe('registered boss models', () => {
           const e = o.matrixWorld.elements;
           for (let i = 0; i < 16; i++) expect(Number.isFinite(e[i]), `${id} ${q} ${o.name}`).toBe(true);
         });
-        if (q === 'high') console.info(`[render] ${id}: ${tris} triangles on high`);
+        if (q === 'high') console.info(`[render] ${id}: ${tris} triangles, ${(v.root.children.filter((o) => (o as THREE.Mesh).isMesh && !(o.userData.surface as string).startsWith("aura:"))).length} surfaces on high`);
         v.dispose();
       }
     });

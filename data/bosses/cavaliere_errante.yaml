@@ -26,14 +26,14 @@ parts:
   - id: steed
     name_key: part.cavaliere_errante.steed
     hurt:
-      - {c: [0, 1.5, 1.05], r: 1.2}   # chest
-      - {c: [0, 1.55, -0.95], r: 1.2} # barrel / hindquarters
-      - {c: [0, 2.7, 2.15], r: 0.6}   # neck and head
+      - {c: [0, 2.2, 1.15], r: 1.2}   # chest (model: steed chest bone y 2.46 z 1.27)
+      - {c: [0, 2.15, -1.05], r: 1.25} # barrel / hindquarters (body bone y 2.36 z -1.27)
+      - {c: [0, 3.5, 2.3], r: 0.65}   # neck and head (head bone y 3.83 z 2.35)
   - id: rider
     name_key: part.cavaliere_errante.rider
     hurt:
-      - {c: [0, 3.45, -0.2], r: 0.75}
-      - {c: [0, 4.45, -0.15], r: 0.45}
+      - {c: [0, 3.7, -0.15], r: 0.75}  # seated torso (rider chest bone y 3.91)
+      - {c: [0, 4.6, -0.1], r: 0.5}    # hood (rider head bone y 4.49)
 move: {walk: 3.0, run: 9.0, turn: 2.8, preferred_range: [6, 12]}
 idle_gap: [0.8, 1.5]
 music: boss_cavaliere_errante

@@ -10,31 +10,31 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
 | 1 | Procedural kit (lathe, swept/skinned tubes, blades, ellipsoids, bevel boxes, instanced scatter, fur, membranes, cloth/capes, merge/LOD, stylized PBR + rim/fresnel, actor FX uniforms, cached textures, blob shadows) | done (code); used by real models in game since chunk 1 | src/render/kit/*.ts |
 | 2 | Rigs: animator, clip libraries + keyword resolution, springs, IK, part anchors, 10 family builders, generic-from-data builder | partial: core + generic builder done and verified for humanoid/quadruped/mounted; the other 7 families have no pose library yet (they hold their rest pose) | src/render/rigs/**, rigs/generic.ts |
 | 3 | ActorRenderer: Portatore, player states, weapons + trails, bosses (BOSS_MODELS + generic fallback), clones/decoy/ally, overlays | partial (v1): Portatore from CharacterLook (cloak, seed glow, vial of light, no shadow, smooth scale, every player state mapped, dodge roll pivot, lock look-at); weapon via buildWeapon on grip sockets; bosses via lazy BOSS_MODELS or generic family model; clone/decoy/ally/echo tints; hit flash, pulsing red flash + red warning icon; Spezzato cracks; transition aura; death dissolve; hidden; blob shadows on Low. Missing: swing-arc generator + trails, part highlight constellation lines, two-hand IK | src/render/actors/ActorRenderer.ts, actors/portatore.ts |
-| 4 | FxRenderer: pooled particles, projectile/hazard visuals, combat FX, fallbacks, Metamondo warp, debug hitboxes | missing (sphere/disc stub) | src/render/fx/FxRenderer.ts |
+| 4 | FxRenderer: pooled particles, projectile/hazard visuals, combat FX, fallbacks, Metamondo warp, debug hitboxes | done (chunk 3) v1: GPU particles (fx.particles additive + fx.smoke alpha, ring buffer, life evaluated in the VS), SDF ground decals (attack warnings incl. charge lanes/leap landings + red hatching, hazard telegraph + 7 active families), shockwave walls/pillars, projectile heads/meshes/ribbon trails/shed particles for all 23 visuals, combat FX for every combat event, perfect-dodge afterimage (fresnel ghost of the Portatore pose), vfx built-ins + generic fallback + registerVfx, Metamondo sphere + reactions, debug hitboxes | src/render/fx/FxRenderer.ts, particles.ts, decals.ts, projectiles.ts |
 | 5 | Renderer/camera: registerShot hook, screenPoint, bloom/outline, act grading, shadow presets, lock-on framing, gravity roll, shake | partial: quality/watchdog/dynamic res, lock-on framing, ctx.registerShot wired, renderer.screenPoint(), post pipeline src/render/fx/post.ts: probe-driven auto exposure ACTIVE on all tiers (direct path); HDR path (half-float target, MSAA x4 High, dehaze, ACES, per-act grading, vignette, dither, bloom mips) written but switched OFF (HDR_ENABLED=false, see Notes); CameraRig.inspect; no outline yet | src/render/Renderer.ts, camera.ts, fx/post.ts |
 | 6 | data/anim/*.yaml pose libraries | partial: humanoid (35 clips), quadruped, mounted (steed + seated rider + foot_ dismounted), portatore (player actions) done; colossus, serpent, dragon, bird, insect, tree, tentacled missing | data/anim/ |
 | 7 | Guardiano del Regno reference model | done (chunk 2): barded slate destrier (dagged green-gold caparison with crown heraldry, peytral, crinet, chanfron, saddle), dull-silver knight (broken-crown great helm, layered pauldrons, tabard, faults, cape), Lancia del Custode (white shaft, vamplate, leaf head with crown socket); 'spectral_aura' wraps only the steed | src/content/bosses/guardiano_del_regno/model.ts |
-| 8 | docs/RENDER_KIT.md | missing | docs/RENDER_KIT.md |
-| — | tests/render*.test.ts | partial: tests/render_anim.test.ts (9 tests) | tests/render_anim.test.ts |
+| 8 | docs/RENDER_KIT.md | done (chunk 3): STATUS: READY — module registration (incl. minion `minions` export), frame/data alignment, ModelBuilder/geometry/surfaces/palette API, 10 rig families (bones, builders, pose-library status), keywords + resolution order, clip format, model-specific clips, partChains/springs/look, RigVisual options, generic overlays, flags, VFX hooks, budgets, Guardiano worked example, checklist | docs/RENDER_KIT.md |
+| — | tests/render*.test.ts | partial: tests/render_anim.test.ts (9 tests), tests/render_models.test.ts (3: every BOSS_MODELS entry < 80k tris on low/medium/high + animates every attack anim without NaN; Guardiano aura on steed surfaces only, helm/chest on their hurtboxes) | tests/render_anim.test.ts, tests/render_models.test.ts |
 
 ## Next
 
-1. FxRenderer (top for gameplay): GPU particle system (fx.particles), hazard telegraph decals + active visuals per
-   HazardKindDef.visual, shockwave rings (Guardiano heavy_overhead / ng_spectral_ring), projectile visuals with trails
-   (spectral_lance), hit sparks, dodge/parry/guard/Spezzato/Grazia FX, generic fallback ('collider_add:<id>',
-   'ally_wing_shield'), debug hitboxes. Replaces the stub's white spheres (they show as white blobs on fighters).
-2. Exposure part 2 (src/render/fx/post.ts, HDR_ENABLED=false today): clamp kit rim/specular for half floats (white
+1. Remaining pose libraries (all 7 content streams' models need them): colossus, serpent, dragon, bird, insect, tree,
+   tentacled (+ extend render_anim tests); then drop the "not yet" marks in docs/RENDER_KIT.md section 5.
+2. FX polish: a settings toggle for `fx.attackWarnings` (request to ui), shockwave wall look from close up, projectile
+   meshes per visual reviewed in a dedicated shot (the chunk-3 capture caught only golden_wave/bolt in frame), decals on
+   sloped (non-arena) ground, uHazeK/exposure scaling of the additive kit fresnel shells.
+3. Exposure part 2 (src/render/fx/post.ts, HDR_ENABLED=false today): clamp kit rim/specular for half floats (white
    blocks after MSAA resolve), make the dehaze cut follow view changes instantly (crushed rk2/final_1_boss_high), then
    enable HDR + per-act grading + vignette, and bloom (BLOOM_LEVELS high 5 / medium 3) once the world stream re-tunes its
    additive layers (request filed). Re-shoot vetta_attesa alba/tramonto/notte; outline pass; shadow preset check.
-3. Remaining pose libraries: colossus, serpent, dragon, bird, insect, tree, tentacled (+ extend render_anim tests).
 4. ActorRenderer v2: swing-arc generator from SwingDef.arc + weapon trails (base/tip), left-hand IK for two-handed grips,
    part.highlight constellation lines, multi-part lock markers; Portatore cloak drape polish.
 5. Guardiano polish: hind thigh still grazes the caparison rear in some poses; chanfron reads boxy from the front; add a
    model triangle-count assert (< 80k) to tests/render_anim.test.ts for BOSS_MODELS entries.
 6. Generic model polish: humanoid sword clips need hand_r pitch tuning (blade follows the swing arc).
-7. docs/RENDER_KIT.md (STATUS: READY when stable; Guardiano model.ts is the worked example), full screenshot pass
-   (title -> new game -> Guardiano: idle, attacks, red telegraph, Spezzato, grace) low/high.
+7. Full screenshot pass (title -> new game -> Guardiano: idle, attacks, red telegraph, Spezzato, grace) low/high; keep
+   docs/RENDER_KIT.md in sync with every API change.
 
 ## Notes
 
@@ -118,3 +118,25 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
   FxRenderer stub's white hit/parry spheres while the boss keeps hitting the invincible player (FxRenderer is Next 1).
   Both to re-check first thing next chunk with HDR_ENABLED=false (current) before touching post.ts again.
 
+
+### Chunk 3 (2026-11-03)
+- docs/RENDER_KIT.md written (STATUS: READY), checked against the code. API additions made for it (owned files):
+  `RigVisualOpts.clips` / `.aliases` (model-specific clips layered over the family library, passed to the Animator as
+  AnimatorExtra); ActorRenderer loads minion models from the owner boss module's named export
+  `minions: Record<minionId, BossModelBuilder>` (BOSS_MODELS is keyed by boss folder only, so minions had no way in).
+- tests/render_models.test.ts: Guardiano 15,896 triangles / 13 surfaces on High; all 3 tests pass with
+  tests/render_anim.test.ts (12/12). tsc: 0 errors in owned files.
+- Doc states honestly that 7 families (colossus, serpent, dragon, bird, insect, tree, tentacled) have no pose library
+  yet and that `RigVisualOpts.clips` works meanwhile; family builders do not set `info.partChains` (models must).
+- FxRenderer v1 (Status #4). Renderer.ts wires `fx.camera` and `fx.playerModel`. ~6-9 FX draw calls in a busy fight.
+  Verification: tsc 0 errors in owned files; `npx vitest run tests/render_anim.test.ts tests/render_models.test.ts`
+  13/13 (registry now has 2 models: guardiano_del_regno + cavaliere_errante from act1, both < 80k on every preset);
+  `npm run registry` + `SM_PARTIAL=1 npm run data` ok. Headless 1280x576 (scratchpad rk3/, script fx.mjs, private Vite
+  vite-rk.mjs on 5174), LOOKED at: a_high_red_tel/b_high_red_tel/c_low_red_tel (heavy_overhead: red hatched wedge +
+  red diamond, readable on the bright giorno floor), c_low_sweep_tel (lance_sweep amber half-annulus filling outward),
+  b_high_charge_tel (charge_lateral lane through the player), a_high_haz_tel/haz_act (fire_pillar, ice_spike,
+  lightning_mark, void_zone, roots box: outlines + growing fill), a_high_proj (fire/ice/light pillars, void particles,
+  crack seams), a_high_grace (rays flash + light pillar + ring), a_high_parry. Fixes made from the shots: decal fill/edge
+  stronger + edge width grows with camera distance (thin at 20 m before), pillars toned down (were white-saturated),
+  crack seams keep the hazard hue (roots read white), trails thin when flying at the camera (stood up as a bar).
+  Stats with FX: high ~62-111 calls / 174-343k tris (scene incl. world + transparent pillars), low 51-54 calls / 69k tris.

@@ -75,6 +75,8 @@ export class Renderer {
     };
     this.actors = new ActorRenderer(this.scene, this.ctx);
     this.fx = new FxRenderer(this.scene, this.ctx);
+    this.fx.camera = () => this.rig.camera;
+    this.fx.playerModel = () => this.actors.player?.model ?? null;
     canvas.addEventListener('webglcontextlost', (e) => {
       e.preventDefault();
       this.contextLost = true;

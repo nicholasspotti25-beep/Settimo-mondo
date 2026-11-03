@@ -4,6 +4,7 @@ type Loader = () => Promise<any>;
 
 /** Boss model modules (default export: BossModelBuilder). */
 export const BOSS_MODELS: Record<string, Loader> = {
+  "cavaliere_errante": () => import('../content/bosses/cavaliere_errante/model'),
   "guardiano_del_regno": () => import('../content/bosses/guardiano_del_regno/model'),
 };
 
