@@ -50,7 +50,15 @@ export class ActorRenderer {
   private seen = new Set<number>();
   private time = 0;
 
-  constructor(scene: THREE.Scene, private ctx: RenderCtx) {
+  /** The rendering camera (set by the Renderer): the Portatore's hero light rides with it. */
+  camera: THREE.Camera | null = null;
+  /** Current tone-mapping exposure (set by the Renderer from the post pipeline; the hero light is banded on screen). */
+  exposure = 1;
+  private sun: THREE.DirectionalLight | null = null;
+  private hemi: THREE.HemisphereLight | null = null;
+  private lightScanT = 0;
+
+  constructor(private readonly scene: THREE.Scene, private ctx: RenderCtx) {
     scene.add(this.group);
     this.group.add(this.blobs.mesh);
     this.warnMat = new THREE.SpriteMaterial({ map: spriteTexture('warning', 64), color: new THREE.Color('#ff2a1a'), transparent: true, depthTest: false, depthWrite: false });
@@ -127,6 +135,13 @@ export class ActorRenderer {
 
   private entryFor(a: Actor): Entry | null {
     let e = this.entries.get(a.id);
+    // a new fight can reuse an id within one tick (startFightDirect: zone load + fight start, Specchio memories):
+    // the entry belongs to the old actor object, so its model (another boss) must not carry over
+    if (e && e.actor !== a) {
+      this.dropEntry(e);
+      this.entries.delete(a.id);
+      e = undefined;
+    }
     if (!e) {
       const warn = new THREE.Sprite(this.warnMat);
       warn.renderOrder = 20;
@@ -167,7 +182,11 @@ export class ActorRenderer {
       }
       this.lookRef = look;
     }
-    if (this.player) this.player.update(sim, alpha, dt);
+    if (this.player) {
+      this.player.update(sim, alpha, dt);
+      this.findLights(dt);
+      if (this.camera) this.player.light(this.camera, this.sun, this.hemi, this.exposure);
+    }
     // --- actors ---
     const seen = this.seen;
     seen.clear();
@@ -197,10 +216,31 @@ export class ActorRenderer {
     this.blobs.mesh.visible = blobs;
     for (const [id, e] of this.entries) {
       if (seen.has(id)) continue;
-      if (e.visual) e.visual.dispose();
-      e.visual?.root.removeFromParent();
-      e.warn.removeFromParent();
+      this.dropEntry(e);
       this.entries.delete(id);
+    }
+  }
+
+  private dropEntry(e: Entry): void {
+    if (e.visual) e.visual.dispose();
+    e.visual?.root.removeFromParent();
+    e.warn.removeFromParent();
+  }
+
+  /** The world's key lights (atmosphere sun + hemisphere, direct children of the scene), re-checked every 2 s. */
+  private findLights(dt: number): void {
+    this.lightScanT -= dt;
+    if (this.lightScanT > 0 && this.sun?.parent && this.hemi?.parent) return;
+    this.lightScanT = 2;
+    this.sun = null;
+    this.hemi = null;
+    let best = -1;
+    for (const o of this.scene.children) {
+      const d = o as THREE.DirectionalLight;
+      if (d.isDirectionalLight && d.intensity > best) {
+        best = d.intensity;
+        this.sun = d;
+      } else if ((o as THREE.HemisphereLight).isHemisphereLight && !this.hemi) this.hemi = o as THREE.HemisphereLight;
     }
   }
 

@@ -3,7 +3,9 @@
  *  - wrap / optional toon-ramp diffuse (painterly soft terminator),
  *  - rim light + fresnel (global rim color driven by the scene, per-material strength),
  *  - triplanar object-space detail map (albedo / roughness / cavity / crack mask) from a procedural DataTexture,
- *  - per-actor FX uniforms (hit flash, Colpo Rosso tint, Spezzato glowing cracks, aura, dissolve-into-light).
+ *  - per-actor FX uniforms (hit flash, Colpo Rosso tint, Spezzato glowing cracks, aura, dissolve-into-light),
+ *  - optional hero lighting (SurfaceOpts.hero): a camera-relative fill + back rim that keeps one character (the Portatore)
+ *    readable from the follow camera at every time of day, independent of where the sun is.
  * Programs are shared: every variant has a stable customProgramCacheKey.
  */
 import * as THREE from 'three';
@@ -33,6 +35,34 @@ export interface ActorFx {
   crackColor: { value: THREE.Color };
   /** rgb = aura color, a = strength (fresnel shell inside the material). */
   aura: { value: THREE.Vector4 };
+}
+
+/**
+ * Hero lighting uniforms (view space, shared by every material of one character). The owner updates them each frame from
+ * the scene lights (see PortatoreVisual.light): the fill is a second, flattering key that follows the camera, the rim
+ * outlines the silhouette edges facing `rimDir` (additive: dark cloaks still get an edge).
+ */
+export interface HeroLight {
+  /** Fill radiance (linear rgb, already divided by PI like a direct light's Lambert term). */
+  fill: { value: THREE.Color };
+  /** Direction toward the fill light, view space (normalized). */
+  fillDir: { value: THREE.Vector3 };
+  /** Rim radiance (linear rgb, additive). */
+  rim: { value: THREE.Color };
+  /** Direction the lit edges face, view space (normalized; z ~ 0 lights the silhouette sides). */
+  rimDir: { value: THREE.Vector3 };
+  /** x = rim fresnel power, y = omnidirectional share of the fill (fills the deepest folds), z = specular glint. */
+  params: { value: THREE.Vector3 };
+}
+
+export function createHeroLight(): HeroLight {
+  return {
+    fill: { value: new THREE.Color(0, 0, 0) },
+    fillDir: { value: new THREE.Vector3(-0.45, 0.55, 0.7).normalize() },
+    rim: { value: new THREE.Color(0, 0, 0) },
+    rimDir: { value: new THREE.Vector3(0.35, 0.94, -0.05).normalize() },
+    params: { value: new THREE.Vector3(2.2, 0.1, 0.5) },
+  };
 }
 
 export function createActorFx(): ActorFx {
@@ -77,6 +107,8 @@ export interface SurfaceOpts {
   fog?: boolean;
   /** Multiply the emissive term by vertex colors (glow surfaces tinted per part). */
   emissiveVertexColor?: boolean;
+  /** Hero lighting (camera fill + back rim) shared by one character's materials. */
+  hero?: HeroLight | null;
 }
 
 const LIGHT_PARS_PATCHED = (() => {
@@ -110,6 +142,15 @@ uniform vec3 uSmDissolveCol;
 uniform float uSmCrack;
 uniform vec3 uSmCrackCol;
 uniform vec4 uSmAura;
+#endif
+#ifdef SM_HERO
+uniform vec3 uSmHeroFill;
+uniform vec3 uSmHeroFillDir;
+uniform vec3 uSmHeroRim;
+uniform vec3 uSmHeroRimDir;
+uniform vec3 uSmHeroP;
+#endif
+#ifdef SM_FX
 float smHash( vec3 p ) {
   p = fract( p * 0.3183099 + 0.1 );
   p *= 17.0;
@@ -193,6 +234,19 @@ function patchShader(shader: THREE.WebGLProgramParametersWithUniforms, u: Record
       '#include <opaque_fragment>',
       `float smNV = 1.0 - clamp( dot( normal, normalize( vViewPosition ) ), 0.0, 1.0 );
   outgoingLight += uSmRim * pow( smNV, uSmRimP.y ) * uSmRimP.x * uSmRimG;
+  #ifdef SM_HERO
+  {
+    vec3 smHA = diffuseColor.rgb * ( 1.0 - 0.6 * metalnessFactor );
+    float smHd = smLightRamp( dot( normal, uSmHeroFillDir ) );
+    outgoingLight += smHA * uSmHeroFill * ( smHd + uSmHeroP.y );
+    // a soft glint of the fill on smooth / metal parts (buckles, clasp, blade guard)
+    vec3 smHh = normalize( uSmHeroFillDir + normalize( vViewPosition ) );
+    float smGl = pow( clamp( dot( normal, smHh ), 0.0, 1.0 ), mix( 8.0, 64.0, 1.0 - roughnessFactor ) ) * ( 1.0 - roughnessFactor );
+    outgoingLight += uSmHeroFill * smGl * uSmHeroP.z * ( 0.3 + metalnessFactor );
+    float smHr = clamp( dot( normal, uSmHeroRimDir ) * 0.6 + 0.4, 0.0, 1.0 );
+    outgoingLight += uSmHeroRim * pow( smNV, uSmHeroP.x ) * smHr;
+  }
+  #endif
   #ifdef SM_FX
   outgoingLight += uSmAura.rgb * pow( smNV, 1.6 ) * uSmAura.a;
   outgoingLight = mix( outgoingLight, uSmFlash.rgb, uSmFlash.a * ( 0.45 + 0.55 * smNV ) );
@@ -230,6 +284,7 @@ export function createStylized(o: SurfaceOpts, globals: KitGlobals, fx: ActorFx 
   if (o.toon) defines.SM_TOON = '';
   if (fx) defines.SM_FX = '';
   if (o.emissiveVertexColor) defines.SM_EVC = '';
+  if (o.hero) defines.SM_HERO = '';
   m.defines = defines;
   const f = fx ?? NEUTRAL_FX;
   const uniforms: Record<string, THREE.IUniform> = {
@@ -245,6 +300,13 @@ export function createStylized(o: SurfaceOpts, globals: KitGlobals, fx: ActorFx 
     uSmCrackCol: f.crackColor,
     uSmAura: f.aura,
   };
+  if (o.hero) {
+    uniforms.uSmHeroFill = o.hero.fill;
+    uniforms.uSmHeroFillDir = o.hero.fillDir;
+    uniforms.uSmHeroRim = o.hero.rim;
+    uniforms.uSmHeroRimDir = o.hero.rimDir;
+    uniforms.uSmHeroP = o.hero.params;
+  }
   if (detail) {
     uniforms.uSmDetail = { value: detailTexture(detail) };
     uniforms.uSmDetailP = { value: new THREE.Vector2(o.detailScale ?? 1.2, o.detailStrength ?? 0.6) };
@@ -254,7 +316,7 @@ export function createStylized(o: SurfaceOpts, globals: KitGlobals, fx: ActorFx 
     patchShader(shader, m.userData.smUniforms as Record<string, THREE.IUniform>);
     m.userData.smShader = shader;
   };
-  const key = `sm1|${detail ? 'd' : ''}|${o.toon ? 't' : ''}|${fx ? 'f' : ''}|${o.emissiveVertexColor ? 'e' : ''}`;
+  const key = `sm1|${detail ? 'd' : ''}|${o.toon ? 't' : ''}|${fx ? 'f' : ''}|${o.emissiveVertexColor ? 'e' : ''}|${o.hero ? 'h' : ''}`;
   m.customProgramCacheKey = () => key;
   return m;
 }

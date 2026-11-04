@@ -1,0 +1,16 @@
+# Yeti (secondary): a beast, he does not speak. One image before (the painted walls), the painting and the Voce after.
+- id: yeti_intro
+  skippable: true
+  steps:
+    - {event: cue, params: {id: yeti_painting_reveal}}
+    - {camera: wide, dur: 2.4}
+    - {caption: story.atto3.yeti_intro, dur: 3.4}
+    - {camera: boss_reveal, dur: 2.0}
+    - {event: start_fight}
+- id: yeti_defeat
+  skippable: true
+  steps:
+    - {wait: 2.0}
+    - {event: cue, params: {id: yeti_painting}}
+    - {caption: story.atto3.yeti_dipinto, dur: 4.0}
+    - {voce: voce.atto3.yeti_caduto}

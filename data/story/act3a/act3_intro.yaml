@@ -1,0 +1,13 @@
+# Act III intro: up the Scala dei Dannati, out of the Inferno, into the white silence of the snowy mountains.
+- id: act3_intro
+  skippable: true
+  steps:
+    - {fade: out, dur: 0.1}
+    - {camera: vista, dur: 0.1}
+    - {wait: 0.6}
+    - {fade: white_in, dur: 3.2}
+    - {title: story.atto3.titolo, dur: 4.2}
+    - {caption: story.atto3.intro.01, dur: 5.0}
+    - {caption: story.atto3.intro.02, dur: 5.0}
+    - {voce: voce.atto3.intro}
+    - {event: autosave, params: {reason: act}}

@@ -1,0 +1,265 @@
+# 14. Yeti — secondary · Pendii della Corona Bianca (the painted cave) · D10.
+# A white beast with thick fur and blue eyes, massive yet very agile. Sudden leaps, screams that bring small avalanches
+# down from the cave roof, fast claws in a snowstorm with poor visibility (the blizzard: beyond BLIZZARD_SIGHT he cannot
+# be locked on; he rushes out of the storm, and his blue eyes glint before every rush). Phase 2: furious, he never stops
+# (behavior: attacks chain with almost no pause, a short pant every few blows is the punish window).
+# On the cave wall he painted the LAST DAWN, the only sun the world remembers (first visual hint of the goal). He does not
+# want to fight: he defends the painting (whoever goes near it is cut off by a leap).
+# Local frame: +Z forward, +Y up, +X = the beast's LEFT. Height ~5.6 m.
+id: yeti
+order: 14
+name_key: boss.yeti.name
+class: secondary
+difficulty: 10
+act: 3
+arena: yeti_caverna
+zone: corona_bianca
+model: {builder: yeti, rig: humanoid, scale: 1.0, palette: act3_white_azure}
+equilibrio_max: 200
+body: {radius: 1.9, height: 5.6, mass: heavy}
+hurtboxes:
+  - {c: [0.8, 1.0, 0], r: 0.95}     # left leg
+  - {c: [-0.8, 1.0, 0], r: 0.95}    # right leg
+  - {c: [0, 2.3, 0], r: 1.3}        # hips
+  - {c: [0, 3.5, 0.3], r: 1.55}     # chest
+  - {c: [1.6, 3.0, 0.6], r: 0.8}    # left arm
+  - {c: [-1.6, 3.0, 0.6], r: 0.8}   # right arm
+  - {c: [0, 4.9, 0.6], r: 0.8}      # head
+move: {walk: 3.2, run: 8.5, turn: 2.4, preferred_range: [2, 6]}
+idle_gap: [0.8, 1.3]
+music: boss_yeti
+intro_sequence: yeti_intro
+defeat_sequence: yeti_defeat
+lore_key: boss.yeti.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_yeti_p1
+    opener: claw_r
+    patterns: [claw_r, claw_l, sudden_leap, avalanche_scream, blizzard, storm_rush, ground_slam, painting_guard]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_yeti_p2
+    on_enter: [furious]
+    transition: 2.6
+    speed_mult: 1.1
+    aggression: 1.3
+    opener: avalanche_scream
+    patterns: [claw_r, claw_l, sudden_leap, avalanche_scream, blizzard, storm_rush, ground_slam, painting_guard, frenzy]
+attacks:
+  # Right claw swipe; often followed by the left.
+  - id: claw_r
+    anim: claw_r
+    telegraph: 0.7
+    active: 0.25
+    recovery: 0.9
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    element: ice
+    range: [0, 4.5]
+    weight: 1.3
+    cooldown: 1.5
+    track: 1.2
+    track_active: 0.2
+    combo_next: claw_l
+    combo_chance: 0.55
+    motion:
+      - {t: -0.1, dur: 0.25, type: forward, speed: 6}
+    hits:
+      - {t: 0.02, dur: 0.2, shape: {type: arc, r: 4.6, angle: 150, yaw: 0, y: [0, 4]}}
+    sfx: yeti_claw
+  - id: claw_l
+    anim: claw_l
+    telegraph: 0.55
+    active: 0.25
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    element: ice
+    range: [0, 4.5]
+    weight: 1.0
+    cooldown: 1.5
+    track: 1.2
+    track_active: 0.2
+    motion:
+      - {t: -0.1, dur: 0.25, type: forward, speed: 6}
+    hits:
+      - {t: 0.02, dur: 0.2, shape: {type: arc, r: 4.6, angle: 150, yaw: 0, y: [0, 4]}}
+    sfx: yeti_claw
+  # A sudden leap: he crouches low and lands on you from far away.
+  - id: sudden_leap
+    anim: leap
+    telegraph: 0.8
+    active: 0.75
+    recovery: 1.3
+    damage_mult: 1.3
+    poise: 26
+    flags: [knockdown]
+    range: [6, 30]
+    weight: 1.1
+    cooldown: 5
+    track: 1.3
+    motion:
+      - {t: 0, dur: 0.6, type: leap_to_target, height: 5}
+    hits:
+      - {t: 0.55, dur: 0.18, shape: {type: cylinder, c: [0, 0, 0.6], r: 3.2, h: 3}}
+    spawns:
+      - {t: 0.58, type: vfx, vfx: yeti_landing_snow}
+    sfx: yeti_leap
+  # The scream: snow and ice come down from the cave roof onto marked ground (small avalanches).
+  - id: avalanche_scream
+    anim: roar
+    telegraph: 1.0
+    active: 1.4
+    recovery: 1.2
+    damage_mult: 1.0
+    poise: 26
+    flags: [knockdown]
+    global: true
+    range: [0, 40]
+    weight: 0.9
+    cooldown: 9
+    spawns:
+      - {t: 0.0, type: hazard, id: yeti_avalanche, at: target_predict, delay: 1.3, active: 0.4, damage_mult: 1.0, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.5, h: 8}}
+      - {t: 0.3, type: hazard, id: yeti_avalanche, at: around_target, count: 3, dist: 4.8, radius: 2.3, delay: 1.3, active: 0.4, damage_mult: 0.9, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.3, h: 8}}
+    sfx: yeti_scream
+  # The snowstorm: a howl whips the cave into a blizzard (behavior: poor visibility for BLIZZARD_DUR seconds).
+  - id: blizzard
+    anim: howl
+    telegraph: 1.1
+    active: 0.6
+    recovery: 0.6
+    damage_mult: 0.0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 40]
+    weight: 0.8
+    cooldown: 30
+    spawns:
+      - {t: 0.05, type: custom, event: blizzard_start}
+    sfx: yeti_howl
+  # Out of the storm: the blue eyes glint, then he rushes and claws (only during the blizzard).
+  - id: storm_rush
+    anim: charge
+    telegraph: 0.8
+    active: 0.6
+    recovery: 1.1
+    damage_mult: 1.1
+    poise: 22
+    flags: []
+    element: ice
+    requires: blizzard
+    range: [3, 30]
+    weight: 1.6
+    cooldown: 2.5
+    track: 1.4
+    track_active: 0.25
+    motion:
+      - {t: 0, dur: 0.45, type: toward_target, speed: 14}
+    hits:
+      - {t: 0.35, dur: 0.22, shape: {type: arc, r: 4.2, angle: 130, y: [0, 4]}}
+    sfx: yeti_rush
+  # Whoever stands under him: both fists into the snow.
+  - id: ground_slam
+    anim: slam
+    telegraph: 0.85
+    active: 0.3
+    recovery: 1.2
+    damage_mult: 1.2
+    poise: 26
+    flags: [knockdown]
+    range: [0, 2.5]
+    weight: 1.0
+    cooldown: 4
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: cylinder, c: [0, 0, 1.5], r: 4.0, h: 3}}
+    sfx: yeti_slam
+  # He defends the painting: whoever goes near it is cut off by a leap that lands between them and the wall.
+  - id: painting_guard
+    anim: leap
+    telegraph: 0.6
+    active: 0.75
+    recovery: 1.0
+    damage_mult: 1.1
+    poise: 26
+    flags: [knockdown]
+    global: true
+    weight: 0.01
+    cooldown: 6
+    track: 2.0
+    motion:
+      - {t: 0, dur: 0.6, type: leap_to_target, height: 4}
+    hits:
+      - {t: 0.55, dur: 0.18, shape: {type: cylinder, c: [0, 0, 0.6], r: 2.8, h: 3}}
+    sfx: yeti_guard_roar
+  # Phase 2, furious: three fast claws in a row, stepping forward; each one throws you back out of the next one's reach
+  # if it lands (no stun-lock). The last one leaves him open.
+  - id: frenzy
+    anim: claw_r
+    telegraph: 0.75
+    active: 1.15
+    recovery: 1.4
+    damage_mult: 0.8
+    poise: 14
+    flags: [knockback]
+    element: ice
+    range: [0, 5]
+    weight: 1.0
+    cooldown: 6
+    track: 1.2
+    track_active: 0.25
+    motion:
+      - {t: 0, dur: 1.0, type: forward, speed: 2}
+    hits:
+      - {t: 0.0, dur: 0.14, shape: {type: arc, r: 4.2, angle: 130, y: [0, 4]}}
+      - {t: 0.45, dur: 0.14, shape: {type: arc, r: 4.2, angle: 130, y: [0, 4]}}
+      - {t: 0.9, dur: 0.16, shape: {type: arc, r: 4.4, angle: 150, y: [0, 4]}, damage_mult: 1.0}
+    sfx: yeti_frenzy
+  # New Game+ (phase 1): two sudden leaps back to back.
+  - id: ng_double_leap
+    anim: leap
+    telegraph: 0.8
+    active: 0.75
+    recovery: 0.45
+    damage_mult: 1.3
+    poise: 26
+    flags: [knockdown]
+    range: [6, 30]
+    weight: 0.8
+    cooldown: 10
+    track: 1.3
+    combo_next: sudden_leap
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.6, type: leap_to_target, height: 5}
+    hits:
+      - {t: 0.55, dur: 0.18, shape: {type: cylinder, c: [0, 0, 0.6], r: 3.2, h: 3}}
+    sfx: yeti_leap
+  # New Game+ (phase 2): a scream that brings down the whole roof in two waves.
+  - id: ng_cave_in
+    anim: roar
+    telegraph: 1.1
+    active: 1.9
+    recovery: 1.2
+    damage_mult: 0.9
+    poise: 26
+    flags: [knockdown]
+    global: true
+    range: [0, 40]
+    weight: 0.7
+    cooldown: 14
+    spawns:
+      - {t: 0.0, type: hazard, id: yeti_avalanche, at: random_arena, count: 6, delay: 1.3, active: 0.4, damage_mult: 0.9, flags: [knockdown], repeat: 2, interval: 0.7, shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 8}}
+    sfx: yeti_scream
+time_of_day_variants:
+  alba: {flags: [gazing], note_key: boss.yeti.tod.alba}
+  notte: {opener: blizzard, note_key: boss.yeti.tod.notte}
+dialogue_keys: []
+drops_weapon: unghie_del_bianco
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_double_leap], p2: [ng_double_leap, ng_cave_in]}
+  idle_mult: 0.85

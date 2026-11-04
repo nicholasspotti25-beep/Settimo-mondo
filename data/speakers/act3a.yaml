@@ -1,0 +1,2 @@
+# Act III-A speakers (synth vocal tones). The Yeti does not speak.
+- {id: gigante_di_fuoco, name_key: boss.gigante_di_fuoco.name, color: '#ff8a3a', voice: {base: 62, formant: 0.7, wave: sawtooth, vibrato: 0.01, breath: 0.6}}

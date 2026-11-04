@@ -1,0 +1,7 @@
+# Act III-A hazard kinds (Il Bianco Silenzio: Bocca del Vulcano, Corona Bianca, Rocca di Brina).
+- {id: gigante_brace, visual: fire, color: '#ff6a20', element: fire}
+- {id: gigante_shock, visual: circle, color: '#ffa04a', element: fire}
+- {id: gigante_flare, visual: circle, color: '#ffd07a', element: fire}
+- {id: rim_crack, visual: crack, color: '#cfe6ff'}
+- {id: crater_boulder, visual: lava, color: '#ff5a18', element: fire}
+- {id: yeti_avalanche, visual: ice, color: '#eef6ff', element: ice}

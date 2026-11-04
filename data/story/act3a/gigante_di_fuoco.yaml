@@ -1,0 +1,17 @@
+# Gigante di Fuoco (secondary): he rises from the crater while the snow melts; one line before, one after, then the Voce.
+- id: gigante_intro
+  skippable: true
+  steps:
+    - {event: cue, params: {id: gigante_rise}}
+    - {camera: boss_reveal, dur: 2.6}
+    - {caption: story.atto3.gigante_intro, dur: 3.2}
+    - {say: boss.gigante_di_fuoco.intro, speaker: gigante_di_fuoco}
+    - {event: start_fight}
+- id: gigante_defeat
+  skippable: true
+  steps:
+    - {wait: 2.0}
+    - {say: boss.gigante_di_fuoco.defeat, speaker: gigante_di_fuoco}
+    - {event: cue, params: {id: crater_cools}}
+    - {voce: voce.atto3.gigante_caduto}
+    - {caption: story.atto3.cratere_spento, dur: 3.5}

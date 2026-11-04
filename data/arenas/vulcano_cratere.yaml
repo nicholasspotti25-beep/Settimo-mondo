@@ -1,3 +1,6 @@
+# Orlo del Cratere — the rim of the Bocca del Vulcano (Gigante di Fuoco). The giant rises from the crater to the north.
+# Between the Inferno's heat and the Frost the snow melts and freezes again into a glaze on the basalt: the rim is
+# slippery (surface ice). Phase 2 (rim_broken): the outer edge has crumbled into the crater, the rim narrows.
 id: vulcano_cratere
 zone: bocca_vulcano
 name_key: arena.vulcano_cratere.name
@@ -6,6 +9,8 @@ shape: circle
 radius: 30
 gate: {pos: [0, 0, 50], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: ice
 obstacles: []
+variants:
+  rim_broken: {radius: 26, surface: ice}
 builder: vulcano_cratere

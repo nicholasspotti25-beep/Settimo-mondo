@@ -1,0 +1,12 @@
+# Atto III — Il Bianco Silenzio (parte A): boss, parti, varianti dell'ora del giorno.
+boss.gigante_di_fuoco.title: "Sentinella tra Inferno e Gelo"
+boss.gigante_di_fuoco.lore: "Lo misero sulla Bocca del Vulcano perché il fuoco dell'Inferno non salisse a sciogliere le montagne. Non era malvagio: obbediva. Sotto i suoi piedi la neve si scioglieva e gelava di nuovo, per secoli, come un respiro."
+boss.gigante_di_fuoco.tod.alba: "All'alba il ghiaccio sull'orlo è più sottile: il bordo cede più spesso."
+boss.gigante_di_fuoco.tod.notte: "Di notte la sua barba illumina il cratere: apre con il respiro di brace."
+boss.gigante_di_fuoco.intro: "Il fuoco non sale oltre me. Torna giù, piccolo, o resta qui per sempre."
+boss.gigante_di_fuoco.mid: "Mi è stato ordinato di non cedere. Allora brucerò tutto, anche me."
+boss.gigante_di_fuoco.defeat: "Ho obbedito... Chi terrà giù il fuoco, adesso?"
+part.gigante_di_fuoco.head: "Testa dalla barba di fiamme"
+boss.yeti.lore: "Sulla parete della sua caverna dipinse l'ultima alba, l'unico sole che il mondo ricordi. Non voleva combattere: difendeva quel dipinto."
+boss.yeti.tod.alba: "All'alba la luce entra nella caverna e cade sul dipinto: la bestia lo guarda, prima di guardare te."
+boss.yeti.tod.notte: "Di notte la tormenta è già alzata: apre nascondendosi nella neve."

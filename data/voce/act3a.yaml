@@ -1,0 +1,6 @@
+# Voce dell'Alba lines at the Act III-A altars (played once, when meditating there after the listed bosses fall).
+- {key: voce.atto3.vulcano_altare, altar: altare_vulcano_01, after: [lucifero_1], priority: 1}
+- {key: voce.atto3.corona_vista_altare, altar: altare_corona_vista, after: [gigante_di_fuoco], priority: 1}
+- {key: voce.atto3.corona_altare, altar: altare_corona_01, after: [gigante_di_fuoco], priority: 1}
+- {key: voce.atto3.rocca_altare, altar: altare_rocca_01, after: [yeti], priority: 1}
+- {key: voce.atto3.rocca_trono_altare, altar: altare_rocca_02, after: [guardiano_rocca_di_brina], priority: 1}

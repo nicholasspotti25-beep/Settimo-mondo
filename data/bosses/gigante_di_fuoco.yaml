@@ -1,0 +1,270 @@
+# 13. Gigante di Fuoco — secondary · Bocca del Vulcano · D10.
+# A giant as tall as a tower: black rock skin, veins of fire, a beard of flames. He rises from the crater while the snow
+# melts around him and fights on the crater rim, where the meltwater freezes again into a glaze on the basalt (the rim is
+# slippery: surface ice) and the rim itself is unstable (his heavy blows crack it; slabs give way under marked ground;
+# in phase 2 the outer edge has crumbled into the crater).
+# Fists that ignite the ground (every fist blow leaves burning basalt for a few seconds), grabs and throws (behavior: the
+# hand closes on you, lifts you and hurls you across the rim), ember breath (a slow sweeping cone).
+# Phase 2: he covers himself in fire (flag ablaze) and charges head-down; after a charge his head hangs low, within reach.
+# Sentinel between Inferno and Frost, tasked with keeping the infernal fire from rising: he is not evil, he obeys.
+# Local frame: +Z forward, +Y up, +X = the giant's LEFT. Height ~16 m.
+id: gigante_di_fuoco
+order: 13
+name_key: boss.gigante_di_fuoco.name
+title_key: boss.gigante_di_fuoco.title
+class: secondary
+difficulty: 10
+act: 3
+arena: vulcano_cratere
+zone: bocca_vulcano
+model: {builder: gigante_di_fuoco, rig: colossus, scale: 1.0, palette: act3_white_azure}
+equilibrio_max: 240
+body: {radius: 3.6, height: 16.0, mass: immovable}
+hurtboxes:
+  - {c: [2.0, 2.0, 0], r: 1.9}      # left shin
+  - {c: [-2.0, 2.0, 0], r: 1.9}     # right shin
+  - {c: [2.0, 5.2, 0], r: 2.0}      # left thigh
+  - {c: [-2.0, 5.2, 0], r: 2.0}     # right thigh
+  - {c: [0, 8.0, 0], r: 2.7}        # pelvis
+  - {c: [0, 11.2, 0.3], r: 3.3}     # chest
+parts:
+  # The head with the beard of flames: out of reach while he stands, within reach when he bends over his fists or
+  # hangs his head after a charge (anchor lowered by the behavior).
+  - {id: head, name_key: part.gigante_di_fuoco.head, hurt: [{c: [0, 14.6, 1.0], r: 1.7}], damage_mult: 1.6, poise_mult: 1.4, lockable: true}
+move: {walk: 2.0, run: 4.6, turn: 1.1, preferred_range: [3, 10]}
+idle_gap: [0.95, 1.55]
+music: boss_gigante_di_fuoco
+intro_sequence: gigante_intro
+defeat_sequence: gigante_defeat
+lore_key: boss.gigante_di_fuoco.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_gigante_di_fuoco_p1
+    opener: fist_slam
+    patterns: [fist_slam, twin_slam, backhand, grab, ember_breath, stomp, rim_quake]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_gigante_di_fuoco_p2
+    on_enter: [ablaze]
+    arena_state: rim_broken
+    dialogue: boss.gigante_di_fuoco.mid
+    transition: 3.0
+    speed_mult: 1.06
+    aggression: 1.15
+    opener: head_charge
+    patterns: [fist_slam, twin_slam, backhand, grab, ember_breath, stomp, rim_quake, head_charge, flare_burst]
+attacks:
+  # The right fist rises over the shoulder and comes down: the basalt under it catches fire.
+  - id: fist_slam
+    anim: slam_r
+    telegraph: 1.05
+    active: 0.35
+    recovery: 1.4
+    damage_mult: 1.3
+    poise: 26
+    flags: [knockdown]
+    element: fire
+    range: [0, 10]
+    weight: 1.3
+    cooldown: 2.5
+    track: 1.1
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: cylinder, c: [-1.8, 0, 6.6], r: 3.2, h: 4}}
+    spawns:
+      - {t: 0.06, type: hazard, id: gigante_brace, at: front, dist: 6.6, delay: 0.1, active: 3.0, damage_mult: 0.3, flags: [dot], element: fire, shape: {type: cylinder, c: [0, 0, 0], r: 2.8, h: 1.6}}
+    sfx: gigante_fist
+  # Both fists high over the head (Colpo Rosso): the rim shakes and a ring of heat rolls out. He stays bent over his fists:
+  # the head comes within reach.
+  - id: twin_slam
+    anim: slam
+    telegraph: 1.3
+    active: 0.45
+    recovery: 1.8
+    damage_mult: 1.5
+    poise: 30
+    flags: [red, knockdown]
+    element: fire
+    range: [0, 11]
+    weight: 1.0
+    cooldown: 5.5
+    track: 1.0
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: cylinder, c: [0, 0, 6.6], r: 4.4, h: 4}}
+    spawns:
+      - {t: 0.06, type: shockwave, id: gigante_shock, from: [0, 0, 6.6], delay: 0.6, shape: {type: ring, r0: 4.6, r1: 16, width: 1.1, height: 0.7}, active: 0.95, damage_mult: 0.7}
+      - {t: 0.06, type: hazard, id: gigante_brace, at: front, dist: 6.6, delay: 0.1, active: 3.0, damage_mult: 0.3, flags: [dot], element: fire, shape: {type: cylinder, c: [0, 0, 0], r: 3.4, h: 1.6}}
+    sfx: gigante_fist_heavy
+  # The left arm sweeps the rim with the back of the hand.
+  - id: backhand
+    anim: sweep_l
+    telegraph: 0.95
+    active: 0.38
+    recovery: 1.2
+    damage_mult: 1.15
+    poise: 22
+    flags: [knockback]
+    range: [0, 9]
+    weight: 1.1
+    cooldown: 3
+    track: 1.1
+    track_active: 0.15
+    hits:
+      - {t: 0.03, dur: 0.3, shape: {type: arc, r: 11, angle: 200, y: [0, 3.5]}}
+    sfx: gigante_sweep
+  # The hand opens and reaches down for you: it cannot be blocked. Caught, you are lifted to his chest and hurled across the
+  # rim (behavior: carry, throw, landing damage).
+  - id: grab
+    anim: grab
+    telegraph: 1.0
+    active: 0.42
+    recovery: 1.5
+    damage_mult: 0.35
+    poise: 0
+    flags: [grab, unblockable]
+    range: [0, 9]
+    weight: 0.9
+    cooldown: 7
+    track: 1.2
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: box, c: [-1.0, 1.3, 6.2], half: [2.4, 1.5, 3.0]}}
+    sfx: gigante_grab
+  # Ember breath: he leans over the rim and breathes a slow cone of embers that sweeps the ground. Step out sideways.
+  - id: ember_breath
+    anim: breath
+    telegraph: 1.15
+    active: 2.0
+    recovery: 1.3
+    damage_mult: 0.5
+    poise: 0
+    flags: [burn]
+    element: fire
+    range: [5, 26]
+    weight: 1.0
+    cooldown: 8
+    track: 1.0
+    track_active: 0.3
+    hits:
+      - {t: 0.25, dur: 1.7, tick: 0.6, shape: {type: arc, r: 24, r_in: 2, angle: 38, y: [0, 6]}}
+    sfx: gigante_breath
+  # Whoever hides between his legs: a stamp that shakes the rim.
+  - id: stomp
+    anim: stomp
+    telegraph: 0.82
+    active: 0.3
+    recovery: 1.15
+    damage_mult: 1.1
+    poise: 26
+    flags: [knockdown]
+    range: [0, 2.5]
+    weight: 1.2
+    cooldown: 3.5
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: cylinder, c: [0, 0, 0], r: 6.4, h: 3}}
+    sfx: gigante_stomp
+  # The unstable rim: he drives his heel into the basalt and the glazed slabs crack under your feet; the marked ground
+  # gives way after a long tell.
+  - id: rim_quake
+    anim: stomp
+    telegraph: 1.0
+    active: 1.6
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 26
+    flags: [knockdown]
+    global: true
+    range: [0, 60]
+    weight: 0.8
+    cooldown: 10
+    spawns:
+      - {t: 0.0, type: hazard, id: rim_crack, at: target_predict, delay: 1.35, active: 0.45, damage_mult: 1.0, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.6, h: 3}}
+      - {t: 0.35, type: hazard, id: rim_crack, at: around_target, count: 3, dist: 5.2, radius: 2.4, delay: 1.35, active: 0.45, damage_mult: 0.9, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 3}}
+    sfx: gigante_quake
+  # Phase 2: covered in fire, he lowers his head and charges across the rim, leaving burning basalt behind. After the charge
+  # his head hangs low: strike it.
+  - id: head_charge
+    anim: charge
+    telegraph: 1.2
+    active: 1.25
+    recovery: 1.7
+    damage_mult: 1.5
+    poise: 30
+    flags: [red, knockdown]
+    element: fire
+    range: [6, 45]
+    weight: 1.2
+    cooldown: 6
+    track: 1.3
+    track_active: 0.08
+    motion:
+      - {t: 0, dur: 1.15, type: forward, speed: 15}
+    hits:
+      - {t: 0, dur: 1.15, shape: {type: capsule, a: [0, 2.0, 2.5], b: [0, 5.5, 5.5], r: 3.0}}
+    spawns:
+      - {t: 0.2, type: hazard, id: gigante_brace, at: self, delay: 0.2, active: 2.6, damage_mult: 0.3, flags: [dot], element: fire, repeat: 3, interval: 0.3, shape: {type: cylinder, c: [0, 0, 0], r: 2.6, h: 1.6}}
+    sfx: gigante_charge
+  # Phase 2: the fire that covers him flares in a ring. Jump it.
+  - id: flare_burst
+    anim: roar
+    telegraph: 0.95
+    active: 0.9
+    recovery: 1.2
+    damage_mult: 0.9
+    poise: 20
+    flags: [burn]
+    element: fire
+    range: [0, 12]
+    weight: 0.8
+    cooldown: 7
+    spawns:
+      - {t: 0.05, type: shockwave, id: gigante_flare, from: [0, 0, 0], delay: 0.5, shape: {type: ring, r0: 3.0, r1: 15, width: 1.1, height: 0.7}, active: 1.0, damage_mult: 0.9}
+    sfx: gigante_flare
+  # New Game+ (phase 1): he punches the inside of the crater and it spits burning boulders onto marked ground.
+  - id: ng_crater_spit
+    anim: slam_r
+    telegraph: 1.1
+    active: 1.6
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 22
+    flags: [burn]
+    element: fire
+    global: true
+    range: [0, 60]
+    weight: 0.8
+    cooldown: 11
+    spawns:
+      - {t: 0.0, type: hazard, id: crater_boulder, at: target_predict, delay: 1.2, active: 0.4, damage_mult: 1.0, shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 6}}
+      - {t: 0.2, type: hazard, id: crater_boulder, at: random_arena, count: 5, delay: 1.3, active: 0.4, damage_mult: 0.9, repeat: 2, interval: 0.6, shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 6}}
+    sfx: gigante_quake
+  # New Game+ (phase 2): two head-down charges back to back; the second one turns toward you first.
+  - id: ng_double_charge
+    anim: charge
+    telegraph: 1.1
+    active: 1.25
+    recovery: 0.5
+    damage_mult: 1.5
+    poise: 30
+    flags: [red, knockdown]
+    element: fire
+    range: [6, 45]
+    weight: 0.8
+    cooldown: 12
+    track: 1.3
+    track_active: 0.08
+    combo_next: head_charge
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 1.15, type: forward, speed: 15}
+    hits:
+      - {t: 0, dur: 1.15, shape: {type: capsule, a: [0, 2.0, 2.5], b: [0, 5.5, 5.5], r: 3.0}}
+    sfx: gigante_charge
+time_of_day_variants:
+  alba: {weights: {rim_quake: 1.6}, note_key: boss.gigante_di_fuoco.tod.alba}
+  notte: {opener: ember_breath, note_key: boss.gigante_di_fuoco.tod.notte}
+dialogue_keys: [boss.gigante_di_fuoco.intro, boss.gigante_di_fuoco.mid, boss.gigante_di_fuoco.defeat]
+drops_weapon: pugni_di_brace
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_crater_spit], p2: [ng_crater_spit, ng_double_charge]}
+  idle_mult: 0.85

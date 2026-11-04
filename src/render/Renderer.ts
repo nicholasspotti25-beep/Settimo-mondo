@@ -75,6 +75,7 @@ export class Renderer {
       r.toneMappingExposure = this.post.exposure;
     };
     this.actors = new ActorRenderer(this.scene, this.ctx);
+    this.actors.camera = this.rig.camera;
     this.fx = new FxRenderer(this.scene, this.ctx);
     this.fx.camera = () => this.rig.camera;
     this.fx.playerModel = () => this.actors.player?.model ?? null;
@@ -161,6 +162,7 @@ export class Renderer {
     this.ctx.skyShade = sim.skyShade() / 7;
     this.rig.update(sim, alpha, dt, camInput);
     this.world.update(sim, dt, this.rig.camera);
+    this.actors.exposure = this.post.exposure;
     this.actors.update(sim, alpha, dt);
     this.fx.update(sim, alpha, dt);
     this.gl.info.reset();

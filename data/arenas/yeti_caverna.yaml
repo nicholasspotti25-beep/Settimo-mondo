@@ -1,3 +1,5 @@
+# Caverna Dipinta — the Yeti's cave on the slopes of the Corona Bianca. On the north wall (arena center + [0, 0, 23]) the
+# Yeti painted the last dawn; he defends it. Packed snow underfoot; the blizzard is a fight state (behavior), not a variant.
 id: yeti_caverna
 zone: corona_bianca
 name_key: arena.yeti_caverna.name
@@ -6,6 +8,7 @@ shape: circle
 radius: 24
 gate: {pos: [0, 0, 106], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: snow
 obstacles: []
+ceiling: 18
 builder: yeti_caverna

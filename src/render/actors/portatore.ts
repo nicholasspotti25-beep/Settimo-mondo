@@ -14,6 +14,7 @@ import { mix, shade } from '../kit/palette';
 import * as geo from '../kit/geometry';
 import { spriteTexture } from '../kit/textures';
 import type { Model } from '../kit/model';
+import { createHeroLight, type HeroLight } from '../kit/materials';
 import { Animator, ease, type AnimInput, type AnimStageName } from '../rigs/animator';
 import { humanoidBody, humanoidSkeleton } from '../rigs/families/humanoid';
 import { standardSurfaces } from '../rigs/families/common';
@@ -26,6 +27,24 @@ export const EYE_COLORS = ['#5a3a22', '#3a6a8a', '#4a7a4a', '#8a7a4a', '#6a5a8a'
 export const CLOAK_COLORS = ['#5a4a6a', '#3a4a6a', '#6a3a3a', '#3a5a4a', '#6a5a3a', '#e8e0d0'];
 
 const _v = new THREE.Vector3();
+const _sd = new THREE.Vector3();
+const _rd = new THREE.Vector3();
+const _sunC = new THREE.Color();
+const _skyC = new THREE.Color();
+const _gndC = new THREE.Color();
+
+/** Hero light comfort band, in exposed (on-screen, pre tone mapping) luminance. */
+const FILL_LO = 0.07, FILL_HI = 0.26;
+const RIM_LO = 0.1, RIM_HI = 0.42;
+
+/** Scale a color so its luminance lies in [lo, hi] (black stays a neutral gray at lo). */
+function clampLum(c: THREE.Color, lo: number, hi: number): THREE.Color {
+  const l = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+  if (l < 1e-5) return c.setRGB(lo, lo, lo);
+  if (l < lo) return c.multiplyScalar(lo / l);
+  if (l > hi) return c.multiplyScalar(hi / l);
+  return c;
+}
 
 function angleLerp(a: number, b: number, t: number): number {
   let d = b - a;
@@ -56,6 +75,8 @@ export class PortatoreVisual {
   private time = 0;
   private readonly center: number;
   readonly height: number;
+  /** Camera fill + back rim shared by every surface (updated in light()). */
+  readonly hero: HeroLight = createHeroLight();
 
   constructor(readonly ctx: RenderCtx, look: CharacterLook) {
     const P = pal(ctx, 'portatore');
@@ -64,14 +85,46 @@ export class PortatoreVisual {
     const mb = ctx.kit.model('portatore', ctx.quality);
     const hairStyle = Math.max(0, Math.min(5, Math.round(look.hair ?? 0)));
     const d = humanoidSkeleton(mb, { height: H, build: 0.2 + (look.build ?? 0.5) * 0.5, cape: 6, hair: hairStyle === 2 || hairStyle === 3 ? 4 : 0 });
-    const S = standardSurfaces(mb, '', { rim: 1.05 });
+    // every surface but the glow shares the hero light (camera fill + back rim, see light())
+    const hero = this.hero;
+    const S = standardSurfaces(mb, '', { rim: 0.8, overrides: { skin: { hero }, cloth: { hero }, metal: { hero }, dark: { hero }, cape: { hero, rim: 0.6 }, horn: { hero } } });
     const cloak = pick(CLOAK_COLORS, look.cloak ?? 0);
     const skin = pick(SKIN_TONES, look.skin ?? 2);
+    // the creator preview's palette (src/ui/creator.ts figureMarkup): cream tunic and sleeves, darker hose, brown boots,
+    // a cloak-colored mantle over the shoulders and the cloak itself; light sleeves against the cloak keep the arms readable
+    const tunic = shade(mix(P.primary, '#d8d0c2', 0.5), 0.9);
     humanoidBody(mb, d, {
-      skin, cloth: mix(P.secondary, '#e8e0d4', 0.18), clothDark: shade(P.secondary, 0.55), metal: P.metal, trim: P.accent, glow: P.glow,
+      skin, cloth: tunic, clothDark: mix(tunic, '#160e22', 0.66), metal: P.metal, trim: P.accent, glow: P.glow,
       armor: 'tunic', head: 'human', hairStyle, hairColor: pick(HAIR_COLORS, look.hairColor ?? 0), eyeColor: pick(EYE_COLORS, look.eyes ?? 0),
-      cape: { color: mix(cloak, '#f4ece0', 0.12), colorEnd: shade(cloak, 0.78), ragged: 0.4, width: 0.2 }, boots: '#3a2e28', gloves: '#4a3a30', surfaces: S,
+      boots: '#3a2e28', gloves: '#4a3a30', surfaces: S,
     });
+    // cloak: pleated, curled around the back, a pale-gold border down both edges and along the hem (the silhouette's
+    // outline from the follow camera), lighter at the shoulders and darker toward the hem
+    const cloakTop = mix(cloak, '#f4ece0', 0.07), cloakEnd = shade(cloak, 0.66);
+    mb.cloth(d.cape, S.cape, {
+      width: 0.17 * H, widthEnd: 0.27 * H, cols: 8, rowsPerBone: 3, color: cloakTop, colorEnd: cloakEnd,
+      bulge: 0.045 * H, bulgeDir: [0, 0, -1], wrap: 0.03 * H, ragged: 0.45, folds: 4.5, foldDepth: 0.03 * H,
+      edge: { color: mix(cloak, '#e8c880', 0.7), frac: 0.13, hem: 0.08 },
+    });
+    const bz = 0.9 + d.build * 0.2;
+    // mantle over the shoulders (open at the front so the seed and clasp show), cloak color, lighter
+    const mantleCol = mix(cloak, '#f4ece0', 0.2);
+    const mantle = geo.lathe([[0.034 * H, 0.112 * H], [0.06 * H, 0.1 * H], [0.093 * H, 0.078 * H], [0.112 * H, 0.045 * H], [0.118 * H, 0.012 * H], [0.112 * H, -0.004 * H]], 22, (34 * Math.PI) / 180, (292 * Math.PI) / 180);
+    geo.xform(mantle, [0, 0, -0.006 * H], [0, 0, 0], [1.0 * d.sw, 1, 0.74 * bz]);
+    mb.part('chest', mantle, S.cape, { color: mantleCol, shade: 0.25 });
+    // mantle border (same pale gold as the cloak trim)
+    const border = geo.torus(0.113 * H, 0.0045 * H, 4, 22, (292 * Math.PI) / 180);
+    // torus arc from +X toward +Z once laid flat; turned so it spans the same 292 deg as the lathe (gap at the front)
+    geo.xform(border, [0, 0, 0], [90, 0, 0]);
+    geo.xform(border, [0, 0, 0], [0, 236, 0]);
+    geo.xform(border, [0, -0.002 * H, -0.006 * H], [0, 0, 0], [1.0 * d.sw, 1, 0.74 * bz]);
+    mb.part('chest', border, S.cape, { color: mix(cloak, '#e8c880', 0.7) });
+    // the hood, lowered on the upper back: a soft fold at the nape that gives the head and shoulders their shape from behind
+    const hood = geo.ellipsoid(0.06 * H, 0.036 * H, 0.03 * H, 14, 10);
+    geo.xform(hood, [0, 0.088 * H, -0.08 * H * bz], [-24, 0, 0], [1, 1, 1]);
+    mb.part('chest', hood, S.cape, { color: shade(mantleCol, 0.9), shade: 0.35 });
+    // clasp of the mantle
+    mb.part('chest', geo.torus(0.016 * H, 0.004 * H, 5, 12), S.metal, { pos: [0, 0.092 * H, 0.05 * H * bz], rot: [-20, 0, 0], color: P.accent });
     // the seed of light in the chest: a small glowing gem set in a gold clasp
     mb.part('chest', geo.ellipsoid(0.028 * H, 0.034 * H, 0.016 * H, 10, 8), S.glow, { pos: [0, 0.01 * H, 0.075 * H * (0.9 + d.build * 0.2)], color: P.glow });
     mb.part('chest', geo.torus(0.034 * H, 0.006 * H, 6, 18), S.metal, { pos: [0, 0.01 * H, 0.072 * H * (0.9 + d.build * 0.2)], color: P.accent });
@@ -234,6 +287,52 @@ export class PortatoreVisual {
     // hit flash
     const fl = this.model.fx.flash.value;
     fl.set(1, 0.92, 0.85, Math.min(0.7, p.hurtTimer * 3));
+  }
+
+  /**
+   * Hero light from the scene's sun + hemisphere (no allocation; call after the camera moved). From the follow camera the
+   * Portatore is seen from behind, i.e. usually from its unlit side, so the cloak read as a flat black slab at dawn,
+   * sunset and night. The fill is a second key that rides with the camera (upper side, toward the sun's side), weaker
+   * when the sun already lights the side the camera sees; the rim lights the silhouette edges facing the sun and the sky,
+   * stronger when the sun is behind the Portatore (backlight). Both take their color from the scene, so the figure stays
+   * in the time of day instead of looking pasted on.
+   */
+  light(camera: THREE.Camera, sun: THREE.DirectionalLight | null, hemi: THREE.HemisphereLight | null, exposure = 1): void {
+    const h = this.hero;
+    let sx = -0.35, sy = 0.5, sz = 0;
+    _sunC.setRGB(0, 0, 0);
+    if (sun && sun.visible && sun.intensity > 0) {
+      _sd.copy(sun.position).sub(sun.target.position);
+      if (_sd.lengthSq() > 1e-6) {
+        _sd.normalize().transformDirection(camera.matrixWorldInverse);
+        sx = _sd.x; sy = _sd.y; sz = _sd.z;
+      }
+      _sunC.copy(sun.color).multiplyScalar(sun.intensity);
+    }
+    if (hemi && hemi.visible) {
+      _skyC.copy(hemi.color).multiplyScalar(hemi.intensity);
+      _gndC.copy(hemi.groundColor).multiplyScalar(hemi.intensity);
+    } else {
+      _skyC.setRGB(0.3, 0.3, 0.35);
+      _gndC.setRGB(0.1, 0.1, 0.12);
+    }
+    // sun in front of the camera (sz < 0): the visible side is in shade -> full fill; sun behind the camera: less
+    const front = Math.max(0, sz);
+    const back = Math.max(0, -sz);
+    const kSun = 0.32 * (1 - 0.7 * front);
+    const kSky = 0.24;
+    const ip = 1 / Math.PI;
+    const fill = h.fill.value.setRGB((_sunC.r * kSun + _skyC.r * kSky + _gndC.r * 0.12) * ip, (_sunC.g * kSun + _skyC.g * kSky + _gndC.g * 0.12) * ip, (_sunC.b * kSun + _skyC.b * kSky + _gndC.b * 0.12) * ip);
+    // keep the result in a comfort band on screen (exposed): never a black slab at night, never a glowing ghost in a dark
+    // arena lit by a strong sun (the world's light intensities vary a lot between zones)
+    const E = Math.max(0.05, exposure);
+    clampLum(fill, FILL_LO / E, FILL_HI / E);
+    h.fillDir.value.set(sx >= 0 ? 0.42 : -0.42, 0.6, 0.68).normalize();
+    // rim: edges facing the sun (on the screen plane) blended with the sky above
+    _rd.set(sx * 0.7, Math.max(0.15, sy) * 0.7 + 0.75, -0.08);
+    h.rimDir.value.copy(_rd.normalize());
+    const kR = 0.16 + 0.34 * back;
+    clampLum(h.rim.value.setRGB(_sunC.r * kR + _skyC.r * 0.28, _sunC.g * kR + _skyC.g * 0.28, _sunC.b * kR + _skyC.b * 0.28), RIM_LO / E, (RIM_HI * (0.75 + 0.25 * back)) / E);
   }
 
   dispose(): void {

@@ -67,6 +67,14 @@ export interface ClothOpts {
   tip?: number;
   /** Ragged hem amplitude (0..1). */
   ragged?: number;
+  /** Vertical pleats across the width (count); they open up toward the hem. Default 0 (flat strip). */
+  folds?: number;
+  /** Pleat depth at the hem (meters along `bulgeDir`). Default 12% of the width. */
+  foldDepth?: number;
+  /** Side edges curl forward around the body by this much (meters, quadratic in the width). */
+  wrap?: number;
+  /** Trim band along both side edges and the hem (lining / embroidered border), read from behind. */
+  edge?: { color: ColorLike; /** Fraction of the half width. Default 0.12. */ frac?: number; /** Hem band as a fraction of the length. Default 0.08. */ hem?: number };
 }
 
 export interface MembraneOpts {
@@ -585,29 +593,48 @@ export class ModelBuilder {
   /** Skinned cloth strip hanging along a chain (cape, tabard, banner, barding skirt). Use a DoubleSide surface. */
   cloth(bones: string[], surface: string, o: ClothOpts): void {
     const samples = this.samplePath(bones, { perBone: o.rowsPerBone ?? 3, tip: o.tip, blendParent: true });
-    const cols = this.seg(o.cols ?? 6, 3);
+    const folds = Math.max(0, o.folds ?? 0);
+    // pleats need ~4 columns each to shade as folds; the trim adds two columns just inside the edges
+    const cols0 = this.seg(Math.max(o.cols ?? 6, Math.round(folds * 4)), 3);
+    const ef = o.edge ? Math.min(0.45, Math.max(0.02, o.edge.frac ?? 0.12)) : 0;
+    const colA: number[] = [];
+    for (let c = 0; c <= cols0; c++) colA.push((c / cols0) * 2 - 1);
+    if (ef > 0) {
+      // a crisp band: one column on the trim line (trim colored) and one just inside it (body colored)
+      for (const e of [-1 + ef, 1 - ef, -1 + ef + 0.05, 1 - ef - 0.05]) if (!colA.some((a) => Math.abs(a - e) < 0.015)) colA.push(e);
+      colA.sort((x, y) => x - y);
+    }
+    const cols = colA.length - 1;
+    // with fewer columns than the pleats need (Low), keep fewer, shallower pleats
+    const foldN = folds > 0 ? Math.min(folds, cols / 3) : 0;
+    const foldD = foldN > 0 ? (o.foldDepth ?? o.width * 0.12) * Math.min(1, foldN / folds) : 0;
     const side = new THREE.Vector3(...(o.side ?? [1, 0, 0])).normalize();
     const bulgeDir = new THREE.Vector3(...(o.bulgeDir ?? [0, 0, -1])).normalize();
     const rows = samples.length;
     const pos = new Float32Array(rows * (cols + 1) * 3), uv = new Float32Array(rows * (cols + 1) * 2), col = new Float32Array(rows * (cols + 1) * 3);
     const si = new Uint16Array(rows * (cols + 1) * 4), sw = new Float32Array(rows * (cols + 1) * 4);
     const cA = new THREE.Color((o.color ?? 0xffffff) as THREE.ColorRepresentation), cB = new THREE.Color((o.colorEnd ?? o.color ?? 0xffffff) as THREE.ColorRepresentation);
+    const cE = o.edge ? new THREE.Color(o.edge.color as THREE.ColorRepresentation) : null;
+    const hemF = o.edge ? Math.max(0, o.edge.hem ?? 0.08) : 0;
     const idx: number[] = [];
     let v = 0;
     for (let r = 0; r < rows; r++) {
       const s = samples[r];
       const w = (o.width + ((o.widthEnd ?? o.width) - o.width) * s.t) / 2;
       for (let c = 0; c <= cols; c++) {
-        const a = c / cols * 2 - 1;
-        const bul = (o.bulge ?? 0) * (1 - a * a);
+        const a = colA[c];
+        let bul = (o.bulge ?? 0) * (1 - a * a) - (o.wrap ?? 0) * a * a;
+        // pleats: gathered at the top, opening toward the hem; the edges stay put so the trim reads as a clean line
+        if (foldD > 0) bul += foldD * (0.25 + 0.75 * s.t) * Math.cos(a * foldN * Math.PI) * (1 - Math.pow(Math.abs(a), 6));
         let hem = 0;
         if (o.ragged && r === rows - 1) hem = (Math.sin(c * 2.7) * 0.5 + 0.5) * o.ragged * (o.width * 0.12);
         const px = s.pos.x + side.x * a * w + bulgeDir.x * bul - s.tan.x * -hem;
         const py = s.pos.y + side.y * a * w + bulgeDir.y * bul + hem * 0.8;
         const pz = s.pos.z + side.z * a * w + bulgeDir.z * bul;
         pos[v * 3] = px; pos[v * 3 + 1] = py; pos[v * 3 + 2] = pz;
-        uv[v * 2] = c / cols; uv[v * 2 + 1] = s.t;
+        uv[v * 2] = (a + 1) / 2; uv[v * 2 + 1] = s.t;
         _c.copy(cA).lerp(cB, s.t);
+        if (cE && (Math.abs(a) > 1 - ef - 1e-4 || s.t > 1 - hemF + 1e-4)) _c.lerp(cE, 0.85);
         col[v * 3] = _c.r; col[v * 3 + 1] = _c.g; col[v * 3 + 2] = _c.b;
         for (let k = 0; k < 4; k++) {
           si[v * 4 + k] = s.idx[k];
