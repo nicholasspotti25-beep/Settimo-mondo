@@ -2,10 +2,11 @@
  * Debug tools (TECH_SPEC debug menu): a pause-menu section shown when settings.debugMenu is on (toggled by the hidden
  * gesture: five quick taps on the pause title) with teleport to any altar or boss, invincibility, one-hit kills, give all
  * weapons and Forms, time of day, Metamondo meter and Eco, kill boss, hitbox display and the FPS + memory overlay; plus
- * the hitbox overlay itself: a 2D canvas drawing the sim's hurt volumes, the player's body, projectiles and hazards
- * projected with the render camera (sim.debug.showHitboxes). Everything acts on the live sim.
+ * the hitbox overlay itself: a 2D canvas drawing the sim's hurt volumes, the player's body, the active melee attack shapes
+ * (Actor.forEachActiveShape), projectiles and hazards projected with the render camera (sim.debug.showHitboxes). Everything acts on the live sim.
  */
-import type { TimeOfDay } from '../core/types';
+import type { ShapeDef, TimeOfDay } from '../core/types';
+import { DEG, localToWorld, type Vec3 } from '../core/math';
 import type { UiCtx } from './ctx';
 import { h } from './dom';
 import { ICONS } from './icons';
@@ -120,6 +121,8 @@ export function fillDebug(ctx: UiCtx, p: HTMLElement, host: DebugHost, tab: { v:
 /* ------------------------------------------------------------------------------------------------ hitbox overlay */
 
 const HURT_MAX = 64;
+/** Box corner index pairs (bit 0 = +x, bit 1 = +y, bit 2 = +z). */
+const BOX_EDGES: readonly (readonly [number, number])[] = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]];
 
 export class HitboxOverlay {
   readonly el: HTMLCanvasElement;
@@ -130,11 +133,79 @@ export class HitboxOverlay {
   private hgt = 0;
   private dpr = 1;
   private shown = false;
+  private wa: Vec3 = { x: 0, y: 0, z: 0 };
+  private wb: Vec3 = { x: 0, y: 0, z: 0 };
+  private corners: Vec3[] = [];
+  /** Draw one active attack shape (same geometry as sim/shapes.ts shapeHits); bound once, no per-frame closure. */
+  private drawShape = (shape: ShapeDef, origin: Vec3, yaw: number, scale: number, progress: number): void => {
+    const a = this.wa, b = this.wb;
+    switch (shape.type) {
+      case 'sphere':
+        this.at(origin, yaw, scale, shape.c, a);
+        this.sphere(a.x, a.y, a.z, shape.r * scale);
+        break;
+      case 'capsule':
+        this.at(origin, yaw, scale, shape.a, a);
+        this.at(origin, yaw, scale, shape.b, b);
+        this.sphere(a.x, a.y, a.z, shape.r * scale);
+        this.sphere(b.x, b.y, b.z, shape.r * scale);
+        this.line(a.x, a.y, a.z, b.x, b.y, b.z);
+        break;
+      case 'arc': {
+        this.at(origin, yaw, scale, shape.c, a);
+        const yb = shape.y ?? [-0.5, 3];
+        const y = a.y + Math.max(yb[0] * scale, 0.05);
+        const r = shape.r * scale, rin = (shape.r_in ?? 0) * scale;
+        if (shape.angle >= 360) {
+          this.arc(a.x, y, a.z, r, 0, Math.PI * 2);
+          if (rin > 0) this.arc(a.x, y, a.z, rin, 0, Math.PI * 2);
+        } else {
+          const f = yaw + (shape.yaw ?? 0) * DEG, half = (shape.angle * DEG) / 2;
+          this.arc(a.x, y, a.z, r, f - half, f + half);
+          if (rin > 0) this.arc(a.x, y, a.z, rin, f + half, f - half);
+          else this.line(a.x + Math.sin(f + half) * r, y, a.z + Math.cos(f + half) * r, a.x, y, a.z);
+          this.line(a.x, y, a.z, a.x + Math.sin(f - half) * r, y, a.z + Math.cos(f - half) * r);
+          if (rin > 0) {
+            this.line(a.x + Math.sin(f - half) * rin, y, a.z + Math.cos(f - half) * rin, a.x + Math.sin(f - half) * r, y, a.z + Math.cos(f - half) * r);
+            this.line(a.x + Math.sin(f + half) * rin, y, a.z + Math.cos(f + half) * rin, a.x + Math.sin(f + half) * r, y, a.z + Math.cos(f + half) * r);
+          }
+        }
+        break;
+      }
+      case 'box': {
+        this.at(origin, yaw, scale, shape.c, a);
+        const by = yaw + (shape.yaw ?? 0) * DEG, sn = Math.sin(by), co = Math.cos(by);
+        const hx = shape.half[0] * scale, hy = shape.half[1] * scale, hz = shape.half[2] * scale;
+        const k = this.corners;
+        for (let i = 0; i < 8; i++) {
+          const lx = i & 1 ? hx : -hx, ly = i & 2 ? hy : -hy, lz = i & 4 ? hz : -hz;
+          k[i].x = a.x + lx * co + lz * sn;
+          k[i].y = a.y + ly;
+          k[i].z = a.z - lx * sn + lz * co;
+        }
+        for (const [i, j] of BOX_EDGES) this.line(k[i].x, k[i].y, k[i].z, k[j].x, k[j].y, k[j].z);
+        break;
+      }
+      case 'ring': {
+        this.at(origin, yaw, scale, shape.c, a);
+        const r = (shape.r0 + (shape.r1 - shape.r0) * Math.min(1, Math.max(0, progress))) * scale, w = (shape.width * scale) / 2;
+        this.arc(a.x, a.y + 0.05, a.z, r + w, 0, Math.PI * 2);
+        if (r - w > 0.05) this.arc(a.x, a.y + 0.05, a.z, r - w, 0, Math.PI * 2);
+        break;
+      }
+      case 'cylinder':
+        this.at(origin, yaw, scale, shape.c, a);
+        this.arc(a.x, a.y, a.z, shape.r * scale, 0, Math.PI * 2);
+        this.arc(a.x, a.y + shape.h * scale, a.z, shape.r * scale, 0, Math.PI * 2);
+        break;
+    }
+  };
 
   constructor(private ctx: UiCtx) {
     this.el = h('canvas', { class: 'sm-hitbox sm-hidden' }) as HTMLCanvasElement;
     this.g = this.el.getContext('2d');
     for (let i = 0; i < HURT_MAX; i++) this.hurt.push({ x: 0, y: 0, z: 0, r: 0 });
+    for (let i = 0; i < 8; i++) this.corners.push({ x: 0, y: 0, z: 0 });
   }
 
   update(on: boolean): void {
@@ -176,6 +247,11 @@ export class HitboxOverlay {
     g.strokeStyle = 'rgba(150,255,140,.95)';
     this.ring(pl.pos.x, pl.pos.y, pl.pos.z, r);
     this.ring(pl.pos.x, pl.pos.y + ph, pl.pos.z, r);
+    // active melee attack shapes (this tick's hit windows): orange
+    g.strokeStyle = 'rgba(255,170,60,.95)';
+    g.lineWidth = 2;
+    for (const a of sim.actors) if (a.alive && !a.hidden) a.forEachActiveShape(this.drawShape);
+    g.lineWidth = 1.5;
     // projectiles and hazards: red
     g.strokeStyle = 'rgba(255,90,70,.95)';
     sim.projectiles.forEachActive((pr) => this.sphere(pr.pos.x, pr.pos.y, pr.pos.z, pr.radius));
@@ -183,6 +259,16 @@ export class HitboxOverlay {
       const s = hz.shape as { r?: number };
       this.ring(hz.pos.x, hz.pos.y + 0.05, hz.pos.z, typeof s.r === 'number' ? s.r : 1);
     });
+  }
+
+  /** A shape point (local offset c, or the origin when c is absent) in world space. */
+  private at(origin: Vec3, yaw: number, scale: number, c: readonly number[] | undefined, out: Vec3): void {
+    if (c) localToWorld(origin, yaw, c[0], c[1], c[2], out, scale);
+    else {
+      out.x = origin.x;
+      out.y = origin.y;
+      out.z = origin.z;
+    }
   }
 
   /** Project a world point; false when behind the camera. */
@@ -207,12 +293,18 @@ export class HitboxOverlay {
 
   /** Horizontal ring of radius r around (x, y, z). */
   private ring(x: number, y: number, z: number, r: number): void {
+    this.arc(x, y, z, r, 0, Math.PI * 2);
+  }
+
+  /** Horizontal arc of radius r around (x, y, z) from angle a0 to a1 (sim convention: direction (sin a, cos a) on x/z). */
+  private arc(x: number, y: number, z: number, r: number, a0: number, a1: number): void {
     const g = this.g!;
+    const n = Math.max(6, Math.ceil((Math.abs(a1 - a0) / (Math.PI * 2)) * 24));
     g.beginPath();
     let open = false;
-    for (let i = 0; i <= 20; i++) {
-      const a = (i / 20) * Math.PI * 2;
-      if (!this.px(x + Math.cos(a) * r, y, z + Math.sin(a) * r)) {
+    for (let i = 0; i <= n; i++) {
+      const a = a0 + ((a1 - a0) * i) / n;
+      if (!this.px(x + Math.sin(a) * r, y, z + Math.cos(a) * r)) {
         open = false;
         continue;
       }
@@ -220,6 +312,17 @@ export class HitboxOverlay {
       else g.moveTo(this.v.x, this.v.y);
       open = true;
     }
+    g.stroke();
+  }
+
+  private line(x0: number, y0: number, z0: number, x1: number, y1: number, z1: number): void {
+    if (!this.px(x0, y0, z0)) return;
+    const sx = this.v.x, sy = this.v.y;
+    if (!this.px(x1, y1, z1)) return;
+    const g = this.g!;
+    g.beginPath();
+    g.moveTo(sx, sy);
+    g.lineTo(this.v.x, this.v.y);
     g.stroke();
   }
 }

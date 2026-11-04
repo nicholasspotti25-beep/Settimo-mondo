@@ -95,6 +95,9 @@ export class Cards {
     switch (e.type) {
       case 'zoneEnter': {
         if (!c.hasZone(e.zone) || game.sim.endingActive) break; // the ending's last shots carry no zone or act card
+        // a memory / direct fight start (zone load + fight in one step): the boss card replaces the act and zone cards. The
+        // journey's act is kept, so coming back from a memory of another act shows no act card.
+        if (game.sim.fight) break;
         const z = c.zone(e.zone);
         const act = c.bundle.progression.acts.find((a) => a.n === z.act);
         const actName = act ? tOpt(act.name_key) : '';
@@ -112,6 +115,8 @@ export class Cards {
         if (!c.hasBoss(e.boss)) break;
         const b = c.boss(e.boss);
         this.zone.hide();
+        this.act.hide();
+        this.pendingZone = null;
         const mem = game.sim.fight?.memory;
         this.boss.show(t(b.name_key), (b.title_key ? tOpt(b.title_key) : '') || (mem ? t('ui.card.memory') : ''), 3.8);
         break;

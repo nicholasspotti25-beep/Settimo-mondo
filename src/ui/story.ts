@@ -140,7 +140,14 @@ export class StoryLayer {
         break;
       case 'fightEnd':
       case 'respawn':
+      case 'zoneEnter':
+        // the lines queued AND the one on screen belong to the fight / place being left (zoneEnter is drained before the new
+        // zone's own lines: fastTravel emits zoneEnter, then openAltar's voce; a boss opener's caption follows fightStart)
         this.queue.length = 0;
+        if (this.cur) {
+          this.cur = null;
+          toggle(this.trSub, 'on', false);
+        }
         break;
       default:
         break;

@@ -21,3 +21,5 @@ spheres/sectors/lines in red.
 It mirrors the hit-window test (same window timing, part origin, yaw, scale, progress; skips inactive/broken parts), loops
 without allocating, and passes a scratch origin vector (copy it to keep it). Call it per actor (`sim.actors`). Test:
 tests/sim_integration.test.ts.
+Used by the ui stream since chunk 5: the hitbox overlay draws every active shape type (sphere, capsule, arc sector with inner
+radius, box, expanding ring, cylinder) in orange (src/ui/debug.ts).

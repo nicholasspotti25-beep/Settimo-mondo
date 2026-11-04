@@ -62,3 +62,13 @@ because the whole step ran before the drain.)
 
 Optional: let card / caption timers ignore the frames spent building a zone, for example by not ticking them while
 `game.renderer.world.busy` is set or while the loading spinner is on.
+
+
+**DONE (ui chunk 5, 2026-11-03):** src/ui/story.ts drops the queue AND the line on screen on `fightEnd` (incl. the new
+`abandoned` one), `respawn` and `zoneEnter`. src/ui/cards.ts hides the act card and clears the scheduled zone card on
+`fightStart`, and skips act/zone cards on a `zoneEnter` that arrives with `sim.fight` already set. One deviation from the
+diff: that skip does not update `lastAct`, so coming back from a memory of another act shows no act card for the journey's
+own act. Not done: the optional timer freeze while a zone builds (the clear on zoneEnter already covers the long frame, and
+`world.busy` also covers ordinary streaming, where captions must keep running). Verified headless (scratchpad
+`ui/fix.mjs`, 844x390): caption on screen + Specchio memory fight into act II (cerbero) -> caption gone, no act card, boss
+card on, no zone card 5 s later.
