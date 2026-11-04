@@ -43,3 +43,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - ui#5 done: ui brief COMPLETE (portrait hint, tablet HUD, 36px floor, caption/card carry-over fix, melee shapes overlay, docs/UI.md, final pass 5 viewports); next: ui review
 - started: ui review (adversarial, read-only; also the newGame-at-load reload flake)
 - world#3 done: 6 landmark builders, vetta_attesa + castello_culla authored, guardiano arena dressing, act1_world reperti, sky god-ray fix; open: vetta Medium over budget (258 calls/426k)
+- deployed 60dadc8 (world#3 + ui#5 + integration); started render-kit#4 (pose libraries for 7 families)
