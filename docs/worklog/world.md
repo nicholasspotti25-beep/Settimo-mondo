@@ -103,3 +103,8 @@
 - Castello layout (world coords): waking chamber z -113..-80 (W16), corridor -80..0 (W14, east side door bay 4 at
   z -35 -> loggia wing x 7..34), great hall 0..70 (W30, nave columns x +-8.5), gallery 70..112 (W12), exit z 105.
   The vista vista_culla_finestre moved to [28,0,-35] (loggia axis); vetta vista look lowered to the world below.
+
+### Lead note (smoke shot boss_01, fight camera at vetta_piazzale)
+- In the actual Guardiano fight view the arena paving/medallion segments read as thick slabs floating at different heights
+  (raised plates with visible side faces, overlapping the path tiles). Check z-fighting/offsets and seat the paving flush
+  with the terrain in the fight camera view (item 4: capture the fight at four times of day).
