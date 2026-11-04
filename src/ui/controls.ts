@@ -6,7 +6,7 @@
  */
 import type { SimEvent } from '../sim/types';
 import { TouchController } from '../input/touch';
-import { h, svgIcon, setText, toggle, StyleCache } from './dom';
+import { h, svgIcon, setText, toggle, StyleCache, NumCache } from './dom';
 import { ICONS, promptIcon, weaponGlyph } from './icons';
 import { controlsOpacity, type ResolvedButton, type ResolvedLayout } from './layout';
 import { replay, type UiCtx } from './ctx';
@@ -32,7 +32,11 @@ export class ControlsView {
   readonly el: HTMLElement;
   readonly touch: TouchController;
   private ctrls: HTMLElement;
-  private ctrlsCss: StyleCache;
+  private ctrlsOp: NumCache;
+  private stickX: NumCache;
+  private stickY: NumCache;
+  private knobDx = NaN;
+  private knobDy = NaN;
   private views = new Map<string, BtnView>();
   private stick: HTMLElement;
   private stickCss: StyleCache;
@@ -49,10 +53,12 @@ export class ControlsView {
     const sprint = h('div', { class: 'sprint' });
     this.stick = h('div', { class: 'sm-stick' }, h('div', { class: 'base' }), sprint, knob);
     this.stickCss = new StyleCache(this.stick);
+    this.stickX = new NumCache(this.stick, 'left', 0.1, 'px', true);
+    this.stickY = new NumCache(this.stick, 'top', 0.1, 'px', true);
     this.knobCss = new StyleCache(knob);
     this.sprintCss = new StyleCache(sprint);
     this.ctrls = h('div', { class: 'sm-ctrls gone' }, this.stick);
-    this.ctrlsCss = new StyleCache(this.ctrls);
+    this.ctrlsOp = new NumCache(this.ctrls, 'opacity', 0.001, '', true);
     this.el = h('div', { class: 'sm-layer sm-touch' }, this.ctrls);
     const game = ctx.game;
     this.touch = new TouchController(this.el, game.input, {
@@ -83,6 +89,7 @@ export class ControlsView {
       css.set('top', `${b.cy}px`);
       css.set('width', `${b.r * 2}px`);
       css.set('height', `${b.r * 2}px`);
+      css.set('opacity', b.alpha < 1 ? b.alpha.toFixed(2) : ''); // per-control opacity from the layout (editor)
       if (ICON_FOR[b.id]) el.appendChild(svgIcon(ICON_FOR[b.id]));
       let cnt: HTMLElement | null = null;
       let pips: HTMLElement | null = null;
@@ -199,6 +206,7 @@ export class ControlsView {
       this.shown = show;
       this.touch.enabled = show;
       if (!show) this.touch.releaseAll();
+      else game.input.lastActivity = performance.now(); // controls appear at their active opacity, then fade when idle
       toggle(this.el, 'on', show);
       toggle(this.ctrls, 'gone', !show);
     }
@@ -207,7 +215,7 @@ export class ControlsView {
     const p = sim.player;
     const now = performance.now();
     const idle = this.touch.touches > 0 ? 0 : (now - game.input.lastActivity) / 1000;
-    this.ctrlsCss.set('opacity', controlsOpacity(idle, L.opacity, game.settings.controlsFade).toFixed(3));
+    this.ctrlsOp.set(controlsOpacity(idle, L.opacity, game.settings.controlsFade));
 
     for (const v of this.views.values()) {
       const id = v.b.id;
@@ -216,9 +224,8 @@ export class ControlsView {
       toggle(v.el, 'sm-hidden', !vis);
       if (!vis) continue;
       toggle(v.el, 'on', this.touch.down.has(id));
-      if (v.b.alpha < 1) v.css.set('opacity', v.b.alpha.toFixed(2));
       if (id.startsWith('slot_')) {
-        const i = Number(id.slice(5)) - 1;
+        const i = id.charCodeAt(5) - 49; // slot_1..slot_3 -> 0..2 (no per-frame substring)
         const w = p.weapons[i] ?? null;
         const def = w && game.content.hasWeapon(w) ? game.content.weapon(w) : null;
         const glyph = def ? def.type : '';
@@ -264,13 +271,22 @@ export class ControlsView {
     // stick: live under the thumb, or a faint ghost at its home position
     const st = this.touch.stick;
     if (st.active) {
-      this.stickCss.set('left', `${st.baseX}px`);
-      this.stickCss.set('top', `${st.baseY}px`);
-      this.knobCss.set('transform', `translate(calc(-50% + ${(st.knobX - st.baseX).toFixed(1)}px), calc(-50% + ${(st.knobY - st.baseY).toFixed(1)}px))`);
+      this.stickX.set(st.baseX);
+      this.stickY.set(st.baseY);
+      const dx = Math.round((st.knobX - st.baseX) * 10) / 10, dy = Math.round((st.knobY - st.baseY) * 10) / 10;
+      if (dx !== this.knobDx || dy !== this.knobDy) { // the knob string is built only when the thumb moved
+        this.knobDx = dx;
+        this.knobDy = dy;
+        this.knobCss.set('transform', `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`);
+      }
     } else {
-      this.stickCss.set('left', `${L.stick.home.x}px`);
-      this.stickCss.set('top', `${L.stick.home.y}px`);
-      this.knobCss.set('transform', 'translate(-50%,-50%)');
+      this.stickX.set(L.stick.home.x);
+      this.stickY.set(L.stick.home.y);
+      if (this.knobDx !== 0 || this.knobDy !== 0) {
+        this.knobDx = 0;
+        this.knobDy = 0;
+        this.knobCss.set('transform', 'translate(-50%,-50%)');
+      }
     }
     toggle(this.stick, 'ghost', !st.active);
     toggle(this.stick, 'sprinting', st.active && st.sprint);

@@ -1,6 +1,6 @@
 /**
  * Title cards and notifications: zone name card on zoneEnter, act card when a new act begins, boss name card on fightStart,
- * the "dawn advances" banner on bossDefeated, toasts (weapon obtained + its Arts, Form unlocked, key item, altar discovered,
+ * the banner on bossDefeated ("the dawn advances" only when the boss brightens the sky, outside a memory), toasts (weapon obtained + its Arts, Form unlocked, key item, altar discovered,
  * reperto, vista), the gentle death screen and the zone-streaming spinner. Timed in UI seconds (paused menus freeze them).
  */
 import type { SimEvent } from '../sim/types';
@@ -60,6 +60,7 @@ export class Cards {
   private deathT: HTMLElement;
   private deathS: HTMLElement;
   private loading: HTMLElement;
+  private loadingText: HTMLElement;
   /** Pending zone card shown after an act card. */
   private pendingZone: { t: string; s: string; delay: number } | null = null;
   private lastAct = -1;
@@ -69,7 +70,8 @@ export class Cards {
     this.deathT = h('div', { class: 't' });
     this.deathS = h('div', { class: 's' });
     this.death = h('div', { class: 'sm-death' }, this.deathT, this.deathS);
-    this.loading = h('div', { class: 'sm-loading' }, svgIcon(ICONS.seed));
+    this.loadingText = h('span', { class: 'lt' });
+    this.loading = h('div', { class: 'sm-loading', role: 'status' }, this.loadingText, svgIcon(ICONS.seed));
     this.el = h('div', { class: 'sm-layer sm-cardlayer' }, this.death, this.zone.el, this.act.el, this.boss.el, this.banner.el, this.toasts, this.loading);
   }
 
@@ -83,6 +85,10 @@ export class Cards {
     this.toastEl = null;
     this.pendingZone = null;
     toggle(this.death, 'on', false);
+  }
+
+  relabel(): void {
+    setText(this.loadingText, this.ctx.t('ui.loading'));
   }
 
   setLoading(on: boolean): void {
@@ -103,6 +109,9 @@ export class Cards {
         const actName = act ? tOpt(act.name_key) : '';
         const zoneName = t(z.name_key);
         if (act && z.act !== this.lastAct && this.lastAct !== -1) {
+          // the act card owns the upper-center: a zone card or a dawn banner still up from the previous act goes away
+          this.zone.hide();
+          this.banner.hide();
           this.act.show(actName, t('ui.card.act', { n: roman(z.act) }), 4.2);
           this.pendingZone = { t: zoneName, s: '', delay: 4.6 };
         } else {
@@ -125,7 +134,7 @@ export class Cards {
         if (!c.hasBoss(e.boss)) break;
         const b = c.boss(e.boss);
         this.boss.hide();
-        this.banner.show(t('ui.card.defeated'), t(b.name_key), 5);
+        this.banner.show(t(defeatBannerKey(!!b.brightens_sky, !!game.sim.fight?.memory)), t(b.name_key), 5);
         break;
       }
       case 'weaponObtained': {
@@ -212,6 +221,14 @@ export class Cards {
       requestAnimationFrame(() => el.classList.add('on'));
     }
   }
+}
+
+/**
+ * Banner over a defeated boss: only a boss that brightens the sky (the principal ones, Lucifero I excepted) defeated in the
+ * journey, not in a memory, makes "the dawn advance"; every other victory gets the plain line.
+ */
+export function defeatBannerKey(brightensSky: boolean, memory: boolean): string {
+  return brightensSky && !memory ? 'ui.card.defeated' : 'ui.card.vanquished';
 }
 
 export function roman(n: number): string {

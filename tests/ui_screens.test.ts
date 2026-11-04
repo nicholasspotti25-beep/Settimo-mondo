@@ -120,3 +120,50 @@ describe('title and creator', () => {
     expect(mixHex('#102030', '#102030', 0.3)).toBe('#102030');
   });
 });
+
+describe('review fixes (cards, story, per-frame writes)', () => {
+  it('the dawn advances only for a sky-brightening boss outside a memory', async () => {
+    const { defeatBannerKey } = await import('../src/ui/cards');
+    expect(defeatBannerKey(true, false)).toBe('ui.card.defeated');
+    expect(defeatBannerKey(true, true)).toBe('ui.card.vanquished');
+    expect(defeatBannerKey(false, false)).toBe('ui.card.vanquished');
+    // only principal bosses brighten the sky, and some principal ones do not (Lucifero I)
+    for (const b of bundle.bosses) if (b.brightens_sky) expect(b.class).toBe('principal');
+    expect(bundle.bosses.some((b) => !b.brightens_sky)).toBe(true);
+  });
+
+  it('compares choice options without a signature string', async () => {
+    const { sameOptions } = await import('../src/ui/story');
+    const a = [{ key: 'x', hold: 0 }, { key: 'y', hold: 1.5 }];
+    expect(sameOptions(a, a.map((o) => ({ ...o })))).toBe(true);
+    expect(sameOptions(a, [{ key: 'x', hold: 0 }])).toBe(false);
+    expect(sameOptions(a, [{ key: 'x', hold: 0 }, { key: 'y', hold: 0 }])).toBe(false);
+    expect(sameOptions(null, null)).toBe(true);
+    expect(sameOptions(a, null)).toBe(false);
+  });
+
+  it('NumCache writes an attribute / style only when the quantized value changes', async () => {
+    const { NumCache } = await import('../src/ui/dom');
+    const writes: string[] = [];
+    const el = { setAttribute: (_n: string, v: string) => writes.push(v), style: { setProperty: (_n: string, v: string) => writes.push(`s:${v}`) } };
+    const c = new NumCache(el as unknown as Element, 'stroke-dashoffset', 0.1);
+    for (let i = 0; i < 100; i++) c.set(276.46);
+    c.set(276.48);
+    expect(writes).toEqual(['276.5']);
+    c.set(12);
+    expect(writes).toEqual(['276.5', '12.0']);
+    c.reset();
+    c.set(12);
+    expect(writes.length).toBe(3);
+    const d = new NumCache(el as unknown as Element, 'stroke-dasharray', 0.01, ' 999');
+    d.set(0);
+    d.set(0.001);
+    expect(writes[3]).toBe('0.00 999');
+    expect(writes.length).toBe(4);
+    const o = new NumCache(el as unknown as Element, 'opacity', 0.001, '', true);
+    o.set(0.5);
+    o.set(0.5);
+    expect(writes[4]).toBe('s:0.500');
+    expect(writes.length).toBe(5);
+  });
+});

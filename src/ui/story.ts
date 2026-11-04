@@ -85,6 +85,8 @@ export class StoryLayer {
   private skipLabelled = false;
   /** Seconds the current sequence line has been on screen (the tap-to-continue cue appears after a beat). */
   private lineAge = 0;
+  private bandDirty = true;
+  private trSmall = false;
   private advCue: HTMLElement;
   private queue: Transient[] = [];
   private cur: Transient | null = null;
@@ -166,7 +168,7 @@ export class StoryLayer {
         this.queue.length = 0;
         if (this.cur) {
           this.cur = null;
-          toggle(this.trSub, 'on', false);
+          this.subOn(this.trSub, false);
         }
         break;
       default:
@@ -197,8 +199,8 @@ export class StoryLayer {
     this.lineAge = 0;
     this.gestureIndex = -1;
     this.releaseHold();
-    toggle(this.trSub, 'on', false);
-    toggle(this.seqSub, 'on', false);
+    this.subOn(this.trSub, false);
+    this.subOn(this.seqSub, false);
   }
 
   /** Language changed. */
@@ -225,7 +227,7 @@ export class StoryLayer {
       this.lineKey = key;
       this.lineSpeaker = speaker;
       this.lineAge = 0;
-      toggle(this.seqSub, 'on', false);
+      this.subOn(this.seqSub, false);
       toggle(this.capCenter, 'on', false);
       toggle(this.titleCard, 'on', false);
       if (line) {
@@ -237,7 +239,7 @@ export class StoryLayer {
           toggle(this.capCenter, 'on', true);
         } else {
           this.fillSub(this.seqSub, this.seqWho, this.seqText, line.kind, line.speaker, line.key);
-          toggle(this.seqSub, 'on', true);
+          this.subOn(this.seqSub, true);
         }
       }
     }
@@ -247,14 +249,19 @@ export class StoryLayer {
       this.cur.left -= dt;
       if (this.cur.left <= 0 || !active) {
         this.cur = null;
-        toggle(this.trSub, 'on', false);
+        this.subOn(this.trSub, false);
       }
     }
     if (!this.cur && active && this.queue.length) {
       this.cur = this.queue.shift()!;
       this.showTransient(this.cur);
     }
-    toggle(this.trSub, 'small', !!this.cur && !!line && line.kind !== 'title' && line.kind !== 'caption');
+    const small = !!this.cur && !!line && line.kind !== 'title' && line.kind !== 'caption';
+    if (small !== this.trSmall) {
+      this.trSmall = small;
+      toggle(this.trSub, 'small', small);
+      this.bandDirty = true;
+    }
 
     // --- sequence fade
     const f = running ? v.fade : null;
@@ -297,12 +304,37 @@ export class StoryLayer {
     }
   }
 
+  /** Show / hide a subtitle line; the menus' reserved band is re-measured after any change. */
+  private subOn(el: HTMLElement, on: boolean): void {
+    if (el.classList.contains('on') === on) return;
+    toggle(el, 'on', on);
+    this.bandDirty = true;
+  }
+
+  /**
+   * Height in px of the subtitle lines on screen, or null when nothing changed since the last call (it is measured only after a
+   * line appeared, changed or went away, never per frame). Menus keep this band clear so a line never covers a control.
+   */
+  invalidateBand(): void {
+    this.bandDirty = true;
+  }
+
+  measureBand(): number | null {
+    if (!this.bandDirty) return null;
+    this.bandDirty = false;
+    let px = 0;
+    if (this.seqSub.classList.contains('on')) px += this.seqSub.offsetHeight;
+    if (this.trSub.classList.contains('on')) px += (px ? 6 : 0) + this.trSub.offsetHeight;
+    return px;
+  }
+
   private showTransient(tr: Transient): void {
     this.fillSub(this.trSub, this.trWho, this.trText, tr.kind, tr.speaker, tr.key);
-    toggle(this.trSub, 'on', true);
+    this.subOn(this.trSub, true);
   }
 
   private fillSub(el: HTMLElement, who: HTMLElement, text: HTMLElement, kind: string, speaker: string, key: string): void {
+    this.bandDirty = true;
     toggle(el, 'voce', kind === 'voce');
     toggle(el, 'caption', kind === 'caption');
     const name = kind === 'say' || kind === 'voce' ? speakerName(this.ctx, speaker) : '';

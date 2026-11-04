@@ -171,6 +171,9 @@ export function listItem(icon: string, name: string, desc: string, right: string
 }
 
 /** Modal confirm dialog inside `host`; resolves true on confirm. */
+/** Event a `.sm-dialog` listens for to close itself as cancelled (dispatched by the UI on Escape). */
+export const DIALOG_CANCEL = 'sm-cancel';
+
 export function confirmDialog(ctx: UiCtx, host: HTMLElement, title: string, text: string, yes: string, no: string, danger = false): Promise<boolean> {
   return new Promise((resolve) => {
     const done = (v: boolean) => {
@@ -184,6 +187,7 @@ export function confirmDialog(ctx: UiCtx, host: HTMLElement, title: string, text
     dlg.addEventListener('click', (e) => {
       if (e.target === dlg) done(false);
     });
+    dlg.addEventListener(DIALOG_CANCEL, () => done(false)); // Escape / back closes the topmost dialog as "no"
     host.appendChild(dlg);
   });
 }

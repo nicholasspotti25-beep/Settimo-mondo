@@ -10,7 +10,7 @@ import type { Settings } from '../app/settings';
 import type { UiCtx } from './ctx';
 import { h, setText, toggle } from './dom';
 import { ICONS } from './icons';
-import { MenuScreen, pill, rangeCtl, row, segCtl, toggleCtl, toggleRow, uiSound } from './screen';
+import { DIALOG_CANCEL, MenuScreen, pill, rangeCtl, row, segCtl, toggleCtl, toggleRow, uiSound } from './screen';
 import { BUFFER_MAX, BUFFER_MIN, LATENCY_MAX, estimateLatency, snap } from './calib';
 
 export interface SettingsHost {
@@ -302,6 +302,7 @@ export class SettingsScreen {
       void ring.offsetWidth;
       ring.classList.add('hit');
     });
+    el.addEventListener(DIALOG_CANCEL, () => this.stopTapTest());
     this.screen.el.appendChild(el);
     let last = -1;
     const finish = () => {

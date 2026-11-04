@@ -84,3 +84,15 @@ if the DamageEvent carries a flag:
 Open for render-kit: #3 (generic vfx fallback must skip `art_*` / `tr_*` ids) and #4 (weapon `trail` colors, `update()` per
 frame, dispose on swap).
 
+
+## Update (weapons chunk 1, 2026-11-04)
+
+- **#3 no longer needed for `art_*`:** installWeaponFx now claims every `art_*` vfx id with
+  `fx.registerVfx('art_*', ...)`, so the generic fallback never draws them. Only `tr_*` ids remain (Transizioni are drawn
+  from the `transizione` event by the weapons stream; if the sim ever emits `tr_*` vfx ids the weapons stream will claim
+  them the same way). Nothing to do for render-kit.
+- **#4 is satisfied by the current PortatoreVisual** (src/render/actors/portatore.ts already calls `buildWeapon`,
+  `update(dt, time)` each frame and `dispose()` on swap). Trails are drawn by the weapons stream itself
+  (installWeaponFx samples the blade line of the equipped weapon), so ActorRenderer needs no trail code. Optional nicety
+  for render-kit: `PortatoreVisual.setWeapon` could also attach `offhand` for `grip: 'fist'` weapons (it already does for
+  any visual that has `offhand`; no change needed).

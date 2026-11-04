@@ -53,6 +53,40 @@ describe('touch presets', () => {
   }
 });
 
+describe('preset reach and zones', () => {
+  it('keeps the tablet weapon slots and Lacrime within thumb reach', () => {
+    for (const [w, h] of [[1180, 820], [1366, 1024], [1024, 768]] as [number, number][]) {
+      for (const mirror of [false, true]) {
+        const L = resolveLayout(layouts.touch_tablet, { w, h }, full(w, h), { mirror, large: false });
+        const light = L.byId.light;
+        for (const id of ['slot_1', 'slot_2', 'slot_3']) {
+          const b = L.byId[id];
+          expect(b.cy, `${id} at ${w}x${h}`).toBeGreaterThan(h * 0.5);
+          expect(Math.hypot(b.cx - light.cx, b.cy - light.cy), `${id} at ${w}x${h}`).toBeLessThan(0.4 * Math.min(w, h));
+        }
+        const lac = L.byId.lacrime;
+        expect(lac.cy).toBeGreaterThan(h * 0.45);
+        expect(mirror ? w - lac.cx : lac.cx).toBeLessThan(w * 0.12);
+      }
+    }
+  });
+
+  it('camera zone covers the free right side and never the stick zone', () => {
+    for (const id of ['touch_default', 'touch_small_phone', 'touch_tablet']) {
+      for (const mirror of [false, true]) {
+        const L = resolveLayout(layouts[id], { w: 844, h: 390 }, full(844, 390), { mirror, large: false });
+        const c = L.camera.zone, st = L.stick.zone;
+        const overlapX = Math.min(c.x + c.w, st.x + st.w) - Math.max(c.x, st.x);
+        const overlapY = Math.min(c.y + c.h, st.y + st.h) - Math.max(c.y, st.y);
+        expect(overlapX > 0 && overlapY > 0, `${id} mirror ${mirror}`).toBe(false);
+        // the right-thumb side (left side when mirrored), corners included, starts camera drags
+        const xs = mirror ? [10, 300] : [534, 834];
+        for (const x of xs) for (const y of [10, 200, 380]) expect(x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h, `${id} ${x},${y}`).toBe(true);
+      }
+    }
+  });
+});
+
 describe('resolveLayout', () => {
   const def = layouts.touch_default;
 

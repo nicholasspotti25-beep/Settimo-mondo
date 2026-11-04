@@ -16,7 +16,7 @@ import {
   circlesOverlap, clamp, hitButton, normalizeLayout, pickPresetId, resolveLayout, round3, toFraction,
   type Circle, type ExtButtonDef, type PresetId, type Rect, type ResolvedButton, type ResolvedLayout,
 } from './layout';
-import { pill, rangeCtl, uiSound } from './screen';
+import { confirmDialog, pill, rangeCtl, uiSound } from './screen';
 
 export interface EditorHost {
   /** Current viewport and safe area (px). */
@@ -352,8 +352,22 @@ export class LayoutEditor {
 
   private save(): void {
     const { t } = this.ctx;
-    const game = this.ctx.game;
+    // an edited layout with overlapping controls is only saved after an explicit confirmation (the preset is always valid)
+    if (!this.pristine && this.L && overlapping(this.L).size > 0) {
+      if (this.el.querySelector('.sm-dialog')) return;
+      void confirmDialog(this.ctx, this.el, t('ui.editor.overlap_title'), t('ui.editor.overlap_text'), t('ui.editor.overlap_save'), t('ui.editor.overlap_edit'))
+        .then((yes) => {
+          if (yes && this.visible) this.commit();
+        });
+      return;
+    }
     uiSound(this.ctx, 'confirm');
+    this.commit();
+  }
+
+  private commit(): void {
+    const { t } = this.ctx;
+    const game = this.ctx.game;
     game.applySettings({ ...game.settings, touchLayout: this.pristine ? null : JSON.parse(JSON.stringify(this.def)) as TouchLayoutDef, leftHanded: this.mirror });
     this.host.flash(t('ui.editor.saved'));
     this.close();
@@ -362,7 +376,7 @@ export class LayoutEditor {
   /* ------------------------------------------------------------------------------------------------ dragging */
 
   private down(e: PointerEvent): void {
-    if ((e.target as HTMLElement).closest('.pnl') || !this.L) return;
+    if ((e.target as HTMLElement).closest('.pnl, .sm-dialog') || !this.L) return;
     e.preventDefault();
     if (this.drag) return; // one control at a time
     const hit: ResolvedButton | null = hitButton(this.L.buttons, e.clientX, e.clientY, 6, (b) => !b.anchor);

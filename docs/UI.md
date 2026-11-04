@@ -25,7 +25,9 @@ Children of `#sm-ui`, bottom to top (DOM order is the stacking order): safe-area
 controls, cards, pause button, altar/pause screen, story layer (subtitles, choices, title cards), end credits, title
 screen, settings, layout editor, fade, portrait hint.
 
-State classes on `#sm-ui`: `inmenu` (altar/pause open: subtitles move to a framed box), `setopen` (settings over the title or
+State classes on `#sm-ui`: `inmenu` (altar/pause open: subtitles move to a framed full-width band at the bottom that the
+menu keeps clear through `--subband`, measured by the UI only when a line appears/changes/goes, so a line never covers a
+control), `paused` (pause menu / settings in game: lines wait hidden, card and line timers get dt 0), `setopen` (settings over the title or
 pause: the screen under it is hidden, not shown through), `editopen` (layout editor: HUD, live controls, settings and pause
 button hidden, the world shows), `ending` (letterbox, no HUD/toasts/pause), `subbg`, `rflash` (reduce flashing), `lowfx`.
 
@@ -39,11 +41,11 @@ button hidden, the world shows), `ending` (letterbox, no HUD/toasts/pause), `sub
 | ../input/touch.ts | TouchController: Pointer Events -> InputRouter (press/setHeld/setStick/addCamera/lockSwitch/pickLock) |
 | hud.ts | Salute/Fiato bars, Eco ring + Metamondo, vials, statuses, ally bar, boss bar + parts, Colpo di Grazia, Colpo Rosso, vignettes, perfect dodge/parry, desktop trio + prompt, FPS/memory overlay |
 | story.ts | subtitles (seq lines + transient dialogue/caption/voce), centered captions, title cards, choices (Implora HOLD + kneel ring), ritual gestures, tap-to-advance, hold-to-skip |
-| cards.ts | zone / act / boss name cards, "L'alba avanza" banner, toasts, death screen, loading spinner |
+| cards.ts | zone / act cards (an act card hides a zone card / banner still up), boss name card (top-center under the HUD bars, clear of both thumbs), defeat banner ("L'alba avanza" only for a sky-brightening boss outside a memory, else "Nemico sconfitto": `defeatBannerKey`), toasts, death screen, loading veil (spinner + `ui.loading`) |
 | screen.ts | MenuScreen scaffold + widgets (pill, row, toggleRow, segCtl, rangeCtl, listItem, confirmDialog, pips, uiSound) |
 | altar.ts | AltarMenu, modes `altar` (Medita, Armeria, Forme, Viaggio, Specchio dei Ricordi, Reperti, leave) and `pause` (journey, read-only Armeria/Forme/Reperti, Collezioni, Impostazioni, save, Debug, quit) |
 | collections.ts | Collezioni view + pure collectionStats / memoryCatalogue |
-| title.ts, creator.ts, credits.ts | title + journeys + import, character creator (code-drawn SVG figure), credits (title and end-of-game mode) |
+| title.ts, creator.ts, credits.ts | title + journeys + import (front page = one flex column: logo on top, menu standing on the horizon line with a minimum gap; under 540 px tall a compact logo and the primary buttons in one row), character creator (code-drawn SVG figure), credits (title and end-of-game mode) |
 | settings.ts, calib.ts | settings screen (7 sections), latency tap test (pure estimateLatency) |
 | editor.ts | touch layout editor + pure panelSpot / rectHitsCircle / overlapping |
 | debug.ts | debug section of the pause menu + HitboxOverlay canvas |
@@ -62,8 +64,11 @@ button hidden, the world shows), `ending` (letterbox, no HUD/toasts/pause), `sub
   long-press menus (`#sm-ui` sets user-select none and touch-callout none).
 - **Buttons**: `:where(#sm-ui) button` is the reset so any class wins over it (an id-specific reset once out-specified every
   class background).
-- **Per frame**: `setText` / `toggle` / `StyleCache` write only on change; nothing allocates in `update()` (the hitbox
-  overlay binds its shape callback once and uses scratch vectors).
+- **Per frame**: `setText` / `toggle` / `StyleCache` write only on change; numeric attributes and opacities that move every
+  frame (Metamondo dashoffset, Eco pip dasharray, status rings, vignettes, sequence fade, skip and kneel rings) go through
+  `NumCache` (dom.ts: quantized, so a steady value costs no write and no string); the bar lag writes only when it moves;
+  sequence lines and choices are compared field by field (`sameOptions`), never through a per-frame signature string;
+  nothing allocates in `update()` (the hitbox overlay binds its shape callback once and uses scratch vectors).
 - **Simulation access**: the UI reads `game.sim` and acts only through `game.act(fn)` or the InputRouter (the only input
   path). It never imports three: lock picking and the hitbox overlay project with `renderer.rig.camera` and a tiny
   ProjVec (controls.ts).
@@ -76,7 +81,9 @@ button hidden, the world shows), `ending` (letterbox, no HUD/toasts/pause), `sub
   and sizes as fractions of the unit (button diameter = size x unit, x1.22 with large buttons).
 - **Presets** (data/ui): `touch_default` (E7), `touch_small_phone` (long side < 720 or short side < 350), `touch_tablet`
   (short side >= 600). `settings.touchLayout` (from the editor) wins over the device preset; `normalizeLayout` fills any
-  missing button from touch_default. `leftHanded` mirrors x (and the HUD ring, bars and pause button).
+  missing button from touch_default. `leftHanded` mirrors x (and the HUD ring, bars and pause button). On tablets the
+  weapon slots arc just above the right cluster (next to lock, y 0.58..0.63) and Lacrime sits above the stick zone
+  (0.06, 0.55), so both thumbs reach them (tested: within 0.4 x the short side of the light button).
 - **HUD scale**: `--k = clamp(0.94 + (min(w,h) - 390) * 0.0008, 0.92, 1.28)` for text and bars; the Eco ring radius is
   `clamp(safe.h * 0.075, 22, 46)` and the vials/status icons follow it (`--hk = ring.r / 29`, 0.92..1.6), so on tablets
   they keep their proportion to the ring.
@@ -92,12 +99,15 @@ Each pointer owns exactly one control for its whole life, decided at pointerdown
 1. a visible, accepting button under the finger (`hitButton`: radius x 1.12 + slop, closest relative center wins) -> press
    (and setHeld for guard/interact/light/jump until that pointer lifts; guard tap = parry by the sim);
 2. the stick zone -> the floating stick appears under the thumb (dead zone, ~25 ms smoothing, outer ring = sprint);
-3. anything else -> camera drag; on the right half a short horizontal flick (< 280 ms, >= 4.5 % of the width) is
-   `lockSwitch`, and a double tap (<= 330 ms, <= 56 px) on a projected boss lock point is `pickLock`.
+3. inside `camera_drag.zone` (mirrored with the layout; the presets cover the whole free right side, corners included)
+   -> camera drag, and a short horizontal flick there (< 280 ms, >= 4.5 % of the width) is `lockSwitch`;
+4. anywhere else (e.g. the upper left outside the stick zone) only taps count: a double tap (<= 330 ms, <= 56 px) on a
+   projected boss lock point is `pickLock` (also true inside the camera zone).
 
 Metamondo is the ring around the Eco pips (an anchored button, only accepted when the meter is full). The interact button
 exists only while `sim.prompt` is set (also in fights). Light haptic tick on presses (settings.haptics, strength).
-`releaseAll()` runs on blur, pause, menus, title and the portrait hint. Controls fade to the idle opacity after a few
+`releaseAll()` runs on blur, pause, menus, title and the portrait hint. Controls appear at their active opacity (the
+router's `lastActivity` is reset when they show and when the mode becomes game) and fade to the idle opacity after a few
 seconds without input (settings.controlsFade).
 
 ## 6. Menu modes
@@ -105,7 +115,9 @@ seconds without input (settings.controlsFade).
 - **Altar** (`sim.altarOpen`): opened by the sim, closed with `sim.closeAltar` (back button, Escape, "Lascia l'altare").
   World-changing actions (meditate, fast travel, memory fight) go through `UI.transition`: fade out 0.38 s, act, fade back in
   once streaming ends.
-- **Pause**: pause button, Escape, the app going to the background, or the portrait hint. The sim is frozen
+- **Pause**: pause button (>= 40 px, aria-label `ui.touch.pause`), Escape, the app going to the background, the window
+  losing focus (blur: the platform layer freezes the sim until focus returns, so the pause menu shows instead of a silent
+  freeze), or the portrait hint. Escape first closes the topmost dialog as cancelled (`DIALOG_CANCEL`). The sim is frozen
   (`paused()` true). Debug appears here when `settings.debugMenu`.
 - **Settings**: over the title or over the pause menu. **Layout editor**: over settings.
 - **Title** (`mode 'title'`): journeys, creator, import, credits. **Credits** (`mode 'credits'`): over the ending's last shot,
@@ -120,7 +132,8 @@ The editor panel must never hide a control: `panelSpot` tries the sides x (middl
 first rect that hits no button circle (and not the HUD ring); the panel stays ~230 px tall by having two states (globals
 until the first selection, then size + opacity) and fades while dragging. A unit test proves a free spot exists for every
 preset, both hands, at every target viewport. Sizes are clamped to 0.06..0.18 units, opacity to 0.2..1; overlapping
-buttons are outlined red with a warning. Saved via `applySettings` (touchLayout + leftHanded); Ripristina saves null.
+buttons are outlined red with a warning, and saving an edited layout that still overlaps asks for an explicit confirmation
+("Salva comunque" / "Continua a modificare"; the untouched preset saves directly). Saved via `applySettings` (touchLayout + leftHanded); Ripristina saves null.
 
 ## 8. Debug menu
 

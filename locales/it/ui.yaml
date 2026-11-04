@@ -10,8 +10,6 @@ ui:
     grace: "Colpo di Grazia"
     perfect_dodge: "Schivata perfetta"
     perfect_parry: "Parata perfetta"
-    metamondo_ready: "Il Metamondo ti chiama"
-    phase: "Fase {n}"
     challenge:
       noDamage: "Senza ferite"
       singleWeapon: "Un'arma sola"
@@ -38,6 +36,7 @@ ui:
   card:
     act: "Atto {n}"
     defeated: "L'alba avanza"
+    vanquished: "Nemico sconfitto"
     memory: "Ricordo"
   death:
     line: "La luce si ritira, ma non si spegne."
@@ -59,8 +58,8 @@ ui:
     dodge: "Schivata"
     guard: "Guardia"
     jump: "Salto"
-    art_prima: "Arte prima"
-    art_seconda: "Arte seconda"
+    art_prima: "Arte Prima"
+    art_seconda: "Arte Seconda"
     lacrime: "Lacrime"
     lock: "Aggancio"
     slot: "Arma {n}"
@@ -82,7 +81,7 @@ ui:
     tramonto: "Tramonto"
     notte: "Notte"
   tod_d:
-    alba: "Luce rosata, ombre lunghe"
+    alba: "Oro pallido e viola, un cielo senza sole"
     giorno: "Cielo pieno, aria limpida"
     tramonto: "Oro e brace sull'orizzonte"
     notte: "Stelle fredde, il mondo trattiene il fiato"
@@ -345,6 +344,10 @@ ui:
     size: "Dimensione"
     opacity: "Opacità"
     overlap: "Alcuni comandi si sovrappongono."
+    overlap_title: "Salvare comunque?"
+    overlap_text: "Alcuni comandi si sovrappongono: un tocco potrebbe premere quello sbagliato."
+    overlap_save: "Salva comunque"
+    overlap_edit: "Continua a modificare"
     zone_stick: "Levetta"
     zone_camera: "Camera"
   coll:

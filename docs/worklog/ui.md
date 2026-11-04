@@ -207,3 +207,59 @@ Every deliverable of the brief is done and verified. Maintenance only:
   - Headless gotcha: calling g.newGame without a prior g.applySettings in a fresh profile made the page navigate (execution
     context destroyed) in one probe; the scripts always apply settings first. Not reproduced through the real title flow.
 
+
+### Review fixes (2026-11-04)
+Adversarial review of the completed brief: 16 findings, all verified in code/screens before fixing. Lead-side items not
+redone (platform focus resume, tools/smoke.ts CDP fix, service-worker fallback). My headless scripts follow the smoke
+pattern: game promises are started in the page and polled (`inPage` in scratchpad `ui/review.mjs`), never awaited across
+page.evaluate.
+- 1 Aim assist (MAJOR, confirmed: nothing read `settings.aimAssist`): the UI row stays and already passes the value through
+  `game.applySettings({ ...s, aimAssist })`; request #3 in docs/requests/ui.md (SimSettings.aimAssist, gate the cone search in
+  firePlayerProjectile, the faceForAction snap and the Arts fallback target; Game.applySettings/makeSim copy it).
+- 2 Blur (MAJOR): `window blur` now releases every touch AND opens the pause menu (same guard as Escape: only in a playable
+  game, not over the altar/title/ending/transition).
+- 3 Title overlap (MAJOR): `.front` is one flex column (logo, then the menu with `margin-top:auto`, `gap: max(14px,3vh)`,
+  bottom padding = horizon + 12 px) so the menu always stands on the `.hz` line (now `bottom: 23vh`, like the mist) and
+  never meets the tagline. Primary buttons are a `.prim` box: a column on tall screens, one row under 540 px tall with a
+  compact logo (seal 24 px, h1 <= 40 px, tag 13 px). 667x375: tag 83-99, menu 184-277 (gap 85), hz 288; 844x390: tag
+  86-102, menu 195-288, hz 299; 1180x820: tag 231-256, menu 414-619, hz 630.
+- 4 Act vs zone card (MAJOR): the act card hides the zone card and the dawn banner before showing.
+- 5 Subtitles over menus (MAJOR): over a menu the lines sit in a full-width bottom band; the altar/pause screen reserves it
+  (`padding-bottom: --subband`), measured by `StoryLayer.measureBand()` only after a line appears/changes/goes (or the menu
+  opens/closes), idle lines take no room (`display:none` in menus). Under the pause menu / settings the lines wait hidden.
+  Geometric check (sub rects vs every visible control clipped by its scroll containers): 0 hits at 667x375, 844x390,
+  1180x820 (Armeria with 5 weapons + a Voce line).
+- 6 Tablet reach (MAJOR): touch_tablet slots arc above the right cluster next to lock (0.770,0.630) (0.836,0.598)
+  (0.903,0.578), Lacrime above the stick zone (0.06,0.55). New test: slots below mid-height and within 0.4 x short side of
+  the light button, Lacrime low-left, at 1180x820 / 1366x1024 / 1024x768, both hands. The editor reads the same presets.
+- 7 Pause button: `max(40px, 36px*k)` (40x40 at 667, 46x46 at 1180) + aria-label `ui.touch.pause` (relabels live).
+- 8 Text >= 11 px: toast kind, Implora "TIENI PREMUTO", gesture alt line, tile slot badge 11 px; boss part names
+  `max(11px, 10.5px*k)`.
+- 9 Per-frame writes: new `NumCache` (dom.ts; quantized numeric attribute/style, writes and builds a string only on change)
+  for the Metamondo dashoffset, the 3 Eco dasharrays, status rings, both vignettes, sequence fade, skip ring, kneel rings,
+  controls opacity and the stick position; the knob transform is rebuilt only when the thumb moves; bar lag writes only when
+  it moves; per-control alpha moved from the frame loop to layout(); sequence-line and choice signatures replaced by field
+  compares (`sameOptions`, no map/join); the challenge fail array/closure replaced by a loop; `slot_N` index via charCode.
+- 10 Boss name card: top-center under the HUD bars (`top: st + 21%`, centered), clear of every touch button in both hands
+  (checked against all button rects at the three viewports).
+- 11 Canon wording: Alba hint "Oro pallido e viola, un cielo senza sole" / "Pale gold and violet, a sunless sky";
+  "L'alba avanza" only when the boss `brightens_sky` and it is not a memory (`defeatBannerKey`, tested), otherwise the new
+  `ui.card.vanquished` "Nemico sconfitto" / "Foe defeated"; "Arte Prima/Seconda"; EN glossary terms in ui.yaml: Tears of
+  Dawn / No Tears, Metaworld, Full Echo (were Lacrime / Metamondo / Eco).
+- 12 Keys: `ui.story.advance` is now a "Tocca per continuare" cue under the line (after 1.6 s on the same line, hidden over
+  menus / choices / gestures); `ui.loading` is shown beside the spinner (13 px, role status); `ui.touch.pause` labels the
+  pause button; `ui.hud.metamondo_ready` and `ui.hud.phase` removed (the brief asks for the ring glow and phase ticks, both
+  present).
+- 13 Controls start active: `input.lastActivity = now` on mode 'game' and whenever the controls appear (after loads,
+  sequences, menus) -> 0.85 measured right after the fade-in at 667/1180 (was 0.35).
+- 14 Camera zone: touch.ts honors `camera_drag.zone` (drags orbit and flicks switch the lock only from inside it; outside it
+  taps still count for the double-tap lock pick). Preset zones widened to the whole free right side (x 0.44/0.47 .. 1,
+  y 0 .. 1) so nothing a player used is lost; test: the zone never overlaps the stick zone and covers the right-side corners
+  in both hands.
+- 15 Timers under pause: story and cards get dt 0 while `paused()` (boss card left 2.73 -> 2.73 after 4.5 s in pause).
+- 16 Escape closes the topmost dialog as cancelled (`DIALOG_CANCEL` event on confirmDialog and the tap-test dialog), the
+  pause stays; the editor asks "Salvare comunque?" before saving an edited layout that overlaps (the untouched preset saves
+  directly; drags ignore the dialog); Specchio in NG+: confirmed (newGamePlus resets `defeated`, startMemoryFight checks it)
+  and the Bible says "replay any defeated boss" -> request #4 (`everDefeated` incl. carried todDefeats, sim + the matching
+  altar.ts line in one change; the UI keeps the sim's rule until then so no entry is dead).
+- Verification: tsc 0 errors; registry + data ok (1089 it / 1089 en); vitest ui_layout/ui_screens/ui_collections 44/44 (new: tablet reach, camera zone, defeatBannerKey, sameOptions, NumCache). Headless (scratchpad ui/review.mjs, vite without HMR/watch, restarted after each edit): 667x375 dsf3 (it+en), 844x390 dsf3 (it+en), 1180x820 dsf2 (it+en) ALL OK: title geometry + audit 0 issues, controls start active, pause 40/46 px + label, act card hides zone card, loading text, boss card centered and clear of all buttons, blur -> pause, timers frozen, Escape closes dialog then resumes, secondary boss -> Nemico sconfitto, Armeria + Voce line: 0 controls covered, tap-to-continue cue during the opening. ui/hud.mjs 844x390: HUD text >= 11 px, min button 40 px, CDP multi-touch stick+light (sprint, running), portrait pause. No page errors. Screenshots reviewed: title 667, fight 667 + 1180 (tablet slots/Lacrime, top-center boss card), Armeria with the subtitle band.

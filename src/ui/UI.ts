@@ -23,6 +23,7 @@ import { SettingsScreen } from './settings';
 import { LayoutEditor } from './editor';
 import { CreditsView } from './credits';
 import { HitboxOverlay } from './debug';
+import { DIALOG_CANCEL } from './screen';
 
 export class SettimoUI implements GameUI {
   private game!: Game;
@@ -109,10 +110,19 @@ export class SettimoUI implements GameUI {
     }, { capture: true, passive: true });
     window.addEventListener('resize', () => this.relayout());
     window.addEventListener('orientationchange', () => setTimeout(() => this.relayout(), 250));
-    window.addEventListener('blur', () => this.controls.touch.releaseAll());
+    // focus lost (another app / window, a system sheet) without the page being hidden: the platform layer freezes the sim
+    // until focus returns, so show the pause menu instead of a silent freeze, and drop every held control
+    window.addEventListener('blur', () => {
+      this.controls.touch.releaseAll();
+      this.openPause();
+    });
     window.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape' || e.repeat) return;
-      if (this.root.querySelector('.sm-dialog')) return;
+      const dialogs = this.root.querySelectorAll('.sm-dialog');
+      if (dialogs.length) {
+        dialogs[dialogs.length - 1].dispatchEvent(new Event(DIALOG_CANCEL)); // close the topmost dialog as cancelled
+        return;
+      }
       if (this.editor.visible) {
         this.editor.close();
         return;
@@ -283,10 +293,21 @@ export class SettimoUI implements GameUI {
     const controlsOn = this.mode === 'game' && this.touchOn && hudOn && !sim.inputLocked && sim.player.alive;
     this.controls.grace = this.hud.graceLevel === 2;
     this.controls.update(dt, controlsOn);
-    this.story.update(dt, inGame);
-    this.cards.update(dt);
+    // card, toast and line timers stand still under the pause menu / settings (the sim is frozen there too)
+    const paused = this.paused();
+    const udt = paused ? 0 : dt;
+    this.story.update(udt, inGame);
+    this.cards.update(udt);
     this.altar.update(inGame && !story && !sim.endingActive ? sim.altarOpen : null);
-    toggle(this.root, 'inmenu', this.altar.isOpen);
+    const inMenu = this.altar.isOpen;
+    if (inMenu !== this.root.classList.contains('inmenu')) {
+      toggle(this.root, 'inmenu', inMenu);
+      this.story.invalidateBand(); // the lines are laid out differently over a menu
+    }
+    toggle(this.root, 'paused', paused); // lines wait (hidden, timers frozen) under the pause menu and settings
+    // over a menu the subtitle lines sit in a band the menu keeps clear (measured only when a line changes)
+    const band = this.story.measureBand();
+    if (band !== null) this.root.style.setProperty('--subband', band > 0 ? `${Math.ceil(band) + 4}px` : '0px');
     toggle(this.root, 'ending', this.mode === 'ending' || (inGame && sim.endingActive));
     toggle(this.pauseBtn, 'sm-hidden', !(this.mode === 'game' && hudOn && !this.altar.isOpen && sim.player.alive));
     if (this.pendingFadeIn && !this.loading && !game.renderer.world.busy) {
@@ -317,6 +338,7 @@ export class SettimoUI implements GameUI {
       this.showEndCredits();
     } else if (this.endCredits.visible) this.endCredits.hide();
     if (m === 'game') {
+      this.game.input.lastActivity = performance.now(); // controls start at their active opacity, then fade when idle
       this.story.reset();
       this.cards.reset();
       this.altar.reset();
@@ -368,6 +390,8 @@ export class SettimoUI implements GameUI {
       this.title.relabel();
       this.settings.relabel();
       this.editor.relabel();
+      this.pauseBtn.setAttribute('aria-label', this.ctx.t('ui.touch.pause'));
+      this.cards.relabel();
       if (this.portrait) this.relabelPortrait();
       if (this.mode === 'credits' && this.endCredits.visible) this.showEndCredits();
     }

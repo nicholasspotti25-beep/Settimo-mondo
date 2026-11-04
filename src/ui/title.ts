@@ -157,8 +157,11 @@ export class TitleScreen {
       return b;
     };
     if (!this.loaded) return;
+    // primary actions in their own box: a column on tall screens, one row on phones (see .sm-title .prim)
+    const prim = h('div', { class: 'prim' });
+    this.menu.append(prim);
     if (any) {
-      this.menu.append(
+      prim.append(
         btn(t('ui.menu.continue'), () => this.continueSlot(latestSlot(this.slots)), true),
         btn(t('ui.menu.load'), () => {
           uiSound(this.ctx, 'confirm');
@@ -169,7 +172,7 @@ export class TitleScreen {
           this.openGames('new');
         }));
     } else {
-      this.menu.append(btn(t('ui.menu.new_game'), () => {
+      prim.append(btn(t('ui.menu.new_game'), () => {
         uiSound(this.ctx, 'confirm');
         this.newSlot = 0;
         this.openCreator();
