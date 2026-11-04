@@ -50,3 +50,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - render-kit#4 done: pose libraries for all 7 remaining families (colossus, serpent, dragon, bird, insect, tree, tentacled), animator globs/bends/radial, keyword side fix, 30 render tests
 - lead: engine lane now rotates world, render-kit, weapons (3 active) so weapons is not starved; started weapons#1
 - ui fix chunk done: all 6 major + 10 minor review findings fixed; requests ui#3 (aimAssist sim/app) and ui#4 (Specchio in NG+) for integrate#2. ui stream DONE (light re-review at final pass)
+- deployed b11aa6e (ui review fixes, pose libraries); started act1#4

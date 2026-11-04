@@ -96,3 +96,13 @@ frame, dispose on swap).
   (installWeaponFx samples the blade line of the equipped weapon), so ActorRenderer needs no trail code. Optional nicety
   for render-kit: `PortatoreVisual.setWeapon` could also attach `offhand` for `grip: 'fist'` weapons (it already does for
   any visual that has `offhand`; no change needed).
+
+## 7. Portatore clips with long weapons (render-kit, data/anim/portatore.yaml)
+
+Seen in headless shots (chunk 1): during the light combo `thrust` step and idle, polearms (Lancia del Custode 2.25 m,
+Remo del Traghettatore 2.2 m) point straight up or pass through the body, because the humanoid/portatore clips aim
+the hand for a ~1 m sword. Weapons use the grip socket frame (+Z out of the fist), so a fix is pose-only: please add
+polearm variants (a `two_hand` / `polearm` clip prefix selected from `MovesetDef.grip`, e.g. `polearm_thrust`,
+`polearm_idle` with the off hand on the shaft and the tip forward-down) or let PortatoreVisual pick a clip prefix from
+the equipped moveset's `grip`. The weapons stream can supply `SwingDef.arc` (from/to yaw-pitch, roll, hand) already in
+every swing as the target aim if that helps.
