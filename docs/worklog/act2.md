@@ -24,9 +24,9 @@ tools/bot/hooks/<6>.ts, tests/act2*.test.ts, docs/requests/act2.md. Also sequenc
 | 10 | Balance bot (perfect wins inside 120+20×D with few hits; sloppy not trivial) | partial: base game ALL 6 PASS (chunk 1, seeds=3): cerbero 134 s/260, 0.7 hits; pyro 144 s/280, 4.3; thunder 160 s/280, 4.0; ice (on ice) 176 s/300, 6.7; magma 185 s/300, 7.3; lucifero_1 scripted 3/3. Left: hit counts of ice/magma; NG+ ice loses (spike lines), NG+ cerbero bite_frenzy | tools/bot/hooks/*, boss yamls |
 | 11 | Bot hooks for scripted mechanics | done (chunk 1): all 6; act2Defense = wave roll + Act I helpers (box hazards, charge lines, ring wind-up hold/jump, round-hazard escape) + Act II ring jump; magma hook runs to the basalt crusts | tools/bot/hooks/*.ts |
 | 12 | Unit tests tests/act2*.test.ts | missing | tests/act2.test.ts |
-| 13 | Canon audit clean for act2 bosses | partial: only "no music theme data" (audio stream) and "no model builder" (item 14) | — |
-| 14 | Boss models (6) incl. Lucifero dual look (lucifero_1 seated / lucifero_2 standing via actor.defId), exported for reuse | missing — blocked: docs/RENDER_KIT.md absent | src/content/bosses/<id>/model.ts |
-| 15 | Arena dressing (6) incl. cues (head_tell, cerbero_chains_break, dite_gate_open, storm_rain, ice_mirror_*, forge_cools, lucifero_*) | missing — blocked: docs/WORLD_KIT.md absent | src/content/bosses/<id>/arena.ts |
+| 13 | Canon audit clean for act2 bosses | partial: "no music theme data" (audio stream) and "no model builder" for the 5 bosses still without a model | — |
+| 14 | Boss models (6) incl. Lucifero dual look (lucifero_1 seated / lucifero_2 standing via actor.defId), exported for reuse | partial: cerbero DONE (chunk 2); pyro, thunder, ice, magma, lucifero left | src/content/bosses/<id>/model.ts |
+| 15 | Arena dressing (6) incl. cues (head_tell, cerbero_chains_break, dite_gate_open, storm_rain, ice_mirror_*, forge_cools, lucifero_*) | partial: dite_soglia DONE (chunk 2: cerbero_chains, dite_gate_open, P2 chain debris; head tells in the model); 5 left | src/content/bosses/<id>/arena.ts |
 | 16 | Zones (6): terrain, path, colliders, props, landmarks, particles, vistas | partial: scaffold only (terrain/path/altars/exits/1 vista each, no landmarks/props); dressing blocked on WORLD_KIT.md | data/zones/*.yaml, src/content/zones/<zone>/** |
 | 17 | Reperti dei Cercatori, 2–3 per zone (12–18), IT+EN | missing | data/reperti/act2.yaml, locales/*/act2_world.yaml |
 | 18 | Cathedral seals diegetic (break as each knight falls) | partial: defeat cues seal_broken_* + captions exist; zone/landmark side missing (WORLD_KIT) | data/zones/cattedrale_caduta.yaml |
@@ -34,24 +34,21 @@ tools/bot/hooks/<6>.ts, tests/act2*.test.ts, docs/requests/act2.md. Also sequenc
 
 ## Next
 
-1. Mostro di Magma hit count (7.3 perfect): lava_wave (2 rings, the 2nd spawns at r0 4.0 = where a player punishing the bent
-   heart stands) and fist_slam's magma_crack ring right after the fist. A plain `delay` on those rings made it WORSE (10.0
-   hits: the ring then lands inside the punish window while the bot swings) — reverted. Try instead: second lava ring from
-   r0 2 with a 0.3 s flash and interval 0.9, or the bot holding swings during a pending ring flash (act1 ringJump only
-   holds during wind-ups); re-run bot.
-2. NG+ fixes: ice under NG+ LOSES (ice_spike_line 26 hits over 2 seeds: ng_glacial_lunge_2 + ice_spikes lines on the
-   sliding ice); cerbero NG+ `bite_frenzy` (3 bites, 12 hits over 2 seeds) needs a readable rhythm / bot handling. Then
-   NG+ passes for all 5 + ToD variant passes; consider distinct NG+ attacks for p2 of cerbero/pyro/thunder.
-3. Ice base hit count (6.7: cut_sweep/cut_return 10 of 20, frost_ring 4) — check the bot's attack windows vs his idle gap
-   and the return-cut timing on ice.
-4. Arena data: obstacles (anvils in fucine_incudini, throne + pillars in cattedrale_navata, bones/iron in dite_soglia), p2
-   from_phase hazards/variants where the cards want them; re-run bots.
-5. tests/act2.test.ts: per-head part attacks + p2 chains, pyro waves, thunder ambient strikes never under the player, ice
-   spam parry/En Garde/mirrors, magma islands/flood/carapace/heart + eruption not before 20 s, lucifero
-   shatter/invulnerable/Il Rifiuto/both choices, NG+ attacks only at ngCycle ≥ 1, cocito_lago surface ice.
-6. Reperti (2–3 per zone, IT+EN) + zone data (landmarks/vistas/props) as far as possible without WORLD_KIT.md.
-7. When RENDER_KIT.md / WORLD_KIT.md say STATUS: READY: 6 models (Lucifero dual look, exported), 6 arena dressings, zone
-   dressing incl. diegetic seals; screenshots on port 5182 at 1280x576.
+1. Pyro model (humanoid rig: giant knight 5.8 m in dark-red incandescent plate with glowing seams, cloak of flames =
+   cape chain with an additive flame shell, wavy flamberge on grip_r reaching the 7.2 m sweep arcs, flag `wreathed` =
+   flame aura + brighter seams) + roghi_campo arena dressing (embers plain, fire columns, red sky; the first seal motif
+   answering `seal_broken_fire`). Same screenshot routine (scratchpad act2/shot.mjs, port 5182).
+2. NG+ fixes: ice under NG+ LOSES (ice_spike_line + ng_glacial_lunge_2 on the sliding ice); cerbero NG+ `bite_frenzy`
+   (12 hits over 2 seeds) needs a readable rhythm / bot handling. Then NG+ passes for all 5 + ToD variant passes;
+   consider distinct NG+ attacks for p2 of cerbero/pyro/thunder.
+3. Thunder, Ice, Mostro di Magma, Lucifero (dual look, exported) models + bufera_altura, cocito_lago, fucine_incudini,
+   cattedrale_navata dressings (in story order, one or two per chunk).
+4. Mostro di Magma hit count (7.3 perfect): lava_wave 2nd ring / fist_slam magma_crack ring (see chunk 1 notes).
+5. Ice base hit count (6.7: cut_sweep/cut_return, frost_ring).
+6. Arena data: obstacles (anvils in fucine_incudini, throne + pillars in cattedrale_navata), p2 from_phase hazards; re-run bots.
+7. tests/act2.test.ts (per-head part attacks + p2 chains, pyro waves, thunder strikes, ice parry/En Garde/mirrors, magma
+   islands/flood/carapace, lucifero shatter/Il Rifiuto/both choices, NG+ only at ngCycle >= 1, cocito surface ice).
+8. Reperti (2-3 per zone, IT+EN) + zone dressing (landmarks/vistas/props) incl. diegetic seals in cattedrale_caduta.
 
 ## Notes
 
@@ -82,3 +79,26 @@ tools/bot/hooks/<6>.ts, tests/act2*.test.ts, docs/requests/act2.md. Also sequenc
   mostro_di_magma}.ts + src/content/bosses/mostro_di_magma/behavior.ts; `npm run registry && SM_PARTIAL=1 npm run data` ok
   (no act2 warnings); tests/data.test.ts strict checks fail only on other streams' missing bosses (same 81 errors as
   before), tests/sim.test.ts passes.
+- Chunk 2 (2026-11-04): Cerbero model + Soglia di Dite dressing.
+  - src/content/bosses/cerbero/model.ts: own quadruped skeleton with the family's bone names (all data/anim/quadruped.yaml
+    clips drive it); three arched necks whose head bones sit ON the data part spheres, `info.partChains` hands them to the
+    behavior anchors (heads rear, strike to the ground, stay low in recovery). Per-head tell: own glow surface per head
+    (eyes + throat, LEFT blood-red / CENTER fire-gold / RIGHT ember) + an additive rays flare in front of the brow that
+    flares only on the attacking head (others dim); hell_howl lights all three. Pitch-black shaggy fur (lean 4-spike
+    tufts), bone spike ridge, long spiked tail, spiked collars with spring broken-chain ends; P1 chest chain + shackle on
+    bone `yoke` (hideOnFlag chains_broken), P2 faint ember edge shell. Under the 80k assertion on every preset (tufts cut
+    from 168 to 32 triangles each; was 90.9k).
+  - data/bosses/cerbero.yaml hurtboxes re-fit to the model (dog proportions: chest front z 3.4, rump z -3.4, back 5.3 m;
+    heads unchanged). Bot after the change (seeds=3): PASS perfect 3/3 134 s / 260, 0.7 hits; sloppy 0/3 (10.3 hits).
+  - src/content/bosses/cerbero/arena.ts: the Porta di Dite 18 m past the north edge (seven-rib portal strapped in iron,
+    vertebra voussoirs, horned skull keystone, iron tympanum + red iron eye, basalt massifs with ribs, two iron leaves that
+    swing open on `dite_gate_open` and stay open once Cerbero is defeated; the red of Dis behind them); souls drifting to
+    the Gate, waiting before the shut leaves, passing once open; three anchor rings with broken tethers that rattle on
+    `cerbero_chains`; floor seal of annular basalt slabs + bone grout + medallion with three spokes (covers the pale bone
+    paving), kerb, six soul-fire braziers, basalt teeth, bone heaps; P2 chest-chain links fall and lie on the slabs.
+  - Checked headless at 1280x576 from the fight camera at giorno, tramonto and notte, P1 and P2, forced bite/spit/growl
+    telegraphs (the right head reads), Gate open. Harness note: setting boss hp + checkPhase leaves the boss in
+    `transition` (renderer transition aura stays on) — force `b.setState('idle')` to see the real P2 look.
+  - Verification: tsc clean (whole tree), tests/render_models + tests/sim 24/24, eslint clean on the two files,
+    `npm run registry && SM_PARTIAL=1 npm run data` ok (no act2 warnings).
+

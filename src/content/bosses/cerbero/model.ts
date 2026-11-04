@@ -508,7 +508,7 @@ const build: BossModelBuilder = (def, ctx, actor: Actor): ActorVisual => {
     family: 'quadruped',
     height: 4.2 * d.k,
     flagAuras: {
-      chains_broken: { color: C.ember, surfaces: [S.skin], strength: 0.16, power: 4.0, flow: 1.1, inflate: 0.04 },
+      chains_broken: { color: C.ember, surfaces: [S.skin], strength: 0.1, power: 5.0, flow: 1.1, inflate: 0.04 },
     },
     onUpdate,
   });

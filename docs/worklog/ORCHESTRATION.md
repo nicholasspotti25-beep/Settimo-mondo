@@ -5,10 +5,12 @@ general-purpose), two at a time — one per lane. Each chunk agent gets the stan
 stream brief (+ CONTENT_BRIEF.md and BOSS_AUTHORING.md for act streams) and docs/worklog/<stream>.md; do the top 1-3 Next
 items in ~50-80 tool calls; update the work log; never break the tree; no git; report done/next/blockers.
 
-## Lanes (priority order; work the first two unfinished streams of a lane round-robin (engine lane: first three, so weapons is not starved))
-- Engine lane: render-kit, world, weapons, audio, forms — plus an integration pass (requests, wiring, build + smoke)
-  after every 3 engine chunks.
-- Game lane: ui, act1, act2, act3a, act3b, act4, act5, act67.
+## Lanes (re-prioritised 2026-11-04: a completable game first, polish second)
+- Visual lane (round-robin): render-kit, world, weapons, act1 (models/arenas), act2 (models/arenas), then audio, forms —
+  plus an integration pass (requests, wiring, build + smoke) after every 3 chunks of this lane.
+- Content lane (round-robin over all five): act3a, act3b, act4, act5, act67 — SIM-SIDE FIRST (boss data, behaviors,
+  story, speakers, Voce, locales, bot hooks, balance, tests); their models/arenas come after every encounter is playable.
+- ui stream is DONE (reviewed + fixed).
 - A stream whose agent reports its whole brief done gets one adversarial read-only review agent, then a fix chunk.
 
 ## Loop
@@ -61,3 +63,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - deployed eed2e8e (weapons#1, integrate#2, flicker fix, act1#4)
 - world#4 done: vetta perf (probe pass hides props, off-scene build + precompile, prop variant merge, bigger terrain chunks), paving flush, bridge/walkway/docks builders, grandi_pianure + foresta_oscura authored; request world#2 probe stats -> render-kit
 - started: render-kit#5 (player silhouette, polearm poses, probe stats, then HDR)
+- act2#2 done: Cerbero model (3 heads, per-head attack glow, chains) + Soglia di Dite arena (Porta di Dite opening); next Pyro
+- lead: lanes re-prioritised (content lane = act3a..act67 sim-side first); started act3a#1
