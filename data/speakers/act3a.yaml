@@ -1,2 +1,6 @@
 # Act III-A speakers (synth vocal tones). The Yeti does not speak.
 - {id: gigante_di_fuoco, name_key: boss.gigante_di_fuoco.name, color: '#ff8a3a', voice: {base: 62, formant: 0.7, wave: sawtooth, vibrato: 0.01, breath: 0.6}}
+# The empty armor: a hollow voice, as if from inside a bell of ice.
+- {id: guardiano_rocca_di_brina, name_key: boss.guardiano_rocca_di_brina.name, color: '#bfe6ff', voice: {base: 92, formant: 1.25, wave: triangle, vibrato: 0.004, breath: 0.7}}
+# Loki: a light, quick, amused voice that never quite settles on one pitch.
+- {id: loki, name_key: boss.loki.name, color: '#6fd890', voice: {base: 138, formant: 1.15, wave: triangle, vibrato: 0.022, breath: 0.3}}

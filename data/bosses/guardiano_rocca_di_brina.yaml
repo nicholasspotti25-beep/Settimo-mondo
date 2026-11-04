@@ -1,0 +1,290 @@
+# 15. Guardiano della Rocca di Brina — secondary · the gate of the ice castle · D11.
+# A gigantic EMPTY armor made of ice: a tower shield, a small sword, frost in the joints. Defensive: the tower shield blocks
+# almost everything that comes from the front (behavior modifyIncoming) and punishes light-attack spam (three light blows
+# on the shield in a short time and he answers at once with a fast shield bash). Equilibrio must be broken to open a gap:
+# heavy blows on the shield still push his Equilibrio; once Spezzato the shield drops and the armor is open.
+# Phase 2: the shield shatters into blades that orbit him (flag blades_orbit; bstate.bladeAngle for the renderer); the
+# blades whirl out in a ring, fly at you and come down as a cyclone. The body takes full damage.
+# Loki's porter, bound by an oath he does not remember. Falling he says "Finalmente" and crumbles.
+# Local frame: +Z forward, +Y up, +X = the armor's LEFT (shield arm). Height ~6.8 m.
+id: guardiano_rocca_di_brina
+order: 15
+name_key: boss.guardiano_rocca_di_brina.name
+title_key: boss.guardiano_rocca_di_brina.title
+class: secondary
+difficulty: 11
+act: 3
+arena: rocca_cancello
+zone: rocca_brina
+model: {builder: guardiano_rocca_di_brina, rig: humanoid, scale: 1.0, palette: act3_white_azure}
+equilibrio_max: 190
+body: {radius: 2.2, height: 6.8, mass: immovable}
+hurtboxes:
+  - {c: [0.9, 1.2, 0], r: 1.0}      # left leg
+  - {c: [-0.9, 1.2, 0], r: 1.0}     # right leg
+  - {c: [0, 2.8, 0], r: 1.4}        # hips
+  - {c: [0, 4.4, 0.2], r: 1.7}      # chest
+  - {c: [0, 6.0, 0.3], r: 0.8}      # helm
+  - {c: [1.5, 2.6, 1.5], r: 1.6}    # tower shield (left arm)
+move: {walk: 1.9, run: 4.0, turn: 1.9, preferred_range: [2, 6]}
+idle_gap: [0.9, 1.5]
+music: boss_guardiano_rocca_di_brina
+intro_sequence: guardiano_brina_intro
+defeat_sequence: guardiano_brina_defeat
+lore_key: boss.guardiano_rocca_di_brina.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_guardiano_rocca_di_brina_p1
+    opener: shield_charge
+    patterns: [sword_thrust, sword_cut, overhead_cleave, shield_bash, shield_charge, frost_slam, back_sweep]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_guardiano_rocca_di_brina_p2
+    on_enter: [shield_broken, blades_orbit]
+    dialogue: boss.guardiano_rocca_di_brina.mid
+    transition: 3.0
+    speed_mult: 1.08
+    aggression: 1.15
+    opener: blade_whirl
+    patterns: [sword_thrust, sword_cut, overhead_cleave, frost_slam, back_sweep, blade_whirl, blade_volley, blade_cyclone]
+attacks:
+  # The small sword darts out from behind the shield.
+  - id: sword_thrust
+    anim: thrust
+    telegraph: 0.65
+    active: 0.22
+    recovery: 0.95
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    element: ice
+    range: [0, 6]
+    weight: 1.3
+    cooldown: 2
+    track: 1.2
+    hits:
+      - {t: 0.02, dur: 0.18, shape: {type: capsule, a: [-0.8, 2.6, 1.5], b: [-0.6, 2.4, 7.2], r: 0.9}}
+    sfx: brina_thrust
+  # A flat cut over the rim of the shield.
+  - id: sword_cut
+    anim: sweep_r
+    telegraph: 0.8
+    active: 0.3
+    recovery: 1.05
+    damage_mult: 1.1
+    poise: 20
+    flags: []
+    element: ice
+    range: [0, 5.5]
+    weight: 1.1
+    cooldown: 2.5
+    track: 1.1
+    track_active: 0.15
+    hits:
+      - {t: 0.03, dur: 0.24, shape: {type: arc, r: 6.2, angle: 150, yaw: -10, y: [0, 4]}}
+    sfx: brina_cut
+  # Colpo Rosso: the sword rises over the shield and comes down with all the weight of the armor.
+  - id: overhead_cleave
+    anim: overhead
+    telegraph: 1.15
+    active: 0.3
+    recovery: 1.5
+    damage_mult: 1.5
+    poise: 30
+    flags: [red, knockdown]
+    element: ice
+    range: [0, 6.5]
+    weight: 0.9
+    cooldown: 5
+    track: 1.1
+    hits:
+      - {t: 0.03, dur: 0.2, shape: {type: capsule, a: [-0.6, 0.6, 2.0], b: [-0.6, 0.6, 7.6], r: 1.4}}
+    spawns:
+      - {t: 0.05, type: hazard, id: brina_line, at: front, dist: 8.5, delay: 0.35, active: 0.35, damage_mult: 0.7, shape: {type: box, c: [0, 0, 0], half: [1.0, 1.5, 1.6]}}
+    sfx: brina_cleave
+  # Shield bash: the tower shield slams forward.
+  - id: shield_bash
+    anim: shield_bash
+    telegraph: 0.6
+    active: 0.25
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 26
+    flags: [knockback]
+    range: [0, 4]
+    weight: 1.0
+    cooldown: 3
+    track: 1.2
+    hits:
+      - {t: 0.02, dur: 0.2, shape: {type: box, c: [0.6, 2.4, 3.6], half: [2.6, 2.4, 1.6]}}
+    sfx: brina_bash
+  # The answer to light-attack spam on the shield (behavior only, never in the patterns): a faster bash, still telegraphed
+  # by the cue guardiano_spam_punish and the shield flaring white.
+  - id: shield_punish
+    anim: shield_bash
+    telegraph: 0.45
+    active: 0.25
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 28
+    flags: [knockback]
+    range: [0, 6]
+    weight: 0.01
+    track: 1.4
+    motion:
+      - {t: -0.1, dur: 0.25, type: forward, speed: 6}
+    hits:
+      - {t: 0.02, dur: 0.2, shape: {type: box, c: [0.6, 2.4, 3.6], half: [2.8, 2.4, 1.9]}}
+    sfx: brina_bash
+  # He advances behind the shield like a wall of ice.
+  - id: shield_charge
+    anim: charge
+    telegraph: 1.0
+    active: 0.9
+    recovery: 1.3
+    damage_mult: 1.2
+    poise: 28
+    flags: [knockback]
+    range: [5, 26]
+    weight: 1.0
+    cooldown: 6
+    track: 1.3
+    track_active: 0.1
+    motion:
+      - {t: 0, dur: 0.8, type: forward, speed: 11}
+    hits:
+      - {t: 0, dur: 0.8, shape: {type: capsule, a: [0.4, 1.4, 2.6], b: [0.4, 3.2, 3.2], r: 2.2}}
+    sfx: brina_charge
+  # The rim of the shield is driven into the ground: frost runs along the floor toward you.
+  - id: frost_slam
+    anim: slam
+    telegraph: 1.0
+    active: 1.2
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 20
+    flags: [slow]
+    element: ice
+    range: [3, 24]
+    weight: 0.9
+    cooldown: 6
+    spawns:
+      - {t: 0.0, type: hazard, id: brina_line, at: line_to_target, count: 5, dist: 3.6, delay: 0.85, active: 0.35, damage_mult: 1.0, flags: [slow], shape: {type: box, c: [0, 0, 0], half: [1.1, 1.5, 1.7]}}
+    sfx: brina_frost
+  # Whoever stays behind him: the armor turns on its waist and the sword sweeps its back.
+  - id: back_sweep
+    anim: spin
+    telegraph: 0.75
+    active: 0.3
+    recovery: 1.1
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockback]
+    element: ice
+    range: [0, 6]
+    weight: 1.4
+    cooldown: 3.5
+    hits:
+      - {t: 0.03, dur: 0.24, shape: {type: arc, r: 6.4, angle: 210, yaw: 180, y: [0, 4]}}
+    sfx: brina_spin
+  # Phase 2: the orbiting blades whirl out in a widening ring. Jump it.
+  - id: blade_whirl
+    anim: spin
+    telegraph: 0.9
+    active: 1.0
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 20
+    flags: []
+    element: ice
+    range: [0, 12]
+    weight: 1.0
+    cooldown: 6
+    spawns:
+      - {t: 0.05, type: shockwave, id: blade_ring, from: [0, 0, 0], delay: 0.3, shape: {type: ring, r0: 2.6, r1: 13, width: 1.1, height: 0.7}, active: 0.9, damage_mult: 0.9}
+    sfx: brina_blades
+  # Phase 2: he flings the blades at you, one after the other.
+  - id: blade_volley
+    anim: cast
+    telegraph: 0.85
+    active: 0.9
+    recovery: 1.1
+    damage_mult: 0.8
+    poise: 14
+    flags: []
+    element: ice
+    range: [5, 30]
+    weight: 1.0
+    cooldown: 5
+    track: 1.3
+    spawns:
+      - {t: 0.0, type: projectile, id: brina_blade, count: 1, speed: 20, from: [1.2, 3.2, 1.0]}
+      - {t: 0.3, type: projectile, id: brina_blade, count: 1, speed: 20, from: [-1.2, 3.2, 1.0]}
+      - {t: 0.6, type: projectile, id: brina_blade, count: 2, spread: 24, speed: 20, from: [0, 3.6, 1.0]}
+    sfx: brina_volley
+  # Phase 2: the blades spin around him and he walks through you like a cyclone of ice; a blow throws you out of it.
+  - id: blade_cyclone
+    anim: spin
+    telegraph: 1.0
+    active: 1.5
+    recovery: 1.4
+    damage_mult: 0.9
+    poise: 22
+    flags: [knockback]
+    element: ice
+    range: [0, 14]
+    weight: 0.8
+    cooldown: 8
+    track: 1.2
+    track_active: 0.3
+    motion:
+      - {t: 0, dur: 1.4, type: forward, speed: 3.8}
+    hits:
+      - {t: 0.05, dur: 1.4, tick: 0.75, shape: {type: arc, r: 4.5, r_in: 1.0, angle: 360, y: [0, 3.5]}}
+    sfx: brina_cyclone
+  # New Game+ (phase 1): two lines of frost cross under you.
+  - id: ng_frost_cross
+    anim: slam
+    telegraph: 1.0
+    active: 1.4
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 20
+    flags: [slow]
+    element: ice
+    global: true
+    range: [0, 40]
+    weight: 0.8
+    cooldown: 11
+    spawns:
+      - {t: 0.0, type: hazard, id: brina_line, at: line_to_target, count: 5, dist: 3.6, delay: 0.85, active: 0.35, damage_mult: 1.0, flags: [slow], shape: {type: box, c: [0, 0, 0], half: [1.1, 1.5, 1.7]}}
+      - {t: 0.45, type: hazard, id: brina_line, at: around_target, count: 4, dist: 3.4, radius: 1.6, delay: 0.95, active: 0.35, damage_mult: 0.9, flags: [slow], shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 3}}
+    sfx: brina_frost
+  # New Game+ (phase 2): the blades climb into the vault and fall on marked ground.
+  - id: ng_blade_rain
+    anim: cast
+    telegraph: 1.0
+    active: 1.6
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 18
+    flags: []
+    element: ice
+    global: true
+    range: [0, 40]
+    weight: 0.8
+    cooldown: 12
+    spawns:
+      - {t: 0.0, type: hazard, id: blade_rain, at: target_predict, delay: 1.1, active: 0.35, damage_mult: 1.0, shape: {type: cylinder, c: [0, 0, 0], r: 2.0, h: 6}}
+      - {t: 0.2, type: hazard, id: blade_rain, at: random_arena, count: 5, delay: 1.2, active: 0.35, damage_mult: 0.9, repeat: 2, interval: 0.6, shape: {type: cylinder, c: [0, 0, 0], r: 2.0, h: 6}}
+    sfx: brina_blades
+time_of_day_variants:
+  alba: {weights: {shield_bash: 1.6}, note_key: boss.guardiano_rocca_di_brina.tod.alba}
+  notte: {opener: frost_slam, note_key: boss.guardiano_rocca_di_brina.tod.notte}
+dialogue_keys: [boss.guardiano_rocca_di_brina.intro, boss.guardiano_rocca_di_brina.mid, boss.guardiano_rocca_di_brina.defeat]
+drops_weapon: baluardo_gelido
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_frost_cross], p2: [ng_frost_cross, ng_blade_rain]}
+  idle_mult: 0.85

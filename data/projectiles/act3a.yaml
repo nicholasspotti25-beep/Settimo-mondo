@@ -1,0 +1,4 @@
+# Act III-A projectile kinds (Il Bianco Silenzio).
+- {id: brina_blade, radius: 0.55, speed: 20, life: 1.8, visual: crescent, color: '#d6f2ff', trail: true, element: ice}
+- {id: loki_bolt, radius: 0.4, speed: 18, life: 2.2, visual: bolt, color: '#7fe0a0', trail: true, element: light}
+- {id: loki_mimic_shot, radius: 0.45, speed: 20, life: 2.0, visual: shard, color: '#bff0d0', trail: true, element: light}

@@ -1,0 +1,15 @@
+# Guardiano della Rocca di Brina (secondary): one line before, the canonical "Finalmente" when he falls, then the Voce.
+- id: guardiano_brina_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 2.4}
+    - {say: boss.guardiano_rocca_di_brina.intro, speaker: guardiano_rocca_di_brina}
+    - {event: start_fight}
+- id: guardiano_brina_defeat
+  skippable: true
+  steps:
+    - {wait: 1.5}
+    - {say: boss.guardiano_rocca_di_brina.defeat, speaker: guardiano_rocca_di_brina}
+    - {event: cue, params: {id: guardiano_crumble_done}}
+    - {caption: story.atto3.rocca_aperta, dur: 3.5}
+    - {voce: voce.atto3.guardiano_caduto}

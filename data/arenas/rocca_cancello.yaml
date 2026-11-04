@@ -1,3 +1,5 @@
+# Cancello di Brina — the frozen forecourt before the gate of the Rocca di Brina (Guardiano della Rocca di Brina). The gate
+# of the castle is to the north (behind the Guardiano); packed rime underfoot, not slippery.
 id: rocca_cancello
 zone: rocca_brina
 name_key: arena.rocca_cancello.name
@@ -6,6 +8,6 @@ shape: circle
 radius: 24
 gate: {pos: [0, 0, -34], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: snow
 obstacles: []
 builder: rocca_cancello

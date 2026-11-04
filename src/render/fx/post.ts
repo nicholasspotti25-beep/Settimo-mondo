@@ -6,8 +6,11 @@
  *   from it, a bright-pass + mip chain builds the bloom, and one composite pass applies exposure, bloom, ACES, grading,
  *   vignette, dithering and the sRGB output transform.
  * - Low: same HDR path without MSAA and bloom (one extra full-screen pass), so exposure, dehaze and grading match.
- * - No renderable half-float (fallback): the scene renders straight to the canvas with the renderer's ACES tone mapping;
- *   every PROBE_DT seconds a 32x16 render of the scene (no shadow update) feeds the same luminance probe.
+ * - Direct path (every tier while HDR_ENABLED = false, and without renderable half floats): the scene renders straight to
+ *   the canvas with the renderer's ACES tone mapping; every PROBE_DT seconds the frame ALREADY DRAWN is blitted (scaled,
+ *   one GPU copy) into a 128x64 grab, decoded back to scene-linear luminance (sRGB decode, inverse ACES fit, / exposure)
+ *   and reduced by the same luminance probe: no scene re-render, no extra draw calls of the scene, no second shader
+ *   variant per material (docs/requests/world.md #2).
  * Exposure: the world's atmosphere sets the base exposure (renderer.toneMappingExposure in scene.onBeforeRender); the
  * probe measures the center-weighted log-average luminance (1x1 RGBA8 reduction, read back asynchronously, no stalls)
  * and the CPU eases a correction factor so the exposed key stays inside a comfort band: bright dawn/sunset scenes facing
@@ -78,6 +81,35 @@ void main() {
   c *= 0.25;
   if (any(isnan(c)) || any(isinf(c))) c = vec3(0.0);
   gl_FragColor = vec4(min(c, vec3(64.0)), 1.0);
+}`;
+
+/** Size of the grab of the presented frame (direct path). */
+const GRAB_W = 128, GRAB_H = 64;
+
+/**
+ * Grab of the presented (tone-mapped, sRGB) frame -> 32x16 scene-linear probe: 4 bilinear taps per texel cover the whole
+ * 128x64 grab; sRGB decode, then the inverse of the ACES RRT+ODT fit three uses (luminance-only approximation: the input
+ * and output matrices roughly preserve luminance), / 0.6 (three's ACES pre-scale) and / the frame's exposure.
+ */
+const PROBE_DISPLAY = /* glsl */ `
+uniform sampler2D tSrc;
+uniform vec2 uStep;
+uniform float uExposure;
+varying vec2 vUv;
+vec3 smToLinear(vec3 c) { return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(0.04045, c)); }
+float smInvAces(float y) {
+  y = clamp(y, 0.0, 0.985);
+  float A = 0.983729 * y - 1.0, B = 0.4329510 * y - 0.0245786, C = 0.238081 * y + 0.000090537;
+  float v = (-B - sqrt(max(B * B - 4.0 * A * C, 0.0))) / (2.0 * A);
+  return max(v, 0.0) * 0.6;
+}
+void main() {
+  vec3 c = texture2D(tSrc, vUv + uStep * vec2(-1.0, -1.0)).rgb + texture2D(tSrc, vUv + uStep * vec2(1.0, -1.0)).rgb
+         + texture2D(tSrc, vUv + uStep * vec2(-1.0, 1.0)).rgb + texture2D(tSrc, vUv + uStep * vec2(1.0, 1.0)).rgb;
+  c = smToLinear(clamp(c * 0.25, 0.0, 1.0));
+  // per channel: hue survives well enough for the luminance the reduction takes
+  vec3 x = vec3(smInvAces(c.r), smInvAces(c.g), smInvAces(c.b)) / max(uExposure, 1e-3);
+  gl_FragColor = vec4(min(x, vec3(64.0)), 1.0);
 }`;
 
 /** 32x16 probe -> 1x1: center-weighted log2 average (R,G = 16-bit encoded) + clipped fraction (B). */
@@ -237,6 +269,9 @@ export class PostPipeline {
   private qScene = new THREE.Scene();
   private qCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   private mCopy: THREE.ShaderMaterial;
+  private mDisplay: THREE.ShaderMaterial;
+  /** Scaled copy of the presented frame (direct path probe source). */
+  private grab: THREE.WebGLRenderTarget;
   private mReduce: THREE.ShaderMaterial;
   private mPre: THREE.ShaderMaterial;
   private mDown: THREE.ShaderMaterial;
@@ -258,6 +293,8 @@ export class PostPipeline {
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
     this.mCopy = pass(PROBE_COPY, { tSrc: { value: null }, uStep: { value: new THREE.Vector2() } });
+    this.grab = new THREE.WebGLRenderTarget(GRAB_W, GRAB_H, { type: THREE.UnsignedByteType, depthBuffer: false, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, generateMipmaps: false });
+    this.mDisplay = pass(PROBE_DISPLAY, { tSrc: { value: this.grab.texture }, uStep: { value: new THREE.Vector2(0.25 / PROBE_W, 0.25 / PROBE_H) }, uExposure: { value: 1 } });
     this.mReduce = pass(REDUCE, { tProbe: { value: this.probe.texture }, uExposure: { value: 1 } });
     this.mPre = pass(PREFILTER, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() }, uExposure: { value: 1 }, uThreshold: { value: new THREE.Vector3(1.5, 0.7, 8) } });
     this.mDown = pass(DOWN, { tSrc: { value: null }, uTexel: { value: new THREE.Vector2() } });
@@ -338,18 +375,25 @@ export class PostPipeline {
   /** After the scene render: probe, bloom and composite (HDR path) or the periodic probe (direct path). */
   end(scene: THREE.Scene, camera: THREE.Camera, dt: number, time: number): void {
     const gl = this.gl;
+    // the exposure this frame was drawn with (before the controller eases it for the next one)
+    const drawnE = gl.toneMappingExposure;
     this.ease(dt);
     if (!this.hdr) {
       this.probeT -= dt;
       if (this.probeT <= 0 && !this.reading) {
         this.probeT = PROBE_DT;
-        const auto = gl.shadowMap.autoUpdate;
-        gl.shadowMap.autoUpdate = false;
-        const exp = gl.toneMappingExposure;
-        gl.setRenderTarget(this.probe);
-        gl.render(scene, camera);
-        gl.shadowMap.autoUpdate = auto;
-        gl.toneMappingExposure = exp;
+        if (this.grabFrame()) {
+          this.mDisplay.uniforms.uExposure.value = drawnE;
+          this.blit(this.mDisplay, this.probe);
+        } else {
+          // no blit possible (multisampled canvas): fall back to a probe render of the scene
+          const auto = gl.shadowMap.autoUpdate;
+          gl.shadowMap.autoUpdate = false;
+          gl.setRenderTarget(this.probe);
+          gl.render(scene, camera);
+          gl.shadowMap.autoUpdate = auto;
+          gl.toneMappingExposure = drawnE;
+        }
         this.measure();
       }
       gl.setRenderTarget(null);
@@ -400,6 +444,25 @@ export class PostPipeline {
     U.uAspect.value = hdr.width / Math.max(1, hdr.height);
     U.uTime.value = time % 100;
     this.blit(m, null);
+  }
+
+  /**
+   * Scaled blit of the canvas (the frame just drawn, still in the drawing buffer) into the 128x64 grab. Raw WebGL2: both
+   * framebuffer bindings are restored to the canvas, which is what three's state cache holds right after a canvas render.
+   */
+  private grabFrame(): boolean {
+    const r = this.gl;
+    const ctx = r.getContext() as WebGL2RenderingContext;
+    if (typeof ctx.blitFramebuffer !== 'function' || r.getContextAttributes()?.antialias) return false;
+    r.initRenderTarget(this.grab);
+    const fb = (r.properties.get(this.grab) as { __webglFramebuffer?: WebGLFramebuffer }).__webglFramebuffer;
+    if (!fb) return false;
+    r.getDrawingBufferSize(this.size);
+    ctx.bindFramebuffer(ctx.READ_FRAMEBUFFER, null);
+    ctx.bindFramebuffer(ctx.DRAW_FRAMEBUFFER, fb);
+    ctx.blitFramebuffer(0, 0, this.size.x, this.size.y, 0, 0, GRAB_W, GRAB_H, ctx.COLOR_BUFFER_BIT, ctx.LINEAR);
+    ctx.bindFramebuffer(ctx.FRAMEBUFFER, null);
+    return true;
   }
 
   private blit(m: THREE.Material, target: THREE.WebGLRenderTarget | null, clear = true): void {
@@ -468,7 +531,8 @@ export class PostPipeline {
     this.freeTargets();
     this.probe.dispose();
     this.reduce.dispose();
-    for (const m of [this.mCopy, this.mReduce, this.mPre, this.mDown, this.mUp, this.mComp, this.mCompBloom]) m.dispose();
+    this.grab.dispose();
+    for (const m of [this.mCopy, this.mDisplay, this.mReduce, this.mPre, this.mDown, this.mUp, this.mComp, this.mCompBloom]) m.dispose();
     this.quad.geometry.dispose();
   }
 }

@@ -1,0 +1,394 @@
+# 16. Loki — principal · Sala del Trono di Brina · D13. Grants the Specchio Form; brightens the sky.
+# An elegant figure with black hair and a crooked smile, green-and-gold cloak; he changes expression, sometimes face.
+# Phase 1: a duel with illusions. He creates two copies (minions flagged `illusion`, one blow shatters them); only the real
+# Loki casts a shadow (flag `casts_shadow`; also `illusionist`, so Verità Scomoda hurts him) — the only shadow in the hall,
+# since you have none. He shuffles places with his copies (mirror_swap): watch the shadow.
+# Phase 2: the hall becomes a labyrinth of mirrors (arena_state mirror_maze: six mirror colliders); he hides in a mirror and
+# exits another one to strike — the mirror he will come out of glows first (cue loki_mirror_glow).
+# Phase 3: the hall collapses into suspended ice bridges (arena_state ice_bridges) and he imitates the THREE WEAPONS YOU HAVE
+# EQUIPPED: the behavior rebuilds mimic_1..3 from your loadout's heavy swings, retimed for fairness (the data below is the
+# fallback for an empty slot).
+# He mixes truth and lies: the Seventh World is a prison; Ouranthos is dead. Defeated, he laughs and vanishes (loki_laugh).
+# Local frame: +Z forward, +Y up, +X = his LEFT. Height ~3.2 m.
+id: loki
+order: 16
+name_key: boss.loki.name
+title_key: boss.loki.title
+class: principal
+difficulty: 13
+act: 3
+arena: rocca_sala_trono
+zone: rocca_brina
+model: {builder: loki, rig: humanoid, scale: 1.0, palette: act3_white_azure}
+equilibrio_max: 170
+body: {radius: 0.9, height: 3.2, mass: heavy}
+hurtboxes:
+  - {c: [0.35, 0.8, 0], r: 0.5}
+  - {c: [-0.35, 0.8, 0], r: 0.5}
+  - {c: [0, 1.6, 0], r: 0.62}
+  - {c: [0, 2.3, 0.05], r: 0.72}
+  - {c: [0, 3.0, 0.05], r: 0.36}
+move: {walk: 3.0, run: 7.0, turn: 3.0, preferred_range: [2, 7]}
+idle_gap: [0.8, 1.3]
+music: boss_loki
+intro_sequence: loki_intro
+defeat_sequence: loki_defeat
+lore_key: boss.loki.lore
+brightens_sky: true
+phases:
+  - id: p1
+    hp_range: [1.0, 0.66]
+    music: boss_loki_p1
+    opener: twin_illusion
+    patterns: [dagger_flurry, dagger_lunge, false_bolt, twin_illusion, mirror_swap, trick_step]
+  - id: p2
+    hp_range: [0.66, 0.33]
+    music: boss_loki_p2
+    on_enter: [mirror_maze]
+    arena_state: mirror_maze
+    dialogue: boss.loki.mid
+    transition: 3.0
+    speed_mult: 1.05
+    aggression: 1.1
+    opener: mirror_strike
+    patterns: [mirror_strike, mirror_volley, dagger_flurry, dagger_lunge, false_bolt]
+  - id: p3
+    hp_range: [0.33, 0.0]
+    music: boss_loki_p3
+    on_enter: [hall_collapsed, mimic]
+    arena_state: ice_bridges
+    dialogue: boss.loki.mid2
+    transition: 3.2
+    speed_mult: 1.08
+    aggression: 1.15
+    opener: mimic_1
+    patterns: [mimic_1, mimic_2, mimic_3, dagger_lunge, false_bolt, falling_ice]
+minions:
+  # The copies: same look, same blows (weaker), no shadow. One blow shatters them.
+  - id: loki_copy
+    name_key: boss.loki.name
+    hp: 0.012
+    body: {radius: 0.9, height: 3.2}
+    move: {walk: 3.0, run: 6.5, turn: 2.6, preferred_range: [2, 8]}
+    idle_gap: [1.6, 2.6]
+    model: {builder: loki, rig: humanoid, scale: 1.0, palette: act3_white_azure}
+    hurt:
+      - {c: [0, 1.0, 0], r: 0.7}
+      - {c: [0, 2.2, 0.05], r: 0.8}
+    attacks:
+      - id: copy_flurry
+        anim: sweep_r
+        telegraph: 0.75
+        active: 0.3
+        recovery: 1.1
+        damage_mult: 0.55
+        poise: 12
+        flags: [knockback]
+        range: [0, 3.5]
+        weight: 1.0
+        cooldown: 3
+        track: 1.1
+        hits:
+          - {t: 0.02, dur: 0.22, shape: {type: arc, r: 3.2, angle: 120, y: [0, 3]}}
+      - id: copy_bolt
+        anim: cast
+        telegraph: 0.85
+        active: 0.3
+        recovery: 1.2
+        damage_mult: 0.5
+        poise: 10
+        flags: []
+        range: [6, 28]
+        weight: 1.0
+        cooldown: 4
+        track: 1.2
+        spawns:
+          - {t: 0.02, type: projectile, id: loki_bolt, count: 1, speed: 14, from: [0, 2.2, 0.6]}
+attacks:
+  # Two quick cuts of a mirror-glass dagger; the first throws you out of reach of the second (no stun-lock).
+  - id: dagger_flurry
+    anim: sweep_r
+    telegraph: 0.6
+    active: 0.6
+    recovery: 0.95
+    damage_mult: 0.8
+    poise: 14
+    flags: [knockback]
+    range: [0, 3.5]
+    weight: 1.3
+    cooldown: 2
+    track: 1.2
+    track_active: 0.25
+    hits:
+      - {t: 0.02, dur: 0.16, shape: {type: arc, r: 3.3, angle: 130, y: [0, 3]}}
+      - {t: 0.42, dur: 0.16, shape: {type: arc, r: 3.3, angle: 130, y: [0, 3]}}
+    sfx: loki_dagger
+  # A lunge across the hall, the cloak snapping behind him.
+  - id: dagger_lunge
+    anim: thrust
+    telegraph: 0.7
+    active: 0.35
+    recovery: 1.1
+    damage_mult: 1.2
+    poise: 22
+    flags: []
+    range: [3, 13]
+    weight: 1.1
+    cooldown: 3
+    track: 1.3
+    track_active: 0.1
+    motion:
+      - {t: 0, dur: 0.3, type: forward, speed: 13}
+    hits:
+      - {t: 0.02, dur: 0.3, shape: {type: capsule, a: [0, 1.6, 0.4], b: [0, 1.5, 2.6], r: 0.9}}
+    sfx: loki_lunge
+  # Three green-gold bolts from the open tome.
+  - id: false_bolt
+    anim: cast
+    telegraph: 0.75
+    active: 0.3
+    recovery: 1.0
+    damage_mult: 0.8
+    poise: 12
+    flags: []
+    element: light
+    range: [5, 30]
+    weight: 1.0
+    cooldown: 4
+    track: 1.3
+    spawns:
+      - {t: 0.02, type: projectile, id: loki_bolt, count: 3, spread: 22, speed: 18, from: [0, 2.2, 0.6]}
+    sfx: loki_bolt
+  # Two copies step out of him. Only one of the three will have a shadow.
+  - id: twin_illusion
+    anim: summon
+    telegraph: 1.0
+    active: 0.5
+    recovery: 0.8
+    damage_mult: 0.0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 40]
+    weight: 1.0
+    cooldown: 16
+    spawns:
+      - {t: 0.05, type: minion, id: loki_copy, count: 2, dist: 4.2}
+    sfx: loki_illusion
+  # He and his copies trade places in a flash of mirror light: follow the shadow.
+  - id: mirror_swap
+    anim: cast
+    telegraph: 0.8
+    active: 0.3
+    recovery: 0.8
+    damage_mult: 0.0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 40]
+    weight: 0.9
+    cooldown: 9
+    spawns:
+      - {t: 0.02, type: custom, event: loki_swap}
+    sfx: loki_swap
+  # A flick of the cloak and he is behind you; the cut follows half a second later.
+  - id: trick_step
+    anim: sweep_l
+    telegraph: 0.7
+    active: 0.75
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    range: [0, 14]
+    weight: 0.9
+    cooldown: 6
+    motion:
+      - {t: 0, dur: 0.1, type: teleport_behind, dist: 3.0}
+    hits:
+      - {t: 0.5, dur: 0.18, shape: {type: arc, r: 3.4, angle: 130, y: [0, 3]}}
+    sfx: loki_trick
+  # Dawn only (opener): the theatrical bow before the duel. No blow.
+  - id: flourish
+    anim: roar
+    telegraph: 1.2
+    active: 0.5
+    recovery: 0.6
+    damage_mult: 0.0
+    poise: 0
+    flags: []
+    weight: 0.01
+    sfx: loki_bow
+  # Phase 2: he slips into a mirror; the mirror he will come out of glows; he exits and cuts.
+  - id: mirror_strike
+    anim: dash
+    telegraph: 1.1
+    active: 0.55
+    recovery: 1.2
+    damage_mult: 1.2
+    poise: 24
+    flags: [knockback]
+    global: true
+    range: [0, 40]
+    weight: 1.5
+    cooldown: 3
+    track: 2.0
+    track_active: 0.2
+    motion:
+      - {t: 0.05, dur: 0.25, type: forward, speed: 11}
+    hits:
+      - {t: 0.3, dur: 0.2, shape: {type: arc, r: 3.4, angle: 120, y: [0, 3]}}
+    spawns:
+      - {t: 0.0, type: custom, event: loki_mirror_exit}
+    sfx: loki_mirror
+  # Phase 2: the mirrors answer him: a fan of bolts.
+  - id: mirror_volley
+    anim: cast
+    telegraph: 0.9
+    active: 0.5
+    recovery: 1.0
+    damage_mult: 0.75
+    poise: 12
+    flags: []
+    element: light
+    range: [4, 30]
+    weight: 1.0
+    cooldown: 5
+    track: 1.3
+    spawns:
+      - {t: 0.02, type: projectile, id: loki_bolt, count: 5, spread: 48, speed: 17, from: [0, 2.2, 0.6]}
+    sfx: loki_bolt
+  # Phase 3: the hall keeps collapsing; ice falls on marked ground.
+  - id: falling_ice
+    anim: cast
+    telegraph: 0.9
+    active: 1.4
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockdown]
+    global: true
+    range: [0, 40]
+    weight: 0.8
+    cooldown: 9
+    spawns:
+      - {t: 0.0, type: hazard, id: sala_crollo, at: target_predict, delay: 1.2, active: 0.4, damage_mult: 1.0, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 8}}
+      - {t: 0.3, type: hazard, id: sala_crollo, at: random_arena, count: 3, delay: 1.3, active: 0.4, damage_mult: 0.9, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 8}}
+    sfx: loki_collapse
+  # Phase 3: the imitations (fallback data for an empty slot: a blade of mirror glass shaped like a weapon you do not
+  # carry). The behavior replaces each with the imitation of the weapon in that slot.
+  - id: mimic_1
+    anim: mimic
+    telegraph: 0.8
+    active: 0.25
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    range: [0, 4.5]
+    weight: 1.0
+    cooldown: 3
+    track: 1.2
+    hits:
+      - {t: 0.02, dur: 0.22, shape: {type: arc, r: 4.2, angle: 140, y: [0, 3]}}
+    sfx: loki_mimic
+  - id: mimic_2
+    anim: mimic
+    telegraph: 0.8
+    active: 0.25
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    range: [0, 4.5]
+    weight: 1.0
+    cooldown: 3
+    track: 1.2
+    hits:
+      - {t: 0.02, dur: 0.22, shape: {type: arc, r: 4.2, angle: 140, y: [0, 3]}}
+    sfx: loki_mimic
+  - id: mimic_3
+    anim: mimic
+    telegraph: 0.8
+    active: 0.25
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    range: [0, 4.5]
+    weight: 1.0
+    cooldown: 3
+    track: 1.2
+    hits:
+      - {t: 0.02, dur: 0.22, shape: {type: arc, r: 4.2, angle: 140, y: [0, 3]}}
+    sfx: loki_mimic
+  # New Game+ (phase 1): two trick steps in a row.
+  - id: ng_trick_dance
+    anim: sweep_l
+    telegraph: 0.7
+    active: 0.75
+    recovery: 0.45
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    range: [0, 14]
+    weight: 0.8
+    cooldown: 11
+    combo_next: trick_step
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.1, type: teleport_behind, dist: 3.0}
+    hits:
+      - {t: 0.5, dur: 0.18, shape: {type: arc, r: 3.4, angle: 130, y: [0, 3]}}
+    sfx: loki_trick
+  # New Game+ (phase 2): out of one mirror, back in, out of another.
+  - id: ng_mirror_chain
+    anim: dash
+    telegraph: 1.1
+    active: 0.55
+    recovery: 0.4
+    damage_mult: 1.2
+    poise: 24
+    flags: [knockback]
+    global: true
+    range: [0, 40]
+    weight: 0.8
+    cooldown: 12
+    track: 2.0
+    track_active: 0.2
+    combo_next: mirror_strike
+    combo_chance: 1
+    motion:
+      - {t: 0.05, dur: 0.25, type: forward, speed: 11}
+    hits:
+      - {t: 0.3, dur: 0.2, shape: {type: arc, r: 3.4, angle: 120, y: [0, 3]}}
+    spawns:
+      - {t: 0.0, type: custom, event: loki_mirror_exit}
+    sfx: loki_mirror
+  # New Game+ (phase 3): your third weapon, then your first, without a pause (rebuilt by the behavior like mimic_1..3).
+  - id: ng_mimic_chain
+    anim: mimic
+    telegraph: 0.8
+    active: 0.25
+    recovery: 0.45
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    range: [0, 4.5]
+    weight: 0.8
+    cooldown: 12
+    track: 1.2
+    combo_next: mimic_1
+    combo_chance: 1
+    hits:
+      - {t: 0.02, dur: 0.22, shape: {type: arc, r: 4.2, angle: 140, y: [0, 3]}}
+    sfx: loki_mimic
+time_of_day_variants:
+  alba: {opener: flourish, note_key: boss.loki.tod.alba}
+  notte: {spawn_mult: 1.5, note_key: boss.loki.tod.notte}
+dialogue_keys: [boss.loki.intro, boss.loki.intro2, boss.loki.intro3, boss.loki.mid, boss.loki.mid2, boss.loki.defeat]
+drops_weapon: grimorio_delle_menzogne
+unlocks_form: specchio
+ng_plus:
+  add_patterns: {p1: [ng_trick_dance], p2: [ng_mirror_chain], p3: [ng_mimic_chain]}
+  idle_mult: 0.85

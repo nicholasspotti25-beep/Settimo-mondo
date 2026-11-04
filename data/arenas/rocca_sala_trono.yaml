@@ -1,11 +1,29 @@
+# Sala del Trono di Brina — Loki's throne hall in the Rocca di Brina (polygon arena so the phases can change its outline).
+# Phase 2 (mirror_maze): the hall becomes a labyrinth of six ice mirrors on a ring of 13 m (colliders); Loki hides in one
+# and exits another. Phase 3 (ice_bridges): the floor collapses; the fight goes on on a suspended bridge of ice (a long
+# hexagon widening at its middle, 10–18 m wide, 52 m long along the hall's axis). Polygons are local to the center.
 id: rocca_sala_trono
 zone: rocca_brina
 name_key: arena.rocca_sala_trono.name
 center: [0, 0, 120]
-shape: circle
+shape: polygon
 radius: 30
+polygon: [0.0, 30.0, 7.76, 28.98, 15.0, 25.98, 21.21, 21.21, 25.98, 15.0, 28.98, 7.76, 30.0, 0.0, 28.98, -7.76, 25.98, -15.0, 21.21, -21.21, 15.0, -25.98, 7.76, -28.98, 0.0, -30.0, -7.76, -28.98, -15.0, -25.98, -21.21, -21.21, -25.98, -15.0, -28.98, -7.76, -30.0, -0.0, -28.98, 7.76, -25.98, 15.0, -21.21, 21.21, -15.0, 25.98, -7.76, 28.98]
 gate: {pos: [0, 0, 90], yaw: 0, width: 6}
 floor_y: 0
 surface: stone
 obstacles: []
+variants:
+  mirror_maze:
+    polygon: [0.0, 27.0, 6.99, 26.08, 13.5, 23.38, 19.09, 19.09, 23.38, 13.5, 26.08, 6.99, 27.0, 0.0, 26.08, -6.99, 23.38, -13.5, 19.09, -19.09, 13.5, -23.38, 6.99, -26.08, 0.0, -27.0, -6.99, -26.08, -13.5, -23.38, -19.09, -19.09, -23.38, -13.5, -26.08, -6.99, -27.0, -0.0, -26.08, 6.99, -23.38, 13.5, -19.09, 19.09, -13.5, 23.38, -6.99, 26.08]
+    obstacles:
+      - {type: box, c: [6.5, 0, 131.26], half: [2.2, 2.8, 0.3], yaw: 0.5236}
+      - {type: box, c: [13.0, 0, 120.0], half: [2.2, 2.8, 0.3], yaw: 1.5708}
+      - {type: box, c: [6.5, 0, 108.74], half: [2.2, 2.8, 0.3], yaw: 2.618}
+      - {type: box, c: [-6.5, 0, 108.74], half: [2.2, 2.8, 0.3], yaw: 3.6652}
+      - {type: box, c: [-13.0, 0, 120.0], half: [2.2, 2.8, 0.3], yaw: 4.7124}
+      - {type: box, c: [-6.5, 0, 131.26], half: [2.2, 2.8, 0.3], yaw: 5.7596}
+  ice_bridges:
+    polygon: [-5, -26, 5, -26, 9, 0, 5, 26, -5, 26, -9, 0]
+    obstacles: []
 builder: rocca_sala_trono

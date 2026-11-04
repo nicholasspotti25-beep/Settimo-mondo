@@ -5,3 +5,7 @@
 - {id: rim_crack, visual: crack, color: '#cfe6ff'}
 - {id: crater_boulder, visual: lava, color: '#ff5a18', element: fire}
 - {id: yeti_avalanche, visual: ice, color: '#eef6ff', element: ice}
+- {id: brina_line, visual: ice, color: '#bfe6ff', element: ice}
+- {id: blade_ring, visual: circle, color: '#dff4ff', element: ice}
+- {id: blade_rain, visual: glass, color: '#e6f6ff', element: ice}
+- {id: sala_crollo, visual: ice, color: '#d0ecff', element: ice}

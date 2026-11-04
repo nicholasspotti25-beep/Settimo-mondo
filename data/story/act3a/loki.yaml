@@ -1,0 +1,24 @@
+# Loki (principal): the throne hall of mirrors; truth mixed with lies; defeated he laughs and vanishes.
+- id: loki_intro
+  skippable: true
+  steps:
+    - {camera: wide, dur: 2.6}
+    - {caption: story.atto3.loki_intro, dur: 3.6}
+    - {camera: boss_close, dur: 0.1}
+    - {say: boss.loki.intro, speaker: loki}
+    - {say: boss.loki.intro2, speaker: loki}
+    - {camera: player_close, dur: 0.1}
+    - {say: boss.loki.intro3, speaker: loki}
+    - {camera: boss_reveal, dur: 1.6}
+    - {event: start_fight}
+- id: loki_defeat
+  skippable: true
+  steps:
+    - {wait: 1.2}
+    - {camera: boss_close, dur: 0.1}
+    - {say: boss.loki.defeat, speaker: loki}
+    - {event: cue, params: {id: loki_laugh}}
+    - {caption: story.atto3.loki_risata, dur: 3.8}
+    - {camera: wide, dur: 2.4}
+    - {voce: voce.atto3.loki_caduto}
+    - {event: autosave, params: {reason: boss}}

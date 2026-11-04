@@ -75,7 +75,7 @@ typically 6-14 draw calls. Rest pose is built in model space (section 3).
 | `tube(bones, surface, TubeOpts) -> TubeHandle` | smooth skinned tube along a chain: limbs, necks, tails, serpents, tentacles. `radius` number or `(t) => r` (use `profile([[t, r], ...])` from rigs/families/common.ts), `color/colorEnd/belly`, `flatten`, `ridge`, `twist`, `tip`, `start`, caps |
 | `TubeHandle.scatter(surface, geo, count, {t, theta, scale, lean, seed, color, sink, rows})` | scales, plates, spikes, fur tufts on the tube surface, skinned with it |
 | `TubeHandle.at(t, theta)` | surface point + normal (place horns, eyes, glow spots on a tube) |
-| `cloth(bones, surface, ClothOpts)` | skinned strip on a chain: capes, banners, tabards, barding skirts (`width/widthEnd`, `side`, `bulge`, `ragged`); use a DoubleSide surface |
+| `cloth(bones, surface, ClothOpts)` | skinned strip on a chain: capes, banners, tabards, barding skirts (`width/widthEnd`, `side`, `bulge`, `ragged`; `folds` + `foldDepth` = vertical pleats opening toward the hem, `wrap` = side edges curl forward around the body, `edge: {color, frac, hem}` = crisp trim band down both edges and along the hem, the outline that reads from behind); use a DoubleSide surface |
 | `membrane(rays, surface, MembraneOpts)` | skinned surface between bone rays: bat/dragon wings, fins (`scallop`, `colorEdge`) |
 | `fan(bone, surface, geoFn, count, {from, to, pos, posTo, scale, color, colorEnd})` | feathers / leaves / plumes interpolated between two rotations, rigid on one bone |
 | `socket(name, bone, pos, rot?)` | attachment point (weapons, FX emitters) -> `model.sockets[name]` |
@@ -121,6 +121,11 @@ so the spectral aura wraps only the horse). Keep the number of surfaces small: e
 Shared helpers: `ctx.kit.mat(opts)` (cached static material for props/extras), `ctx.kit.glow(color, opacity)` (cached unlit
 glow, additive below opacity 1), `ctx.kit.fresnel(color, {power, strength, inflate, flow})` (additive shell for ghosts,
 orbs, spectral wraps), `ctx.kit.sprite(kind)` / `tex.spriteAtlas()` (sprite textures), `ctx.kit.detail(kind)`.
+
+**Hero light** (`SurfaceOpts.hero`, `createHeroLight()` in materials.ts): an optional camera-relative fill + back rim
+shared by one character's materials (`fill`/`fillDir`, `rim`/`rimDir`, `params` = rim power, omni share, glint), in view
+space. The Portatore uses it (PortatoreVisual.light(camera, sun, hemi, exposure): colors from the scene's sun and
+hemisphere, banded in exposed luminance so it never turns into a black slab nor a glowing ghost). Bosses do not need it.
 
 ### 4.4 Palette (src/render/kit/palette.ts)
 
@@ -252,7 +257,11 @@ Clips here override family clips of the same name; aliases map your attack anims
 - `mb.info.look = [{ bone: 'head', weight: 0.6, limit: 60 }]`: look-at the player during idle, move, telegraph, intro
   (disable with `lookAtPlayer: false`). `mb.info.flinch`: bones that recoil on hits.
 - Mounted-style tricks, all generic: `info.follow` (a bone follows another unless a flag is set), `info.hideOnFlag`,
-  `info.flagPrefix` (flag -> clip prefix, also `airborne`), `info.flagRoot` (flag -> root bone).
+  `info.flagPrefix` (flag -> clip prefix, also `airborne`), `info.flagRoot` (flag -> root bone). A flagged anim tries the
+  exact prefixed clip, its alias, then the prefixed RESOLVED keyword (`thrust_high` -> `thrust` -> `polearm_thrust`,
+  mirrors kept), else the plain clip. The Portatore uses it for grip variants: flag `polearm` (equipped moveset grip
+  'polearm') -> `polearm_idle/walk/run/guard/thrust/thrust_heavy/charge/sweep_r/sweep_l/overhead/slam/spin` in
+  data/anim/portatore.yaml (right hand at the hip, left hand on the shaft, tip level and forward).
 
 ## 7. RigVisual
 

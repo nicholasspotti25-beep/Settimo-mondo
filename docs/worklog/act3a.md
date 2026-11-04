@@ -12,19 +12,19 @@ tests/act3a*.test.ts, docs/requests/act3a.md. Also sequence act3_intro (up the S
 
 | # | Deliverable | Status | Files |
 |---|---|---|---|
-| 1 | Boss data, all card elements (phases, attacks with fair telegraphs, parts, music ids, lore, drops_weapon, Form) | partial: gigante_di_fuoco + yeti done (chunk 1); guardiano, loki missing | data/bosses/*.yaml |
-| 2 | Behaviors: gigante grab+throw, ignited ground, unstable rim, p2 ablaze head-down charge; yeti blizzard visibility, avalanche screams, p2 never stops, defends the painting; guardiano frontal tower shield (modifyIncoming) + light-spam punish + Equilibrio gap, p2 orbiting blades, "Finalmente"; loki p1 illusions (illusion / casts_shadow / illusionist), p2 mirror labyrinth, p3 ice bridges + imitation of the player's three weapons, laugh + vanish | partial: gigante done (grab → carry → throw inside the arena, invulnerable flight, single landing hit; head anchor lowered on twin slam / after head charge / Spezzato; front-only blows, stomp under/behind, rim quake after 12 s); yeti done (blizzard 10 s: unlockable beyond 9 m, storm_rush only in the storm with an eyes-glint cue, never before 15 s; painting_guard leap lands between player and painting, chosen first; p2 fury rhythm 0.15 s gaps + 1.6 s pant every 3rd attack; dawn gaze 3 s) | src/content/bosses/<id>/behavior.ts |
-| 3 | Time-of-day variants | partial: gigante alba (rim gives way more often) / notte (ember breath opener); yeti alba (gazes at the painting 3 s) / notte (blizzard opener) | boss yamls |
-| 4 | NG+ `ng_plus` blocks (new attack per phase) | partial: gigante p1 ng_crater_spit, p2 + ng_double_charge; yeti p1 ng_double_leap, p2 + ng_cave_in (both bot-verified) | boss yamls |
-| 5 | Story: act3_intro, intro/defeat per boss (Loki cinematic, laugh `loki_laugh`, brightens_sky, Specchio Form) | partial: act3_intro, gigante_intro/defeat, yeti_intro/defeat (cues yeti_painting_reveal / yeti_painting) done | data/story/act3a/*.yaml |
-| 6 | Speakers + Voce dell'Alba (altars altare_vulcano_01, altare_corona_vista, altare_corona_01, altare_rocca_01, altare_rocca_02 + after-boss) | partial: speaker gigante_di_fuoco; Voce lines for all 5 altars done; after-boss lines: gigante, yeti | data/speakers/act3a.yaml, data/voce/act3a.yaml |
-| 7 | Locales IT+EN (verbatim canon quotes) | partial: every key referenced so far (gigante, yeti, act3_intro, 5 altar lines) in both languages (unit-tested) | locales/{it,en}/act3a_*.yaml |
-| 8 | Projectile + hazard kinds | partial: gigante hazards (gigante_brace, gigante_shock, gigante_flare, rim_crack, crater_boulder), yeti_avalanche; no projectiles needed yet | data/projectiles/act3a.yaml, data/hazards/act3a.yaml |
-| 9 | Arena data (bounds, obstacles, surface, variants: crater rim, painted cave, gate, throne hall → mirror labyrinth → ice bridges) | partial: vulcano_cratere (surface ice = meltwater glaze, variant rim_broken r 30→26), yeti_caverna (snow, ceiling 18, painting at center+[0,0,23]) done | data/arenas/*.yaml |
-| 10 | Balance bot (perfect wins inside 120+20×D with few hits; sloppy not trivial), incl. NG+ and ToD probes | partial: gigante + yeti PASS incl. NG+ and ToD probes (see Notes) | — |
-| 11 | Bot hooks for scripted mechanics | partial: gigante (breath side-step/roll, head target, leaveBurningGround shared helper + act2Defense); yeti (steps away from the painting + act2Defense) | tools/bot/hooks/*.ts |
-| 12 | Unit tests tests/act3a*.test.ts | partial: data/NG+/locale checks + 6 gigante + 4 yeti tests (13/13 pass) | tests/act3a.test.ts |
-| 13 | Canon audit clean for act3a bosses | partial: gigante, yeti only "no music theme data" (audio stream) + "no model builder" (item 14) |
+| 1 | Boss data, all card elements (phases, attacks with fair telegraphs, parts, music ids, lore, drops_weapon, Form) | partial: gigante_di_fuoco, yeti, guardiano_rocca_di_brina done (chunk 1); loki missing | data/bosses/*.yaml |
+| 2 | Behaviors: gigante grab+throw, ignited ground, unstable rim, p2 ablaze head-down charge; yeti blizzard visibility, avalanche screams, p2 never stops, defends the painting; guardiano frontal tower shield (modifyIncoming) + light-spam punish + Equilibrio gap, p2 orbiting blades, "Finalmente"; loki p1 illusions (illusion / casts_shadow / illusionist), p2 mirror labyrinth, p3 ice bridges + imitation of the player's three weapons, laugh + vanish | partial: gigante done (grab → carry → throw inside the arena, invulnerable flight, single landing hit; head anchor lowered on twin slam / after head charge / Spezzato; front-only blows, stomp under/behind, rim quake after 12 s); yeti done (blizzard 10 s: unlockable beyond 9 m, storm_rush only in the storm with an eyes-glint cue, never before 15 s; painting_guard leap lands between player and painting, chosen first; p2 fury rhythm 0.15 s gaps + 1.6 s pant every 3rd attack; dawn gaze 3 s); guardiano done (frontal shield x0.12 damage, light poise x0.35 / heavy full, back x0.55; 3 light blows on the shield in 2.5 s → shield_punish; Spezzato = shield down; p2 blades_orbit + bladeAngle) | src/content/bosses/<id>/behavior.ts |
+| 3 | Time-of-day variants | partial: gigante alba (rim gives way more often) / notte (ember breath opener); yeti alba (gazes at the painting 3 s) / notte (blizzard opener); guardiano alba (bashes more) / notte (frost_slam opener) | boss yamls |
+| 4 | NG+ `ng_plus` blocks (new attack per phase) | partial: gigante p1 ng_crater_spit, p2 + ng_double_charge; yeti p1 ng_double_leap, p2 + ng_cave_in; guardiano p1 ng_frost_cross, p2 + ng_blade_rain (all bot-verified) | boss yamls |
+| 5 | Story: act3_intro, intro/defeat per boss (Loki cinematic, laugh `loki_laugh`, brightens_sky, Specchio Form) | partial: act3_intro, gigante_intro/defeat, yeti_intro/defeat (cues yeti_painting_reveal / yeti_painting), guardiano_brina_intro/defeat ("Finalmente" verbatim) done | data/story/act3a/*.yaml |
+| 6 | Speakers + Voce dell'Alba (altars altare_vulcano_01, altare_corona_vista, altare_corona_01, altare_rocca_01, altare_rocca_02 + after-boss) | partial: speakers gigante_di_fuoco, guardiano_rocca_di_brina; Voce lines for all 5 altars done; after-boss lines: gigante, yeti, guardiano | data/speakers/act3a.yaml, data/voce/act3a.yaml |
+| 7 | Locales IT+EN (verbatim canon quotes) | partial: every key referenced so far (gigante, yeti, guardiano, act3_intro, 5 altar lines) in both languages (unit-tested) | locales/{it,en}/act3a_*.yaml |
+| 8 | Projectile + hazard kinds | partial: gigante hazards (gigante_brace, gigante_shock, gigante_flare, rim_crack, crater_boulder), yeti_avalanche, brina_line, blade_ring, blade_rain; projectile brina_blade | data/projectiles/act3a.yaml, data/hazards/act3a.yaml |
+| 9 | Arena data (bounds, obstacles, surface, variants: crater rim, painted cave, gate, throne hall → mirror labyrinth → ice bridges) | partial: vulcano_cratere (surface ice = meltwater glaze, variant rim_broken r 30→26), yeti_caverna (snow, ceiling 18, painting at center+[0,0,23]), rocca_cancello (snow) done | data/arenas/*.yaml |
+| 10 | Balance bot (perfect wins inside 120+20×D with few hits; sloppy not trivial), incl. NG+ and ToD probes | partial: gigante, yeti, guardiano PASS incl. NG+ and ToD probes (see Notes) | — |
+| 11 | Bot hooks for scripted mechanics | partial: gigante (breath side-step/roll, head target, leaveBurningGround shared helper + act2Defense); yeti (steps away from the painting + act2Defense); guardiano (heavy instead of light on the raised shield, back away from the blade cyclone) | tools/bot/hooks/*.ts |
+| 12 | Unit tests tests/act3a*.test.ts | partial: data/NG+/locale checks + 6 gigante + 4 yeti + 6 guardiano tests (19/19 pass) | tests/act3a.test.ts |
+| 13 | Canon audit clean for act3a bosses | partial: gigante, yeti, guardiano only "no music theme data" (audio stream) + "no model builder" (item 14) | — |
 | 14 | Boss models (4) + exported yeti painting builder `buildYetiPainting(ctx, {withCompanion})` | missing (later chunk) | src/content/bosses/<id>/model.ts, src/content/bosses/yeti/painting.ts |
 | 15 | Arena dressing (4) incl. cues | missing (later chunk) | src/content/bosses/<id>/arena.ts |
 | 16 | Zones (3): terrain, path, colliders, props, landmarks, particles, vistas, auroras at night | partial: scaffold only | data/zones/*.yaml, src/content/zones/<zone>/** |
@@ -33,14 +33,12 @@ tests/act3a*.test.ts, docs/requests/act3a.md. Also sequence act3_intro (up the S
 
 ## Next
 
-1. Guardiano della Rocca di Brina sim side (front shield, light-spam punish, Equilibrio gap, p2 orbiting blades, "Finalmente").
-3. Loki sim side (illusions with the only shadow, mirror labyrinth, ice bridges + imitation of the three equipped weapons,
-   lies mixed with truth, laugh and vanish, Specchio Form, brightens_sky). Arena variants mirror_maze (obstacles = mirror
-   colliders, he exits mirrors: teleport) and ice_bridges (narrow polygon); imitation = AttackDefs built at runtime from
-   sim.player.weapons movesets, retimed (telegraph >= 0.6, damage capped) — check whether the sim allows per-actor runtime
-   AttackDefs in attackMap (otherwise file a request in docs/requests/act3a.md).
-3. Reperti (2–3 per zone) IT+EN.
-4. Models (4) + yeti painting builder; arena dressing (4); zone dressing (when RENDER_KIT / WORLD_KIT are READY).
+1. Loki sim side (illusions with the only shadow, mirror labyrinth, ice bridges + imitation of the three equipped weapons,
+   lies mixed with truth, laugh and vanish, Specchio Form, brightens_sky). Arena variants mirror_maze and ice_bridges;
+   imitation = placeholder data attacks mimic_1..3 whose attackMap entries the behavior rebuilds at phase 3 from
+   sim.player.weapons movesets, retimed for fairness.
+2. Reperti (2–3 per zone) IT+EN.
+3. Models (4) + yeti painting builder; arena dressing (4); zone dressing (RENDER_KIT.md and WORLD_KIT.md are READY).
 
 ## Notes
 
@@ -79,3 +77,14 @@ tests/act3a*.test.ts, docs/requests/act3a.md. Also sequence act3_intro (up the S
   gigante_grab_caught, gigante_throw, gigante_ablaze, crater_cools, arena_state:rim_broken; yeti_painting_reveal,
   yeti_blizzard_start/end, yeti_eyes, yeti_guard, yeti_pant, yeti_furious, yeti_painting. Flags: head_low, holding,
   ablaze; blizzard, panting, furious, gazing.
+- Guardiano della Rocca di Brina (chunk 1). 6.8 m empty ice armor (humanoid), equilibrio 190. P1 sword_thrust, sword_cut,
+  overhead_cleave (Colpo Rosso + frost box ahead), shield_bash, shield_charge, frost_slam (frost line of 5 boxes), back_sweep
+  (only from behind); shield_punish only from the spam rule. P2 (shield_broken, blades_orbit, mid line): + blade_whirl
+  (jumpable ring), blade_volley (4 brina_blade projectiles), blade_cyclone (360° r 4.5, tick 0.75 with knockback, walks
+  3.8 m/s; first version 4.5 m/s r 4.8 gave 6 hits / 2 seeds).
+- Bot (seeds=3): PASS perfect 3/3 avg 225 s / 340, 1.3 hits; sloppy 0/3 (5.0 hits, boss HP left 0.99: its light spam is
+  blocked and punished — the shield works as the card says). NG+ (2 seeds) won 342/338 s, 0/1 hits (slow but clean; NG+
+  HP is x1.15); ToD notte won 221 s (5 hits), alba 222 s (5 hits) — probes before the cyclone retreat in the hook.
+- Verification after the Guardiano: tsc clean (whole tree), eslint clean, `npx vitest run tests/act3a.test.ts` 19/19,
+  `npm run registry && SM_PARTIAL=1 npm run data` ok (act3a warning left: rocca_brina exit requires loki), canon-audit act3a:
+  music themes + model builders + missing Loki only ("Finalmente" quote OK).

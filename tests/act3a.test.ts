@@ -1,6 +1,8 @@
 /**
  * ACT III-A encounters 13–16 (Bible C10): scripted mechanics of the Gigante di Fuoco (grab and throw, head within reach,
- * unstable rim, ablaze phase 2), the Yeti (blizzard, the painting he defends, phase 2 that never stops), their time-of-day variants, New Game+ patterns and IT/EN strings.
+ * unstable rim, ablaze phase 2), the Yeti (blizzard, the painting he defends, phase 2 that never stops), the
+ * Guardiano della Rocca di Brina (tower shield, light-spam punish, Equilibrio gap, orbiting blades, "Finalmente"), Loki
+ * (illusions and the only shadow, the mirror labyrinth, ice bridges and the imitation of the player's weapons), their time-of-day variants, New Game+ patterns and IT/EN strings.
  */
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -8,10 +10,13 @@ import { describe, expect, it } from 'vitest';
 import { dist2D } from '../src/core/math';
 import { insideArena } from '../src/core/terrain';
 import type { TimeOfDay } from '../src/core/types';
-import type { Actor } from '../src/sim/actor';
+import type { Actor, PartRuntime } from '../src/sim/actor';
+import { applyDamageToActor } from '../src/sim/combat';
 import type { Sim } from '../src/sim/sim';
-import { emptyInput, type SimEvent } from '../src/sim/types';
+import { emptyInput, type AttackKind, type SimEvent } from '../src/sim/types';
 import { GRAB_HOLD, RIM_QUAKE_EARLIEST, THROW_FLIGHT } from '../src/content/bosses/gigante_di_fuoco/behavior';
+import { BACK_MULT, BLADE_SPIN, SHIELD_FRONT_MULT, SHIELD_LIGHT_POISE, SPAM_HITS, SPAM_WINDOW } from '../src/content/bosses/guardiano_rocca_di_brina/behavior';
+import { MIMIC_DAMAGE, MIMIC_TELEGRAPH_MIN, buildMimic, copiesOf, mirrorExits } from '../src/content/bosses/loki/behavior';
 import { BLIZZARD_DUR, BLIZZARD_SIGHT, FURY_CHAIN, FURY_GAP, FURY_PANT, GAZE_TIME, PAINTING_GUARD, paintingPos } from '../src/content/bosses/yeti/behavior';
 import { loadContent, makeSim } from './helpers';
 
@@ -22,7 +27,7 @@ const LOC = {
   en: JSON.parse(readFileSync(path.join(ROOT, 'locales/en.json'), 'utf8')) as Record<string, string>,
 };
 /** Bosses of this stream implemented so far (the list grows chunk by chunk). */
-const ACT3A = ['gigante_di_fuoco', 'yeti'] as const;
+const ACT3A = ['gigante_di_fuoco', 'yeti', 'guardiano_rocca_di_brina', 'loki'] as const;
 
 function fight(boss: string, opts: { seed?: number; tod?: TimeOfDay; ng?: number; invincible?: boolean } = {}): { sim: Sim; boss: Actor } {
   const sim = makeSim(opts.seed ?? 3);
@@ -58,6 +63,14 @@ function placeFront(sim: Sim, a: Actor, d: number): void {
   sim.player.pos.x = a.pos.x + Math.sin(a.yaw) * d;
   sim.player.pos.z = a.pos.z + Math.cos(a.yaw) * d;
   sim.player.pos.y = sim.groundAt(sim.player.pos.x, sim.player.pos.z);
+}
+
+let instance = 1;
+/** A player hit on an actor through the real damage pipeline; returns the damage dealt. */
+function playerHit(sim: Sim, a: Actor, amount: number, poise: number, kind: AttackKind, part: PartRuntime | null = null): number {
+  return applyDamageToActor(sim, a, {
+    source: -1, target: a.id, amount, poise, element: 'physical', flags: [], pos: { ...a.pos }, instance: instance++, part: part?.index ?? -1, kind,
+  }, part);
 }
 
 function force(sim: Sim, a: Actor, id: string): void {
@@ -314,6 +327,248 @@ describe('Yeti', () => {
     expect(attacked).toBe(false);
     const night = fight('yeti', { tod: 'notte' });
     expect(night.boss.attack?.def.id).toBe('blizzard');
+  });
+});
+
+describe('Guardiano della Rocca di Brina', () => {
+  it('the tower shield blocks almost everything from the front; heavy blows still break Equilibrio, light ones barely', () => {
+    const { sim, boss } = fight('guardiano_rocca_di_brina');
+    run1(sim);
+    boss.idleTimer = 99;
+    placeFront(sim, boss, 5);
+    expect(boss.flags.has('shield_up')).toBe(true);
+    const light = playerHit(sim, boss, 100, 20, 'light');
+    expect(light).toBeCloseTo(100 * SHIELD_FRONT_MULT, 3);
+    expect(boss.poise).toBeCloseTo(20 * SHIELD_LIGHT_POISE, 3);
+    boss.poise = 0;
+    playerHit(sim, boss, 100, 20, 'heavy');
+    expect(boss.poise).toBeCloseTo(20, 3);
+    boss.poise = 0;
+    placeFront(sim, boss, -5);
+    expect(playerHit(sim, boss, 100, 20, 'light')).toBeCloseTo(100 * BACK_MULT, 3);
+  });
+
+  it('breaking Equilibrio opens the gap: Spezzato, the shield drops and blows land in full', () => {
+    const { sim, boss } = fight('guardiano_rocca_di_brina');
+    run1(sim);
+    placeFront(sim, boss, 5);
+    let n = 0;
+    while (boss.state !== 'spezzato' && n++ < 40) playerHit(sim, boss, 10, 30, 'heavy');
+    expect(boss.state).toBe('spezzato');
+    expect(n).toBeLessThan(12);
+    record(sim, 0.1);
+    expect(boss.flags.has('shield_up')).toBe(false);
+    expect(playerHit(sim, boss, 100, 0, 'light')).toBeCloseTo(100, 3);
+  });
+
+  it(`light spam on the shield (${SPAM_HITS} blows within ${SPAM_WINDOW} s) brings the punishing bash; spaced blows do not`, () => {
+    const a = fight('guardiano_rocca_di_brina');
+    run1(a.sim);
+    a.boss.idleTimer = 99;
+    placeFront(a.sim, a.boss, 5);
+    a.sim.drainEvents();
+    for (let i = 0; i < SPAM_HITS; i++) {
+      playerHit(a.sim, a.boss, 10, 5, 'light');
+      record(a.sim, 0.3);
+      placeFront(a.sim, a.boss, 5);
+    }
+    expect(a.boss.attack?.def.id).toBe('shield_punish');
+    expect(a.boss.bstate.punishes).toBe(1);
+    const b = fight('guardiano_rocca_di_brina');
+    run1(b.sim);
+    b.boss.idleTimer = 99;
+    for (let i = 0; i < SPAM_HITS + 1; i++) {
+      placeFront(b.sim, b.boss, 5);
+      playerHit(b.sim, b.boss, 10, 5, 'light');
+      record(b.sim, SPAM_WINDOW / (SPAM_HITS - 1) + 0.2, (s) => { s.boss!.idleTimer = 99; });
+    }
+    expect(b.boss.bstate.punishes).toBe(0);
+    expect(b.boss.behavior!.canUseAttack!(b.boss, b.sim, b.boss.attackMap.get('shield_punish')!)).toBe(false);
+  });
+
+  it('the back sweep is only for whoever camps behind him', () => {
+    const { sim, boss } = fight('guardiano_rocca_di_brina');
+    const sweep = boss.attackMap.get('back_sweep')!;
+    placeFront(sim, boss, 5);
+    expect(boss.behavior!.canUseAttack!(boss, sim, sweep)).toBe(false);
+    placeFront(sim, boss, -5);
+    expect(boss.behavior!.canUseAttack!(boss, sim, sweep)).toBe(true);
+  });
+
+  it('phase 2: the shield shatters into orbiting blades and no longer blocks', () => {
+    const { sim, boss } = fight('guardiano_rocca_di_brina');
+    boss.hp = boss.hpMax * 0.49;
+    sim.drainEvents();
+    boss.checkPhase(sim);
+    const ev = [...sim.drainEvents().map((e) => ({ t: 0, e })), ...record(sim, 3.5)];
+    expect(boss.phase.id).toBe('p2');
+    expect(boss.flags.has('shield_broken') && boss.flags.has('blades_orbit')).toBe(true);
+    expect(boss.flags.has('shield_up')).toBe(false);
+    expect(ev.some((x) => x.e.type === 'cue' && x.e.id === 'guardiano_shield_shatter')).toBe(true);
+    const a0 = boss.bstate.bladeAngle as number;
+    record(sim, 0.5);
+    const da = ((boss.bstate.bladeAngle as number) - a0 + Math.PI * 2) % (Math.PI * 2);
+    expect(da).toBeCloseTo(BLADE_SPIN * 0.5, 1);
+    boss.setState('idle');
+    boss.idleTimer = 99;
+    placeFront(sim, boss, 5);
+    expect(playerHit(sim, boss, 100, 0, 'light')).toBeCloseTo(100, 3);
+  });
+
+  it('falling he says "Finalmente" (verbatim) and crumbles; at night he opens with the frost', () => {
+    const def = c.boss('guardiano_rocca_di_brina');
+    const steps = c.sequence(def.defeat_sequence!).steps as Record<string, unknown>[];
+    const say = steps.find((st) => st.say === 'boss.guardiano_rocca_di_brina.defeat');
+    expect(say?.speaker).toBe('guardiano_rocca_di_brina');
+    expect(LOC.it['boss.guardiano_rocca_di_brina.defeat']).toContain('Finalmente');
+    const { sim, boss } = fight('guardiano_rocca_di_brina');
+    sim.drainEvents();
+    boss.hp = 1;
+    playerHit(sim, boss, 10, 0, 'heavy');
+    expect(boss.alive).toBe(false);
+    const ev = [...sim.drainEvents().map((e) => ({ t: 0, e })), ...record(sim, 1)];
+    expect(ev.some((x) => x.e.type === 'cue' && x.e.id === 'guardiano_crumble')).toBe(true);
+    expect(fight('guardiano_rocca_di_brina', { tod: 'notte' }).boss.attack?.def.id).toBe('frost_slam');
+  });
+});
+
+describe('Loki', () => {
+  it('phase 1: two copies (illusions, no shadow); only Loki casts the shadow; one blow shatters a copy', () => {
+    const { sim, boss } = fight('loki');
+    expect(boss.flags.has('casts_shadow') && boss.flags.has('illusionist')).toBe(true);
+    until(sim, (s) => copiesOf(s.boss!, s).length > 0, 5);
+    expect(boss.history[0]).toBe('twin_illusion');
+    const copies = copiesOf(boss, sim);
+    expect(copies.length).toBe(2);
+    for (const m of copies) {
+      expect(m.flags.has('illusion')).toBe(true);
+      expect(m.flags.has('casts_shadow')).toBe(false);
+    }
+    expect(boss.behavior!.canUseAttack!(boss, sim, boss.attackMap.get('twin_illusion')!)).toBe(false);
+    expect(boss.behavior!.canUseAttack!(boss, sim, boss.attackMap.get('mirror_swap')!)).toBe(true);
+    const hp0 = boss.hp;
+    playerHit(sim, copies[0], 25, 10, 'light');
+    expect(copies[0].alive).toBe(false);
+    expect(boss.hp).toBe(hp0);
+    expect(copiesOf(boss, sim).length).toBe(1);
+    const night = fight('loki', { tod: 'notte' });
+    until(night.sim, (s) => copiesOf(s.boss!, s).length > 0, 5);
+    expect(copiesOf(night.boss, night.sim).length).toBe(3);
+  });
+
+  it('the swap: Loki always changes place with one of his copies', () => {
+    const { sim, boss } = fight('loki', { seed: 11 });
+    until(sim, (s) => copiesOf(s.boss!, s).length > 0, 5);
+    for (let k = 0; k < 4; k++) {
+      const spots = [boss, ...copiesOf(boss, sim)].map((x) => ({ x: x.pos.x, z: x.pos.z }));
+      const before = { x: boss.pos.x, z: boss.pos.z };
+      force(sim, boss, 'mirror_swap');
+      record(sim, 0.4);
+      expect(Math.hypot(boss.pos.x - before.x, boss.pos.z - before.z)).toBeGreaterThan(0.5);
+      expect(spots.some((p) => Math.hypot(p.x - boss.pos.x, p.z - boss.pos.z) < 0.5)).toBe(true);
+      record(sim, 1.2);
+    }
+    expect(boss.bstate.swaps).toBe(4);
+  });
+
+  it('one blow at a time: copies never strike while Loki winds up, and Loki waits while a copy strikes', () => {
+    const { sim, boss } = fight('loki');
+    until(sim, (s) => copiesOf(s.boss!, s).length > 0, 5);
+    const [m] = copiesOf(boss, sim);
+    force(sim, boss, 'dagger_lunge');
+    expect(m.behavior!.canUseAttack!(m, sim, m.attacks[0])).toBe(false);
+    boss.cancelAttack(sim);
+    boss.setState('idle');
+    m.startAttack(sim, m.attacks[0]);
+    expect(boss.behavior!.selectAttack!(boss, sim, boss.availableAttacks(sim))).toBeNull();
+  });
+
+  it('phase 2: the labyrinth of mirrors; he hides in a mirror that glows, then comes out of it to strike', () => {
+    const { sim, boss } = fight('loki');
+    boss.hp = boss.hpMax * 0.6;
+    sim.drainEvents();
+    boss.checkPhase(sim);
+    const ev = [...sim.drainEvents().map((e) => ({ t: 0, e })), ...record(sim, 3.5)];
+    expect(boss.phase.id).toBe('p2');
+    expect(ev.some((x) => x.e.type === 'cue' && x.e.id === 'arena_state:mirror_maze')).toBe(true);
+    expect(sim.zone!.arenaColliders.length).toBe(6);
+    expect(copiesOf(boss, sim).length).toBe(0);
+    boss.setState('idle');
+    sim.drainEvents();
+    force(sim, boss, 'mirror_strike');
+    const glow = sim.drainEvents().find((e) => e.type === 'cue' && e.id === 'loki_mirror_glow');
+    expect(glow).toBeTruthy();
+    const exits = mirrorExits(sim);
+    expect(exits.some((x) => Math.hypot(x.x - boss.pos.x, x.z - boss.pos.z) < 0.01)).toBe(true);
+    expect(boss.hidden && boss.untargetable && boss.invulnerable).toBe(true);
+    expect(playerHit(sim, boss, 50, 10, 'heavy')).toBe(0);
+    until(sim, (s) => s.boss!.attack?.stage === 'active', 3);
+    record(sim, 0.05);
+    expect(boss.hidden || boss.untargetable || boss.invulnerable).toBe(false);
+  });
+
+  it('phase 3: the ice bridges, and the imitation of the three weapons the player has equipped', () => {
+    const { sim, boss } = fight('loki');
+    const ws = sim.c.weapons.filter((w) => !w.ng_plus_only).slice(0, 3).map((w) => w.id);
+    for (const w of ws) sim.giveWeapon(w);
+    sim.setLoadout(ws);
+    expect(sim.player.weapons).toEqual(ws);
+    boss.hp = boss.hpMax * 0.3;
+    sim.drainEvents();
+    boss.checkPhase(sim);
+    boss.checkPhase(sim);
+    const ev = [...sim.drainEvents().map((e) => ({ t: 0, e })), ...record(sim, 4)];
+    expect(boss.phase.id).toBe('p3');
+    expect(ev.some((x) => x.e.type === 'cue' && x.e.id === 'arena_state:ice_bridges')).toBe(true);
+    expect(sim.zone!.activeArena!.shape).toBe('polygon');
+    expect(sim.zone!.arenaColliders.length).toBe(0);
+    expect(boss.bstate.mimic).toEqual(ws);
+    ['mimic_1', 'mimic_2', 'mimic_3'].forEach((id, i) => {
+      const def = boss.attackMap.get(id)!;
+      expect(def).toEqual(buildMimic(sim, ws[i], id));
+      expect(def.anim!.startsWith('mimic_')).toBe(true);
+    });
+    boss.setState('idle');
+    sim.drainEvents();
+    force(sim, boss, 'mimic_2');
+    expect(sim.drainEvents().some((e) => e.type === 'cue' && e.id === `loki_mimic:${ws[1]}`)).toBe(true);
+    expect(boss.bstate.mimicNow).toBe(ws[1]);
+  });
+
+  it('every weapon of the game can be imitated, always within the fairness rules', () => {
+    const sim = makeSim(2);
+    for (const w of sim.c.weapons) {
+      const def = buildMimic(sim, w.id, 'mimic_1');
+      expect(def, w.id).not.toBeNull();
+      expect(def!.telegraph).toBeGreaterThanOrEqual(MIMIC_TELEGRAPH_MIN);
+      expect(def!.recovery).toBeGreaterThanOrEqual(1.0);
+      expect(def!.damage_mult).toBeGreaterThanOrEqual(MIMIC_DAMAGE[0]);
+      expect(def!.damage_mult).toBeLessThanOrEqual(MIMIC_DAMAGE[1]);
+      expect(def!.track_active ?? 0).toBeLessThanOrEqual(0.35);
+      expect((def!.hits?.length ?? 0) + (def!.spawns?.length ?? 0), w.id).toBeGreaterThan(0);
+    }
+  });
+
+  it('defeated he laughs and vanishes; he grants the Specchio Form and brightens the sky; dawn opens with a bow', () => {
+    const def = c.boss('loki');
+    expect(def.class).toBe('principal');
+    expect(def.unlocks_form).toBe('specchio');
+    expect(def.brightens_sky).toBe(true);
+    expect(def.drops_weapon).toBe('grimorio_delle_menzogne');
+    const steps = c.sequence(def.defeat_sequence!).steps as Record<string, unknown>[];
+    expect(steps.some((st) => st.event === 'cue' && (st.params as Record<string, unknown>).id === 'loki_laugh')).toBe(true);
+    expect(LOC.it['boss.loki.mid']).toContain('prigione');
+    expect(LOC.it['boss.loki.mid2']).toContain('Ouranthos è morto');
+    const { sim, boss } = fight('loki');
+    until(sim, (s) => copiesOf(s.boss!, s).length > 0, 5);
+    sim.drainEvents();
+    boss.hp = 1;
+    playerHit(sim, boss, 10, 0, 'heavy');
+    expect(boss.alive).toBe(false);
+    const ev = sim.drainEvents();
+    expect(ev.some((e) => e.type === 'cue' && e.id === 'loki_vanish')).toBe(true);
+    expect(copiesOf(boss, sim).length).toBe(0);
+    expect(fight('loki', { tod: 'alba' }).boss.attack?.def.id).toBe('flourish');
   });
 });
 

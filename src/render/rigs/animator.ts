@@ -460,16 +460,39 @@ export class Animator {
     if (fp) {
       for (const f in fp) {
         if ((f === 'airborne' && airborne) || flags?.has(f)) {
-          const n = fp[f] + anim;
-          if (this.lib.clips[n]) return this.compile(n);
-          const al = this.lib.aliases?.[anim];
-          if (al && this.lib.clips[fp[f] + al]) return this.compile(fp[f] + al);
+          // cached per flag: resolve() runs several times per frame (idle/walk/run + the action)
+          let fc = this.flagCache.get(f);
+          if (!fc) this.flagCache.set(f, (fc = new Map()));
+          let hit = fc.get(anim);
+          if (hit === undefined) {
+            hit = this.flagClip(fp[f], anim);
+            fc.set(anim, hit);
+          }
+          if (hit) return this.compile(hit);
         }
       }
     }
     const nm = resolveKeyword(this.lib, anim, this.kwCache);
     return this.compile(nm);
   }
+
+  /**
+   * Prefixed variant of an anim: exact ('polearm_' + anim), its alias, then the resolved keyword ('thrust_high' ->
+   * 'thrust' -> 'polearm_thrust'; a mirrored '_l' keyword keeps its mirror). Null = no variant (use the plain clip).
+   */
+  private flagClip(prefix: string, anim: string): string | null {
+    const clips = this.lib.clips;
+    if (clips[prefix + anim]) return prefix + anim;
+    const al = this.lib.aliases?.[anim];
+    if (al && clips[prefix + al]) return prefix + al;
+    const nm = resolveKeyword(this.lib, anim, this.kwCache);
+    const mir = nm.startsWith('~mirror:');
+    const src = mir ? nm.slice(8) : nm;
+    if (src === 'idle' && anim !== 'idle') return null;
+    if (clips[prefix + src]) return mir ? `~mirror:${prefix}${src}` : prefix + src;
+    return null;
+  }
+  private flagCache = new Map<string, Map<string, string | null>>();
 
   hasClip(name: string): boolean {
     return !!this.lib.clips[name];

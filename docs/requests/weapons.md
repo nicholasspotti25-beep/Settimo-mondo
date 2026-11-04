@@ -40,7 +40,7 @@ stream draws itself. Please make the generic fallback for unknown vfx ids ignore
 are not drawn twice. (Sim-generic ids such as `barrier`, `decoy_spawn`, `dispel`, `lightning_arc`, `bind`,
 `shape_shift_<form>` stay with the render kit; the weapons stream only adds weapon-specific dressing on top.)
 
-## 4. ActorRenderer hooks used by weapons (render-kit)
+## 4. ActorRenderer hooks used by weapons (render-kit) — DONE (trails drawn by weapons/fx.ts, see the note under #7)
 
 `WeaponVisual` keeps the documented contract (root/base/tip/grip/offhand/update/dispose) and adds optional fields that
 the actor renderer may use:
@@ -97,7 +97,7 @@ frame, dispose on swap).
   for render-kit: `PortatoreVisual.setWeapon` could also attach `offhand` for `grip: 'fist'` weapons (it already does for
   any visual that has `offhand`; no change needed).
 
-## 7. Portatore clips with long weapons (render-kit, data/anim/portatore.yaml)
+## 7. Portatore clips with long weapons (render-kit, data/anim/portatore.yaml) — DONE (render-kit chunk 5, 2026-11-04)
 
 Seen in headless shots (chunk 1): during the light combo `thrust` step and idle, polearms (Lancia del Custode 2.25 m,
 Remo del Traghettatore 2.2 m) point straight up or pass through the body, because the humanoid/portatore clips aim
@@ -106,3 +106,18 @@ polearm variants (a `two_hand` / `polearm` clip prefix selected from `MovesetDef
 `polearm_idle` with the off hand on the shaft and the tip forward-down) or let PortatoreVisual pick a clip prefix from
 the equipped moveset's `grip`. The weapons stream can supply `SwingDef.arc` (from/to yaw-pitch, roll, hand) already in
 every swing as the target aim if that helps.
+
+**DONE (render-kit chunk 5):** PortatoreVisual sets the animator flag `polearm` when the equipped weapon's moveset grip is
+'polearm' (not while shape-shifted); `info.flagPrefix = { polearm: 'polearm_' }`. data/anim/portatore.yaml has
+polearm_idle/walk/run/guard/thrust/thrust_heavy/charge/sweep_r/sweep_l/overhead/slam/spin (right hand at the hip, left
+hand forward on the shaft, tip level and forward; thrusts draw back level and punch forward). The animator's flag path
+now also tries the prefixed RESOLVED keyword, so every polearm anim lands on a variant: thrust_high / harpoon_thrust /
+trident_jab / drill_* -> polearm_thrust, charge_thrust -> polearm_charge, *_sweep_* / reap_* -> polearm_sweep_r or
+polearm_overhead, plunge* -> polearm_slam, *_spin -> polearm_spin; throws and rakes keep the plain clips. Checked on a
+pose sheet of the Lancia del Custode (idle, walk, run, guard, all 7 swings at telegraph + active, side and back views):
+no swing points the lance straight up any more, idle/walk keep it level beside the body. Test: tests/render_anim.test.ts
+'polearm grip selects the polearm_ clip variants'. Not used: SwingDef.arc (a swing-arc generator is render-kit Next).
+
+**#4 (trails) — DONE by the weapons stream itself:** installWeaponFx (src/render/weapons/fx.ts) draws the swing ribbons
+from `WeaponVisual.trail` colors and the base/tip line of the equipped visual, in sim time. The render kit draws no trail
+of its own (no double ribbons); PortatoreVisual still creates the visual with buildWeapon and calls update/dispose.

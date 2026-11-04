@@ -9,9 +9,9 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
 |---|---|---|---|
 | 1 | Procedural kit (lathe, swept/skinned tubes, blades, ellipsoids, bevel boxes, instanced scatter, fur, membranes, cloth/capes, merge/LOD, stylized PBR + rim/fresnel, actor FX uniforms, cached textures, blob shadows) | done (code); used by real models in game since chunk 1 | src/render/kit/*.ts |
 | 2 | Rigs: animator, clip libraries + keyword resolution, springs, IK, part anchors, 10 family builders, generic-from-data builder | done (chunk 4): all 10 families animate from their libraries; animator gained globs anywhere in keys (`neck*_0`), chain globs for waves (`tent*` + `spread`), static `bends`, `axis: radial`; sided compound resolution (`branch_whip_l` -> sweep_l); unknown anims fall back to the family `attack` alias | src/render/rigs/**, rigs/generic.ts |
-| 3 | ActorRenderer: Portatore, player states, weapons + trails, bosses (BOSS_MODELS + generic fallback), clones/decoy/ally, overlays | partial (v1): Portatore from CharacterLook (cloak, seed glow, vial of light, no shadow, smooth scale, every player state mapped, dodge roll pivot, lock look-at); weapon via buildWeapon on grip sockets; bosses via lazy BOSS_MODELS or generic family model; clone/decoy/ally/echo tints; hit flash, pulsing red flash + red warning icon; Spezzato cracks; transition aura; death dissolve; hidden; blob shadows on Low. Missing: swing-arc generator + trails, part highlight constellation lines, two-hand IK | src/render/actors/ActorRenderer.ts, actors/portatore.ts |
+| 3 | ActorRenderer: Portatore, player states, weapons + trails, bosses (BOSS_MODELS + generic fallback), clones/decoy/ally, overlays | partial (v1.5): Portatore from CharacterLook with the creator-preview palette (cream tunic, dark hose, pleated cloak with a pale-gold border, mantle, lowered hood) + hero light (camera fill + back rim from the scene lights, banded on screen) so it reads at every time of day; seed glow, vial, no shadow, smooth scale, every player state mapped, polearm clip variants by moveset grip; weapon via buildWeapon (trails drawn by weapons/fx.ts); bosses via lazy BOSS_MODELS or generic family model (stale model on actor-id reuse fixed); clone/decoy/ally/echo tints; hit flash, red flash + warning icon; Spezzato; transition aura; death dissolve; hidden; blob shadows on Low. Missing: swing-arc generator from SwingDef.arc, part highlight constellation lines, true two-hand IK | src/render/actors/ActorRenderer.ts, actors/portatore.ts |
 | 4 | FxRenderer: pooled particles, projectile/hazard visuals, combat FX, fallbacks, Metamondo warp, debug hitboxes | done (chunk 3) v1: GPU particles (fx.particles additive + fx.smoke alpha, ring buffer, life evaluated in the VS), SDF ground decals (attack warnings incl. charge lanes/leap landings + red hatching, hazard telegraph + 7 active families), shockwave walls/pillars, projectile heads/meshes/ribbon trails/shed particles for all 23 visuals, combat FX for every combat event, perfect-dodge afterimage (fresnel ghost of the Portatore pose), vfx built-ins + generic fallback + registerVfx, Metamondo sphere + reactions, debug hitboxes | src/render/fx/FxRenderer.ts, particles.ts, decals.ts, projectiles.ts |
-| 5 | Renderer/camera: registerShot hook, screenPoint, bloom/outline, act grading, shadow presets, lock-on framing, gravity roll, shake | partial: quality/watchdog/dynamic res, lock-on framing, ctx.registerShot wired, renderer.screenPoint(), post pipeline src/render/fx/post.ts: probe-driven auto exposure ACTIVE on all tiers (direct path); HDR path (half-float target, MSAA x4 High, dehaze, ACES, per-act grading, vignette, dither, bloom mips) written but switched OFF (HDR_ENABLED=false, see Notes); CameraRig.inspect; no outline yet | src/render/Renderer.ts, camera.ts, fx/post.ts |
+| 5 | Renderer/camera: registerShot hook, screenPoint, bloom/outline, act grading, shadow presets, lock-on framing, gravity roll, shake | partial: quality/watchdog/dynamic res (resize deferred to the next render, lead), lock-on framing, ctx.registerShot, screenPoint(), post pipeline src/render/fx/post.ts: auto exposure on all tiers measured from the PRESENTED frame (blit grab + inverse ACES, no scene re-render); stats = presented frame, post passes in stats.postCalls; HDR path (MSAA, dehaze, ACES, per-act grading, vignette, bloom mips) written but OFF (HDR_ENABLED=false); CameraRig.inspect; no outline pass (the Portatore's cloak trim + hero rim do that job) | src/render/Renderer.ts, camera.ts, fx/post.ts |
 | 6 | data/anim/*.yaml pose libraries | done (chunk 4): humanoid, quadruped, mounted, portatore + colossus (extends humanoid, 27 heavy clips), serpent (25), dragon (22), bird (24), insect (24, mantis/beetle/ant/wasp/spider), tree (23), tentacled (20, kraken + cthulhu); every keyword resolves on every family | data/anim/ |
 | 7 | Guardiano del Regno reference model | done (chunk 2): barded slate destrier (dagged green-gold caparison with crown heraldry, peytral, crinet, chanfron, saddle), dull-silver knight (broken-crown great helm, layered pauldrons, tabard, faults, cape), Lancia del Custode (white shaft, vamplate, leaf head with crown socket); 'spectral_aura' wraps only the steed | src/content/bosses/guardiano_del_regno/model.ts |
 | 8 | docs/RENDER_KIT.md | done (chunk 3): STATUS: READY — module registration (incl. minion `minions` export), frame/data alignment, ModelBuilder/geometry/surfaces/palette API, 10 rig families (bones, builders, pose-library status), keywords + resolution order, clip format, model-specific clips, partChains/springs/look, RigVisual options, generic overlays, flags, VFX hooks, budgets, Guardiano worked example, checklist | docs/RENDER_KIT.md |
@@ -19,22 +19,21 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
 
 ## Next
 
-1. FX polish: a settings toggle for `fx.attackWarnings` (request to ui), shockwave wall look from close up, projectile
-   meshes per visual reviewed in a dedicated shot (the chunk-3 capture caught only golden_wave/bolt in frame), decals on
-   sloped (non-arena) ground, uHazeK/exposure scaling of the additive kit fresnel shells.
-2. Exposure part 2 (src/render/fx/post.ts, HDR_ENABLED=false today): clamp kit rim/specular for half floats (white
-   blocks after MSAA resolve), make the dehaze cut follow view changes instantly (crushed rk2/final_1_boss_high), then
-   enable HDR + per-act grading + vignette, and bloom (BLOOM_LEVELS high 5 / medium 3) once the world stream re-tunes its
-   additive layers (request filed). Re-shoot vetta_attesa alba/tramonto/notte; outline pass; shadow preset check.
-3. ActorRenderer v2: swing-arc generator from SwingDef.arc + weapon trails (base/tip), left-hand IK for two-handed grips,
-   part.highlight constellation lines, multi-part lock markers; Portatore cloak drape polish.
-4. Guardiano polish: hind thigh still grazes the caparison rear in some poses; chanfron reads boxy from the front; add a
-   model triangle-count assert (< 80k) to tests/render_anim.test.ts for BOSS_MODELS entries.
-5. Generic model polish: humanoid sword clips need hand_r pitch tuning (blade follows the swing arc); bird/dragon
-   attack poses on real content models (the generic bird has a 2.6 H wing, so close-ups of folds were judged in
-   scratchpad rk4/fold_bird.png); serpent slam rear-up height depends on segment length (body_0/body_2 +-36).
+1. Exposure part 2 (src/render/fx/post.ts, HDR_ENABLED=false): clamp kit rim/specular (and the new hero rim) for half
+   floats, make the dehaze cut follow view changes instantly, then enable HDR + per-act grading + vignette and bloom
+   (BLOOM_LEVELS high 5 / medium 3) once the world stream re-tunes its additive layers; re-shoot every act at all four
+   times of day before switching it on. With HDR on, the probe already reads the HDR target (no blit needed).
+2. ActorRenderer v2: swing-arc generator from SwingDef.arc (sided sweeps: `*_lr` / `*_rl` both resolve to sweep_r today),
+   left-hand IK on the shaft for polearms / two-handed grips (the polearm clips place the left hand by pose only),
+   two_hand clip variants (spadone, ascia, martello: same flag mechanism, prefix `two_hand_`), part.highlight
+   constellation lines, multi-part lock markers.
+3. FX polish: settings toggle for `fx.attackWarnings` (request to ui), shockwave wall close-up, projectile meshes per
+   visual in a dedicated shot, decals on sloped ground, exposure scaling of the additive kit fresnel shells.
+4. Guardiano polish: hind thigh vs caparison rear, chanfron from the front; BOSS_MODELS triangle assert in tests.
+5. Generic model polish: humanoid sword clips hand_r pitch (sword thrust active points up too, same fix as polearms),
+   bird/dragon attack poses on real content models, serpent slam rear-up height vs segment length.
 6. Full screenshot pass (title -> new game -> Guardiano: idle, attacks, red telegraph, Spezzato, grace) low/high; keep
-   docs/RENDER_KIT.md in sync with every API change.
+   docs/RENDER_KIT.md in sync.
 
 ## Notes
 
@@ -173,3 +172,41 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
   slam, sweep, topple), kraken (tentacles gather into a column -> slam radiating onto the ground), cthulhu. Fixes made
   from them: bird fold (secondaries jutted out sideways; 8 candidates rendered in rk4/fold_bird.png, picked humerus
   [0,75,-25] / forearm [0,-165,0] / hand [0,175,0]), serpent slam rear-up doubled (root 0.45 -> 0.9, body bend 22 -> 36).
+
+
+### Chunk 5 (2026-11-04)
+- Portatore readability (lead: "a flat black slab from the follow camera in every smoke screenshot"). Causes: seen from
+  behind = its unlit side (the sun is usually in front, toward the boss), a flat dark cloak strip covering shoulders to
+  shins, dark violet tunic/sleeves, rim term too weak on a flat strip. Fixes:
+  - kit/materials.ts: `SurfaceOpts.hero` (HeroLight uniforms, define SM_HERO, own program key): wrap-lit fill from a
+    view-space direction + soft glint + back rim on silhouette edges (fresnel x edge direction), all view space.
+  - PortatoreVisual.light(camera, sun, hemi, exposure): fill = 0.32 sun (less when the sun already lights the visible
+    side) + 0.24 sky + 0.12 ground, from the camera's upper side toward the sun's side; rim from the sun's screen-plane
+    direction + sky above, stronger when backlit; both banded in EXPOSED luminance (fill 0.07-0.26, rim 0.1-0.42 / exposure)
+    because the world's light intensities differ a lot between zones (raw values gave rim 3.3 = white ghost in porta_dite).
+    ActorRenderer finds the atmosphere sun/hemisphere among the scene children (re-checked every 2 s), Renderer passes
+    camera + post exposure. No extra draw calls.
+  - Look (matches the creator preview, src/ui/creator.ts): cream tunic and sleeves (arms now read against the cloak), dark
+    hose, cloak via `cloth` with new ClothOpts (kit/model.ts): `folds`/`foldDepth` pleats, `wrap`, `edge` trim band (two
+    extra columns -> crisp line); pale-gold border on both edges + hem, lighter at the shoulders; mantle (open-front lathe +
+    gold border) and a lowered hood at the nape for the head/shoulder shape from behind; mantle clasp.
+  - Evidence (scratchpad rk5/, 1280x576, follow camera, LOOKED at): before rk5/*_crop (black slab); after rk5/d/
+    cerbero_giorno, cavaliere_errante_tramonto (+ close_back), guardiano alba (full frame), rk5/e/cavaliere_errante_notte_low
+    (moonlit blue figure, edges visible), elder_tree_alba_low, guardiano tramonto low (front close-up), rk5/f/*: the figure
+    reads at alba, giorno, tramonto and notte, High and Low, without looking pasted on. Triangles +~1.5k.
+- Bug found from the shots and fixed: ActorRenderer reused an entry when a new fight's actor got the same id in the same tick
+  (startFightDirect / Specchio memories) -> the previous boss's model stayed (Cerbero model in the Guardiano arena; the
+  smoke's boss_03 elder_tree shows the Guardiano model for the same reason). Entries now belong to the Actor object.
+- Polearm poses (weapons #7, DONE): flag `polearm` from the equipped moveset grip, animator flag path resolves prefixed
+  RESOLVED keywords (cached per flag, no per-frame allocation), 12 polearm_ clips. Pose sheets rk5/pose/lance0.png (before:
+  telegraphs and run point the lance straight up) -> lance1/lance2.png (level, forward; plunge telegraph still raises the
+  lance high, by design). Harness: scratchpad pose.mjs (sim frozen, swing states set by hand, side + back views).
+- Probe (world #2, DONE): stats = presented frame + stats.postCalls; probe measured from the frame already drawn (blit grab,
+  inverse ACES), see the request note for numbers. Weapons #4 (trails) marked DONE: weapons/fx.ts draws them.
+- Not done: exposure part 2 (HDR/grading/bloom) — no budget left this chunk; it stays OFF (Next 1).
+- Verification: `npx tsc --noEmit -p tsconfig.json` 0 errors in src/render/** + tests/render*; `npm run registry` +
+  `SM_PARTIAL=1 npm run data` ok; `npx vitest run tests/render_anim.test.ts tests/render_models.test.ts` 32/32 (new: polearm
+  variant resolution + bones, hero light finite and banded). Stats High 1280x576: vetta tramonto 105 calls / 278k tris
+  steady (postCalls 0-2), grandi_pianure tramonto 110-112 / 384k, notte 114 / 391k, porta_dite giorno 84 / 275k;
+  Low: vetta tramonto 100 / 229k, foresta alba 50 / 106k (scene totals incl. world; world stream owns the zone budgets).
+

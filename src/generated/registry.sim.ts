@@ -6,16 +6,19 @@ import b2 from '../content/bosses/cerbero/behavior';
 import b3 from '../content/bosses/elder_tree/behavior';
 import b4 from '../content/bosses/gigante_di_fuoco/behavior';
 import b5 from '../content/bosses/great_devourer/behavior';
-import b6 from '../content/bosses/ice/behavior';
-import b7 from '../content/bosses/lucifero_1/behavior';
-import b8 from '../content/bosses/mostro_della_palude/behavior';
-import b9 from '../content/bosses/mostro_della_palude/minion_annegato_canne';
-import b10 from '../content/bosses/mostro_della_palude/minion_annegato_lanterna';
-import b11 from '../content/bosses/mostro_della_palude/minion_annegato_ossa';
-import b12 from '../content/bosses/mostro_di_magma/behavior';
-import b13 from '../content/bosses/pyro/behavior';
-import b14 from '../content/bosses/thunder/behavior';
-import b15 from '../content/bosses/yeti/behavior';
+import b6 from '../content/bosses/guardiano_rocca_di_brina/behavior';
+import b7 from '../content/bosses/ice/behavior';
+import b8 from '../content/bosses/loki/behavior';
+import b9 from '../content/bosses/loki/minion_loki_copy';
+import b10 from '../content/bosses/lucifero_1/behavior';
+import b11 from '../content/bosses/mostro_della_palude/behavior';
+import b12 from '../content/bosses/mostro_della_palude/minion_annegato_canne';
+import b13 from '../content/bosses/mostro_della_palude/minion_annegato_lanterna';
+import b14 from '../content/bosses/mostro_della_palude/minion_annegato_ossa';
+import b15 from '../content/bosses/mostro_di_magma/behavior';
+import b16 from '../content/bosses/pyro/behavior';
+import b17 from '../content/bosses/thunder/behavior';
+import b18 from '../content/bosses/yeti/behavior';
 
 export const BEHAVIORS: BehaviorRegistry = {
   "caronte": b0,
@@ -24,14 +27,17 @@ export const BEHAVIORS: BehaviorRegistry = {
   "elder_tree": b3,
   "gigante_di_fuoco": b4,
   "great_devourer": b5,
-  "ice": b6,
-  "lucifero_1": b7,
-  "mostro_della_palude": b8,
-  "mostro_della_palude:annegato_canne": b9,
-  "mostro_della_palude:annegato_lanterna": b10,
-  "mostro_della_palude:annegato_ossa": b11,
-  "mostro_di_magma": b12,
-  "pyro": b13,
-  "thunder": b14,
-  "yeti": b15,
+  "guardiano_rocca_di_brina": b6,
+  "ice": b7,
+  "loki": b8,
+  "loki:loki_copy": b9,
+  "lucifero_1": b10,
+  "mostro_della_palude": b11,
+  "mostro_della_palude:annegato_canne": b12,
+  "mostro_della_palude:annegato_lanterna": b13,
+  "mostro_della_palude:annegato_ossa": b14,
+  "mostro_di_magma": b15,
+  "pyro": b16,
+  "thunder": b17,
+  "yeti": b18,
 };

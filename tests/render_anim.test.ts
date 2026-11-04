@@ -239,4 +239,39 @@ describe('render: models driven by the libraries', () => {
     expect(p.model.triangles).toBeLessThan(40000);
     p.dispose();
   });
+
+  it('Portatore: polearm grip selects the polearm_ clip variants (weapons request #7)', () => {
+    const p = new PortatoreVisual(ctx, { name: 'T', build: 0.5, height: 0.5, skin: 2, hair: 0, hairColor: 1, eyes: 0, cloak: 3 });
+    const an = new Animator(p.model, content, 'portatore');
+    const pole = new Set(['polearm']);
+    // exact, resolved keyword (thrust_high -> thrust), compound (charge_thrust -> charge), mirrored side, locomotion
+    expect(an.resolve('thrust', pole)?.name).toBe('polearm_thrust');
+    expect(an.resolve('thrust_high', pole)?.name).toBe('polearm_thrust');
+    expect(an.resolve('charge_thrust', pole)?.name).toBe('polearm_charge');
+    expect(an.resolve('sweep_rl', pole)?.name).toBe('polearm_sweep_r');
+    expect(an.resolve('idle', pole)?.name).toBe('polearm_idle');
+    expect(an.resolve('walk', pole)?.name).toBe('polearm_walk');
+    // no polearm variant: the plain clip; no flag: the plain clips
+    expect(an.resolve('throw', pole)?.name).toBe('throw');
+    expect(an.resolve('thrust')?.name).toBe('thrust');
+    // every polearm_ pose key is a real bone of the Portatore
+    const lib = resolveLibrary(content, 'portatore');
+    const bones = new Set(p.model.boneList.map((b) => b.name));
+    for (const [name, c] of Object.entries(lib.clips)) {
+      if (!name.startsWith('polearm_')) continue;
+      const cl = getClip(lib, name) as ClipDef;
+      for (const st of [cl, cl.telegraph, cl.active, cl.recovery] as (StagePose | undefined)[]) for (const k of Object.keys(st?.pose ?? {})) expect(bones.has(k), `${name}: ${k}`).toBe(true);
+    }
+    // the hero light accepts the scene lights and keeps finite, banded values
+    const cam = new THREE.PerspectiveCamera();
+    cam.updateMatrixWorld();
+    const sun = new THREE.DirectionalLight('#ffd0a0', 8);
+    sun.position.set(0, 3, 10);
+    sun.updateMatrixWorld();
+    p.light(cam, sun, new THREE.HemisphereLight('#a0b0ff', '#302020', 2), 0.9);
+    const f = p.hero.fill.value, r = p.hero.rim.value;
+    for (const v of [f.r, f.g, f.b, r.r, r.g, r.b]) expect(Number.isFinite(v) && v >= 0).toBe(true);
+    expect(0.2126 * f.r + 0.7152 * f.g + 0.0722 * f.b).toBeLessThan(0.3);
+    p.dispose();
+  });
 });

@@ -42,7 +42,7 @@ export class Renderer {
   private stableT = 0;
   targetFrameMs = 1000 / 60;
   contextLost = false;
-  stats = { fps: 60, frameMs: 16.7, calls: 0, triangles: 0, geometries: 0, textures: 0, exposure: 1, key: 0 };
+  stats = { fps: 60, frameMs: 16.7, calls: 0, triangles: 0, geometries: 0, textures: 0, exposure: 1, key: 0, postCalls: 0 };
   private fpsAcc = 0;
   private fpsFrames = 0;
 
@@ -169,12 +169,15 @@ export class Renderer {
     this.post.updateGrade(sim.zone?.def.act ?? 0, dt);
     this.post.begin();
     this.gl.render(this.scene, this.rig.camera);
+    // the presented frame; the post pipeline's passes (probe grab + reduction, bloom, composite) are reported apart
+    const mainCalls = this.gl.info.render.calls, mainTris = this.gl.info.render.triangles;
     this.post.end(this.scene, this.rig.camera, dt, this.ctx.time);
     this.stats.exposure = this.post.exposure;
     this.stats.key = this.post.key;
     const info = this.gl.info;
-    this.stats.calls = info.render.calls;
-    this.stats.triangles = info.render.triangles;
+    this.stats.calls = mainCalls;
+    this.stats.triangles = mainTris;
+    this.stats.postCalls = info.render.calls - mainCalls;
     this.stats.geometries = info.memory.geometries;
     this.stats.textures = info.memory.textures;
     this.adapt(dt);

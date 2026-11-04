@@ -448,3 +448,262 @@ clips:
         arm_r: {z: [-4, 0.7]}
   flying:
     base: hover
+
+  # --- Polearms (MovesetDef.grip 'polearm': lance, halberd, harpoon, scythe, naginata, trident, drill) -----------------
+  # Selected through the 'polearm' flag -> 'polearm_' prefix (PortatoreVisual). The right hand is the rear hand at the hip,
+  # the left hand rides the shaft in front; the weapon's +Z leaves the right fist, so the tip direction is set by the
+  # summed pitch of arm_r + forearm_r + hand_r (0 = level forward, negative = tip up) plus the torso lean. Unlisted
+  # swings resolve to the plain clips (thrust_high -> polearm_thrust, charge_thrust -> polearm_charge, ...).
+  polearm_idle:
+    pose:
+      spine: [3, -8, 0]
+      chest: [2, -12, 0]
+      neck: [-2, 10, 0]
+      head: [-4, 8, 0]
+      arm_r: [10, 0, -12]
+      forearm_r: [-60, 0, 0]
+      hand_r: [34, 0, 0]
+      arm_l: [-50, 0, -28]
+      forearm_l: [-34, 0, 0]
+      thigh_l: [-14, 6, 6]
+      shin_l: [14, 0, 0]
+      foot_l: [2, -6, 0]
+      thigh_r: [8, -10, -6]
+      shin_r: [10, 0, 0]
+      foot_r: [-6, 10, 0]
+    root: [0, -0.03, 0]
+    cycle:
+      period: 3.8
+      root: {y: [0.005, 0]}
+      bones:
+        chest: {x: [1.4, 0]}
+        neck: {x: [-0.7, 0.1]}
+        head: {y: [2.5, 0.3]}
+  polearm_walk:
+    pose:
+      spine: [5, -6, 0]
+      chest: [2, -10, 0]
+      neck: [-2, 8, 0]
+      arm_r: [8, 0, -12]
+      forearm_r: [-58, 0, 0]
+      hand_r: [34, 0, 0]
+      arm_l: [-48, 0, -28]
+      forearm_l: [-34, 0, 0]
+    cycle:
+      stride: 1.55
+      root: {y: [0.022, 0.125, double], x: [0.012, 0]}
+      rootRot: {y: [5, 0], z: [2, 0]}
+      bones:
+        thigh_l: {x: [-27, 0]}
+        thigh_r: {x: [27, 0]}
+        shin_l: {x: [34, 0.82, pos]}
+        shin_r: {x: [34, 0.32, pos]}
+        foot_l: {x: [-12, 0.05]}
+        foot_r: {x: [12, 0.05]}
+        arm_r: {x: [-3, 0]}
+        arm_l: {x: [3, 0]}
+        chest: {y: [-3, 0]}
+  polearm_run:
+    pose:
+      spine: [14, -4, 0]
+      chest: [6, -8, 0]
+      neck: [-10, 6, 0]
+      head: [-6, 4, 0]
+      arm_r: [16, 0, -14]
+      forearm_r: [-66, 0, 0]
+      hand_r: [34, 0, 0]
+      arm_l: [-44, 0, -30]
+      forearm_l: [-40, 0, 0]
+    root: [0, -0.04, 0]
+    cycle:
+      stride: 2.5
+      root: {y: [0.05, 0.1, double]}
+      rootRot: {y: [6, 0], z: [2, 0]}
+      bones:
+        thigh_l: {x: [-46, 0]}
+        thigh_r: {x: [46, 0]}
+        shin_l: {x: [70, 0.78, pos]}
+        shin_r: {x: [70, 0.28, pos]}
+        foot_l: {x: [-18, 0.05]}
+        foot_r: {x: [18, 0.05]}
+        arm_r: {x: [-5, 0]}
+        arm_l: {x: [5, 0]}
+        chest: {y: [-5, 0]}
+  polearm_guard:
+    base: guard
+    pose:
+      arm_r: [-14, 0, -14]
+      forearm_r: [-74, 0, 0]
+      hand_r: [30, 0, 0]
+      arm_l: [-82, 0, -22]
+      forearm_l: [-44, 0, 0]
+  polearm_thrust:
+    base: thrust
+    telegraph:
+      pose:
+        spine: [-2, -6, 0]
+        chest: [-2, -10, 0]
+        neck: [0, 16, 0]
+        head: [0, 14, 0]
+        arm_r: [34, 0, -14]
+        forearm_r: [-72, 0, 0]
+        hand_r: [38, 0, 0]
+        arm_l: [-42, 0, -30]
+        forearm_l: [-42, 0, 0]
+      rootRot: [0, -8, 0]
+    active:
+      pose:
+        spine: [10, 6, 0]
+        chest: [6, 10, 0]
+        neck: [-8, -6, 0]
+        head: [-6, -6, 0]
+        arm_r: [-62, 0, -6]
+        forearm_r: [-14, 0, 0]
+        hand_r: [62, 0, 0]
+        arm_l: [-80, 0, -20]
+        forearm_l: [-6, 0, 0]
+    recovery:
+      pose:
+        spine: [6, 2, 0]
+        chest: [4, 4, 0]
+        arm_r: [-24, 0, -10]
+        forearm_r: [-44, 0, 0]
+        hand_r: [52, 0, 0]
+        arm_l: [-62, 0, -24]
+        forearm_l: [-26, 0, 0]
+  polearm_thrust_heavy:
+    base: thrust_heavy
+    telegraph:
+      pose:
+        spine: [-6, -10, 0]
+        chest: [-8, -14, 0]
+        arm_r: [46, 0, -16]
+        forearm_r: [-82, 0, 0]
+        hand_r: [22, 0, 0]
+        arm_l: [-32, 0, -30]
+        forearm_l: [-52, 0, 0]
+      rootRot: [0, -10, 0]
+    active:
+      pose:
+        arm_r: [-70, 0, -4]
+        forearm_r: [-8, 0, 0]
+        hand_r: [48, 0, 0]
+        arm_l: [-88, 0, -16]
+        forearm_l: [-4, 0, 0]
+    recovery:
+      pose:
+        arm_r: [-30, 0, -10]
+        forearm_r: [-40, 0, 0]
+        hand_r: [50, 0, 0]
+        arm_l: [-62, 0, -24]
+        forearm_l: [-26, 0, 0]
+  polearm_charge:
+    base: charge
+    telegraph:
+      pose:
+        arm_r: [30, 0, -14]
+        forearm_r: [-70, 0, 0]
+        hand_r: [2, 0, 0]
+        arm_l: [-46, 0, -30]
+        forearm_l: [-40, 0, 0]
+    active:
+      pose:
+        arm_r: [6, 0, -10]
+        forearm_r: [-62, 0, 0]
+        hand_r: [6, 0, 0]
+        arm_l: [-58, 0, -28]
+        forearm_l: [-28, 0, 0]
+    recovery:
+      pose:
+        arm_r: [0, 0, -12]
+        forearm_r: [-56, 0, 0]
+        hand_r: [40, 0, 0]
+        arm_l: [-50, 0, -28]
+        forearm_l: [-32, 0, 0]
+  polearm_sweep_r:
+    base: sweep_r
+    telegraph:
+      pose:
+        arm_r: [-30, -20, -40]
+        forearm_r: [-50, 0, 0]
+        hand_r: [70, 0, 0]
+        arm_l: [-70, 0, -40]
+        forearm_l: [-30, 0, 0]
+    active:
+      pose:
+        arm_r: [-70, 30, -10]
+        forearm_r: [-10, 0, 0]
+        hand_r: [80, 0, 0]
+        arm_l: [-60, 0, 10]
+        forearm_l: [-30, 0, 0]
+    recovery:
+      pose:
+        arm_r: [-40, 16, -10]
+        forearm_r: [-30, 0, 0]
+        hand_r: [60, 0, 0]
+        arm_l: [-50, 0, -10]
+        forearm_l: [-30, 0, 0]
+  polearm_sweep_l:
+    mirror: polearm_sweep_r
+  polearm_overhead:
+    base: overhead
+    telegraph:
+      pose:
+        arm_r: [-150, 10, -14]
+        forearm_r: [-24, 0, 0]
+        hand_r: [160, 0, 0]
+        arm_l: [-170, -10, -10]
+        forearm_l: [-30, 0, 0]
+    active:
+      pose:
+        arm_r: [-40, 0, -8]
+        forearm_r: [-20, 0, 0]
+        hand_r: [86, 0, 0]
+        arm_l: [-70, 0, -20]
+        forearm_l: [-10, 0, 0]
+    recovery:
+      pose:
+        arm_r: [-20, 0, -10]
+        forearm_r: [-40, 0, 0]
+        hand_r: [50, 0, 0]
+        arm_l: [-56, 0, -24]
+        forearm_l: [-26, 0, 0]
+  polearm_slam:
+    base: slam
+    telegraph:
+      pose:
+        arm_r: [-150, 0, -10]
+        forearm_r: [-20, 0, 0]
+        hand_r: [160, 0, 0]
+        arm_l: [-176, 0, -6]
+        forearm_l: [-20, 0, 0]
+    active:
+      pose:
+        arm_r: [-50, 0, -6]
+        forearm_r: [-10, 0, 0]
+        hand_r: [96, 0, 0]
+        arm_l: [-70, 0, -14]
+        forearm_l: [-6, 0, 0]
+    recovery:
+      pose:
+        arm_r: [-30, 0, -10]
+        forearm_r: [-30, 0, 0]
+        hand_r: [60, 0, 0]
+        arm_l: [-56, 0, -22]
+        forearm_l: [-24, 0, 0]
+  polearm_spin:
+    base: spin
+    telegraph:
+      pose:
+        arm_r: [-40, -20, -50]
+        forearm_r: [-30, 0, 0]
+        hand_r: [70, 0, 0]
+        arm_l: [-60, 0, -20]
+        forearm_l: [-30, 0, 0]
+    active:
+      pose:
+        arm_r: [-80, 0, -40]
+        forearm_r: [-6, 0, 0]
+        hand_r: [86, 0, 0]
+        arm_l: [-70, 0, 20]
+        forearm_l: [-10, 0, 0]

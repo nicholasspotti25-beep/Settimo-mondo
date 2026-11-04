@@ -27,6 +27,7 @@ export const EYE_COLORS = ['#5a3a22', '#3a6a8a', '#4a7a4a', '#8a7a4a', '#6a5a8a'
 export const CLOAK_COLORS = ['#5a4a6a', '#3a4a6a', '#6a3a3a', '#3a5a4a', '#6a5a3a', '#e8e0d0'];
 
 const _v = new THREE.Vector3();
+const POLEARM: ReadonlySet<string> = new Set(['polearm']);
 const _sd = new THREE.Vector3();
 const _rd = new THREE.Vector3();
 const _sunC = new THREE.Color();
@@ -66,6 +67,8 @@ export class PortatoreVisual {
   readonly animator: Animator;
   weapon: WeaponVisual | null = null;
   private weaponId: string | null = null;
+  /** Animator flags from the equipped moveset's grip (polearm clip variants). */
+  private gripFlags: ReadonlySet<string> | null = null;
   private readonly vial: THREE.Group;
   private readonly seedHalo: THREE.Sprite;
   private readonly input: AnimInput = { anim: 'idle', stage: 'idle', time: 0, dur: 1, speed: 0, scale: 1, flags: undefined, airborne: false, hitFlash: 0 };
@@ -128,6 +131,8 @@ export class PortatoreVisual {
     // the seed of light in the chest: a small glowing gem set in a gold clasp
     mb.part('chest', geo.ellipsoid(0.028 * H, 0.034 * H, 0.016 * H, 10, 8), S.glow, { pos: [0, 0.01 * H, 0.075 * H * (0.9 + d.build * 0.2)], color: P.glow });
     mb.part('chest', geo.torus(0.034 * H, 0.006 * H, 6, 18), S.metal, { pos: [0, 0.01 * H, 0.072 * H * (0.9 + d.build * 0.2)], color: P.accent });
+    // grip-specific clip variants ('polearm_' + keyword, data/anim/portatore.yaml), switched by the equipped moveset
+    mb.info.flagPrefix = { polearm: 'polearm_' };
     this.model = mb.build();
     this.model.setShadow(false);
     this.animator = new Animator(this.model, ctx.content, 'portatore');
@@ -165,8 +170,15 @@ export class PortatoreVisual {
       this.weapon.dispose();
       this.weapon = null;
     }
+    this.gripFlags = null;
     if (!id || !this.ctx.content.hasWeapon(id)) return;
-    const w = buildWeapon(this.ctx.content.weapon(id), this.ctx);
+    const def = this.ctx.content.weapon(id);
+    try {
+      if (this.ctx.content.moveset(def.type).grip === 'polearm') this.gripFlags = POLEARM;
+    } catch {
+      this.gripFlags = null;
+    }
+    const w = buildWeapon(def, this.ctx);
     const r = this.model.sockets.grip_r ?? this.model.bones.hand_r;
     const l = this.model.sockets.grip_l ?? this.model.bones.hand_l;
     if (w.grip === 'bow') l?.add(w.root);
@@ -236,6 +248,8 @@ export class PortatoreVisual {
     inp.scale = this.visScale;
     inp.airborne = p.flying;
     inp.hitFlash = p.hurtTimer;
+    // a shape-shifted weapon (Arma Mutaforma) swings with its form's moveset: no polearm variants then
+    inp.flags = p.shapeShift ? undefined : this.gripFlags ?? undefined;
     void sim;
   }
 
