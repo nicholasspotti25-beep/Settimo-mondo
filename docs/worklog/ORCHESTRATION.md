@@ -65,3 +65,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - started: render-kit#5 (player silhouette, polearm poses, probe stats, then HDR)
 - act2#2 done: Cerbero model (3 heads, per-head attack glow, chains) + Soglia di Dite arena (Porta di Dite opening); next Pyro
 - lead: lanes re-prioritised (content lane = act3a..act67 sim-side first); started act3a#1
+- 2026-11-04 ~19:00 usage limit stopped render-kit#5 and act3a#1; 22:18 both resumed
