@@ -8,7 +8,6 @@
  * params: width (100), height (24), gateWidth (9), keep (true), crag (true), style ('pale'), seed.
  * Sim colliders are authored in the zone data (walls/towers), see docs/WORLD_KIT.md.
  */
-import * as THREE from 'three';
 import type { LandmarkDef, ZoneDef } from '../../core/types';
 import type { RenderCtx } from '../../render/types';
 import type { LandmarkResult } from '../../render/world/landmarks';

@@ -46,20 +46,22 @@ export function plazaParts(p: Parts, m: THREE.Matrix4, glows: GlowSet, o: PlazaO
   // medallion
   let rIn = 0;
   if (o.center) {
-    p.add(cyl(1.7, 1.75, 0.22, 24), 'matte', { color: DARK, cover: 0.3 }, mul(m, mat4([0, -0.17, 0])));
+    // flush with the paving: disc top at +0.03 (the slab tops are at +0.02), inlays and ring a hair above it
+    p.add(cyl(1.7, 1.75, 0.22, 24), 'matte', { color: DARK, cover: 0.3 }, mul(m, mat4([0, 0.03 - 0.11, 0])));
     for (let i = 0; i < 8; i++) {
       const a = (i / 8) * Math.PI * 2;
       const L = i % 2 ? 1.1 : 1.6;
-      p.add(box(0.28, 0.05, L), 'matte', { color: o.col, cover: 0 }, mul(m, mat4([Math.sin(a) * L * 0.5, 0.05, Math.cos(a) * L * 0.5], [0, a, 0])));
+      p.add(box(0.28, 0.03, L), 'matte', { color: o.col, cover: 0 }, mul(m, mat4([Math.sin(a) * L * 0.5, 0.04, Math.cos(a) * L * 0.5], [0, a, 0])));
     }
-    p.add(torus(1.72, 0.07, 4, 32), 'matte', { color: o.col, cover: 0 }, mul(m, mat4([0, 0.04, 0], [Math.PI / 2, 0, 0])));
+    p.add(torus(1.72, 0.06, 4, 32), 'matte', { color: o.col, cover: 0 }, mul(m, mat4([0, 0.02, 0], [Math.PI / 2, 0, 0])));
     rIn = 1.8;
   }
   const bandW = (R0 - rIn) / o.rings;
   for (let k = 0; k < o.rings; k++) {
     const a = rIn + k * bandW, b = a + bandW;
     const n = Math.max(6, Math.round((Math.PI * 2 * b) / 2.3));
-    slabRing(p, m, 0, 0, a, b, n, 0.03, 0.24, k % 2 ? ['#8c8478', '#a8a092'] : ['#9a9284', '#b4ac9c'], r);
+    // slab tops 2 cm above the flattened floor (covers the terrain's own paving without z-fighting), 20 cm thick
+    slabRing(p, m, 0, 0, a, b, n, 0.02, 0.2, k % 2 ? ['#8c8478', '#a8a092'] : ['#9a9284', '#b4ac9c'], r);
   }
   // kerb + steps down
   slabRing(p, m, 0, 0, R0, R0 + 0.7, Math.round((Math.PI * 2 * R0) / 1.6), 0.12, 0.5, DARK, r);

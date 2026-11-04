@@ -293,8 +293,14 @@ export function slabRing(p: Parts, m: THREE.Matrix4, cx: number, cz: number, r0:
     }
     const g = extrude(s, th, 0, 2);
     g.rotateX(-Math.PI / 2);
-    const tilt = r.range(-0.012, 0.012);
-    p.add(g, 'matte', { color: col, cover: 0.55, jitter: 0.12 }, mul(m, mat4([cx, y - th / 2 + r.range(-0.015, 0.012), cz], [tilt, 0, -tilt])));
+    // settle each slab about its own centroid (a tilt about the ring centre lifted far slabs by r * tilt: at r 20 m the
+    // slabs stood up to 25 cm proud at random heights); only a hair of tilt and height jitter. The slab spans
+    // [y - th, y]: `y` is the TOP of the paving
+    const rm = (r0 + r1) / 2;
+    const gx = Math.cos(am) * rm, gz = -Math.sin(am) * rm;
+    g.translate(-gx, 0, -gz);
+    const tilt = r.range(-0.0035, 0.0035);
+    p.add(g, 'matte', { color: col, cover: 0.55, jitter: 0.12 }, mul(m, mat4([cx + gx, y - th / 2 + r.range(-0.006, 0.004), cz + gz], [tilt, 0, -tilt])));
   }
 }
 

@@ -122,7 +122,8 @@ All in src/render/world/ (import with relative paths from src/content/...).
 ## 4b. Landmark builders (src/content/landmarks/)
 
 Place with `landmarks: [{builder, pos, yaw, scale, params}]` (pos y = ground height at pos; builders that settle on
-the terrain sample `env.heightAt` themselves). No builder creates sim colliders: add `zone.colliders` (or arena
+the terrain sample `env.heightAt` themselves). The sim walks on the terrain, not on decks: carve the path to a deck's
+height (bridge / walkway / docks) or keep the structure as dressing beside the route. No builder creates sim colliders: add `zone.colliders` (or arena
 `obstacles`) for anything solid on a route.
 
 | Builder | What | params (default) |
@@ -132,6 +133,9 @@ the terrain sample `env.heightAt` themselves). No builder creates sim colliders:
 | `summit_plaza` | round plaza: compass medallion, concentric slab rings, kerb, steps down, broken balustrade with gaps, bronze braziers lit at dusk/night | radius 9, rings 3, center true, steps 2, balustrade 0.75, gaps '0,180' (deg, 0 = +Z), gapWidth 6, braziers 4, style, seed. `plazaParts()` reusable from arena.ts |
 | `arch` | freestanding archway / arcade along local X (opening faces +Z), voussoirs + keystone, spandrels and cornice when intact, broken variant with fallen blocks | span 6, height 5, depth 1.6, bays 1, broken 0..1, pointed false, style, seed. Piers at x = -total/2 + 0.8 + i*(span + 1.6) |
 | `ruins` | wall fragments with jagged tops (window/doorway), standing/broken/fallen columns, toppled lintel, rubble, paving, settled on the terrain | radius 9, walls 3, columns 4, height 5, style, seed |
+| `bridge` | crossing along local Z, deck top at local y 0 (pos.y = walking height). stone: piers with cutwaters, barrel arches (causeway fill where the ground is too high), spandrels, paved deck + kerbs, parapets with coping, end posts, ruined centre gap at broken >= 0.8; wood: trestles + braces, stringers, plank deck, post-and-rail with rope. Lantern posts at both ends (brighter at night) | length 30, width 5, style stone/wood/(stone style), arches 3, rise span*0.42, parapet true, broken 0, lanterns true, seed. Interior piers at local z = -length/2 + i*length/arches (box 1.8 along Z x width+0.4) |
+| `walkway` | rotten plank boardwalk on stilts along local Z, deck at local y `height`: sagging uneven boards with gaps, leaning stilt pairs, cross beams, fallen boards, crooked hand rail + slack rope, seeker lanterns on poles, optional square pier head at the far end | length 24, width 2.2, height 0.6, bend 0 (S-curve amplitude m), broken 0.25, rail left/right/both/none, lanterns 2, platform 0 (pier head side, 0 = none), seed |
+| `docks` | river-port wharf along local X facing +Z (water), deck top at local y 0: pilings, beams, planks, stone quay wall behind, fender beam, iron bollards + rope coils, jetty over the water with ladder, crates / barrels, timber derrick crane with hook, boat-house roof, lantern posts along the front | length 30, depth 7, jetty 14 (0 = none), jettyX 0, crane true, lanterns 4, shed true, style wood/dark, seed |
 | `world_below` | the panorama from a summit: land far below, plains + road, dark forest + Elder Tree shadow, swamp lights, river of souls, red glow, great peaks, sea of clouds (hazy impostors, 2-3 draw calls) | depth -240, clouds 1, seed. Place at the zone centre |
 
 Styles: pale (default), stone, dark, marble, black, warm. Helpers for your own builders (`_kit.ts`, files starting with
@@ -162,6 +166,16 @@ facing the light show; `add(center, halfWidthAxis, halfHeightAxis, inwardNormal)
   ~15-25 draw calls and ~60k triangles on High (Parts merges to one mesh per slot; one GlowSet per builder).
 - Quality via `ctx.quality` ('low' | 'medium' | 'high'): drop small detail and shadows on Low (`parts.build(opts,
   ctx.quality !== 'low')`).
+- Measured per preset (scratchpad world/c4/prof.mjs: per-pass calls / tris by category): vetta spawn High 145 / 290k,
+  Medium 111 / 219k, Low 68 / 132k; Guardiano fight view 105 / 278k, 93 / 243k, 55 / 125k; grandi_pianure and
+  foresta_oscura High 127-133 calls / 369-401k tris. Props: one call per kind x variant x slot; lower qualities fold
+  variants (High all, Medium <= 3 / 2 for small kinds, Low 2 / 1; small = `far` <= 260 m) and small kinds cast shadows
+  on High only, so prefer a few kinds with many instances over many kinds.
+- `renderer.stats` on the direct post path also counts the luminance probe (a 32x16 re-render every 0.3 s): a probe
+  frame reads ~+40-50 calls. During that pass the world hides props, ground cover, particles and sites; keep anything
+  else you add cheap (merged with `Parts`). docs/requests/world.md #2 asks the render kit to report it separately.
+- Zone builds happen off-scene: the WorldRenderer attaches the zone, sites, particles and arenas in one step after
+  compiling their shaders (canvas + probe variants) behind the loading fade. `world.buildStats` gives ms per phase.
 - No per-frame allocation in `update` (reuse vectors), no real lights, no `Math.random` (use `R` with a seed so the
   dressing is identical every load), every visible string through locales.
 - Dispose everything you create in `dispose()` (geometries + non-shared materials; `disposeTree` does both).

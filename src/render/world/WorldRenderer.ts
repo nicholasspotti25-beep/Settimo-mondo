@@ -232,6 +232,7 @@ export class WorldRenderer {
       releaseZoneEnv();
       createZoneEnv(def, this.ctx);
       lap('env');
+      const stage = new THREE.Group();
       let visual: ZoneVisual;
       const custom = ZONE_BUILDERS[def.id];
       if (custom) {
@@ -245,13 +246,13 @@ export class WorldRenderer {
         return;
       }
       this.zoneVisual = visual;
-      this.group.add(visual.root);
+      stage.add(visual.root);
       lap('zone');
       const zs = (visual as { stats?: Record<string, number> }).stats;
       if (zs) for (const k in zs) T[`zone.${k}`] = zs[k];
       try {
         this.sites = new ZoneSites(zoneEnv(def, this.ctx));
-        if (this.sites) this.group.add(this.sites.group);
+        if (this.sites) stage.add(this.sites.group);
       } catch (err) {
         console.error(`[world] sites of ${def.id} failed`, err);
       }
@@ -259,7 +260,7 @@ export class WorldRenderer {
       try {
         const env = zoneEnv(def, this.ctx);
         this.particles = new ZoneParticles(env, zoneParticleList(env), (s) => this.atmosphere.lightning(s));
-        this.group.add(this.particles.group);
+        stage.add(this.particles.group);
       } catch (err) {
         console.error(`[world] particles of ${def.id} failed`, err);
       }
@@ -275,14 +276,18 @@ export class WorldRenderer {
             return;
           }
           this.arenaVisuals.set(arenaId, av);
-          this.group.add(av.root);
+          stage.add(av.root);
         } catch (err) {
           console.error(`[world] arena builder ${arenaId} failed`, err);
         }
       }
       lap('arenas');
       this.collectProbeHidden();
-      await this.warmShaders(token);
+      await this.warmShaders(stage, token);
+      if (token !== this.token) return;
+      // the finished zone enters the scene in one step (frames rendered during the build stay cheap and never show a
+      // half-built zone; the shaders are already compiled)
+      for (const c of [...stage.children]) this.group.add(c);
       lap('compile');
       T.total = Math.round(performance.now() - t0);
       if (token === this.token) this.buildStats = T;
@@ -299,20 +304,36 @@ export class WorldRenderer {
    * Compile the new zone's materials before the zone is shown (see the header). Bounded: a driver without parallel
    * compile resolves at once after the synchronous compile; a stuck one never holds the loading fade over ~6 s.
    */
-  private async warmShaders(token: number): Promise<void> {
+  private async warmShaders(stage: THREE.Object3D, token: number): Promise<void> {
     const gl = this.gl, cam = this.lastCamera;
     if (!gl || !cam || token !== this.token) return;
+    const parallel = gl.extensions.has('KHR_parallel_shader_compile');
+    const prevRT = gl.getRenderTarget();
     try {
-      if (!gl.extensions.has('KHR_parallel_shader_compile')) {
-        // no parallel compile (e.g. SwiftShader): compile synchronously now, still behind the loading fade
-        gl.compile(this.group, cam, this.scene);
-        return;
-      }
-      await Promise.race([gl.compileAsync(this.group, cam, this.scene), new Promise((r) => setTimeout(r, 6000))]);
+      const jobs: Promise<unknown>[] = [];
+      // canvas variants (no parallel compile, e.g. SwiftShader: synchronous, still behind the loading fade)
+      if (parallel) jobs.push(gl.compileAsync(stage, cam, this.scene));
+      else gl.compile(stage, cam, this.scene);
+      // render-target variants for the luminance probe (any render target selects the same program variant:
+      // no tone mapping, linear output), with the probe's detail hidden as in the real pass
+      this.probeRT ??= new THREE.WebGLRenderTarget(4, 4, { depthBuffer: true });
+      gl.setRenderTarget(this.probeRT);
+      this.setProbeLite(true);
+      if (parallel) jobs.push(gl.compileAsync(stage, cam, this.scene));
+      else gl.compile(stage, cam, this.scene);
+      this.setProbeLite(false);
+      gl.setRenderTarget(prevRT);
+      if (jobs.length) await Promise.race([Promise.all(jobs), new Promise((r) => setTimeout(r, 6000))]);
+      // without parallel compile the driver finishes linking at the first use: query every program now (cached ones
+      // return at once) so that stall happens here, behind the fade, not in the first visible frame
+      else for (const p of gl.info.programs ?? []) (p as unknown as { getUniforms(): unknown }).getUniforms();
     } catch (err) {
+      this.setProbeLite(false);
+      gl.setRenderTarget(prevRT);
       console.warn('[world] shader warm-up failed', err);
     }
   }
+  private probeRT: THREE.WebGLRenderTarget | null = null;
 
   /** True while a zone is being built (the presentation keeps its fade up). */
   get busy(): boolean {
@@ -392,6 +413,8 @@ export class WorldRenderer {
     releaseZoneEnv();
     this.scene.remove(this.sky.mesh);
     this.sky.dispose();
+    this.probeRT?.dispose();
+    this.probeRT = null;
     this.group.clear();
   }
 }

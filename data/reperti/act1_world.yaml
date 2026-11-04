@@ -5,3 +5,9 @@
 - {id: rep_vetta_lanterna, zone: vetta_attesa, pos: [-9, 0, -112], kind: lantern, title_key: reperto.rep_vetta_lanterna.title, text_key: reperto.rep_vetta_lanterna.text}
 - {id: rep_vetta_lettera, zone: vetta_attesa, pos: [14, 0, -40], kind: letter, title_key: reperto.rep_vetta_lettera.title, text_key: reperto.rep_vetta_lettera.text}
 - {id: rep_vetta_armatura, zone: vetta_attesa, pos: [-20, 0, 31], kind: armor, title_key: reperto.rep_vetta_armatura.title, text_key: reperto.rep_vetta_armatura.text}
+- {id: rep_pianure_diario, zone: grandi_pianure, pos: [-146, 0, -16], kind: letter, title_key: reperto.rep_pianure_diario.title, text_key: reperto.rep_pianure_diario.text}
+- {id: rep_pianure_sella, zone: grandi_pianure, pos: [21, 0, 70], kind: armor, title_key: reperto.rep_pianure_sella.title, text_key: reperto.rep_pianure_sella.text}
+- {id: rep_pianure_ponte, zone: grandi_pianure, pos: [88, 0, 22], kind: lantern, title_key: reperto.rep_pianure_ponte.title, text_key: reperto.rep_pianure_ponte.text}
+- {id: rep_foresta_corteccia, zone: foresta_oscura, pos: [-9, 0, -128], kind: mural, title_key: reperto.rep_foresta_corteccia.title, text_key: reperto.rep_foresta_corteccia.text}
+- {id: rep_foresta_lanterne, zone: foresta_oscura, pos: [-30, 0, -78], kind: lantern, title_key: reperto.rep_foresta_lanterne.title, text_key: reperto.rep_foresta_lanterne.text}
+- {id: rep_foresta_seme, zone: foresta_oscura, pos: [15, 0, 62], kind: letter, title_key: reperto.rep_foresta_seme.title, text_key: reperto.rep_foresta_seme.text}

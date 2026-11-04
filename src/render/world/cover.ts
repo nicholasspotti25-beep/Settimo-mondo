@@ -10,7 +10,7 @@ import * as THREE from 'three';
 import { ATMOS } from './atmosphere';
 import type { CoverDef } from './biomes';
 import type { ZoneEnv } from './env';
-import { GLSL_ATMOS_FRAG, GLSL_ATMOS_PARS, GLSL_ATMOS_VERT, GLSL_NOISE } from './glsl';
+import { GLSL_ATMOS_FRAG, GLSL_ATMOS_PARS, GLSL_NOISE } from './glsl';
 import { atmosUniforms } from './materials';
 
 function tuftGeometry(type: CoverDef['type']): THREE.BufferGeometry {

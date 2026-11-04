@@ -4,12 +4,22 @@ name_key: zone.foresta_oscura.name
 size: [400, 400]
 biome: dark_forest
 palette: act1_green_gold
+# The Dark Forest: enormous trunks close over the road from the plains (spawn, south); the light barely filters
+# through. West of the road a sunken mossy hollow is crossed by an old seekers' boardwalk; east, a ring of black
+# standing stones. A broken dark archway marks the deep wood, then the Altare della Foresta (z 76), the fog gate
+# (z 93) and the clearing of the Elder Tree (center [0,0,120] r 27), whose shadow covers everything. Exit north to
+# the swamp (z 190).
 terrain:
   type: heightfield
   base: 0
   noise: {amp: 3, scale: 38, octaves: 4, seed: 524}
   path_flatten: 7
   rim: {height: 12, width: 26}
+  bumps:
+    - [-42, -92, -2.2, 16]
+    - [-120, 40, 6, 40]
+    - [130, -60, 7, 45]
+    - [70, 150, 5, 35]
   flats: [[6, 76, 5, 0, 6]]
 spawn: [0, 0, -180]
 spawn_yaw: 0
@@ -25,9 +35,34 @@ exits:
   - {to: palude, at: [0, 0, 190], radius: 6, requires: [elder_tree], arrive: spawn, kind: walk}
 vistas:
   - {id: vista_foresta_ombra, pos: [60, 0, -40], look: [0, 20, 120], name_key: vista.vista_foresta_ombra.name}
-reperti: []
-landmarks: []
-props: []
+reperti: [rep_foresta_corteccia, rep_foresta_lanterne, rep_foresta_seme]
+colliders:
+  # piers of the dark archway over the road (span 7)
+  - {type: cylinder, c: [-3.3, -2, -40], r: 1.2, h: 12}
+  - {type: cylinder, c: [5.3, -2, -40], r: 1.2, h: 12}
+landmarks:
+  - {builder: walkway, pos: [-42, -0.9, -92], yaw: 0.35, params: {length: 34, width: 2.2, height: 0.3, bend: 2.5, broken: 0.35, rail: left, lanterns: 3, seed: 31}}
+  - {builder: ruins, pos: [64, 0, -24], yaw: 0.2, params: {radius: 10, walls: 1, columns: 7, height: 5, style: dark, seed: 32}}
+  - {builder: ruins, pos: [-58, 0, 40], yaw: 2.4, params: {radius: 7, walls: 2, columns: 2, height: 4, style: dark, seed: 33}}
+  - {builder: arch, pos: [1, 0, -40], yaw: 0, params: {span: 7, height: 5, depth: 1.5, broken: 0.6, pointed: true, style: dark, seed: 34}}
+props:
+  - {kind: giant_tree, count: 28, scale: [0.9, 1.5], avoid_path: 12, collide: true, seed: 301}
+  - {kind: twilight_tree, count: 30, scale: [0.8, 1.2], avoid_path: 8, collide: true, seed: 302}
+  - {kind: dead_tree, count: 8, scale: [0.9, 1.3], avoid_path: 8, collide: true, seed: 303}
+  - {kind: fern, count: 200, scale: [0.7, 1.4], avoid_path: 3, seed: 304}
+  - {kind: mushroom_glow, count: 110, scale: [0.6, 1.4], avoid_path: 2.5, seed: 305}
+  - {kind: log, count: 16, scale: [0.8, 1.3], avoid_path: 6, collide: true, seed: 306}
+  - {kind: stump, count: 14, scale: [0.8, 1.3], avoid_path: 4, collide: true, seed: 307}
+  - {kind: boulder, count: 10, scale: [0.6, 1.2], avoid_path: 7, collide: true, seed: 308}
+  - {kind: rock, count: 30, scale: [0.4, 0.9], avoid_path: 3, seed: 309}
+  - {kind: seeker_lantern, count: 6, area: [-20, -170, 20, 70], scale: [0.9, 1.1], avoid_path: 2.5, seed: 310}
+  - {kind: bones, count: 5, scale: [0.8, 1.1], avoid_path: 5, seed: 311}
+  - {kind: gravestone, count: 6, area: [40, -50, 90, 0], scale: [0.8, 1.1], avoid_path: 5, seed: 312}
+horizon:
+  - {builder: dark_forest, dir: 90, dist: 300, scale: 1.3}
+  - {builder: dark_forest, dir: 270, dist: 300, scale: 1.3}
+  - {builder: dark_forest, dir: 0, dist: 320, scale: 1.4}
+  - {builder: mountains, dir: 180, dist: 520, scale: 1.2}
 surface: moss
 ambience: forest_night
 timeofday: foresta_oscura

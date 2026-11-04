@@ -59,3 +59,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - act1#4 done: Cavaliere volume pass (surcoat, plate, hood, cloak drape), pianure_erba_alta arena dressing with cues; next Elder Tree
 - started: act2#2 (models + arenas, NG+ fixes)
 - deployed eed2e8e (weapons#1, integrate#2, flicker fix, act1#4)
+- world#4 done: vetta perf (probe pass hides props, off-scene build + precompile, prop variant merge, bigger terrain chunks), paving flush, bridge/walkway/docks builders, grandi_pianure + foresta_oscura authored; request world#2 probe stats -> render-kit
+- started: render-kit#5 (player silhouette, polearm poses, probe stats, then HDR)

@@ -4,12 +4,22 @@ name_key: zone.grandi_pianure.name
 size: [420, 420]
 biome: plains
 palette: act1_green_gold
+# The Great Plains: from the foot of the Vetta (spawn, south) the road crosses a sea of tall gold grass, bends west to
+# the ruined watch-hill of the Altare della Vista, then runs north-east past a broken waystation to the Altare delle
+# Pianure, the fog gate (z 96) and the round meadow of the Cavaliere Errante (center [0,0,130] r 34), then on to the
+# dark forest (exit z 195). East of the road a dry gully is spanned by a ruined stone bridge that leads nowhere.
 terrain:
   type: heightfield
   base: 0
   noise: {amp: 4, scale: 38, octaves: 4, seed: 513}
   path_flatten: 7
   rim: {height: 16, width: 26}
+  bumps:
+    - [-160, -5, 7, 24]
+    - [112, 20, -12, 13]
+    - [150, -120, 10, 40]
+    - [-170, 120, 12, 45]
+    - [60, -150, 5, 30]
   flats: [[-120, -40, 5, 0, 6], [8, 78, 5, 0, 6]]
 spawn: [0, 0, -185]
 spawn_yaw: 0
@@ -26,9 +36,41 @@ exits:
   - {to: foresta_oscura, at: [0, 0, 195], radius: 6, requires: [cavaliere_errante], arrive: spawn, kind: walk}
 vistas:
   - {id: vista_pianure_rovine, pos: [-120, 0, -30], look: [-200, 20, 120], name_key: vista.vista_pianure_rovine.name}
-reperti: []
-landmarks: []
-props: []
+reperti: [rep_pianure_diario, rep_pianure_sella, rep_pianure_ponte]
+colliders:
+  # piers of the broken archway over the road (yaw -0.69, span 8)
+  - {type: cylinder, c: [-56.3, -2, -108.9], r: 1.2, h: 12}
+  - {type: cylinder, c: [-63.7, -2, -115.1], r: 1.2, h: 12}
+  # piers of the ruined bridge in the east gully
+  - {type: box, c: [100, -8, 20], half: [0.9, 20, 2.7]}
+  - {type: box, c: [112, -8, 20], half: [0.9, 20, 2.7]}
+  - {type: box, c: [124, -8, 20], half: [0.9, 20, 2.7]}
+landmarks:
+  - {builder: ruins, pos: [-158, 0, -8], yaw: 0.6, params: {radius: 13, walls: 4, columns: 5, height: 6, style: stone, seed: 21}}
+  - {builder: ruins, pos: [-62, 0, 44], yaw: -0.3, params: {radius: 8, walls: 2, columns: 3, height: 4, style: stone, seed: 22}}
+  - {builder: ruins, pos: [70, 0, -96], yaw: 1.9, params: {radius: 7, walls: 2, columns: 2, height: 3.5, style: pale, seed: 23}}
+  - {builder: arch, pos: [-60, 0, -112], yaw: -0.69, params: {span: 8, height: 5.5, depth: 1.6, broken: 0.45, style: stone, seed: 24}}
+  - {builder: bridge, pos: [112, -0.6, 20], yaw: 1.5708, params: {length: 48, width: 5, arches: 4, broken: 0.85, style: stone, lanterns: false, seed: 25}}
+props:
+  - {kind: tall_grass, count: 520, avoid_path: 3, seed: 201}
+  - {kind: twilight_tree, count: 26, scale: [0.9, 1.4], avoid_path: 12, collide: true, seed: 202}
+  - {kind: oak, count: 10, scale: [0.9, 1.3], avoid_path: 14, collide: true, seed: 203}
+  - {kind: boulder, count: 16, scale: [0.6, 1.3], avoid_path: 8, collide: true, seed: 204}
+  - {kind: rock, count: 50, scale: [0.4, 0.9], avoid_path: 3, seed: 205}
+  - {kind: flower_glow, count: 70, scale: [0.5, 0.9], avoid_path: 2.5, seed: 206}
+  - {kind: ruin_column, count: 10, scale: [0.8, 1.2], avoid_path: 8, collide: true, seed: 207}
+  - {kind: ruin_wall, count: 5, scale: [0.8, 1.1], avoid_path: 12, collide: true, seed: 208}
+  - {kind: armor_remains, count: 4, area: [-40, 30, 40, 92], scale: [0.9, 1.1], avoid_path: 4, seed: 209}
+  - {kind: sword_grave, count: 5, area: [-30, 50, 30, 92], scale: [0.9, 1.1], avoid_path: 4, seed: 210}
+  - {kind: seeker_lantern, count: 5, area: [-130, -180, 20, 90], scale: [0.9, 1.1], avoid_path: 3, seed: 211}
+  - {kind: bones, count: 6, scale: [0.8, 1.1], avoid_path: 5, seed: 212}
+horizon:
+  - {builder: dark_forest, dir: 0, dist: 380, scale: 0.8}
+  - {builder: castle, dir: 180, dist: 420, scale: 1.1}
+  - {builder: mountains, dir: 200, dist: 520, scale: 1.3}
+  - {builder: ruins, dir: 285, dist: 360}
+  - {builder: swamp, dir: 40, dist: 520}
+  - {builder: red_glow, dir: 15, dist: 900}
 surface: grass
 ambience: plains_wind
 timeofday: grandi_pianure

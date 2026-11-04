@@ -20,13 +20,18 @@
      castle_hall x5 + loggia arcade + world_below, 3 Reperti; src/content/zones/castello_culla/zone.ts: no heightfield,
      crag under the castle). data/reperti/act1_world.yaml + locales/{it,en}/act1_world.yaml (6 Reperti).
      data/timeofday/castello_culla.yaml: brighter ambient (night interior readable).
-   - missing: grandi_pianure, foresta_oscura, palude, fiume_anime (data skeletons only), their Reperti; climb walls.
+   - done (chunk 4): grandi_pianure (tall grass road west to the ruined watch-hill of the vista altar, broken
+     archway over the road, ruined stone bridge over the east gully, waystation ruins, oaks / twilight trees, armor
+     and sword graves before the gate, horizon: dark forest ahead, castle + Vetta behind, red glow; 3 Reperti) and
+     foresta_oscura (giant trunks, ferns, glowing mushrooms, logs, seekers' boardwalk over a mossy hollow, ring of dark
+     standing stones, broken dark archway, gravestones; 3 Reperti). 12 Reperti in act1_world (IT + EN).
+   - missing: palude, fiume_anime (data skeletons only), their Reperti; climb walls.
 3. Arena dressing src/content/bosses/guardiano_del_regno/arena.ts — **done** (paving + medallion over the whole circle,
    kerb, steps, balustrade open at the gate and the descent, ruined archway framing the gate, 8 guardian statues (one
    toppled), column stumps, braziers lit at dusk/night, stair down to the road; nothing solid inside r 24).
 4. docs/WORLD_KIT.md — **done** (STATUS: READY; new section 4b: landmark builders + params + _kit helpers).
 - Landmark builders (src/content/landmarks/**) — **partial**: done _kit.ts (helpers), castle_hall, castle_gate,
-  summit_plaza, arch, ruins, world_below. Missing: bridge, walkway (rotten piers), docks, bone_gate, sunken cathedral,
+  summit_plaza, arch, ruins, world_below, bridge, walkway (rotten piers), docks (chunk 4). Missing: bone_gate, sunken cathedral,
   crater rim, painted cave, ice castle, taiga logs, drum circle, ships, observatory, dragon nests, mirror shrines, wind
   cliffs, yggdrasil, root tunnel, inverted palace, celestial terraces, greenhouse, hedge walls.
 - tests/world_kit.test.ts — **done** (5/5 pass).
@@ -34,18 +39,20 @@
 
 ## Next
 
-1. Budget check on the Vetta: medium at the spawn measured 258 calls / 425k tris (zs.mjs, giorno), more than High
-   (78-122 calls / 204-336k). Find out why (shadow pass? quality-dependent prop counts?) and bring it under D3. Also
-   trim Low (101 calls).
-2. Vetta vista polish: a faint short pale line remains on the horizon NNE (the world_below far land, fully fogged); the
-   world below still reads hazy from the east edge: lower its fog further or add a visible cliff edge + nearer cloud
-   banks; generic boulder/cliff_rock props look like faceted eggs (props/kinds.ts).
-3. Landmark builders still missing for Act I: bridge, walkway (rotten piers on stilts), docks (river port); then
-   grandi_pianure, foresta_oscura, palude, fiume_anime authoring + 2-3 Reperti each (keep ids/arena/altar positions).
-4. Fight check of vetta_piazzale with the Guardiano (startFightDirect) at 4 tods; one climb wall per zone.
+1. Author palude (fog, rotten walkways with the `walkway` builder + platform pier for the deep water, seeker lanterns)
+   and fiume_anime (black river of souls, `docks` at the crossing near the boat exit z 195, clear of the fiume_traghetto
+   arena centre [0,0,-40]) with 2-3 Reperti each; screenshot the docks builder (built + typechecked, not yet seen).
+2. Re-check grandi_pianure looking north: dark blobs floating near the top of the frame (dark_forest horizon impostor,
+   scale lowered 1.2 -> 0.8, not re-shot) and the gully bridge from a viewpoint that shows the drop; foresta_oscura day
+   reads hazy-bright for "light barely filtering" (data/timeofday/foresta_oscura: darker giorno, heavier canopy).
+   foresta_oscura High measured 127 calls / 401k tris before trimming giant_tree 34 -> 28, fern 240 -> 200: re-measure.
+3. Vetta vista polish: faint pale line on the horizon NNE (world_below far land), world below hazy from the east edge;
+   generic boulder/cliff_rock props look like faceted eggs (props/kinds.ts).
+4. One climb wall per zone (zone.climb).
 5. Later-act landmark set (bone_gate, cathedral, ...), ship zones (platform), far-tree LOD, budgets per zone x quality
    table.
-6. When render-kit enables HDR (post.ts HDR_ENABLED): re-check uHazeK = HDR_HAZE_K and the display-space fog/sky.
+6. When render-kit applies docs/requests/world.md #2 (probe stats / probe from the frame) re-measure; when it enables
+   HDR (post.ts HDR_ENABLED): re-check uHazeK = HDR_HAZE_K and the display-space fog/sky.
 
 ## Notes
 
@@ -108,3 +115,45 @@
 - In the actual Guardiano fight view the arena paving/medallion segments read as thick slabs floating at different heights
   (raised plates with visible side faces, overlapping the path tiles). Check z-fighting/offsets and seat the paving flush
   with the terrain in the fight camera view (item 4: capture the fight at four times of day).
+
+- Chunk 4 (2026-11-04). Item: Vetta performance (Next 1 of chunk 3) — DONE.
+  Diagnosis (scratchpad world/c4/prof.mjs: per-pass calls/tris by world category via onBeforeRender/onBeforeShadow
+  hooks, CPU profile of the build): (a) the "alternating" counts and "Medium > High" were the post pipeline's luminance
+  probe: on the direct path it re-renders the whole scene into a 32x16 target every 0.3 s and `stats` sums it (Medium
+  spawn 148 real -> 260 on a probe frame); (b) props cost one call per kind x variant x slot (Medium ~45 main + ~37
+  shadow); terrain 15 + backdrop 10 calls; (c) the build: ~75% of it was synchronous shader compiling under SwiftShader
+  (35 programs, plus a second render-target variant of every material compiled at the first probe), JS work 0.3-0.8 s;
+  frames rendered between the build's awaits drew the half-built zone (and compiled it) mid-build.
+  Fixes: WorldRenderer hides props / cover / particles / sites during passes into targets <= 64 px (probe-lite); the
+  zone is built off-scene (stage group) and enters the scene in one step after `compile` of both the canvas and the
+  probe variants (compileAsync where KHR_parallel_shader_compile exists, else compile + program link queries, all
+  behind the loading fade); `world.buildStats` (ms per phase: env, zone.terrain/water/cover/props/landmarks/horizon,
+  sites, particles, arenas, compile, total). PropField folds variants on lower qualities (High all, Medium <= 3 / 2
+  small, Low 2 / 1 small; small = draw distance <= 260 m) and small kinds cast shadows on High only. Terrain chunks 56 /
+  64 / 72 cells (High / Medium / Low), backdrop 3x3 blocks (2x2 on Low). Request: docs/requests/world.md #2 (render
+  kit: report the probe separately in stats; better, probe from the drawn frame).
+  Measured (1280x576, steady frame / probe frame): spawn High 145 / 198 calls, 290k / 469k tris (was 149 / 261);
+  Medium 111 / 158, 219k / 368k (was 148 / 260, 228k / 428k); Low 68 / 108, 132k / 239k (was 102 / 205). Fight view
+  (follow cam, tramonto): High 105 / 154, 278k / 432k; Medium 93 / 140, 243k / 385k; Low 55 / 98, 125k / 236k.
+  Build (world.buildStats, travel castello -> vetta, machine load 2-4): 0.3-0.5 s JS when warm, ~2 s with the
+  synchronous compile on Low (was 4-10 s); no mid-build frames of the new zone.
+- Chunk 4. Item: arena paving in the fight view — DONE. Root cause: `slabRing` tilted each slab about the RING centre
+  (mat4 pivot at the plaza centre), so a 0.012 rad tilt lifted / sank slabs at r 20 m by up to 25 cm: thick plates at
+  random heights with visible sides. Now each slab is settled about its own centroid (tilt +-0.0035, height jitter
+  +-6 mm), slab tops 2 cm above the flattened floor (y is the TOP: the slab spans [y - th, y]), 20 cm thick; medallion
+  disc top at +3 cm with inlays/ring flush. Same fix for summit_plaza (shared plazaParts). Checked in the actual fight
+  camera (startFightDirect guardiano, follow cam + overview) at alba/giorno/tramonto/notte on High (scratchpad
+  world/c4/sheet_f2.png) and tramonto on Low/Medium/High (sheet_q.png): flush concentric paving, medallion, thin grout,
+  no floating plates.
+- Chunk 4. Item: Act I builders + zones — DONE for bridge, walkway, docks, grandi_pianure, foresta_oscura (palude and
+  fiume_anime remain). Layout notes: plains watch-hill bump moved to [-160,-5] (was 2 m above the vista altar's flat:
+  the altar sat in a pit); bridge deck at y -0.6 (ends meet the banks: terrain -1.8 / -0.1, gully bottom -9.8, sampled
+  with core Terrain via scratchpad world/c4/h.ts); boardwalk deck at y -0.6 over the hollow (-3.8 centre). Colliders:
+  archway piers on both roads, the 3 interior bridge piers. Ids, arenas, altars, gates and exits unchanged.
+  Verification: screenshots 1280x576 at alba/giorno/tramonto/notte, High, 4 viewpoints per zone (scratchpad
+  world/c4/sheet_gp.png, sheet_fo.png): plains = gold tall grass in wind, road, ruins on the hill, broken archway,
+  fireflies at night; forest = giant trunks, mist, ferns, boardwalk with rail and stilts, standing stones, dark arch,
+  fireflies, violet night. renderer.stats High: plains 133 calls / 369k, forest 127 / 401k (trimmed after).
+- Verification chunk 4: `npx tsc --noEmit -p tsconfig.json` 0 errors (whole tree); `npx vitest run
+  tests/world_kit.test.ts` 5/5; `npm run registry && SM_PARTIAL=1 npm run data` ok (1101 it / 1101 en strings);
+  eslint on world files 0 errors (the two old unused-import warnings in castle_gate.ts / cover.ts removed).

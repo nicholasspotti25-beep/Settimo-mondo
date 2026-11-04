@@ -16,13 +16,13 @@ model: {builder: cerbero, rig: quadruped, scale: 1.0, palette: act2_red_blue_bla
 equilibrio_max: 160
 body: {radius: 3.4, height: 7.2, mass: immovable}
 hurtboxes:
-  - {c: [0, 3.0, 2.2], r: 2.4}     # chest
-  - {c: [0, 3.3, -0.9], r: 2.4}    # barrel
-  - {c: [0, 3.0, -3.7], r: 2.1}    # haunches
-  - {c: [1.6, 1.1, 2.7], r: 1.0}   # front left leg
-  - {c: [-1.6, 1.1, 2.7], r: 1.0}  # front right leg
-  - {c: [1.5, 1.1, -3.9], r: 1.0}  # hind left leg
-  - {c: [-1.5, 1.1, -3.9], r: 1.0} # hind right leg
+  - {c: [0, 3.6, 1.9], r: 2.2}     # chest (model: deep chest, front at z 3.4, back 5.3 m)
+  - {c: [0, 3.7, -0.4], r: 2.1}    # barrel
+  - {c: [0, 3.4, -2.5], r: 1.95}   # haunches (rump back at z -3.4)
+  - {c: [1.25, 1.15, 2.0], r: 0.95}   # front left leg
+  - {c: [-1.25, 1.15, 2.0], r: 0.95}  # front right leg
+  - {c: [1.2, 1.1, -2.1], r: 0.95}  # hind left leg
+  - {c: [-1.2, 1.1, -2.1], r: 0.95} # hind right leg
 parts:
   - {id: head_left, name_key: boss.cerbero.head_left, hurt: [{c: [2.3, 5.2, 5.6], r: 1.25}], damage_mult: 1.25, poise_mult: 1.2, equilibrio: 70, lockable: true}
   - {id: head_center, name_key: boss.cerbero.head_center, hurt: [{c: [0, 5.8, 6.2], r: 1.35}], damage_mult: 1.25, poise_mult: 1.2, equilibrio: 80, lockable: true}
