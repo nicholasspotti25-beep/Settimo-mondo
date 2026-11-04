@@ -17,21 +17,18 @@ Brief: docs/briefs/ui.md. Owned: src/ui/**, src/input/touch.ts, data/ui/**, loca
 | 3e | Credits mode (GameMode 'credits'): credits.NN lines over the last shot of the ending (translucent veil, the sunrise visible), tap skips ahead, then "Torna al titolo" (quitToTitle behind a fade) or "Inizia il Ciclo dell'Alba" (game.startNewGamePlus behind a fade, waits for zone streaming) with the cycle note; Ending overlay (mode 'ending' / sim.endingActive): cinematic letterbox, HUD/controls/pause/toasts/zone+act cards hidden, stronger caption shadow on the white shots | done | src/ui/UI.ts, src/ui/credits.ts, src/ui/cards.ts, src/ui/style.ts |
 | 3c | Title (dawn horizon + logo; Continua = most recent save, Carica, Nuova partita, Importa codice, Impostazioni, Riconoscimenti; journeys screen with 3 slots: name, resume zone (last visited altar, as Game.loadState), hour, playtime, bosses, last-step date, delete with confirm, overwrite confirm; text-code import with paste, slot choice, validation), character creator (name, build, height, skin, 6 hair styles, hair color, eyes, cloak; code-drawn SVG preview with the Portatore palettes; shrinks to fit 375 px tall), credits from the title | done | src/ui/title.ts, src/ui/creator.ts, src/ui/credits.ts |
 | 4 | Settings screen from title AND pause (Generale: language live, subtitle size/background + live sample, show FPS; Grafica: quality Low/Medium/High/Auto (+ current auto level), 30/60 FPS; Audio: 5 volumes with live preview; Controlli: camera sensitivity, invert Y, toggle guard, aim assist, input buffer 0.15-0.20, latency 0-0.04 + tap test estimate; Tocco: large buttons, left hand, controls fade, haptics + strength, layout reset; Accessibilita: reduce shake/flashing, leniency (off by default); Salvataggio: export code + copy + save now in game, import from the title), all via game.applySettings | done | src/ui/settings.ts, src/ui/calib.ts |
-| 5 | Debug menu: hidden gesture (5 quick taps on the pause title toggles settings.debugMenu) -> pause > Debug: invincible, one-hit kill, hitbox overlay, FPS + memory overlay, Metamondo meter slider, full Eco, give all weapons + Forms (straight into the state, no toast flood), kill boss (debugKillBoss), time of day (game.meditate), teleport to any altar (grouped by zone in route order, sim.travel) or boss (startFightDirect skipIntro) behind a fade; hitbox overlay canvas: enemy hurt spheres (bodyHurt) cyan, player feet/head rings green, projectiles + hazards red | done (melee attack shapes not drawn: request 2 in docs/requests/ui.md) | src/ui/debug.ts, src/ui/altar.ts, src/ui/UI.ts |
-| 6 | Safe areas (env() probe -> layout safe rect), phone -> tablet scaling (--k, ring), portrait hint, pause overlay after background, paused() semantics | partial (all done except the portrait hint) | src/ui/UI.ts |
-| 7 | docs/UI.md + unit tests for pure layout math | partial (tests/ui_layout.test.ts 22, tests/ui_screens.test.ts 10, tests/ui_collections.test.ts 5: collectionStats/memoryCatalogue; docs/UI.md missing) | tests/ui_*.test.ts |
-| L | locales/{it,en}/ui.yaml | done for every screen built (HUD, touch, story, cards, prompts, title, slots, import, creator, tod, altar, wtype, pause, set.*, editor.*, coll.*, end.*, debug.*); 1071 it / 1071 en strings | locales/*/ui.yaml |
+| 5 | Debug menu: hidden gesture (5 quick taps on the pause title toggles settings.debugMenu) -> pause > Debug: invincible, one-hit kill, hitbox overlay, FPS + memory overlay, Metamondo meter slider, full Eco, give all weapons + Forms (straight into the state, no toast flood), kill boss (debugKillBoss), time of day (game.meditate), teleport to any altar (grouped by zone in route order, sim.travel) or boss (startFightDirect skipIntro) behind a fade; hitbox overlay canvas: enemy hurt spheres (bodyHurt) cyan, player feet/head rings green, active melee attack shapes (Actor.forEachActiveShape: sphere, capsule, arc sector, box, expanding ring, cylinder) orange, projectiles + hazards red | done | src/ui/debug.ts, src/ui/altar.ts, src/ui/UI.ts |
+| 6 | Safe areas (env() probe -> layout safe rect), phone -> tablet scaling (--k, ring, --hk for vials/status icons), 36 px button floor (MIN_BUTTON_PX), portrait hint (isPortrait: covers everything, swallows touches, pauses a running game), pause overlay after background, paused() semantics | done | src/ui/UI.ts, src/ui/layout.ts, src/ui/hud.ts |
+| 7 | docs/UI.md + unit tests for pure layout math | done (docs/UI.md: GameUI contract, stacking, files, rules, units/scaling, input ownership, menu modes, editor placement, debug, how to check; tests/ui_layout.test.ts 24 incl. portrait + 36 px floor with insets, tests/ui_screens.test.ts 10, tests/ui_collections.test.ts 5) | docs/UI.md, tests/ui_*.test.ts |
+| L | locales/{it,en}/ui.yaml | done for every screen built (HUD, touch, story, cards, prompts, title, slots, import, creator, tod, altar, wtype, pause, set.*, editor.*, coll.*, end.*, debug.*); 1074 it / 1074 en strings (+ ui.portrait.*) | locales/*/ui.yaml |
 
 ## Next
 
-1. Portrait hint (deliverable 6, the last missing piece of it).
-2. Tablet HUD polish (vials/status icons are small at 1366x1024); in-game empty weapon slots draw ICONS.armory, which
-   reads as an "X" at that size (editor shows the slot number: do the same or a dim ring); run ui/audit.mjs on the
-   altar menu sections (pause sections and collections are at 0 issues now).
-3. docs/UI.md (conventions, layout units, components, input ownership, menu modes, editor placement rule, debug gesture).
-4. Final verification pass at 844x390, 932x430, 667x375 (dsf 3), 1180x820, 1366x1024 incl. CDP multi-touch (collections,
-   credits and debug were checked at 844x390 and 667x375 only; check them at the tablet sizes too).
-5. When the sim offers it (request 2), draw active melee attack shapes in the hitbox overlay.
+Every deliverable of the brief is done and verified. Maintenance only:
+1. When the story data authors a ritual gesture step with a trace, check the trace path with real data (story.ts handles it;
+   no content uses it yet), and the Reperti reader once reperti exist in the content.
+2. Android hardware back (platform.ts is not ours): if the app stream wires a back event, map it to the same path as Escape.
+3. Re-run the scratchpad `ui/final.sh` batch after any larger UI change (all scripts x all brief viewports).
 
 ## Notes
 
@@ -166,4 +163,47 @@ Brief: docs/briefs/ui.md. Owned: src/ui/**, src/input/touch.ts, data/ui/**, loca
   - Fixed after review: the NG+ entry sat below the fold (now beside Riprendi); the collection detail scrolled away from a
     long grid (sticky column); the gold title washed out on the bright sunrise and clipped at 375 px (centered dark veil,
     dark drop-shadow, scrollable bottom-anchored layout, smaller lines); the NG dialog repeated a sentence.
+
+### Chunk 5 (2026-11-03/04)
+- Portrait hint: `isPortrait(w,h)` (h > w x 1.05, pure, tested) in layout.ts; UI.ts shows `.sm-portrait` (rotating phone
+  icon, "Ruota il dispositivo" + touch/desktop line, ui.portrait.*) on top of everything with touch-action none; on showing
+  it releases touches, clears input and opens the pause menu (paused() true only through the pause menu, as specified).
+- Tablet HUD: vials and status icons scale with the Eco ring (`--hk = ring.r / 29`, 0.92..1.6) instead of `--k` only
+  (1366x1024: vials 14x22 -> 16x24 with a viewBox fitted to the flask so the glyph fills it, statuses 23 -> 29 px); empty
+  weapon slots (touch buttons, desktop trio and Armeria slot cards) show a dim numbered ring instead of the crossed-swords
+  glyph that read as an "X"; slot glyphs 52 -> 62 % of the button; slot numbers 9*k -> 11 px with a shadow (legible on the
+  bright sky); Lacrime count >= 11 px.
+- Touch floor: small-phone slots were 35 px at 667x375 -> preset size 0.068 (37 px) AND `MIN_BUTTON_PX = 36` floor in
+  resolveLayout (insets, editor 0.06 size). Test: every button >= 36 px at all 5 viewports, with 47/21 px insets, at
+  640x320 with a cutout, normal + large, and the editor minimum.
+- Altar menu audit: slot card "Arma N" label 9.5 -> 11 px; Specchio challenge toggles are now whole-row targets via the new
+  shared `toggleRow` (screen.ts; settings.ts and debug.ts use it too, their duplicates removed). Over menus on phones
+  (height <= 440) the framed subtitle is narrower and 14 px x --sub so it hides less of the grid.
+- Integration request #1 (docs/requests/integration.md, marked DONE): story.ts drops the queued AND on-screen transient line on
+  fightEnd (incl. abandoned), respawn and zoneEnter; cards.ts hides the act card and the scheduled zone card on fightStart
+  and skips act/zone cards on a zoneEnter that arrives with sim.fight set (memory/direct fight). Deviation: that skip keeps
+  lastAct, so returning from a memory of another act shows no act card. The optional timer freeze during zone builds is not
+  done (the zoneEnter clear covers the long frame; world.busy also covers ordinary streaming).
+- Request 2 (sim, DONE by integration): HitboxOverlay draws `Actor.forEachActiveShape` shapes (bound callback, scratch
+  vectors, no per-frame allocation).
+- docs/UI.md written.
+- Verification:
+  - `npx tsc --noEmit -p tsconfig.json`: 0 errors (whole tree). `npx vitest run tests/ui_layout.test.ts
+    tests/ui_screens.test.ts tests/ui_collections.test.ts`: 39/39. `npm run registry && SM_PARTIAL=1 npm run data`: ok,
+    1074 it / 1074 en strings.
+  - Headless batch (scratchpad `ui/final.sh`: hud, altaraudit, coll, dbg, title, settings, editor at 844x390 dsf3 it,
+    932x430 dsf3 en, 667x375 dsf3 en, 1180x820 dsf2 it, 1366x1024 dsf2 en, + left-handed HUD at 844x390 and 1180x820):
+    every audit 0 issues (altar 9 states, collections 7, debug 2, title 10, settings 10, editor 3 per viewport), no page
+    errors. HUD per viewport: no HUD/touch text under 11 px, smallest button 37..41 px, empty slot numbered; CDP multi-touch
+    (stick drag + light at once): stick (0.34, 0.94) [mirrored -0.34 left-handed], sprint true, held [light], player
+    running/move; portrait: hint shown (it/en text), paused() true, sim.time frozen, back to landscape -> hint gone, pause
+    menu open. Debug at tablets: 5 CDP taps exceed the 2.5 s gesture window under swiftshader at 2732x2048, so the script
+    replays them in-page; then toggles, give all (38/7), notte, teleport to cavaliere_errante with overlay, kill -> defeated.
+  - Request #1 (scratchpad `ui/fix.mjs`, 844x390): caption on screen + memory fight into act II (cerbero) -> caption gone,
+    act card off, boss card on, no zone card 5 s later; overlay drew an active capsule of the Guardiano.
+  - Screenshots reviewed: fight HUD at 1366x1024 and 844x390 (vials, statuses, empty slot, stick + pressed light), portrait
+    hint, pause after rotation, Armeria/Specchio at 1366x1024 and 667x375 (numbered empty slots, smaller menu subtitle),
+    debug fight with overlay at 1180x820.
+  - Headless gotcha: calling g.newGame without a prior g.applySettings in a fresh profile made the page navigate (execution
+    context destroyed) in one probe; the scripts always apply settings first. Not reproduced through the real title flow.
 

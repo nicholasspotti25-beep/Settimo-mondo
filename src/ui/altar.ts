@@ -300,7 +300,7 @@ export class AltarMenu {
       const id = st.equipped[i];
       const w = id && c.hasWeapon(id) ? c.weapon(id) : null;
       const b = h('button', { class: `sm-slotc${i === this.slotSel ? ' sel' : ''}`, type: 'button' },
-        h('i', { class: 'g' }, svgIcon(w ? weaponGlyph(w.type) : ICONS.armory)),
+        h('i', { class: 'g' }, w ? svgIcon(weaponGlyph(w.type)) : h('span', { class: 'numc' }, String(i + 1))), // empty: a dim numbered ring, as in game
         h('div', { class: 'n' }, h('small', null, t('ui.touch.slot', { n: i + 1 })), w ? t(w.name_key) : t('ui.altar.empty')));
       if (!w) b.classList.add('empty');
       b.addEventListener('click', () => {

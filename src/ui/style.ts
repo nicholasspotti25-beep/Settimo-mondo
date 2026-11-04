@@ -284,6 +284,7 @@ export const CSS = /* css */ `
 #sm-ui .sm-ico.sm-inl { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; }
 .sm-read { font-size: clamp(14px, 1.7vh + 8px, 18px); line-height: 1.6; color: var(--ivory); white-space: pre-line; margin-top: 8px; }
 .sm-slotc.empty .g { color: var(--line); }
+.sm-slotc .g .numc { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; border-radius: 30%; box-shadow: inset 0 0 0 1px var(--line-2); font: 500 16px var(--serif); color: rgba(246,239,226,.46); }
 .sm-tile > .sm-ico { display: block; }
 .sm-cards.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .sm-cards.four .sm-todc .d { line-height: 1.25; }
@@ -297,6 +298,7 @@ export const CSS = /* css */ `
 .sm-sum span { font: 600 11px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
 #sm-ui.inmenu .sm-subs { left: auto; right: calc(var(--sr) + 16px); bottom: calc(var(--sb) + 8px); transform: none; width: min(66vw, 760px); }
 #sm-ui.inmenu .sm-sub { background: rgba(14,9,24,.92); box-shadow: 0 0 0 1px var(--line-2), 0 8px 30px rgba(0,0,0,.5); }
+@media (max-height: 440px) { #sm-ui.inmenu .sm-subs { width: min(54vw, 760px); } #sm-ui.inmenu .sm-sub { font-size: calc(14px * var(--sub)); } } /* phones: the framed line over a menu hides less of it */
 .sm-slotc.empty .n { color: var(--ivory-dim); font-style: italic; }
 .sm-detail .big .sm-h2 { margin: 0; }
 .sm-split > .a .sm-li { min-height: 46px; }

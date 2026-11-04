@@ -143,6 +143,11 @@ export function wallShape(len: number, h: number, openings: WallOpening[], topPr
   return s;
 }
 
+/** Extrude a wall face shape `thick` deep (centered on z = 0), no uvs. */
+export function extrudeWall(s: THREE.Shape, thick: number): THREE.BufferGeometry {
+  return extrude(s, thick, 0, 6);
+}
+
 /** Arch band (rib / archivolt) between the curve of `span` and a curve `thick` wider, extruded `depth`. */
 export function archBand(span: number, rise: number, thick: number, depth: number, pointed: boolean): THREE.BufferGeometry {
   const inner = archCurve(span, rise, pointed, 8);
