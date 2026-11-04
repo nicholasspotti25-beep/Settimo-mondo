@@ -58,3 +58,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - 2026-11-04 ~14:00 usage limit stopped act1#4; 16:18 resumed; started world#4
 - act1#4 done: Cavaliere volume pass (surcoat, plate, hood, cloak drape), pianure_erba_alta arena dressing with cues; next Elder Tree
 - started: act2#2 (models + arenas, NG+ fixes)
+- deployed eed2e8e (weapons#1, integrate#2, flicker fix, act1#4)

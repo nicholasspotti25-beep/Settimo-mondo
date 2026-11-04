@@ -37,6 +37,8 @@ export interface WorldZoneVisual extends ZoneVisual {
   landmarks: LandmarkInstance[];
   updaters: ((sim: Sim, dt: number, camera: THREE.Camera) => void)[];
   disposers: (() => void)[];
+  /** Milliseconds per build step (terrain, water, cover, props, landmarks, horizon). */
+  stats: Record<string, number>;
 }
 
 export async function buildZone(def: ZoneDef, ctx: RenderCtx, opts: BuildZoneOpts = {}): Promise<WorldZoneVisual> {
@@ -46,6 +48,13 @@ export async function buildZone(def: ZoneDef, ctx: RenderCtx, opts: BuildZoneOpt
   const updaters: WorldZoneVisual['updaters'] = [];
   const disposers: (() => void)[] = [];
   const type = def.terrain.type ?? 'heightfield';
+  const stats: Record<string, number> = {};
+  let t = performance.now();
+  const lap = (k: string) => {
+    const n = performance.now();
+    stats[k] = Math.round(n - t);
+    t = n;
+  };
 
   let terrain: TerrainMeshes | null = null;
   if (!opts.noTerrain && type !== 'void') {
@@ -61,6 +70,8 @@ export async function buildZone(def: ZoneDef, ctx: RenderCtx, opts: BuildZoneOpt
     }
   }
 
+  lap('terrain');
+
   // water
   const wk = opts.noWater ? null : waterKindFor(def, env.biome);
   if (wk) {
@@ -70,6 +81,8 @@ export async function buildZone(def: ZoneDef, ctx: RenderCtx, opts: BuildZoneOpt
     disposers.push(() => water.dispose());
   }
 
+  lap('water');
+
   // ground cover
   const coverDef = opts.cover === undefined ? env.biome.cover : opts.cover;
   if (!opts.noCover && coverDef && coverDef.type !== 'none' && type !== 'void') {
@@ -78,6 +91,8 @@ export async function buildZone(def: ZoneDef, ctx: RenderCtx, opts: BuildZoneOpt
     updaters.push((sim, dt, cam) => cover.update(cam));
     disposers.push(() => cover.dispose());
   }
+
+  lap('cover');
 
   // props: data props (sim colliders agree) + biome dressing + out-of-bounds rim
   const props = new PropField(env);
@@ -89,6 +104,8 @@ export async function buildZone(def: ZoneDef, ctx: RenderCtx, opts: BuildZoneOpt
   updaters.push((_s, _dt, cam) => props.update(cam));
   disposers.push(() => props.dispose());
 
+  lap('props');
+
   // landmarks
   const landmarks = await buildLandmarks(def.landmarks, def, ctx);
   for (const l of landmarks) root.add(l.object);
@@ -99,6 +116,8 @@ export async function buildZone(def: ZoneDef, ctx: RenderCtx, opts: BuildZoneOpt
     for (const l of landmarks) l.dispose();
   });
 
+  lap('landmarks');
+
   // horizon impostors (regions ahead)
   if (def.horizon?.length) {
     const hz = await buildHorizon(def, ctx, env);
@@ -107,9 +126,12 @@ export async function buildZone(def: ZoneDef, ctx: RenderCtx, opts: BuildZoneOpt
     disposers.push(() => hz.dispose());
   }
 
+  lap('horizon');
+
   const visual: WorldZoneVisual = {
     root,
     env,
+    stats,
     landmarks,
     updaters,
     disposers,

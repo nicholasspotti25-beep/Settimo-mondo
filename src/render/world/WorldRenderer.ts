@@ -247,6 +247,8 @@ export class WorldRenderer {
       this.zoneVisual = visual;
       this.group.add(visual.root);
       lap('zone');
+      const zs = (visual as { stats?: Record<string, number> }).stats;
+      if (zs) for (const k in zs) T[`zone.${k}`] = zs[k];
       try {
         this.sites = new ZoneSites(zoneEnv(def, this.ctx));
         if (this.sites) this.group.add(this.sites.group);
@@ -301,6 +303,11 @@ export class WorldRenderer {
     const gl = this.gl, cam = this.lastCamera;
     if (!gl || !cam || token !== this.token) return;
     try {
+      if (!gl.extensions.has('KHR_parallel_shader_compile')) {
+        // no parallel compile (e.g. SwiftShader): compile synchronously now, still behind the loading fade
+        gl.compile(this.group, cam, this.scene);
+        return;
+      }
       await Promise.race([gl.compileAsync(this.group, cam, this.scene), new Promise((r) => setTimeout(r, 6000))]);
     } catch (err) {
       console.warn('[world] shader warm-up failed', err);
