@@ -51,3 +51,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - lead: engine lane now rotates world, render-kit, weapons (3 active) so weapons is not starved; started weapons#1
 - ui fix chunk done: all 6 major + 10 minor review findings fixed; requests ui#3 (aimAssist sim/app) and ui#4 (Specchio in NG+) for integrate#2. ui stream DONE (light re-review at final pass)
 - deployed b11aa6e (ui review fixes, pose libraries); started act1#4
+- weapons#1 done: work log, buildWeapon (7 dedicated Act I models + 31 category fallbacks), installWeaponFx (trails, art flares, transizione flash), 14 Act I Arts tested, docs/WEAPONS.md DPS table; request #7 polearm poses -> render-kit
+- started: integrate#2 (ui#3 aimAssist, ui#4 Specchio NG+, open requests)
