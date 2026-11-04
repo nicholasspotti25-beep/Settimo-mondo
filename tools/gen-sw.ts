@@ -36,7 +36,7 @@ self.addEventListener('fetch', (e) => {
     caches.match(req, { ignoreSearch: true }).then((hit) => hit || fetch(req).then((res) => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
       return res;
-    }).catch(() => caches.match('./')))
+    }).catch(() => (req.mode === 'navigate' ? caches.match('./') : Response.error())))
   );
 });
 `;

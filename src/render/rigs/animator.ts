@@ -13,7 +13,7 @@
 import * as THREE from 'three';
 import type { Content } from '../../core/content';
 import type { Model } from '../kit/model';
-import { extendLibrary, getClip, resolveKeyword, resolveLibrary, type ClipDef, type ClipLibraryDef, type CycleDef, type Osc, type StagePose, type WaveDef } from './clips';
+import { extendLibrary, getClip, resolveKeyword, resolveLibrary, type BendDef, type ClipDef, type ClipLibraryDef, type CycleDef, type Osc, type StagePose, type WaveDef } from './clips';
 import { SpringChain, type SpringSpec } from './springs';
 import { aimBone, ccdIK } from './ik';
 
@@ -143,6 +143,11 @@ export function ease(name: string, t: number): number {
     }
     default: return 1 - Math.pow(1 - x, 3); // out
   }
+}
+
+/** Glob ('*' = any run of characters) -> anchored RegExp. */
+export function globRe(glob: string): RegExp {
+  return new RegExp(`^${glob.split('*').map((p) => p.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*')}$`);
 }
 
 function smooth(e0: number, e1: number, x: number): number {
@@ -277,13 +282,13 @@ export class Animator {
   /* Clip compilation                                                                                                */
   /* -------------------------------------------------------------------------------------------------------------- */
 
-  /** Bone indices for a pose key: exact name, or prefix glob 'neck*'. */
+  /** Bone indices for a pose key: exact name, or a glob with '*' anywhere ('neck*' = prefix, 'neck*_0' = first bone of every neck). */
   private keyBones(key: string): number[] {
-    if (key.endsWith('*')) {
-      const p = key.slice(0, -1);
+    if (key.includes('*')) {
+      const re = globRe(key);
       const out: number[] = [];
       this.bones.forEach((b, i) => {
-        if (b.name.startsWith(p)) out.push(i);
+        if (re.test(b.name)) out.push(i);
       });
       return out;
     }
@@ -305,6 +310,47 @@ export class Animator {
     return list.map((x) => x[1]);
   }
 
+  /** Rest position of a bone in model space (compile time only: allocates). */
+  private restModelPos(i: number): THREE.Vector3 {
+    const chain: THREE.Bone[] = [];
+    let o: THREE.Object3D | null = this.bones[i];
+    while (o && (o as THREE.Bone).isBone) {
+      chain.unshift(o as THREE.Bone);
+      o = o.parent;
+    }
+    const p = new THREE.Vector3(), q = new THREE.Quaternion(), t = new THREE.Vector3();
+    for (const bn of chain) {
+      const rp = (bn.userData.restPos as THREE.Vector3 | undefined) ?? bn.position;
+      const rq = (bn.userData.restQuat as THREE.Quaternion | undefined) ?? bn.quaternion;
+      p.add(t.copy(rp).applyQuaternion(q));
+      q.multiply(rq);
+    }
+    return p;
+  }
+
+  /**
+   * [cos a, sin a] of the horizontal heading a of a chain at rest (first -> last bone; a single bone: from the model axis).
+   * A 'radial' curl of v degrees is x = v cos a, z = -v sin a: down/outward for + whatever the chain's heading.
+   */
+  private radialOf(ids: number[]): [number, number] {
+    const a = this.restModelPos(ids[0]);
+    const b = ids.length > 1 ? this.restModelPos(ids[ids.length - 1]) : a.clone().multiplyScalar(2);
+    const dx = b.x - a.x, dz = b.z - a.z;
+    const l = Math.hypot(dx, dz);
+    return l < 1e-6 ? [1, 0] : [dz / l, dx / l];
+  }
+
+  /** Chains matched by a wave/bend chain key: one chain, or every named chain matching a glob ('tent*'), natural order. */
+  chainsOf(chain: string): number[][] {
+    if (!chain.includes('*')) {
+      const one = this.chainBones(chain);
+      return one.length ? [one] : [];
+    }
+    const re = globRe(chain);
+    const names = Object.keys(this.model.chains).filter((n) => re.test(n)).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+    return names.map((n) => this.chainBones(n)).filter((c) => c.length > 0);
+  }
+
   private compileStage(s: StagePose | undefined | null): CStage | null {
     if (!s) return null;
     const idx: number[] = [];
@@ -313,7 +359,7 @@ export class Animator {
     const entries = Object.entries(s.pose ?? {});
     // exact names win over globs
     for (const [k, r] of entries) {
-      if (k.endsWith('*')) continue;
+      if (k.includes('*')) continue;
       for (const i of this.keyBones(k)) {
         exact.add(i);
         idx.push(i);
@@ -321,7 +367,7 @@ export class Animator {
       }
     }
     for (const [k, r] of entries) {
-      if (!k.endsWith('*')) continue;
+      if (!k.includes('*')) continue;
       for (const i of this.keyBones(k)) {
         if (exact.has(i)) continue;
         idx.push(i);
@@ -354,13 +400,31 @@ export class Animator {
         push(-2, 2, c.rootRot.z);
       }
     }
+    // static bends expand into pose entries (additive: a bone may also have its own pose)
+    for (const bd of s.bends ?? ([] as BendDef[])) {
+      const ax = bd.axis === 'x' ? 0 : bd.axis === 'y' ? 1 : 2;
+      const to = bd.to ?? bd.from;
+      for (const ids of this.chainsOf(bd.chain)) {
+        const n = ids.length;
+        const [rc, rs] = bd.axis === 'radial' ? this.radialOf(ids) : [0, 0];
+        for (let j = 0; j < n; j++) {
+          const v = bd.from + (to - bd.from) * (n > 1 ? j / (n - 1) : 0);
+          idx.push(ids[j]);
+          if (bd.axis === 'radial') rot.push(v * rc, 0, -v * rs);
+          else rot.push(ax === 0 ? v : 0, ax === 1 ? v : 0, ax === 2 ? v : 0);
+        }
+      }
+    }
     const waves: CWave[] = [];
     for (const w of s.waves ?? ([] as WaveDef[])) {
-      const ids = this.chainBones(w.chain);
-      if (!ids.length) continue;
-      waves.push({
-        idx: Int16Array.from(ids), axis: w.axis === 'x' ? 0 : w.axis === 'y' ? 1 : 2, amp: w.amp, ampEnd: w.ampEnd ?? 1, wavelength: w.wavelength ?? 6,
-        offset: w.offset ?? 0, period: w.period ?? 1.2, stride: w.stride ?? 0,
+      const chains = this.chainsOf(w.chain);
+      chains.forEach((ids, k) => {
+        const common = { idx: Int16Array.from(ids), ampEnd: w.ampEnd ?? 1, wavelength: w.wavelength ?? 6, offset: (w.offset ?? 0) + k * (w.spread ?? 0), period: w.period ?? 1.2, stride: w.stride ?? 0 };
+        if (w.axis === 'radial') {
+          const [rc, rs] = this.radialOf(ids);
+          if (Math.abs(rc) > 1e-3) waves.push({ ...common, axis: 0, amp: w.amp * rc });
+          if (Math.abs(rs) > 1e-3) waves.push({ ...common, axis: 2, amp: -w.amp * rs });
+        } else waves.push({ ...common, axis: w.axis === 'x' ? 0 : w.axis === 'y' ? 1 : 2, amp: w.amp });
       });
     }
     return {
@@ -375,7 +439,7 @@ export class Animator {
     const def: ClipDef | null = getClip(this.lib, name);
     let cc: CClip | null = null;
     if (def) {
-      const hasBase = !!(def.pose || def.cycle || def.root || def.rootRot || def.waves);
+      const hasBase = !!(def.pose || def.cycle || def.root || def.rootRot || def.waves || def.bends);
       cc = {
         name,
         base: hasBase ? this.compileStage(def) : null,

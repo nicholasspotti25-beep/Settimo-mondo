@@ -1,0 +1,656 @@
+# Tentacled pose library: the Kraken (mantle + ring of tentacles rising from the water) and Cthulhu (humanoid titan with a
+# tentacled face, leathery wings and a body dissolving into mist). One library drives both variants: each clip poses the
+# kraken bones and the cthulhu bones (bones a variant lacks are ignored).
+# Kraken:  root bone body (waterline); body > head (mantle tip); body > tent{i}_0..k (tentacles in a ring, i = 0.. n-1,
+#          tent0 / tent{n-1} flank the front). Waves/bends on `tent*` drive every tentacle (`spread` desynchronises them).
+# Cthulhu: humanoid bones (hips spine chest neck head jaw arm_l/r forearm_l/r hand_l/r ...) + head > face{i}_0..3 (face
+#          tentacles hanging over the chest) + chest > wing_l_0..2 > wing_l_f{0,1,2}_0 (+ _r) + hips > mist{i}_0..2.
+# axis 'radial' (bends/waves): + curls a chain down/outward away from the body axis, - up/inward (closing like a fist).
+# Wings (rest SPREAD up and out): left wing +y folds it back, +z raises it; the right wing mirrors (-y, -z).
+family: tentacled
+aliases:
+  attack: slam
+  overhead: slam
+  stomp: slam
+  rear_stomp: slam
+  leap: slam
+  dive: slam
+  swoop: slam
+  thrust_heavy: grab
+  coil: grab
+  bite: grab
+  throw: sweep_r
+  tail_sweep: sweep_r
+  kick: sweep_r
+  claw_r: sweep_r
+  claw_l: sweep_l
+  shield_bash: thrust
+  charge: thrust
+  breath: roar
+  howl: roar
+  transition: roar
+  cast: summon
+clips:
+  idle:
+    pose:
+      spine: [4, 0, 0]
+      chest: [4, 0, 0]
+      neck: [-4, 0, 0]
+      arm_l: [-16, 0, 12]
+      arm_r: [-16, 0, -12]
+      forearm_l: [-30, 0, 0]
+      forearm_r: [-30, 0, 0]
+      hand_l: [10, 0, -10]
+      hand_r: [10, 0, 10]
+      wing_l_0: [0, 52, -16]
+      wing_r_0: [0, -52, 16]
+      wing_l_1: [0, -30, -20]
+      wing_r_1: [0, 30, 20]
+    cycle:
+      period: 4.4
+      root: {y: [0.03, 0]}
+      bones:
+        head: {x: [2, 0.2], y: [3, 0.5]}
+        chest: {x: [-1.5, 0]}
+        wing_l_0: {z: [2, 0.1]}
+        wing_r_0: {z: [-2, 0.1]}
+        body: {x: [1.5, 0.3], z: [1.2, 0.6]}
+    waves:
+      - {chain: tent*, axis: radial, amp: 7, wavelength: 4.5, period: 3.4, spread: 0.13}
+      - {chain: tent*, axis: y, amp: 5, wavelength: 5, period: 3.4, spread: 0.13, offset: 0.25}
+      - {chain: face*, axis: x, amp: 6, wavelength: 3, period: 2.6, spread: 0.17}
+      - {chain: face*, axis: z, amp: 4, wavelength: 3, period: 2.6, spread: 0.17, offset: 0.25}
+      - {chain: mist*, axis: radial, amp: 8, wavelength: 3, period: 3.0, spread: 0.2}
+  walk:
+    pose:
+      body: [8, 0, 0]
+      head: [-6, 0, 0]
+      spine: [8, 0, 0]
+      chest: [4, 0, 0]
+      arm_l: [-10, 0, 14]
+      arm_r: [-10, 0, -14]
+      forearm_l: [-24, 0, 0]
+      forearm_r: [-24, 0, 0]
+      wing_l_0: [0, 56, -16]
+      wing_r_0: [0, -56, 16]
+      wing_l_1: [0, -30, -20]
+      wing_r_1: [0, 30, 20]
+      mist*: [16, 0, 0]
+    cycle:
+      stride: 2.2
+      root: {y: [0.06, 0]}
+      rootRot: {z: [2.5, 0]}
+      bones:
+        arm_l: {x: [12, 0]}
+        arm_r: {x: [-12, 0]}
+        chest: {y: [-5, 0]}
+    waves:
+      - {chain: tent*, axis: radial, amp: 14, wavelength: 4, stride: 2.2, spread: 0.06}
+      - {chain: face*, axis: x, amp: 7, wavelength: 3, stride: 2.2, spread: 0.17}
+      - {chain: mist*, axis: x, amp: 12, wavelength: 3, stride: 2.2, spread: 0.2}
+  run:
+    pose:
+      body: [16, 0, 0]
+      head: [-12, 0, 0]
+      spine: [16, 0, 0]
+      chest: [6, 0, 0]
+      neck: [-10, 0, 0]
+      arm_l: [20, 0, 20]
+      arm_r: [20, 0, -20]
+      forearm_l: [-30, 0, 0]
+      forearm_r: [-30, 0, 0]
+      wing_l_0: [0, 60, -10]
+      wing_r_0: [0, -60, 10]
+      mist*: [30, 0, 0]
+    bends: [{chain: tent*, axis: radial, from: -6, to: -10}]
+    cycle:
+      stride: 3.2
+      root: {y: [0.08, 0]}
+    waves:
+      - {chain: tent*, axis: radial, amp: 18, wavelength: 4, stride: 3.2, spread: 0.04}
+      - {chain: face*, axis: x, amp: 10, wavelength: 3, stride: 3.2, spread: 0.12}
+      - {chain: mist*, axis: x, amp: 16, wavelength: 3, stride: 3.2, spread: 0.2}
+  hover:
+    pose:
+      spine: [2, 0, 0]
+      arm_l: [-20, 0, 20]
+      arm_r: [-20, 0, -20]
+      forearm_l: [-30, 0, 0]
+      forearm_r: [-30, 0, 0]
+      mist*: [10, 0, 0]
+    cycle:
+      period: 1.6
+      root: {y: [0.08, 0.25]}
+      bones:
+        wing_l_0: {z: [26, 0]}
+        wing_r_0: {z: [-26, 0]}
+        wing_l_1: {z: [14, 0.88]}
+        wing_r_1: {z: [-14, 0.88]}
+        wing_l_f*: {z: [10, 0.8]}
+        wing_r_f*: {z: [-10, 0.8]}
+    waves:
+      - {chain: tent*, axis: radial, amp: 10, wavelength: 4, period: 1.6, spread: 0.1}
+      - {chain: face*, axis: x, amp: 6, wavelength: 3, period: 1.6, spread: 0.17}
+      - {chain: mist*, axis: radial, amp: 10, wavelength: 3, period: 1.6, spread: 0.2}
+  fly:
+    pose:
+      spine: [24, 0, 0]
+      chest: [8, 0, 0]
+      neck: [-20, 0, 0]
+      arm_l: [30, 0, 16]
+      arm_r: [30, 0, -16]
+      mist*: [40, 0, 0]
+    rootRot: [10, 0, 0]
+    cycle:
+      period: 1.1
+      root: {y: [0.06, 0.25]}
+      bones:
+        wing_l_0: {z: [32, 0]}
+        wing_r_0: {z: [-32, 0]}
+        wing_l_1: {z: [16, 0.88]}
+        wing_r_1: {z: [-16, 0.88]}
+        wing_l_f*: {z: [12, 0.8]}
+        wing_r_f*: {z: [-12, 0.8]}
+    waves:
+      - {chain: tent*, axis: radial, amp: 16, wavelength: 4, period: 1.1, spread: 0.05}
+      - {chain: face*, axis: x, amp: 10, wavelength: 3, period: 1.1, spread: 0.12}
+      - {chain: mist*, axis: x, amp: 16, wavelength: 3, period: 1.1, spread: 0.2}
+  slam:
+    hold: 3
+    telegraph:
+      pose:
+        body: [-10, 0, 0]
+        head: [-10, 0, 0]
+        spine: [-12, 0, 0]
+        chest: [-14, 0, 0]
+        neck: [8, 0, 0]
+        arm_l: [-172, 0, 18]
+        arm_r: [-172, 0, -18]
+        forearm_l: [-40, 0, 0]
+        forearm_r: [-40, 0, 0]
+        wing_l_0: [0, 10, 24]
+        wing_r_0: [0, -10, -24]
+        jaw: [20, 0, 0]
+      bends:
+        - {chain: tent*, axis: radial, from: -24, to: -6}
+        - {chain: face*, axis: x, from: -10, to: -20}
+      root: [0, 0.3, -0.1]
+      ease: inout
+    active:
+      pose:
+        body: [14, 0, 0]
+        head: [10, 0, 0]
+        spine: [34, 0, 0]
+        chest: [22, 0, 0]
+        neck: [-20, 0, 0]
+        arm_l: [-56, 0, 8]
+        arm_r: [-56, 0, -8]
+        forearm_l: [-6, 0, 0]
+        forearm_r: [-6, 0, 0]
+        wing_l_0: [0, 30, -10]
+        wing_r_0: [0, -30, 10]
+        jaw: [8, 0, 0]
+      bends:
+        - {chain: tent*, axis: radial, from: 26, to: 10}
+        - {chain: face*, axis: x, from: 16, to: 10}
+      root: [0, -0.2, 0.15]
+    recovery:
+      pose:
+        body: [8, 0, 0]
+        spine: [26, 0, 0]
+        chest: [14, 0, 0]
+        arm_l: [-46, 0, 12]
+        arm_r: [-46, 0, -12]
+        forearm_l: [-14, 0, 0]
+        forearm_r: [-14, 0, 0]
+      bends: [{chain: tent*, axis: radial, from: 18, to: 8}]
+      root: [0, -0.12, 0.1]
+      blend: 0.3
+  sweep_r:
+    hold: 2
+    telegraph:
+      pose:
+        body: [0, -18, 0]
+        head: [0, -10, 0]
+        spine: [2, -22, 0]
+        chest: [-4, -34, 6]
+        neck: [0, 20, 0]
+        arm_r: [-76, -30, -64]
+        forearm_r: [-48, 0, 0]
+        arm_l: [-40, 0, 26]
+        forearm_l: [-50, 0, 0]
+      bends:
+        - {chain: tent*, axis: y, from: 8, to: 14}
+        - {chain: tent*, axis: radial, from: -8, to: -4}
+      rootRot: [0, -12, 0]
+      root: [0, 0.05, -0.05]
+    active:
+      pose:
+        body: [4, 22, 0]
+        head: [0, 12, 0]
+        spine: [8, 26, 0]
+        chest: [6, 42, -4]
+        neck: [0, -22, 0]
+        arm_r: [-84, 40, 10]
+        forearm_r: [-8, 0, 0]
+        arm_l: [-10, 0, 40]
+        forearm_l: [-30, 0, 0]
+      bends:
+        - {chain: tent*, axis: y, from: -12, to: -20}
+        - {chain: tent*, axis: radial, from: 10, to: 4}
+      rootRot: [0, 16, 0]
+      root: [0, -0.05, 0.1]
+    recovery:
+      pose:
+        body: [2, 12, 0]
+        spine: [6, 14, 0]
+        chest: [4, 20, 0]
+        arm_r: [-46, 24, -4]
+        forearm_r: [-26, 0, 0]
+      bends: [{chain: tent*, axis: y, from: -6, to: -10}]
+      rootRot: [0, 8, 0]
+  sweep_l:
+    mirror: sweep_r
+  thrust:
+    hold: 2
+    telegraph:
+      pose:
+        body: [-8, 0, 0]
+        head: [-6, 0, 0]
+        spine: [-4, -20, 0]
+        chest: [-6, -26, 0]
+        arm_r: [30, -10, -24]
+        forearm_r: [-100, 0, 0]
+        arm_l: [-60, 10, 20]
+        tent0_0: [-40, 0, 0]
+        tent7_0: [-40, 0, 0]
+      bends:
+        - {chain: tent0, axis: x, from: 0, to: -12}
+        - {chain: tent7, axis: x, from: 0, to: -12}
+        - {chain: face*, axis: x, from: -12, to: -18}
+      root: [0, 0.06, -0.15]
+    active:
+      pose:
+        body: [12, 0, 0]
+        spine: [20, 18, 0]
+        chest: [8, 26, 0]
+        neck: [-18, -18, 0]
+        arm_r: [-92, 16, -4]
+        forearm_r: [-2, 0, 0]
+        arm_l: [10, 0, 26]
+        tent0_0: [64, 0, 0]
+        tent7_0: [64, 0, 0]
+      bends:
+        - {chain: tent0, axis: x, from: 0, to: -4}
+        - {chain: tent7, axis: x, from: 0, to: -4}
+        - {chain: face*, axis: x, from: -30, to: -12}
+      root: [0, -0.06, 0.3]
+    recovery:
+      pose:
+        body: [8, 0, 0]
+        spine: [16, 12, 0]
+        arm_r: [-70, 12, -6]
+        forearm_r: [-14, 0, 0]
+        tent0_0: [46, 0, 0]
+        tent7_0: [46, 0, 0]
+      bends:
+        - {chain: tent0, axis: x, from: 0, to: 6}
+        - {chain: tent7, axis: x, from: 0, to: 6}
+      root: [0, -0.04, 0.2]
+  grab:
+    hold: 3
+    telegraph:
+      pose:
+        body: [-6, 0, 0]
+        spine: [-6, 0, 0]
+        chest: [-12, 0, 0]
+        arm_l: [-70, 10, 70]
+        arm_r: [-70, -10, -70]
+        forearm_l: [-20, 0, 0]
+        forearm_r: [-20, 0, 0]
+        wing_l_0: [0, 0, 20]
+        wing_r_0: [0, 0, -20]
+        jaw: [30, 0, 0]
+      bends:
+        - {chain: tent*, axis: radial, from: -14, to: -2}
+        - {chain: face*, axis: x, from: -24, to: -10}
+      root: [0, 0.12, -0.08]
+    active:
+      pose:
+        body: [12, 0, 0]
+        spine: [28, 0, 0]
+        chest: [14, 0, 0]
+        neck: [-22, 0, 0]
+        arm_l: [-82, -34, 10]
+        arm_r: [-82, 34, -10]
+        forearm_l: [-30, -20, 0]
+        forearm_r: [-30, 20, 0]
+        tent0_0: [50, 0, 0]
+        tent7_0: [50, 0, 0]
+        jaw: [40, 0, 0]
+      bends:
+        - {chain: tent*, axis: radial, from: 14, to: -22}
+        - {chain: tent0, axis: y, from: 0, to: -14}
+        - {chain: tent7, axis: y, from: 0, to: 14}
+        - {chain: face*, axis: x, from: -40, to: -6}
+      root: [0, -0.06, 0.25]
+    recovery:
+      pose:
+        body: [6, 0, 0]
+        spine: [18, 0, 0]
+        arm_l: [-56, -20, 16]
+        arm_r: [-56, 20, -16]
+        forearm_l: [-40, 0, 0]
+        forearm_r: [-40, 0, 0]
+        jaw: [10, 0, 0]
+      bends: [{chain: tent*, axis: radial, from: 8, to: -14}]
+      root: [0, -0.02, 0.15]
+      blend: 0.5
+  spin:
+    hold: 2
+    telegraph:
+      pose:
+        spine: [8, -30, 0]
+        chest: [4, -40, 0]
+        arm_r: [-70, -30, -80]
+        arm_l: [-30, 0, 60]
+      bends: [{chain: tent*, axis: radial, from: -16, to: -6}]
+      rootRot: [0, -24, 0]
+    active:
+      pose:
+        arm_r: [-88, 0, -84]
+        arm_l: [-88, 0, 84]
+        wing_l_0: [0, 0, 10]
+        wing_r_0: [0, 0, -10]
+      bends:
+        - {chain: tent*, axis: radial, from: 30, to: 0}
+        - {chain: tent*, axis: y, from: 6, to: 16}
+      cycle:
+        period: 0.6
+        rootRot: {y: [160, 0]}
+    recovery:
+      pose:
+        arm_r: [-30, 0, -30]
+        arm_l: [-30, 0, 30]
+      bends: [{chain: tent*, axis: radial, from: 10, to: 0}]
+  roar:
+    hold: 4
+    telegraph:
+      pose:
+        body: [10, 0, 0]
+        head: [12, 0, 0]
+        spine: [26, 0, 0]
+        chest: [14, 0, 0]
+        neck: [-6, 0, 0]
+        arm_l: [-30, -20, 20]
+        arm_r: [-30, 20, -20]
+        forearm_l: [-70, 0, 0]
+        forearm_r: [-70, 0, 0]
+        wing_l_0: [0, 50, -20]
+        wing_r_0: [0, -50, 20]
+      bends:
+        - {chain: tent*, axis: radial, from: -6, to: -16}
+        - {chain: face*, axis: x, from: 6, to: 6}
+      root: [0, -0.1, 0]
+    active:
+      pose:
+        body: [-12, 0, 0]
+        head: [-16, 0, 0]
+        spine: [-10, 0, 0]
+        chest: [-18, 0, 0]
+        neck: [-14, 0, 0]
+        jaw: [44, 0, 0]
+        arm_l: [10, 0, 56]
+        arm_r: [10, 0, -56]
+        forearm_l: [-30, 0, 0]
+        forearm_r: [-30, 0, 0]
+        wing_l_0: [-10, -10, 34]
+        wing_r_0: [-10, 10, -34]
+        wing_l_1: [0, 0, 10]
+        wing_r_1: [0, 0, -10]
+      bends:
+        - {chain: tent*, axis: radial, from: 20, to: 6}
+        - {chain: face*, axis: x, from: -26, to: -16}
+      root: [0, 0.2, -0.05]
+      cycle:
+        period: 0.15
+        bones:
+          chest: {x: [1.5, 0]}
+          head: {y: [2, 0.3], x: [1.5, 0.5]}
+          body: {z: [1.5, 0.2]}
+      waves:
+        - {chain: tent*, axis: radial, amp: 6, wavelength: 3, period: 0.3, spread: 0.2}
+        - {chain: face*, axis: z, amp: 8, wavelength: 2, period: 0.25, spread: 0.2}
+    recovery:
+      pose:
+        spine: [10, 0, 0]
+        jaw: [10, 0, 0]
+        arm_l: [-10, 0, 20]
+        arm_r: [-10, 0, -20]
+      bends: [{chain: tent*, axis: radial, from: 6, to: 0}]
+  summon:
+    hold: 4
+    telegraph:
+      pose:
+        body: [8, 0, 0]
+        spine: [20, 0, 0]
+        chest: [10, 0, 0]
+        arm_l: [-60, 0, 30]
+        arm_r: [-60, 0, -30]
+        forearm_l: [-80, 0, 0]
+        forearm_r: [-80, 0, 0]
+      bends: [{chain: tent*, axis: radial, from: -20, to: -20}]
+      root: [0, -0.08, 0]
+      waves:
+        - {chain: face*, axis: z, amp: 10, wavelength: 2, period: 0.5, spread: 0.2}
+    active:
+      pose:
+        body: [-8, 0, 0]
+        head: [-14, 0, 0]
+        spine: [-12, 0, 0]
+        chest: [-14, 0, 0]
+        neck: [-16, 0, 0]
+        arm_l: [-160, 0, 40]
+        arm_r: [-160, 0, -40]
+        forearm_l: [-10, 0, 0]
+        forearm_r: [-10, 0, 0]
+        hand_l: [-20, 0, 0]
+        hand_r: [-20, 0, 0]
+        wing_l_0: [-10, -10, 30]
+        wing_r_0: [-10, 10, -30]
+        jaw: [36, 0, 0]
+      bends:
+        - {chain: tent*, axis: radial, from: -30, to: 10}
+        - {chain: face*, axis: x, from: -20, to: -20}
+      root: [0, 0.3, 0]
+      ease: back
+      waves:
+        - {chain: tent*, axis: y, amp: 14, wavelength: 3, period: 0.6, spread: 0.12}
+        - {chain: face*, axis: z, amp: 12, wavelength: 2, period: 0.4, spread: 0.2}
+        - {chain: mist*, axis: radial, amp: 16, wavelength: 2, period: 0.5, spread: 0.2}
+    recovery:
+      pose:
+        arm_l: [-30, 0, 20]
+        arm_r: [-30, 0, -20]
+        forearm_l: [-30, 0, 0]
+        forearm_r: [-30, 0, 0]
+      bends: [{chain: tent*, axis: radial, from: -6, to: 0}]
+  block:
+    telegraph:
+      pose:
+        body: [-6, 0, 0]
+        spine: [14, 0, 0]
+        arm_l: [-100, -30, 20]
+        arm_r: [-100, 30, -20]
+        forearm_l: [-100, -20, 0]
+        forearm_r: [-100, 20, 0]
+        wing_l_0: [0, -30, 10]
+        wing_r_0: [0, 30, -10]
+        wing_l_1: [0, -40, 0]
+        wing_r_1: [0, 40, 0]
+      bends:
+        - {chain: tent*, axis: radial, from: -34, to: -20}
+        - {chain: face*, axis: x, from: 10, to: 10}
+      root: [0, -0.1, -0.05]
+  burrow:
+    telegraph:
+      pose:
+        body: [6, 0, 0]
+        head: [10, 0, 0]
+        spine: [20, 0, 0]
+        arm_l: [-30, 0, 30]
+        arm_r: [-30, 0, -30]
+      bends: [{chain: tent*, axis: radial, from: -10, to: -10}]
+      root: [0, -0.2, 0]
+    active:
+      pose:
+        body: [4, 0, 0]
+        head: [6, 0, 0]
+        arm_l: [-150, 0, 20]
+        arm_r: [-150, 0, -20]
+      bends: [{chain: tent*, axis: radial, from: -24, to: -30}]
+      root: [0, -3.2, 0]
+      blend: 0.9
+      ease: in
+    recovery:
+      bends: [{chain: tent*, axis: radial, from: -30, to: -30}]
+      root: [0, -3.6, 0]
+  emerge:
+    hold: 3
+    telegraph:
+      bends: [{chain: tent*, axis: radial, from: -30, to: -30}]
+      root: [0, -3.2, 0]
+      blend: 0.12
+      ease: snap
+    active:
+      pose:
+        body: [-10, 0, 0]
+        head: [-14, 0, 0]
+        spine: [-14, 0, 0]
+        chest: [-16, 0, 0]
+        arm_l: [-150, 0, 44]
+        arm_r: [-150, 0, -44]
+        wing_l_0: [-10, -10, 30]
+        wing_r_0: [-10, 10, -30]
+        jaw: [40, 0, 0]
+      bends: [{chain: tent*, axis: radial, from: 24, to: 4}]
+      root: [0, 0.25, 0]
+      blend: 0.7
+      ease: back
+    recovery:
+      pose:
+        arm_l: [-20, 0, 20]
+        arm_r: [-20, 0, -20]
+        jaw: [8, 0, 0]
+      bends: [{chain: tent*, axis: radial, from: 6, to: 0}]
+  stagger:
+    active:
+      pose:
+        body: [-14, 8, 6]
+        head: [-12, 0, 0]
+        spine: [-14, 10, 0]
+        chest: [-12, 14, 8]
+        neck: [16, -10, 0]
+        jaw: [24, 0, 0]
+        arm_l: [-40, 0, 50]
+        arm_r: [-20, 0, -46]
+      bends: [{chain: tent*, axis: radial, from: 16, to: 10}]
+      root: [0, -0.05, -0.15]
+      waves:
+        - {chain: tent*, axis: y, amp: 10, wavelength: 3, period: 0.3, spread: 0.2}
+  spezzato:
+    telegraph:
+      pose:
+        body: [-14, 0, 0]
+        spine: [-14, 0, 0]
+        chest: [-16, 0, 0]
+        jaw: [36, 0, 0]
+        arm_l: [-30, 0, 50]
+        arm_r: [-30, 0, -50]
+      bends: [{chain: tent*, axis: radial, from: -20, to: -10}]
+    active:
+      pose:
+        body: [22, 0, 6]
+        head: [20, 0, 0]
+        spine: [36, 0, 0]
+        chest: [20, 0, 0]
+        neck: [10, 0, 0]
+        jaw: [20, 0, 0]
+        arm_l: [-20, 0, 8]
+        arm_r: [-10, 0, -10]
+        wing_l_0: [20, 50, -40]
+        wing_r_0: [20, -50, 40]
+        mist*: [20, 0, 0]
+      bends:
+        - {chain: tent*, axis: radial, from: 30, to: 16}
+        - {chain: face*, axis: x, from: 10, to: 10}
+      root: [0, -0.3, 0]
+      cycle:
+        period: 2.4
+        bones:
+          body: {x: [2, 0]}
+          chest: {x: [-2, 0]}
+  death:
+    telegraph:
+      pose:
+        body: [-16, 0, 0]
+        head: [-20, 0, 0]
+        spine: [-20, 0, 0]
+        chest: [-18, 0, 0]
+        neck: [-16, 0, 0]
+        jaw: [46, 0, 0]
+        arm_l: [-120, 0, 50]
+        arm_r: [-120, 0, -50]
+        wing_l_0: [-10, -10, 34]
+        wing_r_0: [-10, 10, -34]
+      bends: [{chain: tent*, axis: radial, from: -26, to: -10}]
+      root: [0, 0.15, 0]
+      waves:
+        - {chain: tent*, axis: y, amp: 12, wavelength: 3, period: 0.35, spread: 0.2}
+    active:
+      pose:
+        body: [30, 0, 10]
+        head: [26, 0, 0]
+        spine: [50, 0, 0]
+        chest: [24, 0, 0]
+        neck: [10, 0, 0]
+        jaw: [28, 0, 0]
+        arm_l: [-30, 0, 20]
+        arm_r: [-20, 0, -26]
+        wing_l_0: [30, 40, -50]
+        wing_r_0: [30, -40, 50]
+        mist*: [40, 0, 0]
+      bends: [{chain: tent*, axis: radial, from: 40, to: 20}]
+      root: [0, -0.8, 0.1]
+  intro:
+    telegraph:
+      pose:
+        body: [14, 0, 0]
+        head: [16, 0, 0]
+        spine: [40, 0, 0]
+        chest: [20, 0, 0]
+        neck: [10, 0, 0]
+        arm_l: [-40, 0, 10]
+        arm_r: [-40, 0, -10]
+        wing_l_0: [0, 70, -20]
+        wing_r_0: [0, -70, 20]
+        wing_l_1: [0, -40, -20]
+        wing_r_1: [0, 40, 20]
+      bends: [{chain: tent*, axis: radial, from: -30, to: -24}]
+      root: [0, -0.4, 0]
+    active:
+      pose:
+        body: [-12, 0, 0]
+        head: [-16, 0, 0]
+        spine: [-10, 0, 0]
+        chest: [-18, 0, 0]
+        neck: [-14, 0, 0]
+        jaw: [40, 0, 0]
+        arm_l: [10, 0, 56]
+        arm_r: [10, 0, -56]
+        wing_l_0: [-10, -10, 34]
+        wing_r_0: [-10, 10, -34]
+      bends: [{chain: tent*, axis: radial, from: 20, to: 6}]
+      root: [0, 0.2, 0]
+      waves:
+        - {chain: tent*, axis: radial, amp: 6, wavelength: 3, period: 0.3, spread: 0.2}

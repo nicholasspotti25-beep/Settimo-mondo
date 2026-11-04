@@ -1,0 +1,1013 @@
+# Colossus pose library (Mostro della Palude, Mostro di Magma, fire giants, ice golems): the humanoid skeleton with heavy
+# proportions (long arms, short legs, hunched). Extends humanoid: every humanoid clip exists; the clips below replace
+# the ones that must read as WEIGHT on a phone screen — long, low anticipation (the root sinks and the torso coils
+# before every blow), a short snap, and a recovery that stays bent (the punish window is visible: fists on the ground,
+# torso low). Bones: hips spine chest neck head jaw shoulder_l/r arm_l/r forearm_l/r hand_l/r thigh_l/r shin_l/r
+# foot_l/r. x = pitch (upright chain leans forward; hanging limb swings BACK), y = turn left, z = roll (left arm rises
+# sideways with +z, right arm with -z). root: [left, up, forward] in hip-height units.
+family: colossus
+extends: humanoid
+aliases:
+  attack: overhead
+  eruption: summon
+  long_reach: thrust
+  mire_arms: grab
+  double_slam: slam
+  mud_wave: slam
+  submerge: burrow
+  tail_sweep: sweep_r
+  coil: grab
+  bite: grab
+clips:
+  idle:
+    pose:
+      spine: [12, 0, 0]
+      chest: [8, 3, 0]
+      neck: [-16, 0, 0]
+      head: [-6, -4, 0]
+      arm_l: [-14, 0, 14]
+      arm_r: [-12, 0, -16]
+      forearm_l: [-24, 0, 0]
+      forearm_r: [-20, 0, 0]
+      hand_l: [10, 0, 0]
+      hand_r: [10, 0, 0]
+      thigh_l: [-12, 4, 9]
+      thigh_r: [-8, -4, -9]
+      shin_l: [16, 0, 0]
+      shin_r: [12, 0, 0]
+      foot_l: [-4, 0, -6]
+      foot_r: [-4, 0, 6]
+    root: [0, -0.06, 0]
+    cycle:
+      period: 4.6
+      root: {y: [0.012, 0]}
+      bones:
+        chest: {x: [-2.6, 0]}
+        spine: {x: [1.2, 0.1]}
+        neck: {x: [1.4, 0.15]}
+        arm_l: {z: [2.4, 0.05], x: [-1.5, 0.2]}
+        arm_r: {z: [-2.4, 0.05], x: [-1.5, 0.2]}
+        head: {y: [3, 0.3]}
+        jaw: {x: [3, 0.1, pos]}
+  walk:
+    pose:
+      spine: [14, 0, 0]
+      chest: [6, 0, 0]
+      neck: [-16, 0, 0]
+      arm_l: [-10, 0, 14]
+      arm_r: [-10, 0, -14]
+      forearm_l: [-22, 0, 0]
+      forearm_r: [-22, 0, 0]
+    root: [0, -0.05, 0]
+    cycle:
+      stride: 1.25
+      root: {y: [0.04, 0.125, double], x: [0.045, 0]}
+      rootRot: {y: [8, 0], z: [5.5, 0]}
+      bones:
+        thigh_l: {x: [-26, 0], z: [3, 0]}
+        thigh_r: {x: [26, 0], z: [3, 0]}
+        shin_l: {x: [34, 0.8, pos]}
+        shin_r: {x: [34, 0.3, pos]}
+        foot_l: {x: [-12, 0.05]}
+        foot_r: {x: [12, 0.05]}
+        arm_l: {x: [16, 0.08]}
+        arm_r: {x: [-16, 0.08]}
+        forearm_l: {x: [-8, 0.2, abs]}
+        forearm_r: {x: [-8, 0.7, abs]}
+        chest: {y: [-7, 0.04], z: [-2.5, 0]}
+        neck: {z: [2, 0]}
+        head: {y: [3, 0]}
+  run:
+    pose:
+      spine: [26, 0, 0]
+      chest: [10, 0, 0]
+      neck: [-28, 0, 0]
+      head: [-6, 0, 0]
+      arm_l: [-4, 0, 18]
+      arm_r: [-4, 0, -18]
+      forearm_l: [-50, 0, 0]
+      forearm_r: [-50, 0, 0]
+    root: [0, -0.08, 0]
+    cycle:
+      stride: 1.9
+      root: {y: [0.07, 0.1, double], x: [0.03, 0]}
+      rootRot: {y: [9, 0], z: [5, 0]}
+      bones:
+        thigh_l: {x: [-40, 0]}
+        thigh_r: {x: [40, 0]}
+        shin_l: {x: [58, 0.78, pos]}
+        shin_r: {x: [58, 0.28, pos]}
+        foot_l: {x: [-16, 0.05]}
+        foot_r: {x: [16, 0.05]}
+        arm_l: {x: [34, 0.06]}
+        arm_r: {x: [-34, 0.06]}
+        chest: {y: [-10, 0.04]}
+  overhead:
+    hold: 3
+    telegraph:
+      pose:
+        spine: [-14, 0, 0]
+        chest: [-18, 0, 0]
+        neck: [6, 0, 0]
+        head: [8, 0, 0]
+        arm_l: [-178, 8, 22]
+        arm_r: [-178, -8, -22]
+        forearm_l: [-56, 0, 0]
+        forearm_r: [-56, 0, 0]
+        hand_l: [-20, 0, 0]
+        hand_r: [-20, 0, 0]
+        thigh_l: [-14, 0, 10]
+        thigh_r: [-10, 0, -10]
+        shin_l: [14, 0, 0]
+        shin_r: [14, 0, 0]
+        jaw: [18, 0, 0]
+      root: [0, 0.04, -0.08]
+      ease: inout
+    active:
+      pose:
+        spine: [44, 0, 0]
+        chest: [28, 0, 0]
+        neck: [-28, 0, 0]
+        head: [-14, 0, 0]
+        arm_l: [-62, -14, 8]
+        arm_r: [-62, 14, -8]
+        forearm_l: [-6, 0, 0]
+        forearm_r: [-6, 0, 0]
+        thigh_l: [-58, 0, 14]
+        thigh_r: [-52, 0, -14]
+        shin_l: [80, 0, 0]
+        shin_r: [74, 0, 0]
+        foot_l: [-22, 0, 0]
+        foot_r: [-22, 0, 0]
+        jaw: [4, 0, 0]
+      root: [0, -0.3, 0.2]
+    recovery:
+      pose:
+        spine: [40, 0, 0]
+        chest: [22, 0, 0]
+        neck: [-26, 0, 0]
+        arm_l: [-56, -10, 10]
+        arm_r: [-56, 10, -10]
+        forearm_l: [-10, 0, 0]
+        forearm_r: [-10, 0, 0]
+        thigh_l: [-50, 0, 12]
+        thigh_r: [-44, 0, -12]
+        shin_l: [66, 0, 0]
+        shin_r: [62, 0, 0]
+      root: [0, -0.24, 0.16]
+      blend: 0.25
+  slam:
+    hold: 4
+    telegraph:
+      pose:
+        spine: [-10, 0, 0]
+        chest: [-20, 0, 0]
+        neck: [12, 0, 0]
+        arm_l: [-168, 0, 40]
+        arm_r: [-168, 0, -40]
+        forearm_l: [-70, 0, 0]
+        forearm_r: [-70, 0, 0]
+        thigh_l: [-10, 0, 12]
+        thigh_r: [-10, 0, -12]
+        shin_l: [12, 0, 0]
+        shin_r: [12, 0, 0]
+        jaw: [24, 0, 0]
+      root: [0, 0.06, -0.06]
+      ease: inout
+    active:
+      pose:
+        spine: [52, 0, 0]
+        chest: [30, 0, 0]
+        neck: [-34, 0, 0]
+        head: [-12, 0, 0]
+        arm_l: [-48, 0, 18]
+        arm_r: [-48, 0, -18]
+        forearm_l: [-4, 0, 0]
+        forearm_r: [-4, 0, 0]
+        hand_l: [30, 0, 0]
+        hand_r: [30, 0, 0]
+        thigh_l: [-70, 0, 18]
+        thigh_r: [-70, 0, -18]
+        shin_l: [96, 0, 0]
+        shin_r: [96, 0, 0]
+        foot_l: [-26, 0, 0]
+        foot_r: [-26, 0, 0]
+      root: [0, -0.4, 0.18]
+    recovery:
+      pose:
+        spine: [46, 0, 0]
+        chest: [26, 0, 0]
+        neck: [-30, 0, 0]
+        arm_l: [-44, 0, 20]
+        arm_r: [-44, 0, -20]
+        forearm_l: [-8, 0, 0]
+        forearm_r: [-8, 0, 0]
+        thigh_l: [-62, 0, 16]
+        thigh_r: [-62, 0, -16]
+        shin_l: [86, 0, 0]
+        shin_r: [86, 0, 0]
+      root: [0, -0.34, 0.14]
+      blend: 0.25
+  slam_r:
+    hold: 3
+    telegraph:
+      pose:
+        spine: [-6, -10, 0]
+        chest: [-14, -22, 8]
+        neck: [8, 16, 0]
+        arm_r: [-176, -10, -18]
+        forearm_r: [-64, 0, 0]
+        arm_l: [-30, 0, 30]
+        forearm_l: [-30, 0, 0]
+        thigh_l: [-16, 0, 10]
+        thigh_r: [-6, 0, -12]
+        shin_l: [16, 0, 0]
+        shin_r: [10, 0, 0]
+      rootRot: [0, -12, 4]
+      root: [0, 0.03, -0.06]
+      ease: inout
+    active:
+      pose:
+        spine: [48, 10, 0]
+        chest: [26, 18, -6]
+        neck: [-30, -10, 0]
+        arm_r: [-50, 22, -6]
+        forearm_r: [-4, 0, 0]
+        hand_r: [30, 0, 0]
+        arm_l: [-20, 0, 34]
+        forearm_l: [-40, 0, 0]
+        thigh_l: [-30, 0, 12]
+        thigh_r: [-74, 0, -14]
+        shin_l: [40, 0, 0]
+        shin_r: [100, 0, 0]
+      rootRot: [0, 12, -4]
+      root: [0, -0.32, 0.16]
+    recovery:
+      pose:
+        spine: [44, 8, 0]
+        chest: [24, 14, 0]
+        neck: [-28, -8, 0]
+        arm_r: [-46, 18, -8]
+        forearm_r: [-8, 0, 0]
+        arm_l: [-16, 0, 30]
+        thigh_l: [-26, 0, 10]
+        thigh_r: [-64, 0, -14]
+        shin_l: [34, 0, 0]
+        shin_r: [86, 0, 0]
+      rootRot: [0, 10, -3]
+      root: [0, -0.26, 0.12]
+      blend: 0.25
+  slam_l:
+    mirror: slam_r
+  stomp:
+    hold: 3
+    telegraph:
+      pose:
+        spine: [-6, 0, 0]
+        chest: [-8, 0, 0]
+        neck: [6, 0, 0]
+        thigh_r: [-84, 0, -12]
+        shin_r: [82, 0, 0]
+        foot_r: [-10, 0, 0]
+        thigh_l: [-6, 0, 6]
+        shin_l: [10, 0, 0]
+        arm_l: [-40, 0, 58]
+        arm_r: [-30, 0, -62]
+        forearm_l: [-30, 0, 0]
+        forearm_r: [-30, 0, 0]
+      rootRot: [0, 0, -9]
+      root: [0.06, 0.06, -0.04]
+      ease: inout
+    active:
+      pose:
+        spine: [26, 0, 0]
+        chest: [14, 0, 0]
+        neck: [-18, 0, 0]
+        thigh_r: [-30, 0, -14]
+        shin_r: [30, 0, 0]
+        thigh_l: [-30, 0, 12]
+        shin_l: [40, 0, 0]
+        arm_l: [-20, 0, 34]
+        arm_r: [-20, 0, -34]
+        forearm_l: [-16, 0, 0]
+        forearm_r: [-16, 0, 0]
+      rootRot: [0, 0, 3]
+      root: [-0.02, -0.18, 0.08]
+    recovery:
+      pose:
+        spine: [22, 0, 0]
+        thigh_r: [-24, 0, -12]
+        shin_r: [26, 0, 0]
+        thigh_l: [-26, 0, 10]
+        shin_l: [32, 0, 0]
+        arm_l: [-14, 0, 24]
+        arm_r: [-14, 0, -24]
+      root: [0, -0.14, 0.06]
+  sweep_r:
+    hold: 3
+    telegraph:
+      pose:
+        spine: [10, -30, 0]
+        chest: [-2, -44, 10]
+        neck: [-6, 30, 0]
+        head: [0, 20, 0]
+        arm_r: [-50, -40, -78]
+        forearm_r: [-30, 0, 0]
+        arm_l: [-56, 20, 30]
+        forearm_l: [-50, 0, 0]
+        thigh_l: [-30, 0, 10]
+        shin_l: [34, 0, 0]
+        thigh_r: [6, 0, -14]
+        shin_r: [26, 0, 0]
+      rootRot: [0, -24, 0]
+      root: [0, -0.1, -0.06]
+      ease: inout
+    active:
+      pose:
+        spine: [22, 30, 0]
+        chest: [12, 46, -8]
+        neck: [-16, -26, 0]
+        head: [0, -20, 0]
+        arm_r: [-80, 60, 4]
+        forearm_r: [-6, 0, 0]
+        hand_r: [0, 0, 20]
+        arm_l: [-10, 0, 44]
+        forearm_l: [-30, 0, 0]
+        thigh_l: [-44, 0, 12]
+        shin_l: [50, 0, 0]
+        thigh_r: [20, 0, -12]
+        shin_r: [26, 0, 0]
+      rootRot: [0, 30, 0]
+      root: [0, -0.16, 0.14]
+    recovery:
+      pose:
+        spine: [24, 24, 0]
+        chest: [12, 34, 0]
+        neck: [-18, -18, 0]
+        arm_r: [-60, 46, -2]
+        forearm_r: [-20, 0, 0]
+        arm_l: [-8, 0, 30]
+        thigh_l: [-40, 0, 10]
+        shin_l: [44, 0, 0]
+      rootRot: [0, 24, 0]
+      root: [0, -0.14, 0.1]
+      blend: 0.3
+  sweep_l:
+    mirror: sweep_r
+  thrust:
+    hold: 2
+    telegraph:
+      pose:
+        spine: [6, -24, 0]
+        chest: [-6, -34, 0]
+        neck: [-10, 26, 0]
+        arm_r: [36, -10, -28]
+        forearm_r: [-110, 0, 0]
+        hand_r: [-10, 0, 0]
+        arm_l: [-70, 10, 24]
+        forearm_l: [-30, 0, 0]
+        thigh_l: [-30, 0, 10]
+        shin_l: [30, 0, 0]
+        thigh_r: [10, 0, -10]
+        shin_r: [24, 0, 0]
+      rootRot: [0, -14, 0]
+      root: [0, -0.1, -0.12]
+    active:
+      pose:
+        spine: [26, 24, 0]
+        chest: [10, 30, 0]
+        neck: [-26, -22, 0]
+        arm_r: [-92, 18, -4]
+        forearm_r: [-2, 0, 0]
+        hand_r: [6, 0, 0]
+        arm_l: [10, 0, 28]
+        forearm_l: [-40, 0, 0]
+        thigh_l: [-58, 0, 10]
+        shin_l: [56, 0, 0]
+        thigh_r: [28, 0, -10]
+        shin_r: [14, 0, 0]
+      rootRot: [0, 18, 0]
+      root: [0, -0.16, 0.36]
+    recovery:
+      pose:
+        spine: [24, 16, 0]
+        chest: [8, 20, 0]
+        neck: [-24, -14, 0]
+        arm_r: [-74, 14, -6]
+        forearm_r: [-14, 0, 0]
+        thigh_l: [-50, 0, 10]
+        shin_l: [50, 0, 0]
+        thigh_r: [22, 0, -10]
+      rootRot: [0, 12, 0]
+      root: [0, -0.14, 0.28]
+      blend: 0.3
+  thrust_heavy:
+    hold: 3
+    telegraph:
+      pose:
+        spine: [-4, 0, 0]
+        chest: [-12, 0, 0]
+        neck: [4, 0, 0]
+        arm_l: [30, 0, 44]
+        arm_r: [30, 0, -44]
+        forearm_l: [-60, 0, 0]
+        forearm_r: [-60, 0, 0]
+        thigh_l: [-40, 0, 10]
+        shin_l: [50, 0, 0]
+        thigh_r: [-20, 0, -10]
+        shin_r: [44, 0, 0]
+        jaw: [20, 0, 0]
+      root: [0, -0.16, -0.14]
+    active:
+      pose:
+        spine: [38, 0, 0]
+        chest: [14, 0, 0]
+        neck: [-34, 0, 0]
+        arm_l: [-96, -12, 10]
+        arm_r: [-96, 12, -10]
+        forearm_l: [-8, 0, 0]
+        forearm_r: [-8, 0, 0]
+        thigh_l: [-66, 0, 10]
+        shin_l: [60, 0, 0]
+        thigh_r: [30, 0, -10]
+        shin_r: [20, 0, 0]
+        jaw: [34, 0, 0]
+      root: [0, -0.22, 0.5]
+    recovery:
+      pose:
+        spine: [36, 0, 0]
+        neck: [-30, 0, 0]
+        arm_l: [-70, -8, 12]
+        arm_r: [-70, 8, -12]
+        forearm_l: [-14, 0, 0]
+        forearm_r: [-14, 0, 0]
+        thigh_l: [-56, 0, 10]
+        shin_l: [56, 0, 0]
+        thigh_r: [24, 0, -10]
+      root: [0, -0.2, 0.4]
+      blend: 0.3
+  charge:
+    telegraph:
+      pose:
+        spine: [34, -10, 0]
+        chest: [14, -20, 0]
+        neck: [-36, 10, 0]
+        arm_l: [36, 0, 30]
+        arm_r: [-40, 0, -26]
+        forearm_l: [-40, 0, 0]
+        forearm_r: [-70, 0, 0]
+        thigh_l: [-50, 0, 10]
+        shin_l: [70, 0, 0]
+        thigh_r: [10, 0, -10]
+        shin_r: [50, 0, 0]
+        jaw: [16, 0, 0]
+      root: [0, -0.2, -0.1]
+      cycle:
+        period: 0.9
+        bones:
+          thigh_r: {x: [-14, 0, pos]}
+          shin_r: {x: [20, 0, pos]}
+    active:
+      pose:
+        spine: [38, -14, 0]
+        chest: [16, -18, 0]
+        neck: [-38, 12, 0]
+        arm_l: [10, 0, 30]
+        arm_r: [-60, 0, -20]
+        forearm_l: [-50, 0, 0]
+        forearm_r: [-80, 0, 0]
+        jaw: [24, 0, 0]
+      root: [0, -0.14, 0.12]
+      cycle:
+        period: 0.5
+        root: {y: [0.06, 0.1, double]}
+        rootRot: {z: [5, 0]}
+        bones:
+          thigh_l: {x: [-46, 0]}
+          thigh_r: {x: [46, 0]}
+          shin_l: {x: [64, 0.78, pos]}
+          shin_r: {x: [64, 0.28, pos]}
+          arm_l: {x: [26, 0.05]}
+    recovery:
+      pose:
+        spine: [24, 0, 0]
+        neck: [-20, 0, 0]
+        arm_l: [-10, 0, 22]
+        arm_r: [-20, 0, -22]
+        thigh_l: [-40, 0, 10]
+        shin_l: [50, 0, 0]
+        thigh_r: [16, 0, -10]
+        shin_r: [26, 0, 0]
+      root: [0, -0.14, 0.1]
+  grab:
+    hold: 2
+    telegraph:
+      pose:
+        spine: [-6, 0, 0]
+        chest: [-14, 0, 0]
+        neck: [4, 0, 0]
+        arm_l: [-70, 10, 76]
+        arm_r: [-70, -10, -76]
+        forearm_l: [-24, 0, 0]
+        forearm_r: [-24, 0, 0]
+        hand_l: [0, 0, -20]
+        hand_r: [0, 0, 20]
+        thigh_l: [-20, 0, 14]
+        thigh_r: [-20, 0, -14]
+        shin_l: [24, 0, 0]
+        shin_r: [24, 0, 0]
+        jaw: [26, 0, 0]
+      root: [0, -0.06, -0.08]
+    active:
+      pose:
+        spine: [34, 0, 0]
+        chest: [16, 0, 0]
+        neck: [-26, 0, 0]
+        arm_l: [-82, -34, 10]
+        arm_r: [-82, 34, -10]
+        forearm_l: [-30, -20, 0]
+        forearm_r: [-30, 20, 0]
+        thigh_l: [-46, 0, 12]
+        thigh_r: [-36, 0, -12]
+        shin_l: [50, 0, 0]
+        shin_r: [44, 0, 0]
+        jaw: [6, 0, 0]
+      root: [0, -0.16, 0.34]
+    recovery:
+      pose:
+        spine: [26, 0, 0]
+        neck: [-20, 0, 0]
+        arm_l: [-60, -24, 16]
+        arm_r: [-60, 24, -16]
+        forearm_l: [-40, 0, 0]
+        forearm_r: [-40, 0, 0]
+        thigh_l: [-34, 0, 10]
+        shin_l: [40, 0, 0]
+      root: [0, -0.12, 0.22]
+  throw:
+    hold: 3
+    telegraph:
+      pose:
+        spine: [-10, -24, 0]
+        chest: [-20, -36, 10]
+        neck: [6, 30, 0]
+        head: [-4, 16, 0]
+        arm_r: [-150, -20, -40]
+        forearm_r: [-80, 0, 0]
+        hand_r: [-30, 0, 0]
+        arm_l: [-86, 20, 16]
+        forearm_l: [-10, 0, 0]
+        thigh_l: [-30, 0, 10]
+        shin_l: [24, 0, 0]
+        thigh_r: [14, 0, -12]
+        shin_r: [24, 0, 0]
+      rootRot: [0, -18, 0]
+      root: [0, -0.04, -0.12]
+      ease: inout
+    active:
+      pose:
+        spine: [34, 22, 0]
+        chest: [16, 34, -8]
+        neck: [-30, -24, 0]
+        arm_r: [-70, 36, -6]
+        forearm_r: [-4, 0, 0]
+        hand_r: [20, 0, 0]
+        arm_l: [10, 0, 30]
+        forearm_l: [-40, 0, 0]
+        thigh_l: [-54, 0, 10]
+        shin_l: [50, 0, 0]
+        thigh_r: [30, 0, -10]
+        shin_r: [16, 0, 0]
+      rootRot: [0, 20, 0]
+      root: [0, -0.16, 0.24]
+    recovery:
+      pose:
+        spine: [28, 16, 0]
+        chest: [12, 22, 0]
+        arm_r: [-46, 26, -10]
+        forearm_r: [-20, 0, 0]
+        thigh_l: [-44, 0, 10]
+        shin_l: [44, 0, 0]
+      rootRot: [0, 14, 0]
+      root: [0, -0.12, 0.18]
+  spin:
+    hold: 2
+    telegraph:
+      pose:
+        spine: [16, -34, 0]
+        chest: [6, -44, 0]
+        neck: [-12, 34, 0]
+        arm_r: [-60, -34, -84]
+        forearm_r: [-14, 0, 0]
+        arm_l: [-40, 30, 70]
+        forearm_l: [-30, 0, 0]
+        thigh_l: [-36, 0, 12]
+        thigh_r: [-24, 0, -12]
+        shin_l: [46, 0, 0]
+        shin_r: [44, 0, 0]
+      rootRot: [0, -34, 0]
+      root: [0, -0.16, 0]
+    active:
+      pose:
+        spine: [14, 0, 0]
+        neck: [-14, 0, 0]
+        arm_r: [-84, 0, -86]
+        forearm_r: [-4, 0, 0]
+        arm_l: [-84, 0, 86]
+        forearm_l: [-4, 0, 0]
+        thigh_l: [-26, 0, 14]
+        thigh_r: [-26, 0, -14]
+        shin_l: [36, 0, 0]
+        shin_r: [36, 0, 0]
+      root: [0, -0.14, 0]
+      cycle:
+        period: 0.7
+        rootRot: {y: [170, 0], z: [4, 0.25]}
+        root: {y: [0.03, 0, double]}
+    recovery:
+      pose:
+        spine: [26, 0, 0]
+        neck: [-20, 0, 0]
+        arm_r: [-40, 0, -40]
+        arm_l: [-40, 0, 40]
+        thigh_l: [-30, 0, 12]
+        thigh_r: [-30, 0, -12]
+        shin_l: [40, 0, 0]
+        shin_r: [40, 0, 0]
+      root: [0, -0.14, 0]
+      blend: 0.35
+  roar:
+    hold: 4
+    telegraph:
+      pose:
+        spine: [30, 0, 0]
+        chest: [16, 0, 0]
+        neck: [-6, 0, 0]
+        head: [14, 0, 0]
+        arm_l: [-30, -20, 20]
+        arm_r: [-30, 20, -20]
+        forearm_l: [-70, 0, 0]
+        forearm_r: [-70, 0, 0]
+        thigh_l: [-30, 0, 12]
+        thigh_r: [-30, 0, -12]
+        shin_l: [40, 0, 0]
+        shin_r: [40, 0, 0]
+      root: [0, -0.16, 0]
+    active:
+      pose:
+        spine: [-8, 0, 0]
+        chest: [-18, 0, 0]
+        neck: [-14, 0, 0]
+        head: [-26, 0, 0]
+        jaw: [44, 0, 0]
+        arm_l: [24, 0, 50]
+        arm_r: [24, 0, -50]
+        forearm_l: [-40, 0, 0]
+        forearm_r: [-40, 0, 0]
+        hand_l: [-20, 0, 0]
+        hand_r: [-20, 0, 0]
+        thigh_l: [-16, 0, 16]
+        thigh_r: [-16, 0, -16]
+        shin_l: [20, 0, 0]
+        shin_r: [20, 0, 0]
+      root: [0, -0.06, -0.04]
+      cycle:
+        period: 0.16
+        bones:
+          chest: {x: [1.5, 0]}
+          head: {y: [2, 0.3], x: [1.5, 0.5]}
+          arm_l: {z: [2, 0.2]}
+          arm_r: {z: [-2, 0.2]}
+    recovery:
+      pose:
+        spine: [14, 0, 0]
+        neck: [-12, 0, 0]
+        jaw: [10, 0, 0]
+        arm_l: [-6, 0, 24]
+        arm_r: [-6, 0, -24]
+      root: [0, -0.06, 0]
+  summon:
+    hold: 5
+    telegraph:
+      pose:
+        spine: [46, 0, 0]
+        chest: [24, 0, 0]
+        neck: [-30, 0, 0]
+        arm_l: [-70, 0, 16]
+        arm_r: [-70, 0, -16]
+        forearm_l: [-20, 0, 0]
+        forearm_r: [-20, 0, 0]
+        hand_l: [40, 0, 0]
+        hand_r: [40, 0, 0]
+        thigh_l: [-70, 0, 16]
+        thigh_r: [-70, 0, -16]
+        shin_l: [96, 0, 0]
+        shin_r: [96, 0, 0]
+        foot_l: [-26, 0, 0]
+        foot_r: [-26, 0, 0]
+      root: [0, -0.4, 0.04]
+      ease: inout
+    active:
+      pose:
+        spine: [-16, 0, 0]
+        chest: [-22, 0, 0]
+        neck: [-10, 0, 0]
+        head: [-24, 0, 0]
+        jaw: [40, 0, 0]
+        arm_l: [-150, 0, 56]
+        arm_r: [-150, 0, -56]
+        forearm_l: [-16, 0, 0]
+        forearm_r: [-16, 0, 0]
+        hand_l: [-30, 0, 0]
+        hand_r: [-30, 0, 0]
+        thigh_l: [-14, 0, 16]
+        thigh_r: [-14, 0, -16]
+        shin_l: [16, 0, 0]
+        shin_r: [16, 0, 0]
+      root: [0, 0.04, 0]
+      ease: back
+      cycle:
+        period: 0.2
+        bones:
+          chest: {x: [1.2, 0]}
+          arm_l: {z: [2.5, 0.1]}
+          arm_r: {z: [-2.5, 0.1]}
+    recovery:
+      pose:
+        spine: [20, 0, 0]
+        neck: [-14, 0, 0]
+        arm_l: [-40, 0, 30]
+        arm_r: [-40, 0, -30]
+        forearm_l: [-30, 0, 0]
+        forearm_r: [-30, 0, 0]
+      root: [0, -0.08, 0]
+  leap:
+    telegraph:
+      pose:
+        spine: [44, 0, 0]
+        chest: [18, 0, 0]
+        neck: [-34, 0, 0]
+        arm_l: [50, 0, 20]
+        arm_r: [50, 0, -20]
+        forearm_l: [-20, 0, 0]
+        forearm_r: [-20, 0, 0]
+        thigh_l: [-90, 0, 14]
+        thigh_r: [-90, 0, -14]
+        shin_l: [118, 0, 0]
+        shin_r: [118, 0, 0]
+        foot_l: [-30, 0, 0]
+        foot_r: [-30, 0, 0]
+      root: [0, -0.46, -0.06]
+      ease: inout
+    active:
+      pose:
+        spine: [-10, 0, 0]
+        chest: [-14, 0, 0]
+        arm_l: [-170, 0, 24]
+        arm_r: [-170, 0, -24]
+        forearm_l: [-40, 0, 0]
+        forearm_r: [-40, 0, 0]
+        thigh_l: [-50, 0, 10]
+        thigh_r: [-20, 0, -10]
+        shin_l: [80, 0, 0]
+        shin_r: [60, 0, 0]
+      root: [0, 0.06, 0.1]
+    recovery:
+      pose:
+        spine: [50, 0, 0]
+        chest: [26, 0, 0]
+        neck: [-34, 0, 0]
+        arm_l: [-50, 0, 20]
+        arm_r: [-50, 0, -20]
+        hand_l: [30, 0, 0]
+        hand_r: [30, 0, 0]
+        thigh_l: [-76, 0, 18]
+        thigh_r: [-76, 0, -18]
+        shin_l: [100, 0, 0]
+        shin_r: [100, 0, 0]
+        foot_l: [-26, 0, 0]
+        foot_r: [-26, 0, 0]
+      root: [0, -0.4, 0.14]
+      blend: 0.15
+      ease: snap
+  block:
+    telegraph:
+      pose:
+        spine: [18, 0, 0]
+        neck: [-10, 0, 0]
+        arm_l: [-100, -30, 20]
+        arm_r: [-100, 30, -20]
+        forearm_l: [-100, -20, 0]
+        forearm_r: [-100, 20, 0]
+        thigh_l: [-30, 0, 14]
+        thigh_r: [-30, 0, -14]
+        shin_l: [40, 0, 0]
+        shin_r: [40, 0, 0]
+      root: [0, -0.14, -0.04]
+    active:
+      pose:
+        spine: [22, 0, 0]
+        neck: [-14, 0, 0]
+        arm_l: [-104, -34, 20]
+        arm_r: [-104, 34, -20]
+        forearm_l: [-104, -20, 0]
+        forearm_r: [-104, 20, 0]
+        thigh_l: [-34, 0, 14]
+        thigh_r: [-34, 0, -14]
+        shin_l: [46, 0, 0]
+        shin_r: [46, 0, 0]
+      root: [0, -0.16, -0.06]
+  burrow:
+    telegraph:
+      pose:
+        spine: [44, 0, 0]
+        chest: [20, 0, 0]
+        neck: [-30, 0, 0]
+        arm_l: [-60, 0, 30]
+        arm_r: [-60, 0, -30]
+        thigh_l: [-80, 0, 16]
+        thigh_r: [-80, 0, -16]
+        shin_l: [106, 0, 0]
+        shin_r: [106, 0, 0]
+      root: [0, -0.42, 0]
+      ease: inout
+    active:
+      pose:
+        spine: [30, 0, 0]
+        chest: [10, 0, 0]
+        neck: [-20, 0, 0]
+        head: [-10, 0, 0]
+        arm_l: [-140, 0, 40]
+        arm_r: [-150, 0, -36]
+        forearm_l: [-20, 0, 0]
+        forearm_r: [-30, 0, 0]
+        thigh_l: [-90, 0, 16]
+        thigh_r: [-90, 0, -16]
+        shin_l: [120, 0, 0]
+        shin_r: [120, 0, 0]
+      root: [0, -1.7, 0]
+      blend: 0.9
+      ease: in
+    recovery:
+      pose:
+        arm_l: [-160, 0, 30]
+        arm_r: [-160, 0, -30]
+      root: [0, -2.2, 0]
+  emerge:
+    telegraph:
+      pose:
+        spine: [40, 0, 0]
+        neck: [-30, 0, 0]
+        arm_l: [-150, 0, 30]
+        arm_r: [-150, 0, -30]
+        thigh_l: [-90, 0, 16]
+        thigh_r: [-90, 0, -16]
+        shin_l: [120, 0, 0]
+        shin_r: [120, 0, 0]
+      root: [0, -1.8, 0]
+      blend: 0.12
+      ease: snap
+      cycle:
+        period: 0.3
+        bones:
+          arm_l: {z: [6, 0]}
+          arm_r: {z: [-6, 0.5]}
+    active:
+      pose:
+        spine: [-16, 0, 0]
+        chest: [-20, 0, 0]
+        neck: [-6, 0, 0]
+        head: [-22, 0, 0]
+        jaw: [42, 0, 0]
+        arm_l: [-156, 0, 50]
+        arm_r: [-156, 0, -50]
+        forearm_l: [-20, 0, 0]
+        forearm_r: [-20, 0, 0]
+        thigh_l: [-16, 0, 14]
+        thigh_r: [-16, 0, -14]
+        shin_l: [20, 0, 0]
+        shin_r: [20, 0, 0]
+      root: [0, 0.04, 0.06]
+      ease: back
+      blend: 0.6
+    recovery:
+      pose:
+        spine: [30, 0, 0]
+        neck: [-22, 0, 0]
+        jaw: [10, 0, 0]
+        arm_l: [-40, 0, 26]
+        arm_r: [-40, 0, -26]
+        thigh_l: [-30, 0, 14]
+        thigh_r: [-30, 0, -14]
+        shin_l: [40, 0, 0]
+        shin_r: [40, 0, 0]
+      root: [0, -0.12, 0.04]
+  stagger:
+    active:
+      pose:
+        spine: [-16, 10, 0]
+        chest: [-14, 14, 8]
+        neck: [18, -10, 0]
+        head: [10, 0, 0]
+        jaw: [20, 0, 0]
+        arm_l: [-40, 0, 50]
+        arm_r: [-20, 0, -46]
+        forearm_l: [-40, 0, 0]
+        forearm_r: [-30, 0, 0]
+        thigh_l: [-30, 0, 12]
+        thigh_r: [16, 0, -12]
+        shin_l: [34, 0, 0]
+        shin_r: [24, 0, 0]
+      rootRot: [-6, 8, 4]
+      root: [0, -0.06, -0.14]
+  spezzato:
+    telegraph:
+      pose:
+        spine: [-14, 0, 0]
+        chest: [-16, 0, 0]
+        neck: [14, 0, 0]
+        head: [-10, 0, 0]
+        jaw: [30, 0, 0]
+        arm_l: [-30, 0, 50]
+        arm_r: [-30, 0, -50]
+      root: [0, -0.04, -0.1]
+    active:
+      pose:
+        spine: [44, 0, 0]
+        chest: [24, 0, 0]
+        neck: [-6, 0, 0]
+        head: [24, 0, 0]
+        jaw: [22, 0, 0]
+        arm_l: [-56, 0, 14]
+        arm_r: [-6, 0, -20]
+        forearm_l: [-6, 0, 0]
+        forearm_r: [-20, 0, 0]
+        hand_l: [40, 0, 0]
+        thigh_l: [-96, 0, 14]
+        thigh_r: [-14, 0, -12]
+        shin_l: [100, 0, 0]
+        shin_r: [110, 0, 0]
+        foot_l: [-10, 0, 0]
+        foot_r: [40, 0, 0]
+      root: [0, -0.5, 0.04]
+      cycle:
+        period: 2.4
+        root: {y: [0.012, 0]}
+        bones:
+          chest: {x: [-3, 0]}
+          head: {x: [2, 0.2]}
+  death:
+    telegraph:
+      pose:
+        spine: [-22, 0, 0]
+        chest: [-20, 0, 0]
+        neck: [10, 0, 0]
+        head: [-30, 0, 0]
+        jaw: [46, 0, 0]
+        arm_l: [-110, 0, 50]
+        arm_r: [-110, 0, -50]
+        forearm_l: [-30, 0, 0]
+        forearm_r: [-30, 0, 0]
+      root: [0, 0, -0.08]
+    active:
+      pose:
+        spine: [56, 0, 0]
+        chest: [30, 0, 0]
+        neck: [-10, 0, 0]
+        head: [20, 0, 6]
+        jaw: [26, 0, 0]
+        arm_l: [-40, 0, 26]
+        arm_r: [-30, 0, -30]
+        forearm_l: [-10, 0, 0]
+        forearm_r: [-6, 0, 0]
+        hand_l: [30, 0, 0]
+        hand_r: [30, 0, 0]
+        thigh_l: [-100, 0, 18]
+        thigh_r: [-100, 0, -18]
+        shin_l: [128, 0, 0]
+        shin_r: [128, 0, 0]
+        foot_l: [40, 0, 0]
+        foot_r: [40, 0, 0]
+      rootRot: [0, 0, 5]
+      root: [0, -0.62, 0.1]
+  intro:
+    base: roar
+    telegraph:
+      pose:
+        spine: [50, 0, 0]
+        chest: [24, 0, 0]
+        neck: [-6, 0, 0]
+        head: [26, 0, 0]
+        arm_l: [-50, 0, 14]
+        arm_r: [-50, 0, -14]
+        hand_l: [30, 0, 0]
+        hand_r: [30, 0, 0]
+        thigh_l: [-80, 0, 16]
+        thigh_r: [-80, 0, -16]
+        shin_l: [104, 0, 0]
+        shin_r: [104, 0, 0]
+        foot_l: [-24, 0, 0]
+        foot_r: [-24, 0, 0]
+      root: [0, -0.42, 0.04]
+  transition:
+    base: roar

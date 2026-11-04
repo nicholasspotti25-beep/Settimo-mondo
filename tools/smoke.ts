@@ -48,15 +48,25 @@ async function main(): Promise<void> {
   page.on('pageerror', (e) => errors.push(`pageerror: ${e.message}`));
   await page.goto(`http://127.0.0.1:${port}/`);
   await page.waitForFunction(() => !!(window as any).__game, null, { timeout: 30000 });
-  // Let boot finish (service worker claim, title screen) before driving the game: evaluating during it was flaky.
-  await page.waitForTimeout(2500);
-  await page.evaluate(async (q) => {
+  // Do not await a game promise across page.evaluate: CDP can answer "Promise was collected", which Playwright reports
+  // as "Execution context was destroyed". Start newGame in the page and poll for its result instead.
+  await page.evaluate((q) => {
     const g = (window as any).__game;
     g.applySettings({ ...g.settings, quality: q, language: 'it' });
-    await g.newGame(0, { name: 'Smoke', build: 0.5, height: 0.5, skin: 2, hair: 1, hairColor: 0, eyes: 0, cloak: 0 });
+    (window as any).__ng = 'pending';
+    g.newGame(0, { name: 'Smoke', build: 0.5, height: 0.5, skin: 2, hair: 1, hairColor: 0, eyes: 0, cloak: 0 }).then(
+      () => ((window as any).__ng = 'ok'),
+      (e: unknown) => ((window as any).__ng = String(e)),
+    );
+  }, quality);
+  await page.waitForFunction(() => (window as any).__ng !== 'pending', null, { timeout: 60000 });
+  const ng = await page.evaluate(() => (window as any).__ng);
+  if (ng !== 'ok') throw new Error(`newGame failed: ${ng}`);
+  await page.evaluate(() => {
+    const g = (window as any).__game;
     g.sim.seq.skip(g.sim);
     g.sim.debug.invincible = true;
-  }, quality);
+  });
   await page.waitForTimeout(1500);
   const report: Record<string, unknown>[] = [];
   const ids: string[] = await page.evaluate(() => (window as any).__game.content.bosses.map((b: { id: string }) => b.id));

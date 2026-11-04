@@ -35,9 +35,14 @@ export interface CycleDef {
  * amp * lerp(1, ampEnd, k/(n-1)) * sin(2PI(phase - k/wavelength + offset)) on `axis` (degrees).
  */
 export interface WaveDef {
-  /** Chain name (model.chains) or bone prefix: 'body' matches body_0, body_1, ... in numeric order. */
+  /**
+   * Chain name (model.chains) or bone prefix: 'body' matches body_0, body_1, ... in numeric order. A trailing '*' drives
+   * every named chain starting with the prefix ('tent*' = tent0, tent1, ...; 'neck*' = neck, neck_l, neck_r), each one
+   * `spread` cycles later than the previous (natural name order).
+   */
   chain: string;
-  axis: 'x' | 'y' | 'z';
+  /** 'radial': curl about the chain's horizontal tangent — + bends it down/outward away from the body axis, - up/inward. */
+  axis: 'x' | 'y' | 'z' | 'radial';
   amp: number;
   /** Wavelength in bones (default 6). */
   wavelength?: number;
@@ -49,6 +54,21 @@ export interface WaveDef {
   period?: number;
   /** Size units per cycle (distance-driven, locomotion). Overrides period when moving. */
   stride?: number;
+  /** Chain globs only: phase offset (cycles) added per matched chain, so tentacles / necks do not move in unison. */
+  spread?: number;
+}
+/**
+ * Static curl along a chain: bone k of n gets lerp(from, to, k/(n-1)) degrees on `axis` (added to its pose). A chain glob
+ * ('tent*') curls every matching chain. Serpent coils, tails wound up for a sweep, tentacles curled for a grab.
+ */
+export interface BendDef {
+  chain: string;
+  /** 'radial' as in WaveDef (kraken tentacles around the body, mist tendrils, roots). */
+  axis: 'x' | 'y' | 'z' | 'radial';
+  /** Degrees on the first bone of the chain. */
+  from: number;
+  /** Degrees on the last bone (default = from). */
+  to?: number;
 }
 export interface StagePose {
   /** Bone rotations (deg). Keys are bone names or prefix globs ('neck*' = every bone starting with 'neck'). */
@@ -57,6 +77,7 @@ export interface StagePose {
   rootRot?: Rot;
   cycle?: CycleDef;
   waves?: WaveDef[];
+  bends?: BendDef[];
   /** Blend curve for reaching this stage's pose. */
   ease?: 'out' | 'in' | 'inout' | 'snap' | 'linear' | 'back';
   /** Blend time as a fraction of the stage duration (default: telegraph 0.75, active 0.25 (max 0.08 s), recovery 0.5). */
@@ -119,7 +140,7 @@ export const GLOBAL_ALIASES: Record<string, string> = {
   peck: 'bite', strike: 'thrust', fang: 'bite', tongue: 'thrust', squeeze: 'coil', crush_coil: 'coil', ink: 'breath', web: 'cast',
   mark: 'cast', curse: 'cast', pray: 'cast', song: 'howl', sing: 'howl', vanish: 'burrow', appear: 'emerge', ambush: 'emerge',
   lift: 'grab', carry: 'grab', drop: 'slam', fall: 'slam', crash: 'slam', land: 'stomp', hover_slam: 'dive', wing: 'swoop',
-  gust: 'hover', tornado: 'spin', whirlwind: 'spin', cyclone: 'spin', bolt: 'cast', ray: 'breath', laser: 'breath', duel: 'sweep_r',
+  gust: 'hover', tornado: 'spin', whirlwind: 'spin', cyclone: 'spin', bolt: 'cast', ray: 'breath', laser: 'breath', duel: 'sweep_r', punt: 'thrust',
 };
 
 /** Prefix bone keys (names, globs, chain names) of a stage. */
@@ -136,6 +157,7 @@ function prefixStage(s: StagePose | undefined, bp: string): StagePose | undefine
     out.cycle = { ...s.cycle, bones: b };
   }
   if (s.waves) out.waves = s.waves.map((w) => ({ ...w, chain: bp + w.chain }));
+  if (s.bends) out.bends = s.bends.map((b) => ({ ...b, chain: bp + b.chain }));
   return out;
 }
 
@@ -235,7 +257,10 @@ function mirrorStage(s: StagePose | undefined): StagePose | undefined {
     }
     out.cycle = c;
   }
-  if (s.waves) out.waves = s.waves.map((w) => ({ ...w, chain: mirrorName(w.chain), amp: w.axis === 'x' ? w.amp : -w.amp }));
+  if (s.waves) out.waves = s.waves.map((w) => ({ ...w, chain: mirrorName(w.chain), amp: w.axis === 'x' || w.axis === 'radial' ? w.amp : -w.amp }));
+  if (s.bends) {
+    out.bends = s.bends.map((b) => (b.axis === 'x' || b.axis === 'radial' ? { ...b, chain: mirrorName(b.chain) } : { ...b, chain: mirrorName(b.chain), from: -b.from, to: b.to === undefined ? undefined : -b.to }));
+  }
   return out;
 }
 
@@ -283,8 +308,28 @@ export const KEYWORDS: readonly string[] = [
   'burrow', 'emerge', 'coil', 'shield_bash', 'block', 'kick', 'howl', 'stagger', 'spezzato', 'death', 'intro', 'transition',
 ];
 
+/** Generic strike for unknown anims: the 'attack' clip, else the family's `attack` alias, else idle. */
+function fallbackClip(lib: ClipLibraryDef): string {
+  if (lib.clips.attack) return 'attack';
+  const a = lib.aliases?.attack;
+  return a && lib.clips[a] ? a : 'idle';
+}
+
+/** A resolved clip name moved to the requested side: 'sweep_r' + l -> 'sweep_l' (or its mirror), 'slam' + r -> 'slam_r' if any. */
+function sidedClip(lib: ClipLibraryDef, name: string, side: 'l' | 'r'): string {
+  const src = name.startsWith('~mirror:') ? name.slice(8) : name;
+  const m = /_(l|r)$/.exec(src);
+  if (!m) return lib.clips[`${src}_${side}`] ? `${src}_${side}` : name;
+  const eff = name.startsWith('~mirror:') ? (m[1] === 'l' ? 'r' : 'l') : m[1];
+  if (eff === side) return name;
+  if (name.startsWith('~mirror:')) return src;
+  const opp = `${src.slice(0, -2)}_${side}`;
+  return lib.clips[opp] ? opp : `~mirror:${src}`;
+}
+
 /**
- * Resolve an animation keyword to a clip name: exact, family alias, global alias, auto-mirror of _l/_r, progressively
+ * Resolve an animation keyword to a clip name: exact, family alias, global alias, auto-mirror of _l/_r, sided compounds
+ * (the base resolved, then moved to the requested side), progressively
  * shorter prefixes, any token, then 'attack' (generic wind-up/strike), else 'idle'.
  */
 export function resolveKeyword(lib: ClipLibraryDef, anim: string, cache?: Map<string, string>): string {
@@ -304,6 +349,11 @@ export function resolveKeyword(lib: ClipLibraryDef, anim: string, cache?: Map<st
   if (!res && /_(l|r)$/.test(anim)) {
     const other = anim.replace(/_l$/, '_§').replace(/_r$/, '_l').replace(/_§$/, '_r');
     if (has(other)) res = `~mirror:${other}`;
+    else {
+      // sided compound ('branch_whip_l', 'tail_slam_r'): resolve the base, then keep the requested side
+      const base = resolveKeyword(lib, anim.slice(0, -2), cache);
+      if (base !== 'idle' && base !== fallbackClip(lib)) res = sidedClip(lib, base, anim.endsWith('_l') ? 'l' : 'r');
+    }
   }
   if (!res) {
     const toks = anim.split('_');
@@ -314,7 +364,7 @@ export function resolveKeyword(lib: ClipLibraryDef, anim: string, cache?: Map<st
     }
     if (!res) for (const t of toks) if ((res = tryName(t))) break;
   }
-  if (!res) res = has('attack') ? 'attack' : 'idle';
+  if (!res) res = fallbackClip(lib);
   cache?.set(anim, res);
   return res;
 }

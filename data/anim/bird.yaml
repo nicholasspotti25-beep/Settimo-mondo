@@ -1,0 +1,747 @@
+# Bird / griffin pose library (Aquila Dorata, Grifone, harpies, ravens). Root bone: body (pelvis).
+# Bones: body > chest > neck_0..2 > head > jaw (lower beak, +x opens); chest > wing_l_0 (humerus) > wing_l_1 (forearm)
+#        > wing_l_2 (hand, primaries) (+ _r); body > tail_0 (fan; griffin: lion tail tail_0..4);
+#        bird legs leg_l_0..2 / leg_r_0..2 (+x swings a leg BACK); griffin legs leg_fl/fr_0..2 (eagle) and leg_bl/br_0..2 (lion).
+# Wings rest SPREAD. LEFT wing (pointing +X): +z raises it (upstroke), -z lowers it, +y sweeps it BACK, -y forward.
+# RIGHT wing mirrors: -z raises, +y sweeps it FORWARD. Folded (idle/walk): humerus back, forearm forward, hand back.
+family: bird
+aliases:
+  attack: bite
+  thrust: bite
+  thrust_heavy: charge
+  throw: bite
+  tail_sweep: sweep_r
+  kick: claw_r
+  stomp: slam
+  rear_stomp: slam
+  overhead: slam
+  coil: grab
+  shield_bash: charge
+  howl: roar
+  transition: roar
+  summon: cast
+  burrow: dive
+  emerge: leap
+clips:
+  idle:
+    pose:
+      wing_l_0: [10, 70, -6]
+      wing_r_0: [10, -70, 6]
+      wing_l_1: [0, -150, 0]
+      wing_r_1: [0, 150, 0]
+      wing_l_2: [0, 130, 0]
+      wing_r_2: [0, -130, 0]
+      neck_0: [-6, 0, 0]
+      neck_1: [6, 0, 0]
+      head: [4, 0, 0]
+      tail_0: [6, 0, 0]
+    cycle:
+      period: 3.2
+      root: {y: [0.006, 0]}
+      bones:
+        chest: {x: [-1.2, 0]}
+        neck_1: {x: [2, 0.2]}
+        head: {y: [14, 0.3], z: [4, 0.6]}
+        tail_*: {y: [3, 0.1]}
+        wing_l_0: {z: [1.2, 0.1]}
+        wing_r_0: {z: [-1.2, 0.1]}
+  walk:
+    base: idle
+    pose:
+      wing_l_0: [10, 68, -2]
+      wing_r_0: [10, -68, 2]
+      wing_l_1: [0, -150, 0]
+      wing_r_1: [0, 150, 0]
+      wing_l_2: [0, 130, 0]
+      wing_r_2: [0, -130, 0]
+      neck_0: [4, 0, 0]
+    cycle:
+      stride: 1.4
+      root: {y: [0.03, 0.15, double]}
+      rootRot: {z: [3, 0], y: [3, 0]}
+      bones:
+        leg_l_0: {x: [-26, 0]}
+        leg_r_0: {x: [26, 0]}
+        leg_l_1: {x: [-20, 0.8, pos]}
+        leg_r_1: {x: [-20, 0.3, pos]}
+        leg_l_2: {x: [24, 0.8, pos]}
+        leg_r_2: {x: [24, 0.3, pos]}
+        leg_bl_0: {x: [-20, 0]}
+        leg_bl_1: {x: [16, 0.85, pos]}
+        leg_br_0: {x: [-20, 0.5]}
+        leg_br_1: {x: [16, 0.35, pos]}
+        leg_fl_0: {x: [-22, 0.25]}
+        leg_fl_1: {x: [30, 0.1, pos]}
+        leg_fr_0: {x: [-22, 0.75]}
+        leg_fr_1: {x: [30, 0.6, pos]}
+        neck_0: {x: [6, 0.1, double]}
+        neck_2: {x: [-6, 0.1, double]}
+        tail_*: {y: [5, 0]}
+  run:
+    pose:
+      wing_l_0: [0, 30, 20]
+      wing_r_0: [0, -30, -20]
+      wing_l_1: [0, -60, 0]
+      wing_r_1: [0, 60, 0]
+      wing_l_2: [0, 50, 0]
+      wing_r_2: [0, -50, 0]
+      neck_0: [18, 0, 0]
+      neck_1: [6, 0, 0]
+      head: [-10, 0, 0]
+    rootRot: [10, 0, 0]
+    cycle:
+      stride: 2.4
+      root: {y: [0.05, 0.15, double]}
+      rootRot: {x: [3, 0.25]}
+      bones:
+        leg_l_0: {x: [-40, 0]}
+        leg_r_0: {x: [40, 0]}
+        leg_l_1: {x: [-30, 0.8, pos]}
+        leg_r_1: {x: [-30, 0.3, pos]}
+        leg_bl_0: {x: [-40, 0]}
+        leg_bl_1: {x: [36, 0.8, pos]}
+        leg_br_0: {x: [-40, 0.1]}
+        leg_br_1: {x: [36, 0.9, pos]}
+        leg_fl_0: {x: [-46, 0.5]}
+        leg_fl_1: {x: [60, 0.35, pos]}
+        leg_fr_0: {x: [-46, 0.6]}
+        leg_fr_1: {x: [60, 0.45, pos]}
+        wing_l_0: {z: [8, 0]}
+        wing_r_0: {z: [-8, 0]}
+  hover:
+    pose:
+      wing_l_0: [0, 6, 6]
+      wing_r_0: [0, -6, -6]
+      neck_0: [-4, 0, 0]
+      head: [12, 0, 0]
+      leg_l_0: [-30, 0, 0]
+      leg_r_0: [-30, 0, 0]
+      leg_l_1: [-20, 0, 0]
+      leg_r_1: [-20, 0, 0]
+      leg_fl_0: [-30, 0, 0]
+      leg_fr_0: [-30, 0, 0]
+      leg_bl_0: [20, 0, 0]
+      leg_br_0: [20, 0, 0]
+      tail_0: [-18, 0, 0]
+    rootRot: [-8, 0, 0]
+    cycle:
+      period: 0.85
+      root: {y: [0.08, 0.3]}
+      bones:
+        wing_l_0: {z: [46, 0], y: [-12, 0.25]}
+        wing_r_0: {z: [-46, 0], y: [12, 0.25]}
+        wing_l_1: {z: [20, 0.9]}
+        wing_r_1: {z: [-20, 0.9]}
+        wing_l_2: {z: [22, 0.82]}
+        wing_r_2: {z: [-22, 0.82]}
+        tail_*: {x: [4, 0.3]}
+  fly:
+    pose:
+      wing_l_0: [0, 10, 4]
+      wing_r_0: [0, -10, -4]
+      neck_0: [20, 0, 0]
+      neck_1: [10, 0, 0]
+      head: [-16, 0, 0]
+      leg_l_0: [56, 0, 0]
+      leg_r_0: [56, 0, 0]
+      leg_fl_0: [50, 0, 0]
+      leg_fr_0: [50, 0, 0]
+      leg_bl_0: [50, 0, 0]
+      leg_br_0: [50, 0, 0]
+      tail_0: [-6, 0, 0]
+    rootRot: [18, 0, 0]
+    cycle:
+      period: 1.15
+      root: {y: [0.05, 0.3]}
+      bones:
+        wing_l_0: {z: [32, 0], y: [-8, 0.25]}
+        wing_r_0: {z: [-32, 0], y: [8, 0.25]}
+        wing_l_1: {z: [14, 0.9]}
+        wing_r_1: {z: [-14, 0.9]}
+        wing_l_2: {z: [16, 0.82]}
+        wing_r_2: {z: [-16, 0.82]}
+  bite:
+    hold: 2
+    telegraph:
+      pose:
+        neck_0: [-20, 0, 0]
+        neck_1: [-12, 0, 0]
+        neck_2: [10, 0, 0]
+        head: [24, 0, 0]
+        jaw: [30, 0, 0]
+        wing_l_0: [0, 50, 14]
+        wing_r_0: [0, -50, -14]
+        wing_l_1: [0, -90, 0]
+        wing_r_1: [0, 90, 0]
+      rootRot: [-8, 0, 0]
+      root: [0, 0.02, -0.12]
+    active:
+      pose:
+        neck_0: [34, 0, 0]
+        neck_1: [16, 0, 0]
+        neck_2: [-4, 0, 0]
+        head: [6, 0, 0]
+        jaw: [4, 0, 0]
+      rootRot: [16, 0, 0]
+      root: [0, -0.06, 0.35]
+    recovery:
+      pose:
+        neck_0: [18, 0, 0]
+        neck_1: [8, 0, 0]
+        head: [4, 0, 0]
+        jaw: [10, 0, 0]
+      rootRot: [8, 0, 0]
+      root: [0, -0.03, 0.2]
+  claw_r:
+    hold: 2
+    telegraph:
+      pose:
+        leg_r_0: [-80, 0, -10]
+        leg_r_1: [-50, 0, 0]
+        leg_r_2: [-30, 0, 0]
+        leg_fr_0: [-90, 0, -10]
+        leg_fr_1: [-40, 0, 0]
+        leg_l_0: [10, 0, 6]
+        wing_l_0: [0, 10, 40]
+        wing_r_0: [0, -10, -40]
+        neck_0: [-10, 0, 0]
+        head: [16, 0, 0]
+        jaw: [24, 0, 0]
+      rootRot: [-24, 0, 8]
+      root: [0.04, 0.06, -0.1]
+    active:
+      pose:
+        leg_r_0: [-50, 20, -6]
+        leg_r_1: [10, 0, 0]
+        leg_r_2: [40, 0, 0]
+        leg_fr_0: [-30, 20, -6]
+        leg_fr_1: [20, 0, 0]
+        wing_l_0: [0, 0, 10]
+        wing_r_0: [0, 0, -10]
+        neck_0: [14, 0, 0]
+        head: [4, 0, 0]
+        jaw: [10, 0, 0]
+      rootRot: [6, 10, 2]
+      root: [0, -0.04, 0.3]
+    recovery:
+      pose:
+        leg_r_0: [-20, 10, 0]
+        leg_fr_0: [-14, 10, 0]
+        wing_l_0: [0, 30, 6]
+        wing_r_0: [0, -30, -6]
+        neck_0: [8, 0, 0]
+      rootRot: [2, 6, 0]
+      root: [0, -0.02, 0.2]
+  sweep_r:
+    hold: 2
+    telegraph:
+      pose:
+        wing_r_0: [0, -46, -50]
+        wing_r_1: [0, -20, -10]
+        wing_l_0: [0, 30, 20]
+        chest: [0, -16, 0]
+        neck_0: [0, 20, 0]
+        head: [6, 10, 0]
+        jaw: [20, 0, 0]
+      rootRot: [-6, -14, 0]
+    active:
+      pose:
+        wing_r_0: [0, 58, 10]
+        wing_r_1: [0, 20, 6]
+        wing_r_2: [0, 10, 6]
+        wing_l_0: [0, 40, 10]
+        chest: [6, 18, 0]
+        neck_0: [6, -16, 0]
+        head: [0, -10, 0]
+      rootRot: [6, 18, 0]
+      root: [0, -0.03, 0.15]
+    recovery:
+      pose:
+        wing_r_0: [0, 30, 0]
+        wing_l_0: [0, 36, 10]
+        chest: [4, 10, 0]
+      rootRot: [2, 8, 0]
+  sweep_l:
+    mirror: sweep_r
+  slam:
+    hold: 3
+    telegraph:
+      pose:
+        wing_l_0: [0, 10, 78]
+        wing_r_0: [0, -10, -78]
+        wing_l_1: [0, 0, 10]
+        wing_r_1: [0, 0, -10]
+        neck_0: [-14, 0, 0]
+        head: [20, 0, 0]
+        jaw: [30, 0, 0]
+        tail_0: [-20, 0, 0]
+      rootRot: [-20, 0, 0]
+      root: [0, 0.12, -0.08]
+      ease: inout
+    active:
+      pose:
+        wing_l_0: [0, -40, -24]
+        wing_r_0: [0, 40, 24]
+        wing_l_1: [0, -10, -10]
+        wing_r_1: [0, 10, 10]
+        wing_l_2: [0, -10, -14]
+        wing_r_2: [0, 10, 14]
+        neck_0: [24, 0, 0]
+        head: [4, 0, 0]
+        jaw: [16, 0, 0]
+      rootRot: [18, 0, 0]
+      root: [0, -0.1, 0.25]
+    recovery:
+      pose:
+        wing_l_0: [0, -20, -16]
+        wing_r_0: [0, 20, 16]
+        neck_0: [16, 0, 0]
+      rootRot: [12, 0, 0]
+      root: [0, -0.08, 0.2]
+      blend: 0.3
+  breath:
+    hold: 3
+    telegraph:
+      pose:
+        wing_l_0: [0, 50, 50]
+        wing_r_0: [0, -50, -50]
+        wing_l_1: [0, -20, 0]
+        wing_r_1: [0, 20, 0]
+        neck_0: [-12, 0, 0]
+        head: [10, 0, 0]
+        tail_0: [-26, 0, 0]
+      rootRot: [-16, 0, 0]
+      root: [0, 0.04, -0.1]
+      ease: inout
+    active:
+      pose:
+        wing_l_0: [0, -56, -10]
+        wing_r_0: [0, 56, 10]
+        wing_l_1: [0, -20, 0]
+        wing_r_1: [0, 20, 0]
+        wing_l_2: [0, -16, -10]
+        wing_r_2: [0, 16, 10]
+        neck_0: [6, 0, 0]
+        head: [6, 0, 0]
+        jaw: [34, 0, 0]
+      rootRot: [-6, 0, 0]
+      root: [0, 0, -0.06]
+      cycle:
+        period: 0.3
+        bones:
+          wing_l_0: {z: [10, 0], y: [-8, 0.25]}
+          wing_r_0: {z: [-10, 0], y: [8, 0.25]}
+    recovery:
+      pose:
+        wing_l_0: [0, 20, 10]
+        wing_r_0: [0, -20, -10]
+        jaw: [8, 0, 0]
+  roar:
+    hold: 3
+    telegraph:
+      pose:
+        neck_0: [14, 0, 0]
+        neck_1: [10, 0, 0]
+        head: [10, 0, 0]
+        wing_l_0: [0, 40, -10]
+        wing_r_0: [0, -40, 10]
+        wing_l_1: [0, -60, 0]
+        wing_r_1: [0, 60, 0]
+      root: [0, -0.06, 0]
+    active:
+      pose:
+        neck_0: [-18, 0, 0]
+        neck_1: [-12, 0, 0]
+        neck_2: [-6, 0, 0]
+        head: [-18, 0, 0]
+        jaw: [44, 0, 0]
+        wing_l_0: [-10, 6, 34]
+        wing_r_0: [-10, -6, -34]
+        wing_l_1: [0, 0, 10]
+        wing_r_1: [0, 0, -10]
+        wing_l_2: [0, 0, 12]
+        wing_r_2: [0, 0, -12]
+        tail_0: [-30, 0, 0]
+      rootRot: [-12, 0, 0]
+      root: [0, 0.04, -0.04]
+      cycle:
+        period: 0.14
+        bones:
+          head: {y: [2.5, 0], x: [1.5, 0.3]}
+          wing_l_2: {z: [3, 0.1]}
+          wing_r_2: {z: [-3, 0.1]}
+    recovery:
+      pose:
+        neck_0: [-4, 0, 0]
+        jaw: [8, 0, 0]
+        wing_l_0: [0, 40, 6]
+        wing_r_0: [0, -40, -6]
+  cast:
+    hold: 4
+    telegraph:
+      pose:
+        wing_l_0: [-10, 0, 84]
+        wing_r_0: [-10, 0, -84]
+        wing_l_1: [0, 0, 10]
+        wing_r_1: [0, 0, -10]
+        neck_0: [-14, 0, 0]
+        neck_1: [-8, 0, 0]
+        head: [-14, 0, 0]
+        tail_0: [-24, 0, 0]
+      rootRot: [-10, 0, 0]
+      root: [0, 0.06, 0]
+      ease: inout
+    active:
+      pose:
+        wing_l_0: [0, -6, 8]
+        wing_r_0: [0, 6, -8]
+        wing_l_2: [0, -10, 8]
+        wing_r_2: [0, 10, -8]
+        neck_0: [6, 0, 0]
+        head: [4, 0, 0]
+        jaw: [36, 0, 0]
+        tail_0: [-30, 0, 0]
+      rootRot: [-4, 0, 0]
+      ease: back
+      cycle:
+        period: 0.2
+        bones:
+          wing_l_2: {z: [3, 0]}
+          wing_r_2: {z: [-3, 0]}
+    recovery:
+      pose:
+        wing_l_0: [0, 30, 10]
+        wing_r_0: [0, -30, -10]
+        jaw: [8, 0, 0]
+  dive:
+    telegraph:
+      pose:
+        wing_l_0: [0, 10, 60]
+        wing_r_0: [0, -10, -60]
+        neck_0: [10, 0, 0]
+        head: [20, 0, 0]
+        leg_l_0: [30, 0, 0]
+        leg_r_0: [30, 0, 0]
+      rootRot: [10, 0, 0]
+      root: [0, 0.1, 0]
+    active:
+      pose:
+        wing_l_0: [0, 56, 14]
+        wing_r_0: [0, -56, -14]
+        wing_l_1: [0, -50, 0]
+        wing_r_1: [0, 50, 0]
+        wing_l_2: [0, 30, 0]
+        wing_r_2: [0, -30, 0]
+        neck_0: [20, 0, 0]
+        neck_1: [10, 0, 0]
+        head: [-6, 0, 0]
+        leg_l_0: [-80, 0, 6]
+        leg_r_0: [-80, 0, -6]
+        leg_l_1: [-30, 0, 0]
+        leg_r_1: [-30, 0, 0]
+        leg_fl_0: [-80, 0, 0]
+        leg_fr_0: [-80, 0, 0]
+        jaw: [30, 0, 0]
+      rootRot: [40, 0, 0]
+      root: [0, -0.1, 0.4]
+    recovery:
+      pose:
+        wing_l_0: [-10, 0, 40]
+        wing_r_0: [-10, 0, -40]
+        leg_l_0: [-30, 0, 0]
+        leg_r_0: [-30, 0, 0]
+        neck_0: [10, 0, 0]
+      rootRot: [-10, 0, 0]
+      root: [0, -0.06, 0.2]
+  swoop:
+    hold: 2
+    telegraph:
+      pose:
+        wing_l_0: [0, 0, 56]
+        wing_r_0: [0, 0, -56]
+        neck_0: [-6, 0, 0]
+        head: [14, 0, 0]
+      rootRot: [-10, 0, 0]
+      root: [0, 0.08, -0.06]
+    active:
+      pose:
+        wing_l_0: [0, 16, -4]
+        wing_r_0: [0, -16, 4]
+        wing_l_2: [0, 6, 10]
+        wing_r_2: [0, -6, -10]
+        neck_0: [16, 0, 0]
+        head: [-4, 0, 0]
+        leg_l_0: [-90, 0, 6]
+        leg_r_0: [-90, 0, -6]
+        leg_l_2: [-30, 0, 0]
+        leg_r_2: [-30, 0, 0]
+        leg_fl_0: [-90, 0, 0]
+        leg_fr_0: [-90, 0, 0]
+        jaw: [24, 0, 0]
+      rootRot: [10, 0, 0]
+      root: [0, -0.06, 0.3]
+    recovery:
+      pose:
+        wing_l_0: [0, 10, 20]
+        wing_r_0: [0, -10, -20]
+        leg_l_0: [-20, 0, 0]
+        leg_r_0: [-20, 0, 0]
+      root: [0, -0.02, 0.15]
+  charge:
+    telegraph:
+      pose:
+        neck_0: [24, 0, 0]
+        neck_1: [10, 0, 0]
+        head: [-14, 0, 0]
+        jaw: [24, 0, 0]
+        wing_l_0: [0, 40, 30]
+        wing_r_0: [0, -40, -30]
+        wing_l_1: [0, -60, 0]
+        wing_r_1: [0, 60, 0]
+        leg_l_0: [-20, 0, 0]
+        leg_r_0: [10, 0, 0]
+        leg_l_1: [-30, 0, 0]
+      rootRot: [14, 0, 0]
+      root: [0, -0.1, -0.08]
+    active:
+      pose:
+        neck_0: [28, 0, 0]
+        head: [-16, 0, 0]
+        jaw: [30, 0, 0]
+        wing_l_0: [0, 20, 30]
+        wing_r_0: [0, -20, -30]
+        wing_l_1: [0, -30, 0]
+        wing_r_1: [0, 30, 0]
+      rootRot: [16, 0, 0]
+      root: [0, -0.06, 0.1]
+      cycle:
+        period: 0.36
+        root: {y: [0.05, 0.15, double]}
+        bones:
+          leg_l_0: {x: [-40, 0]}
+          leg_r_0: {x: [40, 0]}
+          leg_fl_0: {x: [-46, 0.5]}
+          leg_fr_0: {x: [-46, 0.6]}
+          leg_bl_0: {x: [-40, 0]}
+          leg_br_0: {x: [-40, 0.1]}
+          wing_l_0: {z: [12, 0]}
+          wing_r_0: {z: [-12, 0]}
+    recovery:
+      pose:
+        neck_0: [10, 0, 0]
+        jaw: [8, 0, 0]
+        wing_l_0: [0, 50, 10]
+        wing_r_0: [0, -50, -10]
+      rootRot: [6, 0, 0]
+  leap:
+    telegraph:
+      pose:
+        wing_l_0: [0, 10, 70]
+        wing_r_0: [0, -10, -70]
+        leg_l_0: [-40, 0, 0]
+        leg_r_0: [-40, 0, 0]
+        leg_l_1: [50, 0, 0]
+        leg_r_1: [50, 0, 0]
+        leg_bl_1: [30, 0, 0]
+        leg_br_1: [30, 0, 0]
+        neck_0: [14, 0, 0]
+      rootRot: [10, 0, 0]
+      root: [0, -0.24, -0.04]
+      ease: inout
+    active:
+      pose:
+        wing_l_0: [0, -14, -30]
+        wing_r_0: [0, 14, 30]
+        wing_l_2: [0, -6, -20]
+        wing_r_2: [0, 6, 20]
+        leg_l_0: [-60, 0, 0]
+        leg_r_0: [-60, 0, 0]
+        leg_l_1: [-20, 0, 0]
+        leg_r_1: [-20, 0, 0]
+        leg_fl_0: [-70, 0, 0]
+        leg_fr_0: [-70, 0, 0]
+        neck_0: [-6, 0, 0]
+        jaw: [30, 0, 0]
+      rootRot: [-10, 0, 0]
+      root: [0, 0.2, 0.2]
+    recovery:
+      pose:
+        wing_l_0: [0, 30, 30]
+        wing_r_0: [0, -30, -30]
+        leg_l_0: [-30, 0, 0]
+        leg_r_0: [-30, 0, 0]
+        leg_l_1: [30, 0, 0]
+        leg_r_1: [30, 0, 0]
+      root: [0, -0.16, 0.15]
+      ease: snap
+      blend: 0.2
+  grab:
+    hold: 2
+    telegraph:
+      pose:
+        wing_l_0: [0, 0, 50]
+        wing_r_0: [0, 0, -50]
+        leg_l_0: [-40, 0, 10]
+        leg_r_0: [-40, 0, -10]
+        leg_l_2: [-40, 0, 0]
+        leg_r_2: [-40, 0, 0]
+        leg_fl_0: [-60, 0, 10]
+        leg_fr_0: [-60, 0, -10]
+        neck_0: [-8, 0, 0]
+        head: [14, 0, 0]
+        jaw: [30, 0, 0]
+      rootRot: [-20, 0, 0]
+      root: [0, 0.04, -0.06]
+    active:
+      pose:
+        wing_l_0: [0, -10, 20]
+        wing_r_0: [0, 10, -20]
+        leg_l_0: [-96, 0, 6]
+        leg_r_0: [-96, 0, -6]
+        leg_l_2: [30, 0, 0]
+        leg_r_2: [30, 0, 0]
+        leg_fl_0: [-80, 0, 4]
+        leg_fr_0: [-80, 0, -4]
+        leg_fl_1: [50, 0, 0]
+        leg_fr_1: [50, 0, 0]
+        neck_0: [14, 0, 0]
+        jaw: [10, 0, 0]
+      rootRot: [-8, 0, 0]
+      root: [0, 0.02, 0.3]
+    recovery:
+      pose:
+        wing_l_0: [0, 30, 14]
+        wing_r_0: [0, -30, -14]
+        leg_l_0: [-30, 0, 0]
+        leg_r_0: [-30, 0, 0]
+        leg_fl_0: [-30, 0, 0]
+        leg_fr_0: [-30, 0, 0]
+      root: [0, -0.02, 0.16]
+  spin:
+    hold: 2
+    telegraph:
+      pose:
+        wing_l_0: [0, 10, 10]
+        wing_r_0: [0, -10, -10]
+        chest: [0, -20, 0]
+      rootRot: [0, -30, 0]
+      root: [0, -0.06, 0]
+    active:
+      pose:
+        wing_l_0: [0, 0, 6]
+        wing_r_0: [0, 0, -6]
+        wing_l_2: [0, 0, 10]
+        wing_r_2: [0, 0, -10]
+      cycle:
+        period: 0.55
+        rootRot: {y: [165, 0]}
+        root: {y: [0.04, 0, double]}
+    recovery:
+      pose:
+        wing_l_0: [0, 30, 10]
+        wing_r_0: [0, -30, -10]
+  block:
+    telegraph:
+      pose:
+        wing_l_0: [0, -70, -6]
+        wing_r_0: [0, 70, 6]
+        wing_l_1: [0, -30, 0]
+        wing_r_1: [0, 30, 0]
+        wing_l_2: [0, -20, 0]
+        wing_r_2: [0, 20, 0]
+        neck_0: [20, 0, 0]
+        head: [20, 0, 0]
+      root: [0, -0.1, -0.04]
+  stagger:
+    active:
+      pose:
+        wing_l_0: [0, 20, 50]
+        wing_r_0: [0, -10, -30]
+        neck_0: [-20, 10, 0]
+        neck_1: [-10, 0, 0]
+        head: [-16, 14, 0]
+        jaw: [30, 0, 0]
+      rootRot: [-14, 8, 6]
+      root: [0, 0.02, -0.15]
+  spezzato:
+    telegraph:
+      pose:
+        wing_l_0: [0, 0, 50]
+        wing_r_0: [0, 0, -50]
+        neck_0: [-20, 0, 0]
+        head: [-20, 0, 0]
+        jaw: [40, 0, 0]
+      rootRot: [-10, 0, 0]
+    active:
+      pose:
+        wing_l_0: [10, 20, -30]
+        wing_r_0: [10, -20, 30]
+        wing_l_1: [0, -20, -6]
+        wing_r_1: [0, 20, 6]
+        neck_0: [30, 0, 0]
+        neck_1: [20, 0, 0]
+        head: [20, 0, 10]
+        jaw: [20, 0, 0]
+        leg_l_0: [-40, 0, 10]
+        leg_r_0: [-40, 0, -10]
+        leg_l_1: [60, 0, 0]
+        leg_r_1: [60, 0, 0]
+        leg_fl_1: [60, 0, 0]
+        leg_fr_1: [60, 0, 0]
+        leg_bl_1: [60, 0, 0]
+        leg_br_1: [60, 0, 0]
+      rootRot: [16, 0, 4]
+      root: [0, -0.45, 0]
+      cycle:
+        period: 2.4
+        bones:
+          neck_0: {x: [2, 0]}
+          wing_l_0: {z: [2, 0.2]}
+  death:
+    telegraph:
+      pose:
+        wing_l_0: [-10, 0, 60]
+        wing_r_0: [-10, 0, -60]
+        neck_0: [-24, 0, 0]
+        head: [-20, 0, 0]
+        jaw: [44, 0, 0]
+      rootRot: [-16, 0, 0]
+      root: [0, 0.06, 0]
+    active:
+      pose:
+        wing_l_0: [10, 10, -20]
+        wing_r_0: [0, -10, 40]
+        wing_l_1: [0, -10, -10]
+        neck_0: [30, 0, 20]
+        neck_1: [20, 0, 20]
+        head: [20, 0, 20]
+        jaw: [24, 0, 0]
+        leg_l_0: [-60, 0, 20]
+        leg_r_0: [-40, 0, -10]
+        leg_l_1: [70, 0, 0]
+        leg_r_1: [70, 0, 0]
+      rootRot: [10, 0, 70]
+      root: [0, -0.5, 0]
+  intro:
+    telegraph:
+      pose:
+        neck_0: [20, 0, 0]
+        neck_1: [10, 0, 0]
+        head: [20, 0, 0]
+        leg_l_1: [30, 0, 0]
+        leg_r_1: [30, 0, 0]
+      root: [0, -0.12, 0]
+    active:
+      pose:
+        neck_0: [-18, 0, 0]
+        neck_1: [-12, 0, 0]
+        head: [-18, 0, 0]
+        jaw: [44, 0, 0]
+        wing_l_0: [-10, 6, 34]
+        wing_r_0: [-10, -6, -34]
+        wing_l_2: [0, 0, 12]
+        wing_r_2: [0, 0, -12]
+        tail_0: [-30, 0, 0]
+      rootRot: [-12, 0, 0]
+      root: [0, 0.04, -0.04]
+      ease: inout

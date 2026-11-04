@@ -44,3 +44,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - started: ui review (adversarial, read-only; also the newGame-at-load reload flake)
 - world#3 done: 6 landmark builders, vetta_attesa + castello_culla authored, guardiano arena dressing, act1_world reperti, sky god-ray fix; open: vetta Medium over budget (258 calls/426k)
 - deployed 60dadc8 (world#3 + ui#5 + integration); started render-kit#4 (pose libraries for 7 families)
+- ui review done: 6 major + 10 minor findings (fake aimAssist, blur freeze, title overlap at 667x375, zone+act card overlap, subtitles over menus, tablet thumb reach, ...). Lead fixed: focus -> onForeground (platform.ts), SW offline fallback only for navigations (gen-sw), smoke no longer awaits newGame across evaluate (real flake cause: CDP 'Promise was collected'). TODO integrate#2: SimSettings.aimAssist gating cone search + homing.
+- started: ui fix chunk (review findings)

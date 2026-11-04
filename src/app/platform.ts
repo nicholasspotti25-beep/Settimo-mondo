@@ -102,6 +102,8 @@ export class Platform {
     document.addEventListener('visibilitychange', () => (document.hidden ? onBackground() : onForeground()));
     window.addEventListener('pagehide', onBackground);
     window.addEventListener('blur', () => onBackground());
+    // A blur that does not hide the page (system sheet, call banner) must resume on focus, or the game stays frozen.
+    window.addEventListener('focus', () => { if (!document.hidden) onForeground(); });
     const App = cap()?.Plugins?.App;
     try {
       App?.addListener?.('appStateChange', (s: { isActive: boolean }) => (s.isActive ? onForeground() : onBackground()));

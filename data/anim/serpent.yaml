@@ -1,0 +1,532 @@
+# Serpent / chain pose library (Grande Divoratore, sea serpents, hydras up to 5 heads, worms, chains of flesh).
+# Bones: body_0 (front, ROOT bone, under the neck) .. body_n (tail tip, toward -Z); body_0 > neck{sfx}_0..k > head{sfx}
+#        > jaw{sfx} with sfx '' | _l | _r | _l2 | _r2. Globs drive every head at once: neck* / head* / jaw*, and
+#        neck*_0 = the first bone of every neck.
+# Axes on the BODY (a chain pointing backward): +y swings the bones behind toward the serpent's RIGHT, +x LIFTS them.
+# On the NECK (pointing up/forward): +x leans it forward/down, -x rears it back; head +x nods down; jaw +x opens.
+# Locomotion is a travelling wave on `body` (axis y) driven by distance; neck*_0 cancels the wave at body_0 so the heads
+# stay on target. root: [left, up, forward] in body diameters.
+family: serpent
+aliases:
+  attack: bite
+  thrust: bite
+  thrust_heavy: charge
+  overhead: slam
+  stomp: slam
+  rear_stomp: slam
+  grab: coil
+  block: coil
+  shield_bash: charge
+  kick: tail_sweep
+  throw: tail_sweep
+  claw_r: sweep_r
+  claw_l: sweep_l
+  howl: roar
+  summon: cast
+  swoop: dive
+  transition: roar
+  breach: emerge
+  strike_below: emerge
+  head_sweep: sweep_r
+  tail_fling: tail_sweep
+  submerge: burrow
+clips:
+  idle:
+    pose:
+      neck*: [-2, 0, 0]
+      head*: [4, 0, 0]
+    cycle:
+      period: 6
+      root: {y: [0.02, 0.1]}
+      bones:
+        neck*_0: {y: [-5, 0], x: [-1.5, 0.1]}
+        neck*: {x: [1.6, 0.3], z: [1.2, 0.55]}
+        head*: {y: [5, 0.4], x: [2, 0.7]}
+        jaw*: {x: [3, 0.2, pos]}
+    waves:
+      - {chain: body, axis: y, amp: 5, wavelength: 7, ampEnd: 1.4, period: 6}
+  walk:
+    pose:
+      neck*: [4, 0, 0]
+      head*: [0, 0, 0]
+    cycle:
+      stride: 3.6
+      root: {y: [0.015, 0.25, double]}
+      bones:
+        neck*_0: {y: [-13, 0]}
+        neck*: {x: [1.5, 0.25, double]}
+    waves:
+      - {chain: body, axis: y, amp: 13, wavelength: 6, ampEnd: 1.25, stride: 3.6}
+  run:
+    pose:
+      neck*: [9, 0, 0]
+      head*: [-8, 0, 0]
+    root: [0, -0.06, 0]
+    cycle:
+      stride: 4.8
+      bones:
+        neck*_0: {y: [-17, 0]}
+        neck*: {x: [2, 0.25, double]}
+    waves:
+      - {chain: body, axis: y, amp: 17, wavelength: 5.5, ampEnd: 1.2, stride: 4.8}
+  hover:
+    pose:
+      neck*: [-4, 0, 0]
+      head*: [8, 0, 0]
+    cycle:
+      period: 2.6
+      root: {y: [0.12, 0]}
+      bones:
+        neck*_0: {y: [-6, 0], x: [4, 0.75]}
+    waves:
+      - {chain: body, axis: x, amp: 7, wavelength: 6, ampEnd: 1.3, period: 2.6}
+      - {chain: body, axis: y, amp: 5, wavelength: 8, ampEnd: 1.5, period: 2.6, offset: 0.25}
+  fly:
+    pose:
+      neck*: [8, 0, 0]
+      head*: [-6, 0, 0]
+    cycle:
+      stride: 5
+      bones:
+        neck*_0: {x: [6, 0.75], y: [-4, 0]}
+    waves:
+      - {chain: body, axis: x, amp: 11, wavelength: 5.5, ampEnd: 1.2, stride: 5}
+      - {chain: body, axis: y, amp: 4, wavelength: 8, ampEnd: 1.5, stride: 5, offset: 0.25}
+  bite:
+    hold: 3
+    telegraph:
+      pose:
+        neck*: [-13, 0, 0]
+        head*: [34, 0, 0]
+        jaw*: [42, 0, 0]
+      root: [0, 0.12, -0.55]
+      bends: [{chain: body, axis: y, from: 7, to: -7}]
+    active:
+      pose:
+        neck*: [19, 0, 0]
+        head*: [-22, 0, 0]
+        jaw*: [3, 0, 0]
+      root: [0, -0.08, 1.5]
+      bends: [{chain: body, axis: y, from: 0, to: 0}]
+    recovery:
+      pose:
+        neck*: [13, 0, 0]
+        head*: [-12, 0, 0]
+        jaw*: [10, 0, 0]
+      root: [0, -0.08, 1.0]
+      blend: 0.4
+  charge:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [9, 0, 0]
+        head*: [-10, 0, 0]
+        jaw*: [20, 0, 0]
+      root: [0, -0.06, -0.35]
+      bends: [{chain: body, axis: y, from: 10, to: -10}]
+    active:
+      pose:
+        neck*: [14, 0, 0]
+        head*: [-14, 0, 0]
+        jaw*: [36, 0, 0]
+      root: [0, -0.08, 0.45]
+      waves:
+        - {chain: body, axis: y, amp: 16, wavelength: 5, ampEnd: 1.2, period: 0.38}
+      cycle:
+        period: 0.38
+        bones:
+          neck*_0: {y: [-16, 0]}
+    recovery:
+      pose:
+        neck*: [6, 0, 0]
+        head*: [-6, 0, 0]
+        jaw*: [8, 0, 0]
+      root: [0, -0.04, 0.2]
+  slam:
+    hold: 3
+    telegraph:
+      pose:
+        body_0: [22, 0, 0]
+        body_2: [-22, 0, 0]
+        neck*: [-11, 0, 0]
+        head*: [34, 0, 0]
+        jaw*: [30, 0, 0]
+      root: [0, 0.45, -0.3]
+      ease: inout
+    active:
+      pose:
+        body_0: [-4, 0, 0]
+        body_2: [4, 0, 0]
+        neck*: [25, 0, 0]
+        head*: [8, 0, 0]
+        jaw*: [18, 0, 0]
+      root: [0, -0.1, 0.9]
+    recovery:
+      pose:
+        body_0: [-2, 0, 0]
+        body_2: [2, 0, 0]
+        neck*: [21, 0, 0]
+        head*: [4, 0, 0]
+        jaw*: [10, 0, 0]
+      root: [0, -0.1, 0.7]
+      blend: 0.3
+  sweep_r:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-5, -13, 2]
+        head*: [12, -12, 0]
+        jaw*: [30, 0, 0]
+      root: [0.1, 0.05, -0.25]
+      bends: [{chain: body, axis: y, from: 4, to: 8}]
+    active:
+      pose:
+        neck*: [12, 17, -2]
+        head*: [6, 15, 0]
+        jaw*: [12, 0, 0]
+      root: [-0.15, -0.06, 0.45]
+      bends: [{chain: body, axis: y, from: -4, to: -10}]
+    recovery:
+      pose:
+        neck*: [8, 11, 0]
+        head*: [2, 8, 0]
+        jaw*: [8, 0, 0]
+      root: [-0.1, -0.04, 0.3]
+      bends: [{chain: body, axis: y, from: -2, to: -6}]
+  sweep_l:
+    mirror: sweep_r
+  tail_sweep:
+    hold: 2
+    telegraph:
+      pose:
+        neck*_0: [0, 14, 0]
+        head*: [6, 10, 0]
+        jaw*: [16, 0, 0]
+      bends: [{chain: body, axis: y, from: -3, to: -15}]
+      root: [0, 0.04, 0.1]
+      ease: inout
+    active:
+      pose:
+        neck*_0: [0, -14, 0]
+        head*: [4, -8, 0]
+        jaw*: [26, 0, 0]
+      bends: [{chain: body, axis: y, from: 4, to: 22}]
+      root: [0, -0.04, 0]
+    recovery:
+      pose:
+        neck*_0: [0, -6, 0]
+        jaw*: [6, 0, 0]
+      bends: [{chain: body, axis: y, from: 2, to: 10}]
+      blend: 0.5
+  tail_slam:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-4, 0, 0]
+        head*: [10, 0, 0]
+        jaw*: [20, 0, 0]
+      bends:
+        - {chain: body, axis: x, from: 0, to: 13}
+        - {chain: body, axis: y, from: 0, to: -6}
+      ease: inout
+    active:
+      pose:
+        neck*: [4, 0, 0]
+        head*: [4, 0, 0]
+        jaw*: [32, 0, 0]
+      bends:
+        - {chain: body, axis: x, from: 0, to: -2}
+        - {chain: body, axis: y, from: 0, to: 3}
+      root: [0, -0.08, 0]
+    recovery:
+      pose:
+        neck*: [2, 0, 0]
+        jaw*: [8, 0, 0]
+      bends: [{chain: body, axis: x, from: 0, to: 2}]
+  coil:
+    hold: 3
+    telegraph:
+      pose:
+        neck*: [-8, 0, 0]
+        head*: [22, 0, 0]
+        jaw*: [26, 0, 0]
+      bends: [{chain: body, axis: y, from: 10, to: 18}]
+      root: [0, 0.1, -0.2]
+    active:
+      pose:
+        neck*: [-6, 0, 0]
+        head*: [18, 0, 0]
+        jaw*: [36, 0, 0]
+      bends: [{chain: body, axis: y, from: 18, to: 30}]
+      root: [0, 0.14, 0.1]
+      waves:
+        - {chain: body, axis: x, amp: 3, wavelength: 4, period: 0.45}
+      cycle:
+        period: 0.45
+        bones:
+          head*: {x: [2, 0]}
+    recovery:
+      pose:
+        neck*: [-2, 0, 0]
+        head*: [10, 0, 0]
+        jaw*: [10, 0, 0]
+      bends: [{chain: body, axis: y, from: 6, to: 12}]
+      blend: 0.6
+  spin:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-6, -10, 0]
+        head*: [14, -8, 0]
+        jaw*: [24, 0, 0]
+      bends: [{chain: body, axis: y, from: -6, to: -14}]
+    active:
+      pose:
+        neck*: [4, 0, 0]
+        jaw*: [30, 0, 0]
+      bends: [{chain: body, axis: y, from: 10, to: 20}]
+      cycle:
+        period: 0.7
+        rootRot: {y: [150, 0]}
+        root: {y: [0.05, 0, double]}
+    recovery:
+      pose:
+        neck*: [4, 0, 0]
+        jaw*: [6, 0, 0]
+      bends: [{chain: body, axis: y, from: 4, to: 8}]
+  breath:
+    hold: 3
+    telegraph:
+      pose:
+        neck*: [-11, 0, 0]
+        head*: [-2, 0, 0]
+        jaw*: [10, 0, 0]
+      root: [0, 0.12, -0.35]
+      bends: [{chain: body, axis: y, from: 6, to: -6}]
+      ease: inout
+    active:
+      pose:
+        neck*: [8, 0, 0]
+        head*: [10, 0, 0]
+        jaw*: [48, 0, 0]
+      root: [0, 0.02, 0.25]
+      cycle:
+        period: 0.22
+        bones:
+          head*: {y: [3, 0], x: [1.5, 0.25]}
+          neck*: {x: [1.2, 0.5]}
+    recovery:
+      pose:
+        neck*: [3, 0, 0]
+        head*: [4, 0, 0]
+        jaw*: [12, 0, 0]
+      root: [0, 0, 0.1]
+  roar:
+    hold: 4
+    telegraph:
+      pose:
+        neck*: [7, 0, 0]
+        head*: [10, 0, 0]
+        jaw*: [10, 0, 0]
+      root: [0, -0.05, -0.12]
+    active:
+      pose:
+        neck*: [-12, 0, 0]
+        head*: [-12, 0, 0]
+        jaw*: [54, 0, 0]
+      root: [0, 0.16, -0.25]
+      cycle:
+        period: 0.14
+        bones:
+          neck*: {y: [1.5, 0]}
+          head*: {x: [2, 0.25], y: [2, 0.5]}
+      waves:
+        - {chain: body, axis: y, amp: 3, wavelength: 3, period: 0.3}
+    recovery:
+      pose:
+        neck*: [-4, 0, 0]
+        jaw*: [12, 0, 0]
+      root: [0, 0.04, -0.1]
+  cast:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-9, 0, 0]
+        head*: [14, 0, 0]
+        jaw*: [16, 0, 0]
+      root: [0, 0.2, -0.15]
+      ease: inout
+    active:
+      pose:
+        neck*: [-11, 0, 0]
+        head*: [16, 0, 0]
+        jaw*: [30, 0, 0]
+      root: [0, 0.24, -0.1]
+      cycle:
+        period: 1.4
+        root: {x: [0.15, 0]}
+        bones:
+          neck*: {y: [7, 0]}
+          head*: {y: [-12, 0]}
+    recovery:
+      pose:
+        neck*: [-3, 0, 0]
+        jaw*: [10, 0, 0]
+      root: [0, 0.06, 0]
+  leap:
+    hold: 2
+    telegraph:
+      pose:
+        neck*: [-12, 0, 0]
+        head*: [36, 0, 0]
+        jaw*: [30, 0, 0]
+      root: [0, -0.05, -0.45]
+      bends: [{chain: body, axis: y, from: 14, to: -14}]
+    active:
+      pose:
+        neck*: [10, 0, 0]
+        head*: [-8, 0, 0]
+        jaw*: [44, 0, 0]
+      root: [0, 0.6, 1.4]
+      bends:
+        - {chain: body, axis: y, from: 0, to: 0}
+        - {chain: body, axis: x, from: -6, to: 2}
+    recovery:
+      pose:
+        neck*: [12, 0, 0]
+        head*: [-6, 0, 0]
+        jaw*: [6, 0, 0]
+      root: [0, -0.06, 0.8]
+      blend: 0.3
+  dive:
+    telegraph:
+      pose:
+        body_0: [26, 0, 0]
+        body_2: [-26, 0, 0]
+        neck*: [-10, 0, 0]
+        head*: [42, 0, 0]
+        jaw*: [20, 0, 0]
+      root: [0, 0.55, -0.2]
+      ease: inout
+    active:
+      pose:
+        body_0: [40, 0, 0]
+        body_2: [-20, 0, 0]
+        neck*: [26, 0, 0]
+        head*: [24, 0, 0]
+        jaw*: [4, 0, 0]
+      root: [0, -1.8, 1.0]
+      blend: 0.8
+      ease: in
+    recovery:
+      pose:
+        body_0: [40, 0, 0]
+        neck*: [26, 0, 0]
+        head*: [24, 0, 0]
+      root: [0, -2.4, 0.9]
+  burrow:
+    telegraph:
+      pose:
+        neck*: [16, 0, 0]
+        head*: [28, 0, 0]
+        jaw*: [6, 0, 0]
+      root: [0, -0.1, 0.2]
+    active:
+      pose:
+        neck*: [26, 0, 0]
+        head*: [30, 0, 0]
+      root: [0, -2.6, 0.6]
+      blend: 0.9
+      ease: in
+      waves:
+        - {chain: body, axis: y, amp: 10, wavelength: 5, period: 0.5}
+    recovery:
+      pose:
+        neck*: [26, 0, 0]
+      root: [0, -3, 0.6]
+  emerge:
+    hold: 3
+    telegraph:
+      pose:
+        neck*: [-6, 0, 0]
+        head*: [-20, 0, 0]
+        jaw*: [10, 0, 0]
+      root: [0, -2.8, 0]
+      blend: 0.15
+      ease: snap
+    active:
+      pose:
+        neck*: [-14, 0, 0]
+        head*: [-6, 0, 0]
+        jaw*: [50, 0, 0]
+      root: [0, 0.35, 0.3]
+      blend: 0.7
+      ease: back
+      bends: [{chain: body, axis: x, from: -6, to: 0}]
+    recovery:
+      pose:
+        neck*: [2, 0, 0]
+        head*: [8, 0, 0]
+        jaw*: [12, 0, 0]
+      root: [0, 0, 0.1]
+  stagger:
+    active:
+      pose:
+        neck*: [-11, 9, 5]
+        head*: [-16, 12, 0]
+        jaw*: [30, 0, 0]
+      root: [0.1, 0.04, -0.35]
+      bends: [{chain: body, axis: y, from: -6, to: 4}]
+  spezzato:
+    telegraph:
+      pose:
+        neck*: [-14, 0, 0]
+        head*: [-18, 0, 0]
+        jaw*: [46, 0, 0]
+      root: [0, 0.1, -0.2]
+    active:
+      pose:
+        neck*: [23, 0, 3]
+        head*: [16, 0, 10]
+        jaw*: [24, 0, 0]
+      root: [0, -0.22, 0.2]
+      bends: [{chain: body, axis: y, from: 6, to: 2}]
+      cycle:
+        period: 2.2
+        bones:
+          neck*_0: {x: [2, 0]}
+          head*: {z: [3, 0.3]}
+  death:
+    telegraph:
+      pose:
+        neck*: [-16, 0, 0]
+        head*: [-24, 0, 0]
+        jaw*: [50, 0, 0]
+      root: [0, 0.25, -0.2]
+      bends: [{chain: body, axis: y, from: -8, to: 8}]
+    active:
+      pose:
+        neck*: [25, 0, 6]
+        head*: [16, 0, 24]
+        jaw*: [30, 0, 0]
+      root: [0, -0.32, 0.3]
+      bends: [{chain: body, axis: y, from: 3, to: 12}]
+  intro:
+    telegraph:
+      pose:
+        neck*: [14, 0, 0]
+        head*: [16, 0, 0]
+        jaw*: [0, 0, 0]
+      root: [0, -0.1, -0.2]
+      bends: [{chain: body, axis: y, from: 14, to: 22}]
+    active:
+      pose:
+        neck*: [-11, 0, 0]
+        head*: [-12, 0, 0]
+        jaw*: [50, 0, 0]
+      root: [0, 0.16, -0.1]
+      bends: [{chain: body, axis: y, from: 6, to: 10}]
+      cycle:
+        period: 0.14
+        bones:
+          head*: {x: [2, 0.25], y: [2, 0.5]}

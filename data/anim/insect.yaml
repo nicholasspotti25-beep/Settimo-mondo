@@ -1,0 +1,809 @@
+# Insect pose library (Mantide Regina, Scarabeo Imperiale, Formica Regina, giant wasps, spiders). Root bone: body (thorax).
+# Bones: body > abd_0..2 (abdomen toward -Z: +x LIFTS it, -x curls it under); body > chest (prothorax; mantis: raised)
+#        > head > mand_l / mand_r (mandibles: left +y opens, -y closes; right mirrored), ant_l_0..2 / ant_r_0..2;
+#        legs leg_l{i}_0..2 / leg_r{i}_0..2, i = 0 front .. 3 (spiders); mantis: the front pair is scythe_l_0..2 /
+#        scythe_r_0..2 (scythe_*_0 points forward from the prothorax: -x raises it; scythe_*_1 hangs: -x swings it forward
+#        = blade extended, +x folds it back); beetle elytra_l / elytra_r (+z left / -z right opens them); wing_l_0 / wing_r_0.
+# Legs point sideways: a LEFT leg swings back with +y and lifts with +z; a RIGHT leg mirrors (-y back, -z lifts).
+# Gait: alternating tripods A = l0 r1 l2 r3, B = r0 l1 r2 l3 (mantis: the scythes stay folded and the four legs walk).
+family: insect
+aliases:
+  attack: bite
+  overhead: slam
+  stomp: slam
+  rear_stomp: slam
+  claw_r: sweep_r
+  claw_l: sweep_l
+  throw: sweep_r
+  coil: grab
+  thrust_heavy: grab
+  kick: tail_sweep
+  shield_bash: charge
+  howl: roar
+  transition: roar
+  summon: cast
+  swoop: dive
+clips:
+  idle:
+    pose:
+      ant_l_0: [-8, 0, 0]
+      ant_r_0: [-8, 0, 0]
+      abd_0: [2, 0, 0]
+    cycle:
+      period: 2.6
+      root: {y: [0.01, 0]}
+      bones:
+        abd_0: {x: [1.6, 0]}
+        abd_1: {x: [1.2, 0.15]}
+        head: {y: [5, 0.3], z: [3, 0.6]}
+        chest: {y: [2, 0.4]}
+        mand_l: {y: [4, 0, pos]}
+        mand_r: {y: [-4, 0, pos]}
+        ant_l_0: {x: [6, 0.1], y: [5, 0.4]}
+        ant_r_0: {x: [6, 0.6], y: [-5, 0.9]}
+        scythe_l_1: {x: [3, 0.2]}
+        scythe_r_1: {x: [3, 0.7]}
+        leg_l0_0: {z: [1.5, 0.1]}
+        leg_r0_0: {z: [-1.5, 0.6]}
+  walk:
+    pose:
+      abd_0: [-2, 0, 0]
+      head: [4, 0, 0]
+    cycle:
+      stride: 1.2
+      root: {y: [0.015, 0, double]}
+      rootRot: {z: [1.5, 0]}
+      bones:
+        leg_l0_0: {y: [16, 0], z: [12, 0.75, pos]}
+        leg_r1_0: {y: [-16, 0], z: [-12, 0.75, pos]}
+        leg_l2_0: {y: [16, 0], z: [12, 0.75, pos]}
+        leg_r3_0: {y: [-16, 0], z: [-12, 0.75, pos]}
+        leg_r0_0: {y: [-16, 0.5], z: [-12, 0.25, pos]}
+        leg_l1_0: {y: [16, 0.5], z: [12, 0.25, pos]}
+        leg_r2_0: {y: [-16, 0.5], z: [-12, 0.25, pos]}
+        leg_l3_0: {y: [16, 0.5], z: [12, 0.25, pos]}
+        leg_l0_1: {z: [-8, 0.75, pos]}
+        leg_r1_1: {z: [8, 0.75, pos]}
+        leg_l2_1: {z: [-8, 0.75, pos]}
+        leg_r0_1: {z: [8, 0.25, pos]}
+        leg_l1_1: {z: [-8, 0.25, pos]}
+        leg_r2_1: {z: [8, 0.25, pos]}
+        abd_0: {y: [2, 0], x: [1.5, 0, double]}
+        ant_l_0: {x: [5, 0.2, double]}
+        ant_r_0: {x: [5, 0.7, double]}
+  run:
+    pose:
+      abd_0: [-4, 0, 0]
+      head: [8, 0, 0]
+      chest: [6, 0, 0]
+      ant_l_0: [16, 0, 0]
+      ant_r_0: [16, 0, 0]
+    root: [0, -0.04, 0]
+    cycle:
+      stride: 1.8
+      root: {y: [0.03, 0, double]}
+      rootRot: {z: [2, 0]}
+      bones:
+        leg_l0_0: {y: [24, 0], z: [16, 0.75, pos]}
+        leg_r1_0: {y: [-24, 0], z: [-16, 0.75, pos]}
+        leg_l2_0: {y: [24, 0], z: [16, 0.75, pos]}
+        leg_r3_0: {y: [-24, 0], z: [-16, 0.75, pos]}
+        leg_r0_0: {y: [-24, 0.5], z: [-16, 0.25, pos]}
+        leg_l1_0: {y: [24, 0.5], z: [16, 0.25, pos]}
+        leg_r2_0: {y: [-24, 0.5], z: [-16, 0.25, pos]}
+        leg_l3_0: {y: [24, 0.5], z: [16, 0.25, pos]}
+        abd_0: {y: [3, 0]}
+  hover:
+    pose:
+      elytra_l: [-10, 0, 46]
+      elytra_r: [-10, 0, -46]
+      leg_l*_0: [0, 0, -14]
+      leg_r*_0: [0, 0, 14]
+      leg_l*_1: [0, 0, -16]
+      leg_r*_1: [0, 0, 16]
+      abd_0: [-10, 0, 0]
+      abd_1: [-6, 0, 0]
+    cycle:
+      period: 0.07
+      bones:
+        wing_l_0: {z: [34, 0]}
+        wing_r_0: {z: [-34, 0]}
+    waves:
+      - {chain: abd, axis: x, amp: 3, wavelength: 3, period: 1.4}
+  fly:
+    pose:
+      elytra_l: [-10, 0, 50]
+      elytra_r: [-10, 0, -50]
+      leg_l*_0: [10, 0, -20]
+      leg_r*_0: [10, 0, 20]
+      leg_l*_1: [0, 0, -20]
+      leg_r*_1: [0, 0, 20]
+      abd_0: [-4, 0, 0]
+    rootRot: [8, 0, 0]
+    cycle:
+      period: 0.06
+      bones:
+        wing_l_0: {z: [36, 0]}
+        wing_r_0: {z: [-36, 0]}
+  bite:
+    hold: 2
+    telegraph:
+      pose:
+        chest: [-10, 0, 0]
+        head: [-14, 0, 0]
+        mand_l: [0, 42, 0]
+        mand_r: [0, -42, 0]
+        ant_l_0: [-20, 10, 0]
+        ant_r_0: [-20, -10, 0]
+        scythe_l_0: [-20, 0, 0]
+        scythe_r_0: [-20, 0, 0]
+        leg_l0_0: [0, -8, 10]
+        leg_r0_0: [0, 8, -10]
+      rootRot: [-6, 0, 0]
+      root: [0, 0.04, -0.12]
+    active:
+      pose:
+        chest: [16, 0, 0]
+        head: [18, 0, 0]
+        mand_l: [0, -16, 0]
+        mand_r: [0, 16, 0]
+        ant_l_0: [10, 0, 0]
+        ant_r_0: [10, 0, 0]
+      rootRot: [8, 0, 0]
+      root: [0, -0.08, 0.4]
+    recovery:
+      pose:
+        chest: [8, 0, 0]
+        head: [10, 0, 0]
+        mand_l: [0, 6, 0]
+        mand_r: [0, -6, 0]
+      root: [0, -0.04, 0.24]
+  thrust:
+    hold: 2
+    telegraph:
+      pose:
+        chest: [-14, 0, 0]
+        head: [-6, 0, 0]
+        scythe_l_0: [-46, 0, 0]
+        scythe_r_0: [-46, 0, 0]
+        scythe_l_1: [20, 0, 0]
+        scythe_r_1: [20, 0, 0]
+        leg_l0_0: [0, 30, 30]
+        leg_r0_0: [0, -30, -30]
+        abd_0: [-24, 0, 0]
+        abd_1: [-30, 0, 0]
+        abd_2: [-30, 0, 0]
+      root: [0, 0.02, -0.15]
+    active:
+      pose:
+        chest: [14, 0, 0]
+        scythe_l_0: [-10, 0, 0]
+        scythe_r_0: [-10, 0, 0]
+        scythe_l_1: [-96, 0, 0]
+        scythe_r_1: [-96, 0, 0]
+        leg_l0_0: [0, -40, 22]
+        leg_r0_0: [0, 40, -22]
+        leg_l0_1: [0, 0, 30]
+        leg_r0_1: [0, 0, -30]
+        abd_0: [-40, 0, 0]
+        abd_1: [-44, 0, 0]
+        abd_2: [-30, 0, 0]
+      root: [0, -0.05, 0.4]
+    recovery:
+      pose:
+        chest: [8, 0, 0]
+        scythe_l_1: [-50, 0, 0]
+        scythe_r_1: [-50, 0, 0]
+        leg_l0_0: [0, -20, 10]
+        leg_r0_0: [0, 20, -10]
+        abd_0: [-14, 0, 0]
+      root: [0, -0.03, 0.25]
+  grab:
+    hold: 3
+    telegraph:
+      pose:
+        chest: [-18, 0, 0]
+        head: [8, 0, 0]
+        scythe_l_0: [-54, 10, 0]
+        scythe_r_0: [-54, -10, 0]
+        scythe_l_1: [36, 0, 0]
+        scythe_r_1: [36, 0, 0]
+        mand_l: [0, 36, 0]
+        mand_r: [0, -36, 0]
+        leg_l0_0: [0, -10, 40]
+        leg_r0_0: [0, 10, -40]
+        leg_l0_1: [0, -20, 10]
+        leg_r0_1: [0, 20, -10]
+      rootRot: [-8, 0, 0]
+      root: [0, 0.06, -0.1]
+    active:
+      pose:
+        chest: [20, 0, 0]
+        head: [10, 0, 0]
+        scythe_l_0: [-6, -8, 0]
+        scythe_r_0: [-6, 8, 0]
+        scythe_l_1: [-110, 0, 0]
+        scythe_r_1: [-110, 0, 0]
+        mand_l: [0, -14, 0]
+        mand_r: [0, 14, 0]
+        leg_l0_0: [0, -46, 14]
+        leg_r0_0: [0, 46, -14]
+        leg_l0_1: [0, -30, 0]
+        leg_r0_1: [0, 30, 0]
+      rootRot: [8, 0, 0]
+      root: [0, -0.06, 0.45]
+    recovery:
+      pose:
+        chest: [4, 0, 0]
+        scythe_l_0: [-30, 0, 0]
+        scythe_r_0: [-30, 0, 0]
+        scythe_l_1: [30, 0, 0]
+        scythe_r_1: [30, 0, 0]
+        mand_l: [0, -10, 0]
+        mand_r: [0, 10, 0]
+      root: [0, -0.02, 0.2]
+      blend: 0.35
+  sweep_r:
+    hold: 2
+    telegraph:
+      pose:
+        chest: [-8, -22, 6]
+        head: [0, 16, 0]
+        scythe_r_0: [-70, -50, 0]
+        scythe_r_1: [-40, 0, 0]
+        scythe_l_0: [-20, 10, 0]
+        leg_r0_0: [0, -30, -50]
+        leg_r0_1: [0, 0, -20]
+        mand_l: [0, 20, 0]
+        mand_r: [0, -20, 0]
+      rootRot: [-4, -14, 0]
+      root: [0, 0.02, -0.06]
+    active:
+      pose:
+        chest: [12, 26, -6]
+        head: [6, -14, 0]
+        scythe_r_0: [-14, 70, 0]
+        scythe_r_1: [-70, 0, 0]
+        scythe_l_0: [-10, 20, 0]
+        leg_r0_0: [0, 70, -16]
+        leg_r0_1: [0, 0, 10]
+        mand_l: [0, 0, 0]
+        mand_r: [0, 0, 0]
+      rootRot: [4, 18, 0]
+      root: [0, -0.03, 0.18]
+    recovery:
+      pose:
+        chest: [8, 16, 0]
+        scythe_r_0: [-20, 40, 0]
+        scythe_r_1: [-30, 0, 0]
+        leg_r0_0: [0, 40, -10]
+      rootRot: [2, 10, 0]
+      root: [0, -0.02, 0.1]
+  sweep_l:
+    mirror: sweep_r
+  slam:
+    hold: 3
+    telegraph:
+      pose:
+        chest: [-16, 0, 0]
+        head: [10, 0, 0]
+        scythe_l_0: [-70, 0, 0]
+        scythe_r_0: [-70, 0, 0]
+        scythe_l_1: [-30, 0, 0]
+        scythe_r_1: [-30, 0, 0]
+        leg_l0_0: [0, -20, 56]
+        leg_r0_0: [0, 20, -56]
+        leg_l1_0: [0, -10, 30]
+        leg_r1_0: [0, 10, -30]
+        mand_l: [0, 30, 0]
+        mand_r: [0, -30, 0]
+        abd_0: [10, 0, 0]
+      rootRot: [-26, 0, 0]
+      root: [0, 0.3, -0.12]
+      ease: inout
+    active:
+      pose:
+        chest: [18, 0, 0]
+        head: [10, 0, 0]
+        scythe_l_0: [30, 0, 0]
+        scythe_r_0: [30, 0, 0]
+        scythe_l_1: [-20, 0, 0]
+        scythe_r_1: [-20, 0, 0]
+        leg_l0_0: [0, -40, -10]
+        leg_r0_0: [0, 40, 10]
+        mand_l: [0, 10, 0]
+        mand_r: [0, -10, 0]
+        abd_0: [6, 0, 0]
+      rootRot: [12, 0, 0]
+      root: [0, -0.18, 0.3]
+    recovery:
+      pose:
+        chest: [12, 0, 0]
+        scythe_l_0: [20, 0, 0]
+        scythe_r_0: [20, 0, 0]
+        leg_l0_0: [0, -30, -6]
+        leg_r0_0: [0, 30, 6]
+      rootRot: [8, 0, 0]
+      root: [0, -0.12, 0.22]
+      blend: 0.3
+  charge:
+    telegraph:
+      pose:
+        chest: [16, 0, 0]
+        head: [14, 0, 0]
+        mand_l: [0, 36, 0]
+        mand_r: [0, -36, 0]
+        ant_l_0: [30, 0, 0]
+        ant_r_0: [30, 0, 0]
+        scythe_l_0: [10, 0, 0]
+        scythe_r_0: [10, 0, 0]
+        abd_0: [8, 0, 0]
+      rootRot: [8, 0, 0]
+      root: [0, -0.14, -0.1]
+      cycle:
+        period: 0.5
+        bones:
+          leg_l2_0: {y: [10, 0]}
+          leg_r2_0: {y: [-10, 0.5]}
+    active:
+      pose:
+        chest: [16, 0, 0]
+        head: [16, 0, 0]
+        mand_l: [0, 30, 0]
+        mand_r: [0, -30, 0]
+        ant_l_0: [40, 0, 0]
+        ant_r_0: [40, 0, 0]
+      rootRot: [8, 0, 0]
+      root: [0, -0.1, 0.1]
+      cycle:
+        period: 0.26
+        root: {y: [0.03, 0, double]}
+        bones:
+          leg_l0_0: {y: [26, 0], z: [16, 0.75, pos]}
+          leg_r1_0: {y: [-26, 0], z: [-16, 0.75, pos]}
+          leg_l2_0: {y: [26, 0], z: [16, 0.75, pos]}
+          leg_r3_0: {y: [-26, 0], z: [-16, 0.75, pos]}
+          leg_r0_0: {y: [-26, 0.5], z: [-16, 0.25, pos]}
+          leg_l1_0: {y: [26, 0.5], z: [16, 0.25, pos]}
+          leg_r2_0: {y: [-26, 0.5], z: [-16, 0.25, pos]}
+          leg_l3_0: {y: [26, 0.5], z: [16, 0.25, pos]}
+    recovery:
+      pose:
+        chest: [6, 0, 0]
+        head: [6, 0, 0]
+        mand_l: [0, 6, 0]
+        mand_r: [0, -6, 0]
+      root: [0, -0.04, 0.06]
+  leap:
+    telegraph:
+      pose:
+        chest: [10, 0, 0]
+        leg_l*_0: [0, 0, 26]
+        leg_r*_0: [0, 0, -26]
+        leg_l*_1: [0, 0, 20]
+        leg_r*_1: [0, 0, -20]
+        scythe_l_0: [-30, 0, 0]
+        scythe_r_0: [-30, 0, 0]
+        mand_l: [0, 30, 0]
+        mand_r: [0, -30, 0]
+      root: [0, -0.32, -0.08]
+      ease: inout
+    active:
+      pose:
+        chest: [-12, 0, 0]
+        head: [-6, 0, 0]
+        leg_l*_0: [0, 20, -16]
+        leg_r*_0: [0, -20, 16]
+        leg_l*_1: [0, 0, -24]
+        leg_r*_1: [0, 0, 24]
+        leg_l0_0: [0, -40, 30]
+        leg_r0_0: [0, 40, -30]
+        scythe_l_0: [-40, 0, 0]
+        scythe_r_0: [-40, 0, 0]
+        scythe_l_1: [-70, 0, 0]
+        scythe_r_1: [-70, 0, 0]
+        mand_l: [0, 40, 0]
+        mand_r: [0, -40, 0]
+      rootRot: [-14, 0, 0]
+      root: [0, 0.2, 0.3]
+    recovery:
+      pose:
+        chest: [14, 0, 0]
+        leg_l*_0: [0, 0, 22]
+        leg_r*_0: [0, 0, -22]
+        mand_l: [0, -10, 0]
+        mand_r: [0, 10, 0]
+      root: [0, -0.26, 0.2]
+      ease: snap
+      blend: 0.15
+  tail_sweep:
+    hold: 2
+    telegraph:
+      pose:
+        abd_0: [10, -18, 0]
+        abd_1: [6, -14, 0]
+        abd_2: [4, -10, 0]
+        chest: [0, 10, 0]
+      rootRot: [0, 14, 0]
+    active:
+      pose:
+        abd_0: [6, 32, 0]
+        abd_1: [4, 24, 0]
+        abd_2: [2, 18, 0]
+        chest: [0, -10, 0]
+        leg_l2_0: [0, 20, 20]
+        leg_r2_0: [0, -20, -20]
+      rootRot: [0, -22, 0]
+    recovery:
+      pose:
+        abd_0: [4, 14, 0]
+        abd_1: [2, 10, 0]
+      rootRot: [0, -10, 0]
+  spin:
+    hold: 2
+    telegraph:
+      pose:
+        chest: [-6, -20, 0]
+        scythe_l_0: [-40, 30, 0]
+        scythe_r_0: [-40, -30, 0]
+        abd_0: [6, -16, 0]
+      rootRot: [0, -24, 0]
+      root: [0, -0.06, 0]
+    active:
+      pose:
+        scythe_l_0: [-20, 60, 0]
+        scythe_r_0: [-20, -60, 0]
+        scythe_l_1: [-80, 0, 0]
+        scythe_r_1: [-80, 0, 0]
+        leg_l0_0: [0, 0, 30]
+        leg_r0_0: [0, 0, -30]
+        abd_0: [6, 20, 0]
+      cycle:
+        period: 0.5
+        rootRot: {y: [170, 0]}
+        root: {y: [0.03, 0, double]}
+    recovery:
+      pose:
+        scythe_l_1: [-20, 0, 0]
+        scythe_r_1: [-20, 0, 0]
+  breath:
+    hold: 3
+    telegraph:
+      pose:
+        chest: [-12, 0, 0]
+        head: [-6, 0, 0]
+        mand_l: [0, 20, 0]
+        mand_r: [0, -20, 0]
+        abd_0: [-20, 0, 0]
+        abd_1: [-30, 0, 0]
+        abd_2: [-30, 0, 0]
+      rootRot: [-6, 0, 0]
+      root: [0, 0.06, -0.1]
+      ease: inout
+    active:
+      pose:
+        chest: [10, 0, 0]
+        head: [12, 0, 0]
+        mand_l: [0, 44, 0]
+        mand_r: [0, -44, 0]
+        abd_0: [-36, 0, 0]
+        abd_1: [-40, 0, 0]
+        abd_2: [-36, 0, 0]
+      rootRot: [4, 0, 0]
+      root: [0, 0, -0.06]
+      cycle:
+        period: 0.2
+        bones:
+          head: {y: [3, 0]}
+          abd_1: {x: [3, 0.3]}
+    recovery:
+      pose:
+        mand_l: [0, 8, 0]
+        mand_r: [0, -8, 0]
+        abd_0: [-10, 0, 0]
+  roar:
+    hold: 3
+    telegraph:
+      pose:
+        chest: [12, 0, 0]
+        head: [12, 0, 0]
+        abd_0: [-6, 0, 0]
+        leg_l*_0: [0, 0, 12]
+        leg_r*_0: [0, 0, -12]
+      root: [0, -0.12, 0]
+    active:
+      pose:
+        chest: [-22, 0, 0]
+        head: [-16, 0, 0]
+        mand_l: [0, 50, 0]
+        mand_r: [0, -50, 0]
+        ant_l_0: [-40, 20, 0]
+        ant_r_0: [-40, -20, 0]
+        scythe_l_0: [-74, 26, 0]
+        scythe_r_0: [-74, -26, 0]
+        scythe_l_1: [-60, 0, 0]
+        scythe_r_1: [-60, 0, 0]
+        leg_l0_0: [0, -30, 50]
+        leg_r0_0: [0, 30, -50]
+        elytra_l: [-14, 0, 50]
+        elytra_r: [-14, 0, -50]
+        wing_l_0: [0, 0, 40]
+        wing_r_0: [0, 0, -40]
+        abd_0: [24, 0, 0]
+        abd_1: [16, 0, 0]
+      rootRot: [-20, 0, 0]
+      root: [0, 0.2, -0.08]
+      cycle:
+        period: 0.12
+        bones:
+          head: {y: [2, 0], x: [1.5, 0.3]}
+          mand_l: {y: [4, 0]}
+          mand_r: {y: [-4, 0]}
+          wing_l_0: {z: [14, 0]}
+          wing_r_0: {z: [-14, 0]}
+    recovery:
+      pose:
+        chest: [-4, 0, 0]
+        mand_l: [0, 10, 0]
+        mand_r: [0, -10, 0]
+      rootRot: [-4, 0, 0]
+      root: [0, 0.04, 0]
+  cast:
+    hold: 3
+    telegraph:
+      pose:
+        chest: [-10, 0, 0]
+        head: [-10, 0, 0]
+        ant_l_0: [-40, 20, 0]
+        ant_r_0: [-40, -20, 0]
+        elytra_l: [-10, 0, 40]
+        elytra_r: [-10, 0, -40]
+        abd_0: [14, 0, 0]
+      root: [0, 0.06, 0]
+    active:
+      pose:
+        chest: [-16, 0, 0]
+        head: [-14, 0, 0]
+        mand_l: [0, 30, 0]
+        mand_r: [0, -30, 0]
+        ant_l_0: [-46, 24, 0]
+        ant_r_0: [-46, -24, 0]
+        scythe_l_0: [-60, 20, 0]
+        scythe_r_0: [-60, -20, 0]
+        elytra_l: [-14, 0, 54]
+        elytra_r: [-14, 0, -54]
+        abd_0: [26, 0, 0]
+        abd_1: [16, 0, 0]
+      rootRot: [-10, 0, 0]
+      root: [0, 0.12, 0]
+      cycle:
+        period: 0.07
+        bones:
+          wing_l_0: {z: [30, 0]}
+          wing_r_0: {z: [-30, 0]}
+      waves:
+        - {chain: ant_l, axis: y, amp: 12, wavelength: 2, period: 0.6}
+        - {chain: ant_r, axis: y, amp: -12, wavelength: 2, period: 0.6}
+        - {chain: abd, axis: x, amp: 6, wavelength: 3, period: 0.4}
+    recovery:
+      pose:
+        ant_l_0: [-10, 0, 0]
+        ant_r_0: [-10, 0, 0]
+        abd_0: [6, 0, 0]
+  block:
+    telegraph:
+      pose:
+        chest: [8, 0, 0]
+        head: [14, 0, 0]
+        scythe_l_0: [-60, -26, 0]
+        scythe_r_0: [-60, 26, 0]
+        scythe_l_1: [30, 0, 0]
+        scythe_r_1: [30, 0, 0]
+        leg_l0_0: [0, -30, 40]
+        leg_r0_0: [0, 30, -40]
+        elytra_l: [0, 0, 20]
+        elytra_r: [0, 0, -20]
+      root: [0, -0.1, -0.05]
+  dive:
+    telegraph:
+      pose:
+        chest: [-10, 0, 0]
+        leg_l*_0: [0, 0, 20]
+        leg_r*_0: [0, 0, -20]
+        elytra_l: [-10, 0, 50]
+        elytra_r: [-10, 0, -50]
+      rootRot: [-16, 0, 0]
+      root: [0, 0.2, -0.1]
+      cycle:
+        period: 0.07
+        bones:
+          wing_l_0: {z: [30, 0]}
+          wing_r_0: {z: [-30, 0]}
+    active:
+      pose:
+        chest: [16, 0, 0]
+        head: [14, 0, 0]
+        mand_l: [0, 40, 0]
+        mand_r: [0, -40, 0]
+        scythe_l_1: [-80, 0, 0]
+        scythe_r_1: [-80, 0, 0]
+        leg_l0_0: [0, -40, 30]
+        leg_r0_0: [0, 40, -30]
+        elytra_l: [-10, 0, 30]
+        elytra_r: [-10, 0, -30]
+        wing_l_0: [0, 20, 10]
+        wing_r_0: [0, -20, -10]
+      rootRot: [34, 0, 0]
+      root: [0, -0.1, 0.4]
+    recovery:
+      pose:
+        chest: [8, 0, 0]
+        mand_l: [0, -6, 0]
+        mand_r: [0, 6, 0]
+      rootRot: [6, 0, 0]
+      root: [0, -0.12, 0.2]
+  burrow:
+    telegraph:
+      pose:
+        chest: [20, 0, 0]
+        head: [24, 0, 0]
+        abd_0: [8, 0, 0]
+      rootRot: [16, 0, 0]
+      root: [0, -0.1, 0]
+      cycle:
+        period: 0.24
+        bones:
+          leg_l0_0: {y: [-30, 0]}
+          leg_r0_0: {y: [30, 0.5]}
+          leg_l1_0: {y: [-24, 0.5]}
+          leg_r1_0: {y: [24, 0]}
+    active:
+      pose:
+        chest: [24, 0, 0]
+        head: [24, 0, 0]
+      rootRot: [24, 0, 0]
+      root: [0, -2.4, 0.2]
+      blend: 0.9
+      ease: in
+      cycle:
+        period: 0.2
+        bones:
+          leg_l*_0: {y: [-26, 0]}
+          leg_r*_0: {y: [26, 0.5]}
+    recovery:
+      rootRot: [24, 0, 0]
+      root: [0, -2.8, 0.2]
+  emerge:
+    hold: 3
+    telegraph:
+      rootRot: [-20, 0, 0]
+      root: [0, -2.4, 0]
+      blend: 0.12
+      ease: snap
+    active:
+      pose:
+        chest: [-18, 0, 0]
+        head: [-10, 0, 0]
+        mand_l: [0, 46, 0]
+        mand_r: [0, -46, 0]
+        scythe_l_0: [-70, 20, 0]
+        scythe_r_0: [-70, -20, 0]
+        scythe_l_1: [-50, 0, 0]
+        scythe_r_1: [-50, 0, 0]
+        leg_l0_0: [0, -30, 46]
+        leg_r0_0: [0, 30, -46]
+        ant_l_0: [-30, 0, 0]
+        ant_r_0: [-30, 0, 0]
+      rootRot: [-16, 0, 0]
+      root: [0, 0.12, 0.1]
+      blend: 0.7
+      ease: back
+    recovery:
+      pose:
+        chest: [4, 0, 0]
+        mand_l: [0, 6, 0]
+        mand_r: [0, -6, 0]
+      root: [0, -0.02, 0.05]
+  stagger:
+    active:
+      pose:
+        chest: [-18, 12, 6]
+        head: [-16, -10, 8]
+        mand_l: [0, 30, 0]
+        mand_r: [0, -30, 0]
+        ant_l_0: [-30, 20, 0]
+        ant_r_0: [-30, -20, 0]
+        scythe_l_0: [-40, 30, 0]
+        scythe_r_0: [-20, -10, 0]
+        leg_l0_0: [0, -10, 30]
+        leg_r0_0: [0, 10, -20]
+      rootRot: [-10, 8, 5]
+      root: [0, 0.04, -0.2]
+  spezzato:
+    telegraph:
+      pose:
+        chest: [-16, 0, 0]
+        head: [-14, 0, 0]
+        mand_l: [0, 40, 0]
+        mand_r: [0, -40, 0]
+      rootRot: [-10, 0, 0]
+    active:
+      pose:
+        chest: [22, 0, 8]
+        head: [26, 0, 10]
+        mand_l: [0, 20, 0]
+        mand_r: [0, -20, 0]
+        ant_l_0: [40, 0, 0]
+        ant_r_0: [40, 0, 0]
+        scythe_l_0: [30, 0, 0]
+        scythe_r_0: [24, 0, 0]
+        scythe_l_1: [30, 0, 0]
+        scythe_r_1: [30, 0, 0]
+        leg_l*_0: [0, 0, -16]
+        leg_r*_0: [0, 0, 16]
+        leg_l*_1: [0, 0, 24]
+        leg_r*_1: [0, 0, -24]
+        abd_0: [-6, 0, 0]
+      rootRot: [6, 0, 6]
+      root: [0, -0.38, 0]
+      cycle:
+        period: 1.8
+        bones:
+          leg_l1_1: {z: [4, 0]}
+          leg_r2_1: {z: [-4, 0.5]}
+          ant_l_0: {x: [4, 0.3]}
+  death:
+    telegraph:
+      pose:
+        chest: [-24, 0, 0]
+        head: [-20, 0, 0]
+        mand_l: [0, 50, 0]
+        mand_r: [0, -50, 0]
+        leg_l*_0: [0, 0, 30]
+        leg_r*_0: [0, 0, -30]
+        scythe_l_0: [-70, 20, 0]
+        scythe_r_0: [-70, -20, 0]
+      rootRot: [-18, 0, 0]
+      root: [0, 0.15, 0]
+    active:
+      pose:
+        chest: [16, 0, 0]
+        head: [20, 0, 0]
+        mand_l: [0, 10, 0]
+        mand_r: [0, -10, 0]
+        leg_l*_0: [0, 0, 34]
+        leg_r*_0: [0, 0, -34]
+        leg_l*_1: [0, 0, 50]
+        leg_r*_1: [0, 0, -50]
+        scythe_l_1: [40, 0, 0]
+        scythe_r_1: [40, 0, 0]
+        abd_0: [-10, 0, 0]
+      rootRot: [0, 0, 168]
+      root: [0, -0.55, 0]
+      blend: 0.8
+  intro:
+    telegraph:
+      pose:
+        chest: [16, 0, 0]
+        head: [20, 0, 0]
+        ant_l_0: [30, 0, 0]
+        ant_r_0: [30, 0, 0]
+        leg_l*_0: [0, 0, 16]
+        leg_r*_0: [0, 0, -16]
+      root: [0, -0.2, 0]
+    active:
+      pose:
+        chest: [-22, 0, 0]
+        head: [-16, 0, 0]
+        mand_l: [0, 50, 0]
+        mand_r: [0, -50, 0]
+        scythe_l_0: [-74, 26, 0]
+        scythe_r_0: [-74, -26, 0]
+        scythe_l_1: [-60, 0, 0]
+        scythe_r_1: [-60, 0, 0]
+        elytra_l: [-14, 0, 50]
+        elytra_r: [-14, 0, -50]
+        leg_l0_0: [0, -30, 50]
+        leg_r0_0: [0, 30, -50]
+      rootRot: [-20, 0, 0]
+      root: [0, 0.2, -0.08]
