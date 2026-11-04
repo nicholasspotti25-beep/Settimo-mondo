@@ -74,6 +74,30 @@ export class StyleCache {
   }
 }
 
+/**
+ * Cached numeric attribute / style writer for per-frame values: the value is quantized to `step` and the DOM (and the string
+ * it needs) is only touched when the quantized value changed, so a steady state costs no write and no allocation.
+ */
+export class NumCache {
+  private q = NaN;
+  private readonly digits: number;
+  constructor(private el: Element, private name: string, private step = 0.1, private suffix = '', private style = false) {
+    this.digits = Math.max(0, Math.ceil(-Math.log10(step) - 1e-9));
+  }
+  set(v: number): void {
+    const q = Math.round(v / this.step);
+    if (q === this.q) return;
+    this.q = q;
+    const str = (q * this.step).toFixed(this.digits) + this.suffix;
+    if (this.style) ((this.el as HTMLElement).style as any).setProperty(this.name, str);
+    else this.el.setAttribute(this.name, str);
+  }
+  /** Forget the cached value (the element was rebuilt or written elsewhere). */
+  reset(): void {
+    this.q = NaN;
+  }
+}
+
 export function fmtPlaytime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);

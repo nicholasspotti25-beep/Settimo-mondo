@@ -1,7 +1,7 @@
 # Preset for small phones (e.g. 667x375, 720x360): same thumb distances from the corner as the default layout on a narrower
 # screen, slightly smaller secondary buttons. Fractions of the safe area (see touch_default.yaml).
 stick:       {zone: [0.00, 0.30, 0.42, 1.00], mode: floating, radius: 0.095, sprint_ring: 0.85, dead_zone: 0.12}
-camera_drag: {zone: [0.46, 0.00, 1.00, 0.62], sensitivity: 1.0}
+camera_drag: {zone: [0.44, 0.00, 1.00, 1.00], sensitivity: 1.0}
 buttons:
   light:       {pos: [0.875, 0.72], size: 0.13}
   heavy:       {pos: [0.755, 0.845], size: 0.105}

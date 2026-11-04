@@ -145,17 +145,17 @@ colossus/golem/giant, else humanoid).
 | humanoid | `humanoidSkeleton(mb, {height, build, shoulders, armLength, legLength, hunch, prefix, parent, at, cape, hair, tail, jaw})` / `humanoidBody(mb, d, {skin, cloth, metal, trim, glow, armor: none\|tunic\|plate\|robe\|bare, head: human\|helm\|hood\|skull\|beast\|mask\|none, cape, bulk, surfaces})` | root > hips > spine > chest > neck > head (> jaw); chest > shoulder_l > arm_l > forearm_l > hand_l (+ _r); hips > thigh_l > shin_l > foot_l (+ _r); chains cape_*, hair_*, tail_*; sockets grip_l/grip_r (weapon, +Z out of the fist), back, seed, head_top | humanoid.yaml (35+ clips) |
 | quadruped | `quadrupedSkeleton(mb, {length, height, legStyle: equine\|canine\|ursine\|feline, heads 1-3, neckBones, neckLength, neckAngle, tailBones, width})` / `quadrupedBody(mb, d, {body, belly, dark, mane, hoof, eye, eyeGlow, fur, muzzle, ears, horns, teeth, bulk, surfaces})` | root > body (pelvis) > spine > chest; chest > neck_0..n > head > jaw (extra heads neck_l_* / head_l / jaw_l, neck_r_* ...); chest > leg_fl_0..2, leg_fr_0..2; body > leg_bl_0..2, leg_br_0..2; body > tail_* | quadruped.yaml |
 | mounted | `mountedSkeleton(mb, {horse: QuadrupedOpts, rider: HumanoidSkeletonOpts, seat})` (+ quadrupedBody + humanoidBody) | the quadruped bones + `saddle`, `rider_root`, `seat` + the humanoid bones prefixed `rider_` | mounted.yaml (steed_* = quadruped, foot_* = dismounted rider) |
-| colossus | `colossusSkeleton(mb, {height, build...})` / `colossusBody(mb, d, {matter: rock\|mud\|lava\|ice\|bone, body, chunk, glow, heart, dressing})` | humanoid bones, heavy proportions | not yet (*) |
-| serpent | `serpentSkeleton(mb, {length, radius, segments, heads up to 5, neckBones, neckLength, rise, front})` / `serpentBody(mb, d, {body, belly, pattern, eye, horns, spikes, mouth: snake\|ring, scales, glow})` | root > body_0 (front) .. body_n (tail tip, -Z); body_0 > neck{sfx}_0..k > head{sfx} > jaw{sfx}, sfx '' \| _l \| _r \| _l2 \| _r2 | not yet (*) |
-| dragon | `dragonSkeleton(mb, {length, height, heads 1-3, neckLength, neckBones, tailLength, tailBones, wingSpan, frontLegs, width})` / `dragonBody(mb, d, {body, belly, membrane, membraneEdge, horn, eye, headColors, glow, crystals, stars, spikes})` | root > body > spine > chest; chest > neck{sfx}_* > head{sfx} > jaw{sfx}; legs leg_fl/fr/bl/br_0..2; body > tail_*; chest > wing_l_0..2 > wing_l_f{0,1,2}_{0,1}; wing_l_b_0..1 (+ _r) | not yet (*) |
-| bird | `birdSkeleton(mb, {height, wingSpan, griffin, length})` / `birdBody(mb, d, {feather, featherTip, belly, fur, beak, talon, eye, glow})` | root > body > chest > neck_0..2 > head > jaw; chest > wing_l_0..2 (+ _r); body > tail_0 (griffin tail_*); legs leg_l_0..2 / leg_r_0..2 (griffin leg_fl/fr/bl/br_*) | not yet (*) |
-| insect | `insectSkeleton(mb, {kind: mantis\|beetle\|ant\|wasp\|spider, height, length, legPairs})` / `insectBody(mb, d, {shell, shellDark, belly, eye, sheen, glow, crown, blade, wing})` | root > body > abd_0..2; body > chest > head > mand_l/mand_r, ant_l_0..2/ant_r_0..2; legs leg_l{i}_0..2 / leg_r{i}_0..2 (mantis front pair scythe_l_0..2 / scythe_r_0..2); elytra_l/r, wing_l_0/wing_r_0 | not yet (*) |
-| tree | `treeSkeleton(mb, {height, radius, armLength, roots})` / `treeBody(mb, d, {bark, barkDark, leaves, leavesTip, glow, mushrooms, moss, face})` | root > trunk_0..3 > crown_*; trunk_2 > branch_l_0..2 / branch_r_0..2; trunk_3 > branch_l2_*, branch_r2_*; trunk_1 > jaw; root > rootl_* | not yet (*) |
-| tentacled | `tentacledSkeleton(mb, {variant: kraken\|cthulhu, height, tentacles, tentacleBones, tentacleLength, wingSpan})` / `tentacledBody(mb, d, {skin, belly, sucker, eye, glow, membrane})` | kraken: root > body > head; body > tent{i}_0..k. cthulhu: humanoid bones + head > face{i}_* + chest > wing_* + mist{i}_* | not yet (*) |
+| colossus | `colossusSkeleton(mb, {height, build...})` / `colossusBody(mb, d, {matter: rock\|mud\|lava\|ice\|bone, body, chunk, glow, heart, dressing})` | humanoid bones, heavy proportions | colossus.yaml (extends humanoid; heavier wind-ups, low recoveries, slam_r/slam_l, eruption = summon) |
+| serpent | `serpentSkeleton(mb, {length, radius, segments, heads up to 5, neckBones, neckLength, rise, front})` / `serpentBody(mb, d, {body, belly, pattern, eye, horns, spikes, mouth: snake\|ring, scales, glow})` | root > body_0 (front) .. body_n (tail tip, -Z); body_0 > neck{sfx}_0..k > head{sfx} > jaw{sfx}, sfx '' \| _l \| _r \| _l2 \| _r2 | serpent.yaml (distance-driven body wave, neck*_0 cancels it so heads stay on target; bite, coil, tail_sweep, tail_slam, dive/burrow/emerge, breach/strike_below = emerge) |
+| dragon | `dragonSkeleton(mb, {length, height, heads 1-3, neckLength, neckBones, tailLength, tailBones, wingSpan, frontLegs, width})` / `dragonBody(mb, d, {body, belly, membrane, membraneEdge, horn, eye, headColors, glow, crystals, stars, spikes})` | root > body > spine > chest; chest > neck{sfx}_* > head{sfx} > jaw{sfx}; legs leg_fl/fr/bl/br_0..2; body > tail_*; chest > wing_l_0..2 > wing_l_f{0,1,2}_{0,1}; wing_l_b_0..1 (+ _r) | dragon.yaml (wings folded tented over the back on the ground, flapping in hover/fly; breath, claw, rear_stomp, tail_sweep, dive, swoop) |
+| bird | `birdSkeleton(mb, {height, wingSpan, griffin, length})` / `birdBody(mb, d, {feather, featherTip, belly, fur, beak, talon, eye, glow})` | root > body > chest > neck_0..2 > head > jaw; chest > wing_l_0..2 (+ _r); body > tail_0 (griffin tail_*); legs leg_l_0..2 / leg_r_0..2 (griffin leg_fl/fr/bl/br_*) | bird.yaml (bird and griffin legs in the same clips; folded wings, hover/fly flaps, claw, dive, swoop, screech) |
+| insect | `insectSkeleton(mb, {kind: mantis\|beetle\|ant\|wasp\|spider, height, length, legPairs})` / `insectBody(mb, d, {shell, shellDark, belly, eye, sheen, glow, crown, blade, wing})` | root > body > abd_0..2; body > chest > head > mand_l/mand_r, ant_l_0..2/ant_r_0..2; legs leg_l{i}_0..2 / leg_r{i}_0..2 (mantis front pair scythe_l_0..2 / scythe_r_0..2); elytra_l/r, wing_l_0/wing_r_0 | insect.yaml (tripod gait for 3-4 leg pairs, mantis raptorial grab/scythe sweep, mandible bite, threat display, dead-bug death) |
+| tree | `treeSkeleton(mb, {height, radius, armLength, roots})` / `treeBody(mb, d, {bark, barkDark, leaves, leavesTip, glow, mushrooms, moss, face})` | root > trunk_0..3 > crown_*; trunk_2 > branch_l_0..2 / branch_r_0..2; trunk_3 > branch_l2_*, branch_r2_*; trunk_1 > jaw; root > rootl_* | tree.yaml (roots lift in walk/stomp, two-branch slam, branch sweeps, canopy shake, toppling death; root_call = summon, heart_pulse = roar, shake_canopy = shake) |
+| tentacled | `tentacledSkeleton(mb, {variant: kraken\|cthulhu, height, tentacles, tentacleBones, tentacleLength, wingSpan})` / `tentacledBody(mb, d, {skin, belly, sucker, eye, glow, membrane})` | kraken: root > body > head; body > tent{i}_0..k. cthulhu: humanoid bones + head > face{i}_* + chest > wing_* + mist{i}_* | tentacled.yaml (one library for both variants: radial tentacle curls/waves, slam, grab, sweep, summon) |
 
-(*) Pose libraries for these seven families are the next render-kit item. Until they land, a model of these families
-holds its rest pose plus springs, look-at and hit flinch. You can ship your own clips today in `RigVisualOpts.clips`
-(section 6.4): they take precedence over the family library, so they stay valid when it lands.
+Every family library resolves every keyword of section 6.2 (tests/render_anim.test.ts checks it, plus every bone and
+chain a clip names on generic models of each family variant). A model of your own may still add or override clips in
+`RigVisualOpts.clips` (section 6.4): they take precedence over the family library.
 
 The `d` (Dims) object each skeleton builder returns has the measurements you need to place parts: humanoid `H, hipY,
 shoulderX, upperArm, forearm, thigh, shin, r` (limb radius scale), `p` (prefix); quadruped `h, L, w, bodyY, chestY, heads,
@@ -183,9 +183,11 @@ intro, transition.
 
 An attack `anim` resolves in this order: flag prefix clip (e.g. `foot_<anim>` while 'dismounted') -> exact clip ->
 model aliases (`RigVisualOpts.aliases`) / family aliases -> global aliases (about 200 verbs: slash, cleave, lunge,
-trample, fire_breath, pounce, constrict, ...) -> mirror of the other side (`claw_l` from `claw_r`) -> shorter prefixes
-(`thrust_combo_2` -> `thrust_combo` -> `thrust`) -> suffix compounds (`lance_thrust_combo` -> `thrust_combo` ->
-`thrust`) -> any token -> `attack` (generic wind-up/strike) -> `idle`. Name attacks freely; pick an `anim` that resolves
+trample, fire_breath, pounce, constrict, punt, ...) -> mirror of the other side (`claw_l` from `claw_r`) -> sided
+compounds (`branch_whip_l`: the base `branch_whip` resolves to `sweep_r`, then the side is kept -> `sweep_l`; `slam_r`
+-> `slam_r` if the family has it, else `slam`) -> shorter prefixes (`thrust_combo_2` -> `thrust_combo` -> `thrust`) ->
+suffix compounds (`lance_thrust_combo` -> `thrust_combo` -> `thrust`) -> any token -> `attack` clip or the family's
+`attack` alias (generic wind-up/strike) -> `idle`. Name attacks freely; pick an `anim` that resolves
 to the motion you mean, or add a clip with exactly that name.
 
 ### 6.3 Clip format (data/anim/<family>.yaml or RigVisualOpts.clips)
@@ -209,9 +211,16 @@ clips:
     waves: [{chain: tail, axis: y, amp: 8, wavelength: 5, period: 2.4}]
 ```
 
+- `bends: [{chain, axis, from, to}]`: a static curl along a chain, bone k of n gets lerp(from, to, k/(n-1)) degrees
+  (added to its pose): serpent coils, a tail wound up before a sweep, tentacles curled for a grab.
+- Chains in `waves` / `bends`: a named chain (`body`, `tail`, `wing_l_f0`, `tent3`), a bone prefix (`abd` = abd_0..), or
+  a glob over named chains (`tent*`, `neck*`, `rootl*`): every match moves, each `spread` cycles later than the
+  previous so tentacles never move in unison. `axis: radial` curls each chain about its own horizontal tangent: +
+  down/outward away from the body axis, - up/inward, whatever direction the chain points (kraken ring, roots, mist).
 - `pose`: bone -> `[x, y, z]` degrees relative to rest. **x = pitch forward** (an upright chain leans forward, a forward
   chain nods down, a hanging limb swings BACK), **y = turn to the character's left**, **z = roll, top toward the
-  character's right** (a left arm rises sideways with +z, a right arm with -z). Keys may be globs (`neck*`).
+  character's right** (a left arm rises sideways with +z, a right arm with -z). Keys may be globs with `*` anywhere
+  (`neck*` = every neck bone, `neck*_0` = the first bone of every neck, `leg_l*_0` = every left hip). Exact names win.
 - `root`: offset of the root bone in units of `model.size` (hip height) `[left, up, forward]`; `rootRot` degrees.
 - `cycle`: oscillations (`[amplitude, phase 0..1, mode?]`, modes pos/neg/abs/double), time (`period`) or distance
   (`stride`, size units) driven. `waves`: travelling waves along a chain (serpents, tails, tentacles, wing fingers).

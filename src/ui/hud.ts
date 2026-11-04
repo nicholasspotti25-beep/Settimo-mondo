@@ -8,7 +8,7 @@
 import type { Actor } from '../sim/actor';
 import type { SimEvent } from '../sim/types';
 import type { StatusKind } from '../core/types';
-import { h, s, svgIcon, setText, toggle, StyleCache, clamp01 } from './dom';
+import { h, s, svgIcon, setText, toggle, StyleCache, NumCache, clamp01 } from './dom';
 import { ICONS, STATUS_ICONS, weaponGlyph, promptIcon } from './icons';
 import { clamp, type ResolvedLayout } from './layout';
 import { replay, type UiCtx } from './ctx';
@@ -20,7 +20,7 @@ const RING_C = 2 * Math.PI * 44;
 const PIP_R = 33;
 const PIP_LEN = ((2 * Math.PI * PIP_R) * 100) / 360;
 
-interface Bar { el: HTMLElement; fill: StyleCache; lag: StyleCache | null; lagV: number; lagHold: number; v: number }
+interface Bar { el: HTMLElement; fill: StyleCache; lag: StyleCache | null; lagV: number; lagHold: number; v: number; lagSet?: boolean }
 
 function makeBar(cls: string, lag: boolean): Bar {
   const fill = h('i', { class: 'fill' });
@@ -37,12 +37,16 @@ function setBar(b: Bar, v: number, dt: number): void {
     b.fill.set('transform', `scaleX(${v.toFixed(4)})`);
   }
   if (!b.lag) return;
+  const before = b.lagV;
   if (b.lagV < v) b.lagV = v;
   else if (b.lagV > v) {
     if (b.lagHold > 0) b.lagHold -= dt;
     else b.lagV = Math.max(v, b.lagV - dt * 0.45);
   }
-  b.lag.set('transform', `scaleX(${b.lagV.toFixed(4)})`);
+  if (b.lagV !== before || !b.lagSet) {
+    b.lagSet = true;
+    b.lag.set('transform', `scaleX(${b.lagV.toFixed(4)})`);
+  }
 }
 
 interface PartView { root: HTMLElement; name: HTMLElement; hp: Bar; eq: Bar; idx: number }
@@ -53,6 +57,8 @@ export class Hud {
   private ringCss: StyleCache;
   private metaArc: SVGCircleElement;
   private ecoArcs: SVGCircleElement[] = [];
+  private metaOff!: NumCache;
+  private ecoDash: NumCache[] = [];
   private seed: SVGGElement;
   private count: SVGTextElement;
   private pbars: HTMLElement;
@@ -62,7 +68,7 @@ export class Hud {
   private vials: HTMLElement;
   private vialEls: HTMLElement[] = [];
   private status: HTMLElement;
-  private statusEls = new Map<StatusKind, { el: HTMLElement; arc: SVGCircleElement; max: number }>();
+  private statusEls = new Map<StatusKind, { el: HTMLElement; off: NumCache; max: number }>();
   private ally: HTMLElement;
   private allyName: HTMLElement;
   private allyBar = makeBar('', false);
@@ -84,9 +90,9 @@ export class Hud {
   private rededge: HTMLElement;
   private redUntil = 0;
   private redActor = -1;
-  private vignette: StyleCache;
+  private vignette: NumCache;
   private vigV = 0;
-  private lowvig: StyleCache;
+  private lowvig: NumCache;
   private pd: HTMLElement;
   private pdText: HTMLElement;
   private trans: HTMLElement;
@@ -116,11 +122,13 @@ export class Hud {
       `<circle class="halo" r="46"/><circle class="trk" r="44" stroke-width="5"/><circle class="meta-hair" r="48.6"/>`;
     this.metaArc = s('circle', { class: 'meta', r: 44, 'stroke-width': 4, transform: 'rotate(-90)', 'stroke-dasharray': `${RING_C} ${RING_C}`, 'stroke-dashoffset': RING_C });
     svg.appendChild(this.metaArc);
+    this.metaOff = new NumCache(this.metaArc, 'stroke-dashoffset', 0.1);
     for (let i = 0; i < 3; i++) {
       const rot = -90 + 10 + i * 120;
       svg.appendChild(s('circle', { class: 'eco-trk', r: PIP_R, 'stroke-width': 5, transform: `rotate(${rot})`, 'stroke-dasharray': `${PIP_LEN} 999` }));
       const arc = s('circle', { class: 'eco', r: PIP_R, 'stroke-width': 5, transform: `rotate(${rot})`, 'stroke-dasharray': `0 999` });
       this.ecoArcs.push(arc);
+      this.ecoDash.push(new NumCache(arc, 'stroke-dasharray', 0.01, ' 999'));
       svg.appendChild(arc);
     }
     svg.appendChild(s('circle', { class: 'core', r: 26 }));
@@ -150,9 +158,9 @@ export class Hud {
     this.redwarn = h('div', { class: 'sm-redwarn' }, svgIcon(ICONS.red));
     this.rededge = h('div', { class: 'sm-rededge' });
     const vig = h('div', { class: 'sm-vignette' });
-    this.vignette = new StyleCache(vig);
+    this.vignette = new NumCache(vig, 'opacity', 0.01, '', true);
     const low = h('div', { class: 'sm-lowvig' });
-    this.lowvig = new StyleCache(low);
+    this.lowvig = new NumCache(low, 'opacity', 0.01, '', true);
     this.pd = h('div', { class: 'sm-pd' });
     this.pdText = h('div', { class: 'sm-pdtext' });
     this.trans = h('div', { class: 'sm-trans' });
@@ -298,11 +306,11 @@ export class Hud {
     setBar(this.fiato, p.fiato / Math.max(1, p.fiatoMax), dt);
     toggle(this.fiato.el, 'empty', p.fiato < 8);
     const lowK = p.hp > 0 && p.hp < p.hpMax * 0.3 ? 1 - p.hp / (p.hpMax * 0.3) : 0;
-    this.lowvig.set('opacity', (lowK * 0.9).toFixed(2));
+    this.lowvig.set(lowK * 0.9);
     if (p.hp < this.lastHp - 0.01 && this.vigV < 0.3) this.vigV = 0.3;
     this.lastHp = p.hp;
     this.vigV = Math.max(0, this.vigV - dt * 1.6);
-    this.vignette.set('opacity', this.vigV.toFixed(2));
+    this.vignette.set(this.vigV);
 
     // --- vials
     while (this.vialEls.length < p.lacrimeMax) {
@@ -324,7 +332,7 @@ export class Hud {
         const arc = s('circle', { cx: 12, cy: 12, r: 11, 'stroke-dasharray': `${2 * Math.PI * 11} 999` });
         const tm = s('svg', { class: 'tm', viewBox: '0 0 24 24' }, arc);
         const el = h('div', { class: `sm-st ${k}`, title: this.ctx.t(`ui.status.${k}`) }, svgIcon(STATUS_ICONS[k] ?? ICONS.star), tm);
-        v = { el, arc, max: left };
+        v = { el, off: new NumCache(arc, 'stroke-dashoffset', 0.1), max: left };
         this.statusEls.set(k, v);
         this.status.appendChild(el);
       }
@@ -335,7 +343,7 @@ export class Hud {
         continue;
       }
       if (left > v.max) v.max = left;
-      v.arc.setAttribute('stroke-dashoffset', ((1 - left / v.max) * 2 * Math.PI * 11).toFixed(1));
+      v.off.set((1 - left / v.max) * 2 * Math.PI * 11);
     }
 
     // --- ally (Ouranthos)
@@ -349,13 +357,13 @@ export class Hud {
     // --- Metamondo ring + Eco pips
     const meta = sim.meta;
     const frac = clamp01(meta.fraction);
-    this.metaArc.setAttribute('stroke-dashoffset', (RING_C * (1 - frac)).toFixed(1));
+    this.metaOff.set(RING_C * (1 - frac));
     toggle(this.ring, 'ready', meta.ready && !!sim.fight?.active);
     toggle(this.ring, 'active', meta.active);
     const segs = p.eco / 100;
     for (let i = 0; i < 3; i++) {
       const f = clamp01(segs - i);
-      this.ecoArcs[i].setAttribute('stroke-dasharray', `${(PIP_LEN * f).toFixed(2)} 999`);
+      this.ecoDash[i].set(PIP_LEN * f);
       toggle(this.ecoArcs[i], 'full', f >= 1);
     }
     const showCount = meta.active;
@@ -472,12 +480,12 @@ export class Hud {
     }
     if (sim.fight?.memory) {
       const pl = sim.player;
-      const fail = [pl.tookDamage, pl.weaponsUsed.size > 1, pl.drank, pl.usedMetamondo];
-      CHALLENGES.forEach((c, i) => {
+      for (let i = 0; i < CHALLENGES.length; i++) {
         const el = this.chalEls[i];
-        toggle(el, 'sm-hidden', !sim.challenges[c]);
-        toggle(el, 'fail', fail[i]);
-      });
+        const fail = i === 0 ? pl.tookDamage : i === 1 ? pl.weaponsUsed.size > 1 : i === 2 ? pl.drank : pl.usedMetamondo;
+        toggle(el, 'sm-hidden', !sim.challenges[CHALLENGES[i]]);
+        toggle(el, 'fail', fail);
+      }
     }
   }
 

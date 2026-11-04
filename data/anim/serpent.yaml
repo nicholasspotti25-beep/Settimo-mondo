@@ -146,12 +146,12 @@ clips:
     hold: 3
     telegraph:
       pose:
-        body_0: [22, 0, 0]
-        body_2: [-22, 0, 0]
-        neck*: [-11, 0, 0]
-        head*: [34, 0, 0]
-        jaw*: [30, 0, 0]
-      root: [0, 0.45, -0.3]
+        body_0: [36, 0, 0]
+        body_2: [-36, 0, 0]
+        neck*: [-16, 0, 0]
+        head*: [44, 0, 0]
+        jaw*: [34, 0, 0]
+      root: [0, 0.9, -0.35]
       ease: inout
     active:
       pose:

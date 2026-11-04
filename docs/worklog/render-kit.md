@@ -19,21 +19,21 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
 
 ## Next
 
-1. (chunk 4, in progress) contact-sheet visual check of the 7 new libraries on generic models + docs/RENDER_KIT.md
-   section 5/6 update (pose libraries, bends/radial/globs, sided compounds).
-2. FX polish: a settings toggle for `fx.attackWarnings` (request to ui), shockwave wall look from close up, projectile
+1. FX polish: a settings toggle for `fx.attackWarnings` (request to ui), shockwave wall look from close up, projectile
    meshes per visual reviewed in a dedicated shot (the chunk-3 capture caught only golden_wave/bolt in frame), decals on
    sloped (non-arena) ground, uHazeK/exposure scaling of the additive kit fresnel shells.
-3. Exposure part 2 (src/render/fx/post.ts, HDR_ENABLED=false today): clamp kit rim/specular for half floats (white
+2. Exposure part 2 (src/render/fx/post.ts, HDR_ENABLED=false today): clamp kit rim/specular for half floats (white
    blocks after MSAA resolve), make the dehaze cut follow view changes instantly (crushed rk2/final_1_boss_high), then
    enable HDR + per-act grading + vignette, and bloom (BLOOM_LEVELS high 5 / medium 3) once the world stream re-tunes its
    additive layers (request filed). Re-shoot vetta_attesa alba/tramonto/notte; outline pass; shadow preset check.
-4. ActorRenderer v2: swing-arc generator from SwingDef.arc + weapon trails (base/tip), left-hand IK for two-handed grips,
+3. ActorRenderer v2: swing-arc generator from SwingDef.arc + weapon trails (base/tip), left-hand IK for two-handed grips,
    part.highlight constellation lines, multi-part lock markers; Portatore cloak drape polish.
-5. Guardiano polish: hind thigh still grazes the caparison rear in some poses; chanfron reads boxy from the front; add a
+4. Guardiano polish: hind thigh still grazes the caparison rear in some poses; chanfron reads boxy from the front; add a
    model triangle-count assert (< 80k) to tests/render_anim.test.ts for BOSS_MODELS entries.
-6. Generic model polish: humanoid sword clips need hand_r pitch tuning (blade follows the swing arc).
-7. Full screenshot pass (title -> new game -> Guardiano: idle, attacks, red telegraph, Spezzato, grace) low/high; keep
+5. Generic model polish: humanoid sword clips need hand_r pitch tuning (blade follows the swing arc); bird/dragon
+   attack poses on real content models (the generic bird has a 2.6 H wing, so close-ups of folds were judged in
+   scratchpad rk4/fold_bird.png); serpent slam rear-up height depends on segment length (body_0/body_2 +-36).
+6. Full screenshot pass (title -> new game -> Guardiano: idle, attacks, red telegraph, Spezzato, grace) low/high; keep
    docs/RENDER_KIT.md in sync with every API change.
 
 ## Notes
@@ -140,3 +140,36 @@ docs/RENDER_KIT.md, src/content/bosses/guardiano_del_regno/model.ts, tests/rende
   stronger + edge width grows with camera distance (thin at 20 m before), pillars toned down (were white-saturated),
   crack seams keep the hazard hue (roots read white), trails thin when flying at the camera (stood up as a bar).
   Stats with FX: high ~62-111 calls / 174-343k tris (scene incl. world + transparent pillars), low 51-54 calls / 69k tris.
+
+
+### Chunk 4 (2026-11-04)
+- Pose libraries for the 7 missing families (data/anim/): colossus.yaml (extends humanoid, 27 heavy clips: long low
+  wind-ups, short snaps, recoveries that stay bent; slam_r/slam_l, eruption/mire_arms/double_slam/mud_wave/long_reach/
+  submerge aliases), serpent.yaml (25: distance-driven body wave with neck*_0 cancelling it at the root, S-coil bite
+  with jaws gaping in the telegraph and snapping shut on impact, coil, tail_sweep, tail_slam, slam, dive/burrow/emerge;
+  breach/strike_below/head_sweep/tail_fling aliases), dragon.yaml (22: wings folded tented over the back on the ground,
+  flapping hover/fly, breath, claw_r/l, rear_stomp, tail_sweep, dive, swoop, block with wings), bird.yaml (24: bird +
+  griffin legs in the same clips, folded wings, claw, dive, swoop, screech, gust), insect.yaml (24: tripod gait for 3-4
+  pairs, mantis raptorial grab, scythe sweep, mandible bite, threat display, dead-bug death), tree.yaml (23: per-root
+  lifts in walk/stomp, two-branch slam, branch sweeps, canopy shake, toppling death; root_call/heart_pulse/
+  shake_canopy aliases), tentacled.yaml (20: kraken + cthulhu in one library).
+- Animator/clips (owned): globs with `*` anywhere in pose/cycle keys (`neck*_0`); wave/bend chain globs over named chains
+  (`tent*`) with `spread`; static `bends`; `axis: radial` (per-chain tangent from rest positions, compile-time only);
+  sided compound resolution (`branch_whip_l` -> sweep_l; before, both sides resolved to sweep_r); unknown anims fall
+  back to the family `attack` alias (caronte `punt` resolved to idle) + global alias punt -> thrust.
+- docs/RENDER_KIT.md: section 5 pose-library column filled for every family, "not yet" note removed; 6.2 resolution
+  order (sided compounds, attack-alias fallback); 6.3 bends, chain globs, radial axis, key globs.
+- Verification: `npx tsc --noEmit -p tsconfig.json` 0 errors in src/render/** and tests/render*; `npm run registry` +
+  `SM_PARTIAL=1 npm run data` ok (11 anim libraries in content.json); `npx vitest run tests/render_anim.test.ts
+  tests/render_models.test.ts` 30/30 (new: keywords on all 11 libraries, sided compounds, every attack anim of every
+  boss in data resolves to a real non-idle clip, bones + wave/bend chains of each library exist on 16 generic variants
+  (colossus x2, serpent/hydra/worm, dragon x2, bird/griffin, 5 insect kinds, tree, kraken/cthulhu), NaN-free over every
+  keyword x stage, < 80k tris, serpent bite moves the head > 1.5 m forward, dragon idle brings the wing tip within 50%
+  of its rest span). Headless 1280x576 contact sheets of key poses on the generic models, LOOKED at (scratchpad
+  rk4/sheet_<family>.png, harness rk4/harness.ts + sheet.mjs, private Vite with fs.allow on the scratchpad): colossus
+  (overhead wind-up arms high -> crouched double-fist strike, sweep wind-up/follow-through, eruption, kneel), serpent
+  (S-coil -> lunge, tail wound left -> hook right, spiral coil), dragon (tented fold, hover flap, rear-up, roar),
+  mantis (prayer idle, raised scythes -> extended strike, threat display), spider, beetle, tree (overhead branches ->
+  slam, sweep, topple), kraken (tentacles gather into a column -> slam radiating onto the ground), cthulhu. Fixes made
+  from them: bird fold (secondaries jutted out sideways; 8 candidates rendered in rk4/fold_bird.png, picked humerus
+  [0,75,-25] / forearm [0,-165,0] / hand [0,175,0]), serpent slam rear-up doubled (root 0.45 -> 0.9, body bend 22 -> 36).

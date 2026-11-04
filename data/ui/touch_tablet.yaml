@@ -1,7 +1,7 @@
 # Preset for tablets (e.g. 1024x768 .. 1366x1024): the right-thumb cluster hugs the lower-right corner so thumbs reach every
 # control while holding the tablet with two hands. Fractions of the safe area (see touch_default.yaml).
 stick:       {zone: [0.00, 0.35, 0.42, 1.00], mode: floating, radius: 0.10, sprint_ring: 0.85, dead_zone: 0.12}
-camera_drag: {zone: [0.45, 0.00, 1.00, 0.70], sensitivity: 1.0}
+camera_drag: {zone: [0.44, 0.00, 1.00, 1.00], sensitivity: 1.0}
 buttons:
   light:       {pos: [0.922, 0.855], size: 0.14}
   heavy:       {pos: [0.843, 0.917], size: 0.11}

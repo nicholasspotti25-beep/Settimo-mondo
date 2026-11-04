@@ -7,7 +7,7 @@
  */
 import type { SimEvent } from '../sim/types';
 import type { SequenceView } from '../sim/sequence';
-import { h, s, setText, toggle, StyleCache, clear } from './dom';
+import { h, s, setText, toggle, NumCache, clear } from './dom';
 import { speakerColor, speakerName, type UiCtx } from './ctx';
 
 const KNEEL_C = 2 * Math.PI * 21;
@@ -25,6 +25,14 @@ const GESTURE_PATHS: Record<string, string> = {
   wave: 'M10 50C24 26 36 26 50 50S76 74 90 50',
   spiral: 'M50 50m0-4a4 4 0 1 1-0.01 0M50 50m0-16a16 16 0 1 1-0.01 0M50 50m0-32a32 32 0 1 1-0.01 0',
 };
+
+/** Same choice options (key + hold) without building a signature string every frame. */
+export function sameOptions(a: readonly { key: string; hold: number }[] | null, b: readonly { key: string; hold: number }[] | null): boolean {
+  if (!a || !b) return a === b;
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i].key !== b[i].key || a[i].hold !== b[i].hold) return false;
+  return true;
+}
 
 function gesturePath(id: string): string | null {
   for (const k of Object.keys(GESTURE_PATHS)) if (id === k || id.endsWith(`_${k}`) || id.startsWith(`${k}_`)) return GESTURE_PATHS[k];
@@ -46,11 +54,13 @@ export class StoryLayer {
   private titleCard: HTMLElement;
   private titleText: HTMLElement;
   private seqFade: HTMLElement;
-  private seqFadeCss: StyleCache;
+  private seqFadeOp: NumCache;
   private tapCatch: HTMLElement;
   private choices: HTMLElement;
-  private choiceEls: { el: HTMLElement; prog: SVGCircleElement; hold: boolean }[] = [];
-  private choiceSig = '';
+  private choiceEls: { el: HTMLElement; prog: NumCache; hold: boolean }[] = [];
+  /** Options of the choice on screen (compared field by field, no per-frame signature string); null = none. */
+  private choiceOpts: { key: string; hold: number }[] | null = null;
+  private choiceStale = true;
   private holding = -1;
   private gesture: HTMLElement;
   private gestureSvg: SVGSVGElement;
@@ -67,7 +77,15 @@ export class StoryLayer {
   private skipArc: SVGCircleElement;
   private skipHeld = false;
   private skipT = 0;
-  private lineSig = '';
+  private lineKind = '';
+  private lineKey = '';
+  private lineSpeaker = '';
+  private lineStale = true;
+  private skipOff!: NumCache;
+  private skipLabelled = false;
+  /** Seconds the current sequence line has been on screen (the tap-to-continue cue appears after a beat). */
+  private lineAge = 0;
+  private advCue: HTMLElement;
   private queue: Transient[] = [];
   private cur: Transient | null = null;
 
@@ -83,7 +101,7 @@ export class StoryLayer {
     this.titleText = h('div', { class: 't' });
     this.titleCard = h('div', { class: 'sm-card title' }, this.titleText);
     this.seqFade = h('div', { class: 'sm-fade' });
-    this.seqFadeCss = new StyleCache(this.seqFade);
+    this.seqFadeOp = new NumCache(this.seqFade, 'opacity', 0.001, '', true);
 
     // tap anywhere advances lines while a sequence runs (below choices, gestures and the skip button)
     this.tapCatch = h('div', { class: 'sm-tapcatch sm-hidden' });
@@ -106,8 +124,10 @@ export class StoryLayer {
     this.gesture.addEventListener('pointerup', (e) => this.gestureUp(e));
 
     this.skipArc = s('circle', { class: 'p', cx: 11, cy: 11, r: 9, 'stroke-dasharray': `${SKIP_C} ${SKIP_C}`, 'stroke-dashoffset': SKIP_C });
+    this.skipOff = new NumCache(this.skipArc, 'stroke-dashoffset', 0.05);
     const ring = s('svg', { class: 'ring', viewBox: '0 0 22 22' }, s('circle', { class: 't', cx: 11, cy: 11, r: 9 }), this.skipArc);
     this.skip = h('button', { class: 'sm-skip sm-hidden', type: 'button' }, ring, h('span'));
+    this.advCue = h('div', { class: 'sm-advcue', 'aria-hidden': 'true' });
     const skipOn = (e: Event) => {
       e.preventDefault();
       e.stopPropagation();
@@ -122,7 +142,7 @@ export class StoryLayer {
     this.skip.addEventListener('pointerleave', skipOff);
 
     this.el = h('div', { class: 'sm-layer sm-story' },
-      this.seqFade, this.titleCard, this.capCenter, this.tapCatch, this.subs, this.choices, this.gesture, this.skip);
+      this.seqFade, this.titleCard, this.capCenter, this.tapCatch, this.subs, this.advCue, this.choices, this.gesture, this.skip);
   }
 
   onEvent(e: SimEvent): void {
@@ -172,8 +192,9 @@ export class StoryLayer {
   reset(): void {
     this.queue.length = 0;
     this.cur = null;
-    this.lineSig = '';
-    this.choiceSig = '';
+    this.lineStale = true;
+    this.choiceStale = true;
+    this.lineAge = 0;
     this.gestureIndex = -1;
     this.releaseHold();
     toggle(this.trSub, 'on', false);
@@ -182,8 +203,10 @@ export class StoryLayer {
 
   /** Language changed. */
   relabel(): void {
-    this.lineSig = '';
-    this.choiceSig = '';
+    this.lineStale = true;
+    this.choiceStale = true;
+    this.skipLabelled = false;
+    setText(this.advCue, this.ctx.t('ui.story.advance'));
     this.gestureIndex = -1;
     if (this.cur) this.showTransient(this.cur);
   }
@@ -195,9 +218,13 @@ export class StoryLayer {
 
     // --- sequence line
     const line = running ? v.line : null;
-    const sig = line ? `${line.kind}|${line.key}|${line.speaker}` : '';
-    if (sig !== this.lineSig) {
-      this.lineSig = sig;
+    const kind = line ? line.kind : '', key = line ? line.key : '', speaker = line ? line.speaker : '';
+    if (this.lineStale || kind !== this.lineKind || key !== this.lineKey || speaker !== this.lineSpeaker) {
+      this.lineStale = false;
+      this.lineKind = kind;
+      this.lineKey = key;
+      this.lineSpeaker = speaker;
+      this.lineAge = 0;
       toggle(this.seqSub, 'on', false);
       toggle(this.capCenter, 'on', false);
       toggle(this.titleCard, 'on', false);
@@ -237,7 +264,7 @@ export class StoryLayer {
       op = f.kind === 'out' || f.kind === 'white_out' ? k : 1 - k;
       toggle(this.seqFade, 'white', f.kind.startsWith('white'));
     }
-    this.seqFadeCss.set('opacity', op.toFixed(3));
+    this.seqFadeOp.set(op);
 
     // --- choices
     this.updateChoices(running ? v.choice : null);
@@ -246,13 +273,19 @@ export class StoryLayer {
     this.updateGesture(running ? v.gesture : null);
 
     // --- tap to advance + skip
-    toggle(this.tapCatch, 'sm-hidden', !running || !!v.choice || !!v.gesture);
+    const tapOn = running && !v.choice && !v.gesture;
+    toggle(this.tapCatch, 'sm-hidden', !tapOn);
+    this.lineAge += dt;
+    toggle(this.advCue, 'on', tapOn && !!line && line.kind !== 'title' && this.lineAge > 1.6);
     const skippable = running && !!sim.seq.seq?.skippable;
     toggle(this.skip, 'sm-hidden', !skippable);
     if (skippable) {
-      setText(this.skip.lastChild as HTMLElement, this.ctx.t('ui.story.skip'));
+      if (!this.skipLabelled) {
+        this.skipLabelled = true;
+        setText(this.skip.lastChild as HTMLElement, this.ctx.t('ui.story.skip'));
+      }
       this.skipT = this.skipHeld ? this.skipT + dt : Math.max(0, this.skipT - dt * 2);
-      this.skipArc.setAttribute('stroke-dashoffset', (SKIP_C * (1 - Math.min(1, this.skipT / SKIP_HOLD))).toFixed(2));
+      this.skipOff.set(SKIP_C * (1 - Math.min(1, this.skipT / SKIP_HOLD)));
       if (this.skipT >= SKIP_HOLD) {
         this.skipT = 0;
         this.skipHeld = false;
@@ -282,9 +315,9 @@ export class StoryLayer {
   /* ------------------------------------------------------------------------------------------------ choices */
 
   private updateChoices(ch: SequenceView['choice']): void {
-    const sig = ch ? ch.options.map((o) => `${o.key}:${o.hold}`).join('|') : '';
-    if (sig !== this.choiceSig) {
-      this.choiceSig = sig;
+    if (this.choiceStale || !sameOptions(this.choiceOpts, ch ? ch.options : null)) {
+      this.choiceStale = false;
+      this.choiceOpts = ch ? ch.options.map((o) => ({ key: o.key, hold: o.hold })) : null;
       this.releaseHold();
       clear(this.choices);
       this.choiceEls = [];
@@ -313,7 +346,7 @@ export class StoryLayer {
           };
           el.addEventListener('pointerup', up);
           el.addEventListener('pointercancel', up);
-          this.choiceEls.push({ el, prog, hold });
+          this.choiceEls.push({ el, prog: new NumCache(prog, 'stroke-dashoffset', 0.05), hold });
           this.choices.appendChild(el);
         });
       }
@@ -324,7 +357,7 @@ export class StoryLayer {
       const c = this.choiceEls[i];
       const p = ch.selected === i ? ch.holdProgress : 0;
       toggle(c.el, 'prog', p > 0);
-      c.prog.setAttribute('stroke-dashoffset', (KNEEL_C * (1 - p)).toFixed(2));
+      c.prog.set(KNEEL_C * (1 - p));
     }
   }
 

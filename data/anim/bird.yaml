@@ -3,7 +3,8 @@
 #        > wing_l_2 (hand, primaries) (+ _r); body > tail_0 (fan; griffin: lion tail tail_0..4);
 #        bird legs leg_l_0..2 / leg_r_0..2 (+x swings a leg BACK); griffin legs leg_fl/fr_0..2 (eagle) and leg_bl/br_0..2 (lion).
 # Wings rest SPREAD. LEFT wing (pointing +X): +z raises it (upstroke), -z lowers it, +y sweeps it BACK, -y forward.
-# RIGHT wing mirrors: -z raises, +y sweeps it FORWARD. Folded (idle/walk): humerus back, forearm forward, hand back.
+# RIGHT wing mirrors: -z raises, +y sweeps it FORWARD. Folded (idle/walk, chosen from a rendered fold test): humerus
+# [0, 75, -25] back and down, forearm [0, -165, 0] forward, hand [0, 175, 0] back: the wing lies along the flank.
 family: bird
 aliases:
   attack: bite
@@ -25,12 +26,12 @@ aliases:
 clips:
   idle:
     pose:
-      wing_l_0: [10, 70, -6]
-      wing_r_0: [10, -70, 6]
-      wing_l_1: [0, -150, 0]
-      wing_r_1: [0, 150, 0]
-      wing_l_2: [0, 130, 0]
-      wing_r_2: [0, -130, 0]
+      wing_l_0: [0, 75, -25]
+      wing_r_0: [0, -75, 25]
+      wing_l_1: [0, -165, 0]
+      wing_r_1: [0, 165, 0]
+      wing_l_2: [0, 175, 0]
+      wing_r_2: [0, -175, 0]
       neck_0: [-6, 0, 0]
       neck_1: [6, 0, 0]
       head: [4, 0, 0]
@@ -48,12 +49,12 @@ clips:
   walk:
     base: idle
     pose:
-      wing_l_0: [10, 68, -2]
-      wing_r_0: [10, -68, 2]
-      wing_l_1: [0, -150, 0]
-      wing_r_1: [0, 150, 0]
-      wing_l_2: [0, 130, 0]
-      wing_r_2: [0, -130, 0]
+      wing_l_0: [0, 73, -20]
+      wing_r_0: [0, -73, 20]
+      wing_l_1: [0, -165, 0]
+      wing_r_1: [0, 165, 0]
+      wing_l_2: [0, 175, 0]
+      wing_r_2: [0, -175, 0]
       neck_0: [4, 0, 0]
     cycle:
       stride: 1.4

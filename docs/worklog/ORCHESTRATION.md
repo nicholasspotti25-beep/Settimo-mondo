@@ -5,7 +5,7 @@ general-purpose), two at a time — one per lane. Each chunk agent gets the stan
 stream brief (+ CONTENT_BRIEF.md and BOSS_AUTHORING.md for act streams) and docs/worklog/<stream>.md; do the top 1-3 Next
 items in ~50-80 tool calls; update the work log; never break the tree; no git; report done/next/blockers.
 
-## Lanes (priority order; work the first two unfinished streams of a lane round-robin)
+## Lanes (priority order; work the first two unfinished streams of a lane round-robin (engine lane: first three, so weapons is not starved))
 - Engine lane: render-kit, world, weapons, audio, forms — plus an integration pass (requests, wiring, build + smoke)
   after every 3 engine chunks.
 - Game lane: ui, act1, act2, act3a, act3b, act4, act5, act67.
@@ -47,3 +47,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - ui review done: 6 major + 10 minor findings (fake aimAssist, blur freeze, title overlap at 667x375, zone+act card overlap, subtitles over menus, tablet thumb reach, ...). Lead fixed: focus -> onForeground (platform.ts), SW offline fallback only for navigations (gen-sw), smoke no longer awaits newGame across evaluate (real flake cause: CDP 'Promise was collected'). TODO integrate#2: SimSettings.aimAssist gating cone search + homing.
 - started: ui fix chunk (review findings)
 - 2026-11-04 ~05:30 usage limit stopped ui-fix and render-kit#4; 10:18 both resumed
+- render-kit#4 done: pose libraries for all 7 remaining families (colossus, serpent, dragon, bird, insect, tree, tentacled), animator globs/bends/radial, keyword side fix, 30 render tests
+- lead: engine lane now rotates world, render-kit, weapons (3 active) so weapons is not starved; started weapons#1

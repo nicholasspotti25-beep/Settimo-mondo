@@ -3,7 +3,7 @@
 # 300, 400) px, so thumbs get the same physical size on every phone). Lacrime sits under the HUD Eco ring (E7 put it at
 # y 0.18, which overlaps the ring on phones); `interact` is the contextual button (altar, reperto, vista, exit).
 stick:       {zone: [0.00, 0.30, 0.45, 1.00], mode: floating, radius: 0.10, sprint_ring: 0.85, dead_zone: 0.12}
-camera_drag: {zone: [0.50, 0.00, 1.00, 0.65], sensitivity: 1.0}
+camera_drag: {zone: [0.47, 0.00, 1.00, 1.00], sensitivity: 1.0}
 buttons:
   light:       {pos: [0.89, 0.72], size: 0.14}
   heavy:       {pos: [0.78, 0.84], size: 0.11}

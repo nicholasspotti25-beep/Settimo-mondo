@@ -29,7 +29,8 @@ export interface TouchHost {
 type Track =
   | { kind: 'button'; id: ButtonName; held: boolean }
   | { kind: 'stick' }
-  | { kind: 'camera'; x0: number; y0: number; t0: number; lx: number; ly: number; right: boolean };
+  /** `cam`: started inside camera_drag.zone (drags orbit, flicks switch the lock); outside it only taps count (lock pick). */
+  | { kind: 'camera'; x0: number; y0: number; t0: number; lx: number; ly: number; cam: boolean };
 
 /** Exponential smoothing rate of the stick output (1/s): ~25 ms time constant, enough to hide finger jitter. */
 const STICK_SMOOTH = 40;
@@ -118,7 +119,7 @@ export class TouchController implements InputSource {
       this.updateStick(x, y, L);
       return;
     }
-    this.tracks.set(e.pointerId, { kind: 'camera', x0: x, y0: y, t0: e.timeStamp, lx: x, ly: y, right: x > L.view.w * 0.5 });
+    this.tracks.set(e.pointerId, { kind: 'camera', x0: x, y0: y, t0: e.timeStamp, lx: x, ly: y, cam: inRect(L.camera.zone, x, y) });
   }
 
   private onMove(e: PointerEvent): void {
@@ -129,7 +130,7 @@ export class TouchController implements InputSource {
     if (!L) return;
     if (tr.kind === 'stick') {
       this.updateStick(e.clientX, e.clientY, L);
-    } else if (tr.kind === 'camera') {
+    } else if (tr.kind === 'camera' && tr.cam) {
       // coalesced events give the full finger path on fast swipes
       const dx = e.clientX - tr.lx, dy = e.clientY - tr.ly;
       tr.lx = e.clientX;
@@ -162,7 +163,7 @@ export class TouchController implements InputSource {
     const L = this.host.layout();
     if (!L) return;
     const dx = e.clientX - tr.x0, dy = e.clientY - tr.y0, dt = e.timeStamp - tr.t0;
-    if (tr.right && this.host.hasLock()) {
+    if (tr.cam && this.host.hasLock()) {
       const flick = classifyFlick(dx, dy, dt, L.view.w);
       if (flick !== 0) {
         this.router.lockSwitch(flick);
