@@ -2,8 +2,9 @@
  * Touch controls input (Pointer Events). Every pointer owns exactly one control for its whole life (a button, the stick or
  * the camera), so thumbs never steal each other's touches. Presses fire on pointerdown (no tap delay); holds last until that
  * pointer lifts. The floating stick appears under the thumb inside the stick zone (dead zone, smoothing, outer ring =
- * sprint); the rest of the screen orbits the camera; a short horizontal flick on the right half switches the lock; a double
- * tap on a boss locks the lock point under the finger (projection done by the host).
+ * sprint); a drag that starts inside camera_drag.zone (the free right side) orbits the camera and a short horizontal flick
+ * there switches the lock; a double tap anywhere outside the buttons and the stick (on a boss) locks the lock point under the
+ * finger (projection done by the host).
  *
  * The geometry comes from the pure math in src/ui/layout.ts; the view (src/ui/controls.ts) only reads this controller's state.
  */
