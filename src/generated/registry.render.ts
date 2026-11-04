@@ -10,10 +10,12 @@ export const BOSS_MODELS: Record<string, Loader> = {
 
 /** Arena dressing modules keyed by ARENA id (default export: ArenaBuilder). */
 export const ARENA_BUILDERS: Record<string, Loader> = {
+  "vetta_piazzale": () => import('../content/bosses/guardiano_del_regno/arena'),
 };
 
 /** Zone builders (default export: ZoneBuilder). */
 export const ZONE_BUILDERS: Record<string, Loader> = {
+  "castello_culla": () => import('../content/zones/castello_culla/zone'),
 };
 
 /** Metamondo Form environments (default export: FormEnvironmentBuilder). */

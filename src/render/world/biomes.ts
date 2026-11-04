@@ -98,11 +98,11 @@ export const BIOMES: Record<string, BiomeDef> = {
     particles: ['dust'], backdrop: 'none',
   },
   summit: {
-    layers: { base: 'rock', alt: 'grass', steep: 'cliff', high: 'snow', path: 'stone' },
-    high: [16, 30], steep: [0.32, 0.55], alt: 0.55, pathWidth: 6,
-    cover: { type: 'short', density: 0.55, height: [0.15, 0.4], base: '#4a5a30', tip: '#c2b47a', maxSlope: 0.3 },
+    layers: { base: 'rock', alt: 'snow', steep: 'cliff', high: 'snow', path: 'stone' },
+    high: [10, 22], steep: [0.28, 0.5], alt: 0.3, pathWidth: 6,
+    cover: { type: 'short', density: 0.38, height: [0.15, 0.4], base: '#5a5a38', tip: '#d2c088', maxSlope: 0.28 },
     atmos: { cloud: 0.55, rays: 1, wind: 1.6, cover: ['#e8eef6', 0.25] },
-    particles: ['dust'], backdrop: 'drop',
+    particles: ['dust'], backdrop: 'drop', backdropHeight: 260,
     dressing: [
       { kind: 'pebbles', count: 90, scale: [0.6, 1.4], avoid_path: 4 },
     ],

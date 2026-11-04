@@ -4,13 +4,26 @@ name_key: zone.vetta_attesa.name
 size: [320, 320]
 biome: summit
 palette: act1_green_gold
+# The summit: the castle gate behind the spawn (south), a road of broken arches climbing north to the Altare della
+# Quiete on its little plaza, the fog gate of the ancient summit plaza (vetta_piazzale, center [0,0,60] r 24), then the
+# descent north toward the plains. The summit is convex: it falls away east and west into the world below.
 terrain:
   type: heightfield
   base: 0
   noise: {amp: 3, scale: 38, octaves: 4, seed: 897}
   path_flatten: 7
-  rim: {height: 12, width: 26}
-  flats: [[0, 14, 5, 0, 6]]
+  bumps:
+    - [0, 150, -18, 34]
+    - [-46, -20, 8, 6]
+    - [36, 22, 6, 6]
+    - [-64, 60, 22, 18]
+    - [70, 96, 18, 20]
+    - [160, 0, -22, 55]
+    - [-160, 0, -22, 55]
+    - [0, -40, 2.5, 30]
+  flats: [[0, 14, 10.5, 0, 6], [0, -146, 20, 0, 10]]
+# organic summit outline (the backdrop drop follows it): castle front to the south, the descent to the north
+bounds: [-60, -158, 60, -158, 95, -140, 118, -105, 132, -60, 150, -20, 145, 30, 126, 70, 100, 105, 60, 135, 20, 152, -20, 152, -60, 135, -100, 110, -128, 70, -142, 20, -136, -30, -122, -80, -100, -125]
 spawn: [0, 0, -135]
 spawn_yaw: 0
 path:
@@ -24,10 +37,46 @@ arenas: [vetta_piazzale]
 exits:
   - {to: grandi_pianure, at: [0, 0, 118], radius: 6, requires: [guardiano_del_regno], arrive: spawn, kind: walk, name_key: exit.vetta_attesa.grandi_pianure}
 vistas:
-  - {id: vista_vetta_mondo, pos: [60, 0, -30], look: [200, 20, -60], name_key: vista.vista_vetta_mondo.name}
-reperti: []
-landmarks: []
-props: []
+  - {id: vista_vetta_mondo, pos: [60, 0, -30], look: [200, -40, -60], name_key: vista.vista_vetta_mondo.name}
+reperti: [rep_vetta_lanterna, rep_vetta_lettera, rep_vetta_armatura]
+colliders:
+  # the castle of the Culla behind the spawn: curtain walls, gatehouse (the passage is open 6 m deep), towers
+  - {type: box, c: [-32, 0, -150], half: [18, 30, 3.7]}
+  - {type: box, c: [32, 0, -150], half: [18, 30, 3.7]}
+  - {type: box, c: [-9.25, 0, -150], half: [4.75, 30, 6]}
+  - {type: box, c: [9.25, 0, -150], half: [4.75, 30, 6]}
+  - {type: box, c: [0, 0, -153], half: [4.6, 30, 3]}
+  - {type: cylinder, c: [-18.5, -10, -148.5], r: 7.4, h: 80}
+  - {type: cylinder, c: [18.5, -10, -148.5], r: 7.4, h: 80}
+  - {type: cylinder, c: [-50, -10, -150], r: 5.6, h: 80}
+  - {type: cylinder, c: [50, -10, -150], r: 5.6, h: 80}
+  # piers of the two archways over the road
+  - {type: cylinder, c: [-5.3, -2, -95], r: 1.2, h: 12}
+  - {type: cylinder, c: [5.3, -2, -95], r: 1.2, h: 12}
+  - {type: cylinder, c: [-4.8, -2, -48], r: 1.2, h: 12}
+  - {type: cylinder, c: [4.8, -2, -48], r: 1.2, h: 12}
+landmarks:
+  - {builder: castle_gate, pos: [0, 0, -150], yaw: 0, params: {width: 100, height: 24, gateWidth: 9, seed: 41}}
+  - {builder: summit_plaza, pos: [0, 0, 14], params: {radius: 9, center: false, gaps: '0,180', gapWidth: 6, braziers: 4, balustrade: 0.7, seed: 5}}
+  - {builder: arch, pos: [0, 0, -95], params: {span: 9, height: 6.5, depth: 1.8, broken: 0.55, seed: 3}}
+  - {builder: arch, pos: [0, 0, -48], params: {span: 8, height: 5.5, depth: 1.6, pointed: true, broken: 0.15, seed: 8}}
+  - {builder: ruins, pos: [-28, 0, -62], yaw: 0.4, params: {radius: 10, walls: 3, columns: 4, height: 5, seed: 11}}
+  - {builder: ruins, pos: [36, 0, -4], yaw: -0.9, params: {radius: 8, walls: 2, columns: 5, height: 4.5, seed: 12}}
+  - {builder: ruins, pos: [-34, 0, 92], yaw: 1.2, params: {radius: 9, walls: 3, columns: 3, height: 5.5, style: stone, seed: 13}}
+  - {builder: world_below, pos: [0, 0, 0], params: {depth: -260, clouds: 1, seed: 7}}
+props:
+  - {kind: snowy_rock, count: 44, scale: [0.7, 1.8], avoid_path: 8, collide: true, seed: 101}
+  - {kind: cliff_rock, count: 6, scale: [1.4, 2.6], avoid_path: 18, collide: true, seed: 102}
+  - {kind: boulder, count: 10, scale: [0.5, 1.0], avoid_path: 7, collide: true, seed: 103}
+  - {kind: rock, count: 60, scale: [0.4, 1.0], avoid_path: 3, seed: 104}
+  - {kind: pebbles, count: 140, scale: [0.6, 1.4], avoid_path: 2.5, seed: 105}
+  - {kind: flower_glow, count: 46, scale: [0.5, 0.9], avoid_path: 2.5, seed: 106}
+  - {kind: dead_tree, count: 7, scale: [0.9, 1.3], avoid_path: 10, collide: true, seed: 107}
+  - {kind: ruin_column, count: 8, area: [-30, -130, 30, 10], scale: [0.8, 1.2], avoid_path: 6, collide: true, seed: 108}
+  - {kind: sword_grave, count: 9, area: [-30, 22, 30, 40], scale: [0.9, 1.1], avoid_path: 4, seed: 109}
+  - {kind: armor_remains, count: 3, area: [-26, 20, 26, 42], scale: [0.9, 1.1], avoid_path: 4, seed: 110}
+  - {kind: seeker_lantern, count: 4, area: [-12, -120, 12, 0], scale: [0.9, 1.1], avoid_path: 3, seed: 111}
+particles: [dust*0.6, snow*0.25]
 surface: stone
 ambience: summit_wind
 timeofday: vetta_attesa

@@ -1,0 +1,7 @@
+# Reperti dei Cercatori of the Act I world (texts in locales/*/act1_world.yaml).
+- {id: rep_culla_lettera, zone: castello_culla, pos: [3.6, 0, -107], kind: letter, title_key: reperto.rep_culla_lettera.title, text_key: reperto.rep_culla_lettera.text}
+- {id: rep_culla_affresco, zone: castello_culla, pos: [-12.4, 0, 25], kind: mural, title_key: reperto.rep_culla_affresco.title, text_key: reperto.rep_culla_affresco.text}
+- {id: rep_culla_reliquia, zone: castello_culla, pos: [24, 0, -31.6], kind: relic, title_key: reperto.rep_culla_reliquia.title, text_key: reperto.rep_culla_reliquia.text}
+- {id: rep_vetta_lanterna, zone: vetta_attesa, pos: [-9, 0, -112], kind: lantern, title_key: reperto.rep_vetta_lanterna.title, text_key: reperto.rep_vetta_lanterna.text}
+- {id: rep_vetta_lettera, zone: vetta_attesa, pos: [14, 0, -40], kind: letter, title_key: reperto.rep_vetta_lettera.title, text_key: reperto.rep_vetta_lettera.text}
+- {id: rep_vetta_armatura, zone: vetta_attesa, pos: [-20, 0, 31], kind: armor, title_key: reperto.rep_vetta_armatura.title, text_key: reperto.rep_vetta_armatura.text}

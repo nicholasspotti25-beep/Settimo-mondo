@@ -6,7 +6,7 @@
  * shafts through every window that faces the key light (violet at night).
  *
  * params: length (40), width (14), height (16, wall height), bays (length/8), roof ('broken' | 'vault' | 'open'),
- * endN / endS ('door' | 'open' | 'wall' | 'rose'), doorWidth (width*0.45), windows ('both' | 'west' | 'east' | 'none'),
+ * endN / endS ('door' | 'open' | 'wall' | 'rose'), doorWidth (width*0.45; doorWidthN / doorWidthS per end), windows ('both' | 'west' | 'east' | 'none'),
  * doorE / doorW (bay index of a side doorway, -1 none), sideDoorWidth (bay*0.62), aisles (false), aisleX (width*0.28),
  * tiles (true), shafts (true), debris (true), style ('pale'), seed.
  * Colliders are NOT created here: walkable bounds stay inside width/2 - 1.6 (piers), aisle columns need cylinders r 1.
@@ -24,7 +24,7 @@ export default function build(def: LandmarkDef, _zone: ZoneDef, ctx: RenderCtx):
   const bl = L / bays;
   const roof = str(def, 'roof', 'broken');
   const endN = str(def, 'endN', 'door'), endS = str(def, 'endS', 'door');
-  const doorWidth = num(def, 'doorWidth', W * 0.45);
+  const doorWidth0 = num(def, 'doorWidth', W * 0.45);
   const windows = str(def, 'windows', 'both');
   const doorE = num(def, 'doorE', -1), doorW = num(def, 'doorW', -1);
   const sideDoorW = num(def, 'sideDoorWidth', bl * 0.62);
@@ -85,7 +85,8 @@ export default function build(def: LandmarkDef, _zone: ZoneDef, ctx: RenderCtx):
 
   // ---- end walls -------------------------------------------------------------------------------------------------
   const gable = (x: number) => H + rise * Math.max(0, 1 - Math.abs(x) / (W / 2)) + 0.8;
-  for (const [end, zEnd] of [[endN, L / 2], [endS, -L / 2]] as const) {
+  const ends: [string, number, number][] = [[endN, L / 2, num(def, 'doorWidthN', doorWidth0)], [endS, -L / 2, num(def, 'doorWidthS', doorWidth0)]];
+  for (const [end, zEnd, doorWidth] of ends) {
     if (end === 'open') continue;
     const ops: WallOpening[] = [];
     if (end === 'door') ops.push({ x: 0, w: doorWidth, h: Math.min(H * 0.82, doorWidth * 1.6), sill: 0, pointed: true });

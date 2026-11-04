@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import type { LandmarkDef, ZoneDef } from '../../core/types';
 import type { RenderCtx } from '../../render/types';
 import type { LandmarkResult } from '../../render/world/landmarks';
-import { blob, cone, cyl, disposeTree, mat4, sphere, tube } from '../../render/world/geo';
+import { blob, cone, cyl, displace, disposeTree, lathe, mat4, sphere, tube } from '../../render/world/geo';
 import { Parts, R, num } from './_kit';
 import { fbm2 } from '../../core/math';
 
@@ -30,29 +30,32 @@ export default function build(def: LandmarkDef, _zone: ZoneDef, ctx: RenderCtx):
   const low = ctx.quality === 'low';
 
   // the land: a displaced ring far below
+  const landH = (x: number, z: number) => {
+    const d = Math.hypot(x, z);
+    // the far land curves away (like a horizon) so its silhouette sits where the haze is soft, never a fogged sliver
+    return fbm2(x / 520, z / 520, 4, seed) * 70 + fbm2(x / 140, z / 140, 2, seed + 3) * 14 - 60 * Math.max(0, 1 - (d - 260) / 500) - Math.max(0, d - 2300) * 0.55;
+  };
   const land = new THREE.RingGeometry(260, 3400, low ? 40 : 72, low ? 8 : 14);
   land.rotateX(-Math.PI / 2);
   const P = land.attributes.position as THREE.BufferAttribute;
   for (let i = 0; i < P.count; i++) {
     const x = P.getX(i), z = P.getZ(i);
-    const d = Math.hypot(x, z);
-    const h = fbm2(x / 520, z / 520, 4, seed) * 70 + fbm2(x / 140, z / 140, 2, seed + 3) * 14 - 60 * Math.max(0, 1 - (d - 260) / 500);
-    P.setY(i, h);
+    P.setY(i, landH(x, z));
   }
   land.computeVertexNormals();
-  p.add(land, 'impostor', { color: ['#2e3026', '#5e5e44'], cover: 0, yRange: [D - 80, D + 60] }, mat4([0, D, 0]));
+  p.add(land, 'impostor', { color: ['#3a3c30', '#76725a'], cover: 0, yRange: [D - 80, D + 60] }, mat4([0, D, 0]));
 
   // plains (north) + the road winding down to them
   for (let i = 0; i < 9; i++) {
     const [x, z] = at(r.range(-30, 30), r.range(520, 1300));
-    p.add(blob(r.range(110, 220), 1, 0.15, i + 11), 'impostor', { color: ['#56582e', '#a49a5a'], cover: 0 }, mat4([x, D + 4, z], [0, r.range(0, 6), 0], [1.7, 0.06, 1]));
+    p.add(blob(r.range(110, 220), 2, 0.12, i + 11), 'impostor', { color: ['#4e5232', '#8a8458'], cover: 0 }, mat4([x, D + landH(x, z) - 2, z], [0, r.range(0, 6), 0], [1.7, 0.05, 1]));
   }
   const road: THREE.Vector3[] = [];
-  for (let i = 0; i <= 8; i++) {
-    const [x, z] = at(4 + Math.sin(i * 1.3) * 9, 240 + i * 120);
-    road.push(V3(x, D + 10 + (i === 0 ? 150 : i === 1 ? 50 : 0), z));
+  for (let i = 0; i <= 10; i++) {
+    const [x, z] = at(4 + Math.sin(i * 1.3) * 9, 330 + i * 95);
+    road.push(V3(x, D + landH(x, z) + 1.5, z));
   }
-  p.add(tube(road, 3.2, 4, 40), 'impostor', { color: ['#a89a80', '#c8b898'], cover: 0 }, mat4([0, 0, 0], [0, 0, 0], [1, 1, 1]));
+  p.add(tube(road, 2.6, 4, 50), 'impostor', { color: ['#6e6650', '#8a8064'], cover: 0 });
   for (let i = 0; i < 5; i++) {
     const [x, z] = at(r.range(-25, 25), r.range(700, 1200));
     p.add(cyl(3, 3.6, r.range(14, 30), 6), 'impostor', { color: ['#6a6476', '#aaa2ac'], cover: 0 }, mat4([x, D + 5, z]));
@@ -66,8 +69,8 @@ export default function build(def: LandmarkDef, _zone: ZoneDef, ctx: RenderCtx):
   }
   {
     const [x, z] = at(46, 1250);
-    p.add(cyl(18, 30, 230, 7), 'impostor', { color: ['#0a0808', '#1c1814'], cover: 0 }, mat4([x, D, z]));
-    p.add(blob(110, 1, 0.35, 21), 'impostor', { color: ['#0c140e', '#1e2c1a'], cover: 0 }, mat4([x, D + 250, z], [0, 0, 0], [1.4, 0.5, 1.2]));
+    p.add(cyl(12, 22, 150, 7), 'impostor', { color: ['#0a0808', '#1c1814'], cover: 0 }, mat4([x, D, z]));
+    for (let k = 0; k < 5; k++) p.add(blob(r.range(45, 70), 1, 0.35, 21 + k), 'impostor', { color: ['#0c140e', '#1e2c1a'], cover: 0 }, mat4([x + r.range(-60, 60), D + r.range(140, 175), z + r.range(-60, 60)], [0, r.range(0, 6), 0], [1.4, 0.5, 1.2]));
   }
 
   // swamp (east): dark flats, pools and seeker lanterns
@@ -101,14 +104,21 @@ export default function build(def: LandmarkDef, _zone: ZoneDef, ctx: RenderCtx):
     p.add(sphere(150, 10, 6), 'glow', { color: '#7a240a' }, mat4([x, D + 190, z], [0, 0, 0], [2.0, 0.5, 1]));
   }
 
-  // great peaks around (mostly west, south, east), rising out of the cloud sea
+  // great peaks around (mostly west, south, east), rising out of the cloud sea: lumpy lathe profiles, light tops
   for (let i = 0; i < (low ? 9 : 16); i++) {
     const dir = r.range(120, 340);
-    const [x, z] = at(dir, r.range(650, 1700));
-    const h = r.range(260, 520);
-    const rad = h * r.range(0.45, 0.65);
-    p.add(cone(rad, h, 8), 'impostor', { color: ['#3a3646', '#7a7488'], cover: 0 }, mat4([x, D - 40, z], [0, r.range(0, 6), 0], [1, 1, r.range(0.7, 1.2)]));
-    p.add(cone(rad * 0.34, h * 0.34, 8), 'impostor', { color: ['#c8c4d8', '#f4f2fa'], cover: 0 }, mat4([x, D - 40 + h * 0.66, z], [0, r.range(0, 6), 0]));
+    const [x, z] = at(dir, r.range(700, 1800));
+    const h = r.range(200, 380);
+    const rad = h * r.range(0.5, 0.75);
+    const y0 = D - 40;
+    const prof: [number, number][] = [[rad, 0], [rad * 0.72, h * 0.28], [rad * 0.46, h * 0.52], [rad * 0.24, h * 0.76], [rad * 0.08, h * 0.94], [0.01, h]];
+    const g = displace(lathe(prof, 9), 0.16, 2.2 / rad, r.int(1, 999));
+    p.add(g, 'impostor', { color: ['#34303e', '#d8d4e4'], cover: 0, yRange: [y0 + h * 0.45, y0 + h] }, mat4([x, y0, z], [0, r.range(0, 6), 0], [1, 1, r.range(0.7, 1.2)]));
+    if (r.next() < 0.6) {
+      const sh = h * r.range(0.45, 0.7);
+      const g2 = displace(lathe(prof.map(([a, b]) => [a * 0.6, b * (sh / h)] as [number, number]), 8), 0.18, 3 / rad, r.int(1, 999));
+      p.add(g2, 'impostor', { color: ['#34303e', '#c8c4d6'], cover: 0, yRange: [y0 + sh * 0.5, y0 + sh] }, mat4([x + r.range(-1, 1) * rad, y0, z + r.range(-1, 1) * rad]));
+    }
   }
 
   // the sea of clouds wrapping the mountain, thinner toward the plains so the road stays visible
@@ -119,10 +129,10 @@ export default function build(def: LandmarkDef, _zone: ZoneDef, ctx: RenderCtx):
     if (north && r.next() < 0.75) continue;
     const [x, z] = at(dir, r.range(280, 1100));
     const rad = r.range(70, 150);
-    p.add(blob(rad, 1, 0.25, i + 51), 'impostor', { color: ['#8a84a4', '#ece4f2'], cover: 0 }, mat4([x, D + r.range(90, 150), z], [0, r.range(0, 6), 0], [1.5, 0.22, 1.2]));
+    p.add(blob(rad, 2, 0.14, i + 51), 'impostor', { color: ['#8e88a6', '#d6cee0'], cover: 0 }, mat4([x, D + r.range(90, 150), z], [0, r.range(0, 6), 0], [1.6, 0.14, 1.3]));
   }
 
-  const group = p.build({ impostor: { fogScale: 0.3, rim: 0.15 } }, false);
+  const group = p.build({ impostor: { fogScale: 0.2, rim: 0 }, glow: { rim: 0 } }, false);
   group.name = 'world_below';
   group.traverse((o) => {
     o.castShadow = false;

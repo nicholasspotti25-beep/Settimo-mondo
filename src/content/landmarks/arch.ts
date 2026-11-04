@@ -33,8 +33,9 @@ export default function build(def: LandmarkDef, zone: ZoneDef, ctx: RenderCtx): 
     const x = -total / 2 + pw / 2 + i * (span + pw);
     const g = Math.min(groundLocal(env, def, x - pw / 2, 0), groundLocal(env, def, x + pw / 2, 0), groundLocal(env, def, x, dp / 2), groundLocal(env, def, x, -dp / 2)) - 0.4;
     const ph = (i === 0 || i === bays) && broken > 0.5 && r.next() < 0.5 ? hs * r.range(0.4, 0.8) : hs;
-    p.add(box(pw + 0.5, 1.2 - g, dp + 0.5), 'matte', { color: DARK, cover: 1, aoBottom: 0.5 }, mat4([x, (1.2 + g) / 2 - 0.1, 0]));
-    p.add(box(pw, ph - 1.1, dp), 'matte', { color: col, cover: 0.7, aoBottom: 0.6, jitter: 0.07 }, mat4([x, 1.1 + (ph - 1.1) / 2, 0]));
+    const pt = Math.max(0, g + 0.4) + 1.1;
+    p.add(box(pw + 0.5, pt - g, dp + 0.5), 'matte', { color: DARK, cover: 1, aoBottom: 0.5 }, mat4([x, (pt + g) / 2, 0]));
+    p.add(box(pw, Math.max(0.5, ph - pt), dp), 'matte', { color: col, cover: 0.7, aoBottom: 0.6, jitter: 0.07 }, mat4([x, pt + Math.max(0.5, ph - pt) / 2, 0]));
     if (ph >= hs) p.add(box(pw + 0.35, 0.4, dp + 0.3), 'matte', { color: col, cover: 1 }, mat4([x, hs - 0.1, 0]));
   }
   for (let i = 0; i < bays; i++) {

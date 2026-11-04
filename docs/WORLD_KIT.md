@@ -119,6 +119,27 @@ All in src/render/world/ (import with relative paths from src/content/...).
   direction, light colors, `uHazeK`). Additive / `toneMapped:false` materials must multiply their output by `uHazeK`
   (auto-exposure / HDR scale) or they wash the screen out when the camera faces the alba/tramonto glow.
 
+## 4b. Landmark builders (src/content/landmarks/)
+
+Place with `landmarks: [{builder, pos, yaw, scale, params}]` (pos y = ground height at pos; builders that settle on
+the terrain sample `env.heightAt` themselves). No builder creates sim colliders: add `zone.colliders` (or arena
+`obstacles`) for anything solid on a route.
+
+| Builder | What | params (default) |
+| --- | --- | --- |
+| `castle_hall` | pale-stone interior along local +Z, floor y 0: walls with huge pointed windows (tracery), piers + buttresses, vault ribs and pointed vault, end walls with great door / rose window, nave arcade, paved floor with runner, fallen stones, live window light shafts | length 40, width 14, height 16, bays length/8, roof broken/vault/open, endN/endS door/open/wall/rose, doorWidth (doorWidthN/doorWidthS), windows both/west/east/none, doorE/doorW (side door bay), sideDoorWidth, aisles false, aisleX width*0.28, tiles, shafts, shaftStrength 0.075, debris, style, seed. Walkable bounds: width/2 - 1.6; aisle columns at x = +-aisleX, z = -length/2 + i*length/bays (i = 1..bays-1), cylinder r 1.1 |
+| `castle_gate` | castle exterior facing +Z: curtain walls + battlements, gatehouse with pointed gate (violet light in the passage, raised portcullis, broken-crown emblem, guardian statue niche), round towers with slate cones, keep with glowing windows and spires, rocky crag below | width 100, height 24, gateWidth 9, keep true, crag true, style, seed |
+| `summit_plaza` | round plaza: compass medallion, concentric slab rings, kerb, steps down, broken balustrade with gaps, bronze braziers lit at dusk/night | radius 9, rings 3, center true, steps 2, balustrade 0.75, gaps '0,180' (deg, 0 = +Z), gapWidth 6, braziers 4, style, seed. `plazaParts()` reusable from arena.ts |
+| `arch` | freestanding archway / arcade along local X (opening faces +Z), voussoirs + keystone, spandrels and cornice when intact, broken variant with fallen blocks | span 6, height 5, depth 1.6, bays 1, broken 0..1, pointed false, style, seed. Piers at x = -total/2 + 0.8 + i*(span + 1.6) |
+| `ruins` | wall fragments with jagged tops (window/doorway), standing/broken/fallen columns, toppled lintel, rubble, paving, settled on the terrain | radius 9, walls 3, columns 4, height 5, style, seed |
+| `world_below` | the panorama from a summit: land far below, plains + road, dark forest + Elder Tree shadow, swamp lights, river of souls, red glow, great peaks, sea of clouds (hazy impostors, 2-3 draw calls) | depth -240, clouds 1, seed. Place at the zone centre |
+
+Styles: pale (default), stone, dark, marble, black, warm. Helpers for your own builders (`_kit.ts`, files starting with
+`_` are not builders): `wallShape` (wall face with arched openings, doorways and a free top profile), `extrudeWall`,
+`archCurve` / `archBand` / `voussoirs`, `column`, `statue` (guardian on a plinth, poses sword/spear/kneel/mourner,
+`broken`), `slabRing`, `groundLocal`, and `LightShafts` (additive window shafts aimed at the live key light; only windows
+facing the light show; `add(center, halfWidthAxis, halfHeightAxis, inwardNormal)`, `finish(strength)`).
+
 ## 5. Arena states, cues and the fight
 
 - A boss phase with `arena_state: <state>` calls `sim.setArenaVariant(state)` (bounds/obstacles/surface/gravity from

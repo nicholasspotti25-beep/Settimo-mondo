@@ -5,37 +5,46 @@
 1. WorldRenderer — **partial**
    - done: WorldRenderer.ts (API kept: constructor(scene, ctx), loadZone(sim), onEvent, update, group, dispose; extras
      `atmosphere`, `sky`, `zoneVisual`, `sites`, `particles`, `arenaVisuals`, `busy`); custom ZONE_BUILDERS else generic
-     builder; ARENA_BUILDERS per arena; cue forwarding (arena_state:<s> -> setState, every cue -> onCue, lightning ->
-     flash + bolt); exposure via scene.onBeforeRender; per-frame `ATMOS.uHazeK` (auto-exposure / HDR haze scale).
+     builder; ARENA_BUILDERS per arena; cue forwarding; exposure; per-frame `ATMOS.uHazeK`.
    - done: atmosphere.ts, sky.ts, terrain.ts, biomes.ts, geo.ts, materials.ts, glsl.ts, env.ts, zone.ts, props/kinds.ts
-     (46 kinds), props/field.ts, cover.ts, water.ts, landmarks.ts (registry), horizon.ts (14 builders).
-   - done (chunk 2, interrupted session, verified this chunk): sites.ts (altars + Cavaliere lantern, Nebbia dell'Alba
-     fog gates, Reperti by kind hidden once collected, exits by kind lit once open, vista cairns), glows.ts (GlowSet),
-     mist.ts (DawnMist wall/disk), particles.ts (fireflies, embers, snow, pollen, ash, souls, stars, rain, lightning,
-     mist, dust, spores; `kind*factor`).
-   - done: wash-out fix for the render-kit request (uHazeK on glows/mist/particles; fog-gate wall near-camera,
-     camera-outside and grazing fades; gate pool/orb dimmed).
-   - missing: ship zones (zone.platform), act colour grading beyond tod tint (post.ts grades per act now), far-tree LOD,
-     sky god-rays read as a sunburst at tramonto on High (no disc, but rays converge to a point; soften).
-2. Act I zones authored (data + builders) — **missing** (data skeletons: no props, landmarks, reperti, climb, horizon;
-   no src/content/zones/<id>/zone.ts). Zones currently look empty (generic biome dressing only).
-3. Arena dressing src/content/bosses/guardiano_del_regno/arena.ts — **missing** (terrain paves the arena floor).
-4. docs/WORLD_KIT.md — **done** (STATUS: READY; example arena.ts typechecked against the tree).
-- Landmark builders (src/content/landmarks/**) — **missing** (registry ready, directory empty).
-- data/reperti/act1_world.yaml + locales/{it,en}/act1_world.yaml — **missing**.
-- tests/world_kit.test.ts — **done** (kind coverage, prop placement == sim colliders, uHazeK, WORLD_KIT sync).
+     (46 kinds), props/field.ts, cover.ts, water.ts, landmarks.ts (registry), horizon.ts (14 builders), sites.ts,
+     glows.ts, mist.ts, particles.ts.
+   - done (chunk 3): sky god-rays now fan from a virtual source below the horizon and the focused glow core became a
+     horizon band (no sun-like burst at any tod); summit biome: snowy rock, backdropHeight 260 (real drop to the world
+     below).
+   - missing: ship zones (zone.platform), act colour grading beyond tod tint, far-tree LOD.
+2. Act I zones authored (data + builders) — **partial**
+   - done: vetta_attesa (data/zones/vetta_attesa.yaml: organic bounds, terrain, colliders for castle + arch piers,
+     props, landmarks castle_gate / summit_plaza / 2 arches / 3 ruins / world_below, particles, 3 Reperti) and
+     castello_culla (data/zones/castello_culla.yaml: bounds polygon of 5 halls + loggia, nave column colliders,
+     castle_hall x5 + loggia arcade + world_below, 3 Reperti; src/content/zones/castello_culla/zone.ts: no heightfield,
+     crag under the castle). data/reperti/act1_world.yaml + locales/{it,en}/act1_world.yaml (6 Reperti).
+     data/timeofday/castello_culla.yaml: brighter ambient (night interior readable).
+   - missing: grandi_pianure, foresta_oscura, palude, fiume_anime (data skeletons only), their Reperti; climb walls.
+3. Arena dressing src/content/bosses/guardiano_del_regno/arena.ts — **done** (paving + medallion over the whole circle,
+   kerb, steps, balustrade open at the gate and the descent, ruined archway framing the gate, 8 guardian statues (one
+   toppled), column stumps, braziers lit at dusk/night, stair down to the road; nothing solid inside r 24).
+4. docs/WORLD_KIT.md — **done** (STATUS: READY; new section 4b: landmark builders + params + _kit helpers).
+- Landmark builders (src/content/landmarks/**) — **partial**: done _kit.ts (helpers), castle_hall, castle_gate,
+  summit_plaza, arch, ruins, world_below. Missing: bridge, walkway (rotten piers), docks, bone_gate, sunken cathedral,
+  crater rim, painted cave, ice castle, taiga logs, drum circle, ships, observatory, dragon nests, mirror shrines, wind
+  cliffs, yggdrasil, root tunnel, inverted palace, celestial terraces, greenhouse, hedge walls.
+- tests/world_kit.test.ts — **done** (5/5 pass).
 - data/skies, data/timeofday, data/palettes — present.
 
 ## Next
 
-1. Landmark builders set in src/content/landmarks/ (castle shell/interiors + arched windows, ruins, arches,
-   bone-and-iron gate, bridges, walkways/piers, docks, summit plaza/castle gate first), then the later-act set.
-2. vetta_attesa authoring + vetta_piazzale dressing (guardiano_del_regno/arena.ts: broken statues, castle gate behind,
-   world below at the edges; keep center [0,0,60] r 24, gate [0,0,36] w 6 clear), horizon vista from the Vetta.
-3. Other Act I zones: castello_culla (interior castle via landmarks), grandi_pianure, foresta_oscura, palude,
-   fiume_anime + data/reperti/act1_world.yaml + locales (2-3 Reperti per zone); keep all ids/arena/altar positions.
-4. Sky: soften the tramonto god-ray convergence on High (reads like a sun); grandi_pianure distance haze a bit strong.
-5. Ship zones (platform), far-tree LOD, budgets per zone x quality table, 4-tod screenshots per authored Act I zone.
+1. Budget check on the Vetta: medium at the spawn measured 258 calls / 425k tris (zs.mjs, giorno), more than High
+   (78-122 calls / 204-336k). Find out why (shadow pass? quality-dependent prop counts?) and bring it under D3. Also
+   trim Low (101 calls).
+2. Vetta vista polish: a faint short pale line remains on the horizon NNE (the world_below far land, fully fogged); the
+   world below still reads hazy from the east edge: lower its fog further or add a visible cliff edge + nearer cloud
+   banks; generic boulder/cliff_rock props look like faceted eggs (props/kinds.ts).
+3. Landmark builders still missing for Act I: bridge, walkway (rotten piers on stilts), docks (river port); then
+   grandi_pianure, foresta_oscura, palude, fiume_anime authoring + 2-3 Reperti each (keep ids/arena/altar positions).
+4. Fight check of vetta_piazzale with the Guardiano (startFightDirect) at 4 tods; one climb wall per zone.
+5. Later-act landmark set (bone_gate, cathedral, ...), ship zones (platform), far-tree LOD, budgets per zone x quality
+   table.
 6. When render-kit enables HDR (post.ts HDR_ENABLED): re-check uHazeK = HDR_HAZE_K and the display-space fog/sky.
 
 ## Notes
@@ -77,4 +86,20 @@
 - Capture scripts (scratchpad world/): vite-w.mjs (private Vite 5176, hmr off), ws.mjs (boss fight: out quality tods
   boss:<id>|zone:<id> camsJSON), zs.mjs (zone sweep), dbgh.mjs (hide-one-layer debug). Page sometimes reloads once
   right after load (scripts retry). After sim.travel wait ~3 s+ before meditate: the arrival flow can override the tod.
-
+- Chunk 3 (2026-11-04, resumed after a usage-limit stop). Landmark kit + 6 builders, Vetta + Castello authored,
+  arena dressing, sky softened. Verification (1280x576, scratchpad world/c3/, LOOKED at): sheet_vetta.png (spawn
+  road north, east vista, altar plaza -> arena; alba/giorno/tramonto/notte, high), sheet_castello.png (corridor, great
+  hall nave, east loggia; 4 tods, high), g_pair.png (vista tramonto + hall notte after fixes), castle gate tramonto
+  (v6_tramonto_2), overhead (v5_giorno_0). Fixes from the shots: sun-like ray burst (sky), sandy/grassy summit -> snowy
+  rock, 40 m backdrop drop hid the world below -> 260, square mesa -> organic bounds, crag blobs poking through the
+  castle front and the great-hall floor, mound bumps removed, styrofoam clouds smoothed, rim-lit horizon line
+  (mostly fixed), castle night too dark (ambient 0.95).
+  renderer.stats: vetta high 78-122 calls / 204-336k tris by view; castello high 37-67 / 128-198k; low: vetta 101 /
+  123k, castello 34 / 83k; medium: vetta 258 / 426k (OVER, see Next 1), castello 74 / 265k.
+  `npx tsc --noEmit -p tsconfig.json`: 0 errors in world files; `npx vitest run tests/world_kit.test.ts`: 5/5;
+  `npm run registry && SM_PARTIAL=1 npm run data`: ok (1 arena + 1 zone builder registered).
+- Capture: scratchpad world/c3.mjs (ws.mjs + seq.skip and a long wait after meditate: the meditate fade covers the
+  first ~10 s, so the first cam of each tod is a dummy; cams accept "hide": [object names] for layer debugging).
+- Castello layout (world coords): waking chamber z -113..-80 (W16), corridor -80..0 (W14, east side door bay 4 at
+  z -35 -> loggia wing x 7..34), great hall 0..70 (W30, nave columns x +-8.5), gallery 70..112 (W12), exit z 105.
+  The vista vista_culla_finestre moved to [28,0,-35] (loggia axis); vetta vista look lowered to the world below.

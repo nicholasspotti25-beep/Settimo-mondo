@@ -119,7 +119,9 @@ vec3 smSkyGradient(vec3 dir) {
   vec3 col = mix(hor, uZenith, pow(clamp(e, 0.0, 1.0), 0.45));
   col = mix(col, uGround, smoothstep(0.0, -0.22, e));
   float g = max(dot(dir, uGlowDir), 0.0);
-  col += uGlow * (pow(g, 6.0) * 0.30 + pow(g, 28.0) * 0.14);
+  // broad glow + a band hugging the horizon under the glow (no focused core: the sun never shows before the ending)
+  float dv = e - uGlowDir.y * 0.55;
+  col += uGlow * (pow(g, 6.0) * 0.30 + exp(-(1.0 - s) * 16.0 - dv * dv * 70.0) * 0.12);
   return col * uSkyBright;
 }
 `;

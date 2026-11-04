@@ -132,14 +132,14 @@ export default function build(def: LandmarkDef, zone: ZoneDef, ctx: RenderCtx): 
     const rock: Col = ['#2e2a30', '#5e5864'];
     for (let i = 0; i < (low ? 10 : 18); i++) {
       const x = r.range(-Wd * 0.6, Wd * 0.6), z = r.range(-80, -6);
-      const rad = r.range(16, 30);
-      p.add(blob(rad, 1, 0.32, r.int(1, 999)), 'matte', { color: rock, cover: 0.5, aoBottom: 0.4 }, mat4([x, base - rad * 0.55, z], [0, r.range(0, 6), 0], [1, r.range(1.1, 1.8), 1]));
+      const rad = r.range(16, 30), sy = r.range(1.1, 1.8);
+      p.add(blob(rad, 1, 0.32, r.int(1, 999)), 'matte', { color: rock, cover: 0.5, aoBottom: 0.4 }, mat4([x, base - rad * sy * 1.05, z - rad * 0.5], [0, r.range(0, 6), 0], [1, sy, 1]));
     }
     for (let i = 0; i < (low ? 5 : 10); i++) {
       const a = r.range(-Math.PI * 0.95, -Math.PI * 0.05);
       const d = r.range(50, 90);
       const h = r.range(40, 110);
-      p.add(blob(r.range(10, 16), 1, 0.3, r.int(1, 999)), 'matte', { color: rock, cover: 0.6 }, mat4([Math.cos(a) * d, base - h * 0.75, Math.sin(a) * d - 30], [0, r.range(0, 6), 0], [1, h / 22, 1]));
+      p.add(blob(r.range(10, 16), 1, 0.3, r.int(1, 999)), 'matte', { color: rock, cover: 0.6 }, mat4([Math.cos(a) * d, base - 6 - h * 0.85, Math.sin(a) * d - 30], [0, r.range(0, 6), 0], [1, h / 22, 1]));
     }
   }
 

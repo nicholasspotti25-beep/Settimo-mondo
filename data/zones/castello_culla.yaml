@@ -4,23 +4,51 @@ name_key: zone.castello_culla.name
 size: [90, 230]
 biome: castle
 palette: act1_green_gold
+# The empty castle of the Culla, perched on the summit: the waking chamber (south), the long corridor of arched
+# windows with the east loggia over the void, the great hall with its nave of columns and fallen vault, the last
+# gallery to the great door that opens onto the Vetta (north). The floor is the halls' own paving (zone.ts).
 terrain:
   type: interior
   base: 0
+bounds: [-6.4, -111.6, 6.4, -111.6, 6.4, -80.5, 5.4, -80.5, 5.4, -39.4, 33, -39.4, 33, -30.6, 5.4, -30.6, 5.4, 1.2, 13.4, 1.2, 13.4, 68.8, 4.4, 68.8, 4.4, 110.8, -4.4, 110.8, -4.4, 68.8, -13.4, 68.8, -13.4, 1.2, -5.4, 1.2, -5.4, -80.5, -6.4, -80.5]
 spawn: [0, 0, -100]
 spawn_yaw: 0
 path:
   - [0, 0, -100]
+  - [0, 0, -35]
+  - [0, 0, 35]
   - [0, 0, 105]
 altars: []
 arenas: []
 exits:
   - {to: vetta_attesa, at: [0, 0, 105], radius: 6, requires: [], arrive: spawn, kind: walk, name_key: exit.castello_culla.vetta_attesa}
 vistas:
-  - {id: vista_culla_finestre, pos: [30, 0, -40], look: [60, 20, -40], name_key: vista.vista_culla_finestre.name}
-reperti: []
-landmarks: []
+  - {id: vista_culla_finestre, pos: [28, 0, -35], look: [70, 6, -35], name_key: vista.vista_culla_finestre.name}
+reperti: [rep_culla_lettera, rep_culla_affresco, rep_culla_reliquia]
+colliders:
+  # the nave columns of the great hall
+  - {type: cylinder, c: [-8.5, 0, 10], r: 1.1, h: 20}
+  - {type: cylinder, c: [-8.5, 0, 20], r: 1.1, h: 20}
+  - {type: cylinder, c: [-8.5, 0, 30], r: 1.1, h: 20}
+  - {type: cylinder, c: [-8.5, 0, 40], r: 1.1, h: 20}
+  - {type: cylinder, c: [-8.5, 0, 50], r: 1.1, h: 20}
+  - {type: cylinder, c: [-8.5, 0, 60], r: 1.1, h: 20}
+  - {type: cylinder, c: [8.5, 0, 10], r: 1.1, h: 20}
+  - {type: cylinder, c: [8.5, 0, 20], r: 1.1, h: 20}
+  - {type: cylinder, c: [8.5, 0, 30], r: 1.1, h: 20}
+  - {type: cylinder, c: [8.5, 0, 40], r: 1.1, h: 20}
+  - {type: cylinder, c: [8.5, 0, 50], r: 1.1, h: 20}
+  - {type: cylinder, c: [8.5, 0, 60], r: 1.1, h: 20}
+landmarks:
+  - {builder: castle_hall, pos: [0, 0, -96.5], params: {length: 33, width: 16, height: 12, bays: 4, roof: vault, endS: rose, endN: open, seed: 1}}
+  - {builder: castle_hall, pos: [0, 0, -40], params: {length: 80, width: 14, height: 20, bays: 8, roof: broken, endS: door, doorWidthS: 11, endN: open, doorE: 4, sideDoorWidth: 8, seed: 2}}
+  - {builder: castle_hall, pos: [20.5, 0, -35], yaw: 1.5708, params: {length: 27, width: 12, height: 14, bays: 3, roof: open, endS: open, endN: open, seed: 4}}
+  - {builder: arch, pos: [34.2, 0, -35], yaw: 1.5708, params: {span: 2.4, height: 3.6, depth: 1.4, bays: 3, pointed: true, seed: 6}}
+  - {builder: castle_hall, pos: [0, 0, 35], params: {length: 70, width: 30, height: 24, bays: 7, roof: broken, aisles: true, aisleX: 8.5, endS: door, doorWidthS: 12.4, endN: door, doorWidthN: 10.4, seed: 3}}
+  - {builder: castle_hall, pos: [0, 0, 91], params: {length: 42, width: 12, height: 15, bays: 5, roof: vault, endS: open, endN: door, doorWidthN: 8, seed: 5}}
+  - {builder: world_below, pos: [0, 0, 0], params: {depth: -300, clouds: 1.2, seed: 9}}
 props: []
+particles: [dust*1.4]
 surface: stone
 ambience: castle_hall
 timeofday: castello_culla

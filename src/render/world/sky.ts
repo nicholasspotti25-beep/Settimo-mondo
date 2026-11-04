@@ -59,14 +59,17 @@ void main() {
   // god-rays fanning out of the sunless glow
   #if SKY_Q > 0
   {
+    // the rays fan up from a virtual source BELOW the horizon (the hidden dawn), never converging on a visible point
     vec3 up = vec3(0.0, 1.0, 0.0);
-    vec3 ax = normalize(cross(up, uGlowDir) + 1e-4);
-    vec3 ay = cross(uGlowDir, ax);
+    vec3 src = normalize(uGlowDir - vec3(0.0, 0.34, 0.0));
+    vec3 ax = normalize(cross(up, src) + 1e-4);
+    vec3 ay = cross(src, ax);
     float ang = atan(dot(d, ay), dot(d, ax));
     float rays = smNoise2(vec2(ang * 9.0, uTime * 0.04)) * 0.6 + smNoise2(vec2(ang * 23.0, -uTime * 0.03)) * 0.4;
     rays = smoothstep(0.45, 0.95, rays);
-    float fall = pow(g, 4.5) * smoothstep(-0.02, 0.12, e);
-    col += uGlow * rays * fall * 0.2 * uRays;
+    float gs = max(dot(d, src), 0.0);
+    float fall = pow(gs, 4.0) * smoothstep(-0.02, 0.14, e) * smoothstep(0.999, 0.965, g);
+    col += uGlow * rays * fall * 0.16 * uRays;
   }
   #endif
 
