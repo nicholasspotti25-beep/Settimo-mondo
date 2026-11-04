@@ -6,6 +6,11 @@
  * One InstancedMesh per (kind, variant, material slot); slots of a batch share one instance-matrix attribute. Culling is
  * done on the CPU per instance (frustum + per-kind draw distance), compacting visible instances to the front of the
  * attribute, so triangles are only paid for what is on screen and draw calls stay at one per batch slot.
+ *
+ * Draw calls scale with (kinds x variants x slots), so lower qualities fold the variants of a kind together (placement,
+ * yaw, scale and tilt still vary per instance; the sim colliders do not depend on the variant): High keeps every
+ * variant, Medium at most 3 (2 for small kinds), Low 2 (1 for small kinds). Small kinds (draw distance <= 260 m:
+ * rocks, pebbles, flowers, lanterns, bones, sword graves...) cast shadows on High only.
  */
 import * as THREE from 'three';
 import { scatterProps } from '../../../core/terrain';
@@ -32,6 +37,11 @@ interface Batch {
   localCenter: THREE.Vector3;
   localRadius: number;
   visible: number;
+}
+
+/** Small props: short draw distance (their shadows and variety only read up close). */
+function isSmallKind(spec: PropKind): boolean {
+  return spec.far <= 260;
 }
 
 const geoCache = new Map<string, Map<string, THREE.BufferGeometry>>();
@@ -70,17 +80,27 @@ export class PropField {
   private frame = 0;
   private farMult: number;
   private shadows: boolean;
+  private quality: 'low' | 'medium' | 'high';
 
   constructor(private env: ZoneEnv) {
     this.group.name = 'props';
     const q = env.ctx.quality;
     this.farMult = q === 'low' ? 0.6 : q === 'medium' ? 0.82 : 1;
     this.shadows = q !== 'low';
+    this.quality = q;
+  }
+
+  /** Variants drawn for a kind at this quality (see the header). */
+  private variantsOf(spec: PropKind): number {
+    const small = isSmallKind(spec);
+    if (this.quality === 'high') return spec.variants;
+    if (this.quality === 'medium') return Math.min(spec.variants, small ? 2 : 3);
+    return Math.min(spec.variants, small ? 1 : 2);
   }
 
   private batch(kind: string, variant: number): Batch {
     const spec = propKind(kind);
-    const v = variant % spec.variants;
+    const v = variant % this.variantsOf(spec);
     const key = `${kind}#${v}`;
     let b = this.batches.get(key);
     if (!b) {
@@ -162,7 +182,7 @@ export class PropField {
         const mesh = new THREE.InstancedMesh(g, worldMat(slot as WorldMatKind), b.count);
         mesh.instanceMatrix = b.attr;
         mesh.frustumCulled = false;
-        mesh.castShadow = this.shadows && !!b.spec.shadow && slot !== 'glow' && slot !== 'glass';
+        mesh.castShadow = this.shadows && !!b.spec.shadow && slot !== 'glow' && slot !== 'glass' && (this.quality === 'high' || !isSmallKind(b.spec));
         mesh.receiveShadow = slot !== 'glow';
         mesh.name = `prop:${b.kind}:${b.variant}:${slot}`;
         if (slot === 'glow' || slot === 'glass') mesh.renderOrder = 2;

@@ -5,7 +5,17 @@
  * builder) and the arena dressing of every arena in the zone (src/content/bosses/<boss>/arena.ts by arena id).
  *
  * API used by the Renderer: constructor(scene, ctx), loadZone(sim), onEvent(e, sim), update(sim, dt, camera), group,
- * dispose(). Extras for other streams: `atmosphere` (lightning(), current exposure), `zoneVisual`, `arenaVisuals`.
+ * dispose(). Extras for other streams: `atmosphere` (lightning(), current exposure), `zoneVisual`, `arenaVisuals`,
+ * `buildStats` (ms per build phase of the last zone, for the smoke / perf logs).
+ *
+ * Performance notes:
+ * - Luminance probe: the post pipeline's direct path re-renders the scene into a 32x16 target every 0.3 s. During that
+ *   pass (scene.onBeforeRender with a render target <= 64 px) the world hides its small detail (props, ground cover,
+ *   particles, sites) so the probe costs ~30 calls instead of a second full frame (it doubled the stats every few
+ *   frames: the "alternating" draw-call count) and compiles no render-target variants of those shaders.
+ * - Shader warm-up: once a zone is built its materials are compiled with renderer.compileAsync (parallel compile where
+ *   KHR_parallel_shader_compile exists) before `busy` clears, so the compile happens behind the loading fade instead of
+ *   stalling the first visible frames.
  */
 import * as THREE from 'three';
 import type { SkyPresetDef, TimeOfDay, TodPreset, ZoneDef } from '../../core/types';
@@ -45,6 +55,12 @@ export class WorldRenderer {
   private zoneDef: ZoneDef | null = null;
   private lastCamera: THREE.Camera | null = null;
   private lastBaseExposure = 0;
+  private gl: THREE.WebGLRenderer | null = null;
+  /** Objects hidden during the luminance probe pass (small detail). */
+  private probeHidden: THREE.Object3D[] = [];
+  private probeLite = false;
+  /** Milliseconds per phase of the last zone build (env, zone, sites, particles, arenas, compile, total). */
+  buildStats: Record<string, number> = {};
 
   constructor(private scene: THREE.Scene, private ctx: RenderCtx) {
     this.group.name = 'world';
@@ -59,11 +75,40 @@ export class WorldRenderer {
     const prev = scene.onBeforeRender;
     scene.onBeforeRender = (renderer, sc, cam, geo, mat, grp) => {
       prev.call(scene, renderer, sc, cam, geo, mat, grp);
+      this.gl = renderer;
+      // three passes the render target as the 4th argument of Scene.onBeforeRender
+      const rt = renderer.getRenderTarget();
+      this.setProbeLite(!!rt && rt.width <= 64 && rt.height <= 64);
       this.updateHaze(renderer);
       renderer.toneMappingExposure = this.atmosphere.exposure;
       this.lastBaseExposure = this.atmosphere.exposure;
     };
     this.applyQuality();
+  }
+
+  /** Hide / restore the small detail for the luminance probe pass (see the header). */
+  private setProbeLite(on: boolean): void {
+    if (on === this.probeLite) return;
+    this.probeLite = on;
+    for (const o of this.probeHidden) {
+      if (on) {
+        o.userData.probeVis = o.visible;
+        o.visible = false;
+      } else if (o.userData.probeVis !== undefined) {
+        o.visible = o.userData.probeVis as boolean;
+        delete o.userData.probeVis;
+      }
+    }
+  }
+
+  private collectProbeHidden(): void {
+    this.setProbeLite(false);
+    const list: THREE.Object3D[] = [];
+    const root = this.zoneVisual?.root;
+    if (root) for (const c of root.children) if (c.name === 'props' || c.name === 'cover' || c.name.startsWith('cover')) list.push(c);
+    if (this.particles) list.push(this.particles.group);
+    if (this.sites) list.push(this.sites.group);
+    this.probeHidden = list;
   }
 
   /**
@@ -135,6 +180,8 @@ export class WorldRenderer {
   /* ---------------------------------------------------------------------------------------------------------------- */
 
   private disposeZone(): void {
+    this.setProbeLite(false);
+    this.probeHidden = [];
     if (this.particles) {
       this.group.remove(this.particles.group);
       this.particles.dispose();
@@ -173,9 +220,18 @@ export class WorldRenderer {
     this.atmosphere.setZoneOpts(biome.atmos ?? {});
     this.retarget(true);
     const job = (async () => {
+      const T: Record<string, number> = {};
+      let t = performance.now();
+      const t0 = t;
+      const lap = (k: string) => {
+        const n = performance.now();
+        T[k] = Math.round(n - t);
+        t = n;
+      };
       this.disposeZone();
       releaseZoneEnv();
       createZoneEnv(def, this.ctx);
+      lap('env');
       let visual: ZoneVisual;
       const custom = ZONE_BUILDERS[def.id];
       if (custom) {
@@ -190,12 +246,14 @@ export class WorldRenderer {
       }
       this.zoneVisual = visual;
       this.group.add(visual.root);
+      lap('zone');
       try {
         this.sites = new ZoneSites(zoneEnv(def, this.ctx));
         if (this.sites) this.group.add(this.sites.group);
       } catch (err) {
         console.error(`[world] sites of ${def.id} failed`, err);
       }
+      lap('sites');
       try {
         const env = zoneEnv(def, this.ctx);
         this.particles = new ZoneParticles(env, zoneParticleList(env), (s) => this.atmosphere.lightning(s));
@@ -203,6 +261,7 @@ export class WorldRenderer {
       } catch (err) {
         console.error(`[world] particles of ${def.id} failed`, err);
       }
+      lap('particles');
       for (const arenaId of def.arenas) {
         const loader = ARENA_BUILDERS[arenaId];
         if (!loader) continue;
@@ -219,12 +278,32 @@ export class WorldRenderer {
           console.error(`[world] arena builder ${arenaId} failed`, err);
         }
       }
+      lap('arenas');
+      this.collectProbeHidden();
+      await this.warmShaders(token);
+      lap('compile');
+      T.total = Math.round(performance.now() - t0);
+      if (token === this.token) this.buildStats = T;
     })();
     this.loading = job;
     try {
       await job;
     } finally {
       if (this.loading === job) this.loading = null;
+    }
+  }
+
+  /**
+   * Compile the new zone's materials before the zone is shown (see the header). Bounded: a driver without parallel
+   * compile resolves at once after the synchronous compile; a stuck one never holds the loading fade over ~6 s.
+   */
+  private async warmShaders(token: number): Promise<void> {
+    const gl = this.gl, cam = this.lastCamera;
+    if (!gl || !cam || token !== this.token) return;
+    try {
+      await Promise.race([gl.compileAsync(this.group, cam, this.scene), new Promise((r) => setTimeout(r, 6000))]);
+    } catch (err) {
+      console.warn('[world] shader warm-up failed', err);
     }
   }
 

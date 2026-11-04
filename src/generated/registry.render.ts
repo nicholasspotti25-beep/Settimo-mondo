@@ -10,6 +10,7 @@ export const BOSS_MODELS: Record<string, Loader> = {
 
 /** Arena dressing modules keyed by ARENA id (default export: ArenaBuilder). */
 export const ARENA_BUILDERS: Record<string, Loader> = {
+  "pianure_erba_alta": () => import('../content/bosses/cavaliere_errante/arena'),
   "vetta_piazzale": () => import('../content/bosses/guardiano_del_regno/arena'),
 };
 

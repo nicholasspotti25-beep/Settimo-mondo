@@ -342,7 +342,8 @@ export class TerrainMeshes {
   constructor(readonly field: ZoneField, biome: BiomeDef, private ctx: RenderCtx) {
     this.group.name = 'terrain';
     this.material = terrainMaterial(biome, field, ctx.quality);
-    const C = ctx.quality === 'low' ? 40 : 56;
+    // chunk size in field cells: one draw call per chunk, LOD per chunk (bigger chunks on Low: fewer calls)
+    const C = ctx.quality === 'low' ? 72 : ctx.quality === 'medium' ? 64 : 56;
     const f = field;
     const steps = ctx.quality === 'low' ? [1, 2, 4] : [1, 2, 4];
     this.lodDist = ctx.quality === 'low' ? [60, 140] : ctx.quality === 'medium' ? [90, 200] : [120, 260];
@@ -443,8 +444,8 @@ export function buildBackdrop(field: ZoneField, kind: BackdropKind, height: numb
       H[k] = y;
     }
   }
-  // blocks for culling
-  const B = 4;
+  // blocks for culling (each block is one draw call; the ring is mostly far away, so few big blocks are enough)
+  const B = quality === 'low' ? 2 : 3;
   const bx = Math.ceil((NX - 1) / B), bz = Math.ceil((NZ - 1) / B);
   for (let bj = 0; bj < B; bj++) {
     for (let bi = 0; bi < B; bi++) {

@@ -273,10 +273,15 @@ function dressKnight(mb: ModelBuilder, d: HumanoidDims, S: KnightSurfaces, C: Co
 }
 
 /**
- * The seated rider's cloak chain: down his back, over the cantle, along the rump and over the tail root. Bones live in
- * the rider's rest frame (standing beside the steed, see mountedSkeleton): seated targets minus the seat offset.
+ * The seated rider's cloak: three rider bones down his back to the cantle (springy), then three bones on the steed's
+ * pelvis along the rump and over the tail root, so the drape rides the horse instead of streaming off it like a flag.
+ * All bind positions live in the rider's rest frame (standing beside the steed, see mountedSkeleton): the horse-side
+ * root `cloak_rump_0` rests at its seated target minus the seat offset and CavaliereVisual adds the offset back every
+ * frame (RUMP_FIX), which keeps one bind frame for weights blended across rider and horse bones.
  */
-function riderCloakChain(mb: ModelBuilder, d: HumanoidDims, q: QuadrupedDims): string[] {
+interface RiderCloak { bones: string[]; seatOff: THREE.Vector3 }
+
+function riderCloakChain(mb: ModelBuilder, d: HumanoidDims, q: QuadrupedDims): RiderCloak {
   const H = d.H, k = q.h / 2.6;
   const seatOff = mb.restPos('seat').clone().sub(mb.restPos('rider_root'));
   const chest = mb.restPos('rider_chest').clone();
@@ -294,16 +299,19 @@ function riderCloakChain(mb: ModelBuilder, d: HumanoidDims, q: QuadrupedDims): s
   let parent = 'rider_chest';
   for (let i = 0; i < seated.length; i++) {
     const rest = seated[i].clone().sub(seatOff);
-    const name = `rider_cape_${i}`;
+    const name = i < 3 ? `rider_cape_${i}` : `cloak_rump_${i - 3}`;
+    if (i === 3) {
+      prev = body;
+      parent = 'body';
+    }
     mb.bone(name, parent, [rest.x - prev.x, rest.y - prev.y, rest.z - prev.z]);
     names.push(name);
     prev = rest;
     parent = name;
   }
-  mb.namedChain('rider_cape', names);
-  // stiff, little gravity: the cloak lies on the rump instead of sinking through it
-  (mb.info.springs as unknown[]).push({ chain: 'rider_cape', stiffness: 95, damping: 9, gravity: 0.5, falloff: 0.55, weight: 1 });
-  return names;
+  mb.namedChain('rider_cape', names.slice(0, 3));
+  (mb.info.springs as unknown[]).push({ chain: 'rider_cape', stiffness: 80, damping: 6, gravity: 1.5, falloff: 0.3, weight: 0.8 });
+  return { bones: names, seatOff };
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
@@ -398,6 +406,9 @@ class CavaliereVisual implements ActorVisual {
   private time = 0;
   private readonly riderRoot: THREE.Bone | undefined;
   private readonly saddleLantern: THREE.Bone | undefined;
+  /** Horse-side cloak root and its corrected local position (rest + seat offset, see riderCloakChain). */
+  private readonly rump: THREE.Bone | undefined;
+  private readonly rumpPos = new THREE.Vector3();
   private readonly roadM: THREE.MeshStandardMaterial[];
   private readonly flameM: THREE.MeshStandardMaterial | undefined;
 
@@ -408,6 +419,7 @@ class CavaliereVisual implements ActorVisual {
     private readonly animM: Animator,
     private readonly animF: Animator,
     actor: Actor,
+    seatOff: THREE.Vector3,
   ) {
     this.root.name = `boss:${def.id}`;
     this.root.add(mounted.root, foot.root);
@@ -415,6 +427,8 @@ class CavaliereVisual implements ActorVisual {
     this.height = mounted.height * 0.55;
     this.riderRoot = mounted.bones.rider_root;
     this.saddleLantern = mounted.bones.lantern_0;
+    this.rump = mounted.bones.cloak_rump_0;
+    if (this.rump) this.rumpPos.copy(this.rump.position).add(seatOff);
     this.roadM = [mounted.materials.knight_road, foot.materials.knight_road].filter(Boolean) as THREE.MeshStandardMaterial[];
     this.flameM = foot.materials.lantern_flame as THREE.MeshStandardMaterial | undefined;
     this.place(actor, 1);
@@ -444,7 +458,7 @@ class CavaliereVisual implements ActorVisual {
   private setMode(m: Mode, actor: Actor): void {
     this.mode = m;
     const riderScale = m === 'mounted' ? 1 : 0.001;
-    for (const b of [this.riderRoot, this.saddleLantern]) {
+    for (const b of [this.riderRoot, this.saddleLantern, this.rump]) {
       if (!b) continue;
       b.scale.setScalar(riderScale);
       b.userData.smScaled = riderScale !== 1;
@@ -479,6 +493,7 @@ class CavaliereVisual implements ActorVisual {
       this.fill(this.inpM, actor, sim);
       this.animM.lookTarget = _look;
       this.animM.update(this.inpM, dt);
+      this.fixRump();
     } else {
       if (this.mode === 'leaving') this.updateHorse(actor, sim, dt);
       this.updateFoot(actor, sim, dt);
@@ -497,6 +512,14 @@ class CavaliereVisual implements ActorVisual {
     b.dissolve.value = a.dissolve.value;
     b.crack.value = a.crack.value;
     b.aura.value.copy(a.aura.value);
+  }
+
+  /** RUMP_FIX: the horse-side cloak bones sit at their seated place (their bind pose is in the rider's rest frame). */
+  private fixRump(): void {
+    const b = this.rump;
+    if (!b || this.mode !== 'mounted') return;
+    b.position.copy(this.rumpPos);
+    b.updateMatrixWorld(true);
   }
 
   private updateFoot(actor: Actor, sim: Sim, dt: number): void {
@@ -586,7 +609,8 @@ const build: BossModelBuilder = (def, ctx, actor: Actor): ActorVisual => {
   const SKm = knightSurfaces(mbM);
   quadrupedBody(mbM, dm.horse, { body: C.coat, belly: C.coatBelly, dark: C.coatDark, mane: C.mane, hoof: '#24211e', eye: '#1a1614', ears: 'equine', surfaces: SS, bulk: 0.98 });
   steedGear(mbM, dm.horse, SS, SKm, C);
-  dressKnight(mbM, dm.rider, SKm, C, riderCloakChain(mbM, dm.rider, dm.horse), MOUNTED_CLOAK(KNIGHT_H / 3.6));
+  const rc = riderCloakChain(mbM, dm.rider, dm.horse);
+  dressKnight(mbM, dm.rider, SKm, C, rc.bones, MOUNTED_CLOAK(KNIGHT_H / 3.6));
   const mounted = mbM.build();
   mounted.setShadow(ctx.quality !== 'low');
   // --- on foot: the same knight standing, the lantern now at his belt ---
@@ -602,7 +626,7 @@ const build: BossModelBuilder = (def, ctx, actor: Actor): ActorVisual => {
   foot.setShadow(ctx.quality !== 'low');
   const animM = new Animator(mounted, ctx.content, 'mounted', undefined, { clips: knightClips('rider_') });
   const animF = new Animator(foot, ctx.content, 'humanoid', undefined, { clips: knightClips('') });
-  return new CavaliereVisual(def, mounted, foot, animM, animF, actor);
+  return new CavaliereVisual(def, mounted, foot, animM, animF, actor, rc.seatOff);
 };
 
 export default build;

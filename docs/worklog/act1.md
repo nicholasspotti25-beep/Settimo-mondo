@@ -24,27 +24,24 @@ tests/act1*.test.ts, docs/requests/act1.md.
 | 11 | Bot hooks for scripted mechanics | done (chunk 1): all 5 hooks; shared act1Defense (box hazards, charge lines, ring jumps, round-hazard escape) | tools/bot/hooks/{cavaliere_errante,elder_tree,mostro_della_palude,great_devourer,caronte}.ts |
 | 12 | Unit tests tests/act1*.test.ts | done for sim (27); model tests started chunk 3 (3: Cavaliere budget, hurtbox alignment, dismount/horse leaves/retry) | tests/act1.test.ts, tests/act1_models.test.ts |
 | 13 | Canon audit clean for act1 bosses | partial: only "no music theme data" (audio stream) and "no model builder" (item 14) remain; canon quotes OK | — |
-| 14 | Boss models (5) | partial (chunk 3): cavaliere_errante first pass (mounted + on-foot composite, horse gallops off on dismount, lantern ember on death; screenshots checked) — needs a volume pass on the knight's body; elder_tree, palude, devourer, caronte missing | src/content/bosses/cavaliere_errante/model.ts |
-| 15 | Arena dressing (5) incl. first_light, pier_destroyed, soul_bridge/current, caronte_ferry cues | missing (unblocked: WORLD_KIT.md and RENDER_KIT.md both STATUS: READY) | src/content/bosses/<id>/arena.ts |
+| 14 | Boss models (5) | partial: cavaliere_errante done (chunk 4 volume pass: surcoat, limb plates, wide cloak draped over the rump, hood framing the helm); elder_tree, palude, devourer, caronte missing | src/content/bosses/cavaliere_errante/{model,garments}.ts |
+| 15 | Arena dressing (5) incl. first_light, pier_destroyed, soul_bridge/current, caronte_ferry cues | partial: pianure_erba_alta done (chunk 4); foresta_cuore, palude_pozza, palude_molo, fiume_traghetto missing | src/content/bosses/<id>/arena.ts |
 | 16 | Requests to other streams | none needed so far | docs/requests/act1.md |
 
 ## Next
 
-1. Cavaliere model, volume pass: the plate-style humanoid body reads as a thin mannequin (ball joints, stick limbs) up close and
-   on foot. Add a long surcoat/tabard skinned over chest/hips/thighs (cloth over the plate), thicker greaves/vambraces, make
-   the cloak hang wider over the horse's rump; check the hood frames the sallet from the front (on foot, outside the
-   transition aura). Then check `counter_stance` / `salute` clips read (pose screenshots with fightPaused during the
-   telegraph), and the night charge out of the dark.
-2. Arena dressing pianure_erba_alta (src/content/bosses/cavaliere_errante/arena.ts): ring of leaning standing stones at
-   r ≈ 36 leaving the gate (z 96) and the north exit path (z 164 → 195) open; taller golden grass band (render-only
-   PropField tall_grass) outside r 30; GlowSet; cues cavaliere_dismount (trampled ring / dust), cavaliere_into_dark /
-   out_of_dark (night), cavaliere_lantern (a warm glint on death). The biome cover already grows inside the arena.
-3. Elder Tree: model (tree family; pose clips for root_call, branch_whip_l/r, branch_slam, shake_canopy, root_stomp,
-   heart_pulse via RigVisualOpts.clips since data/anim has no tree.yaml yet; heart part sphere [0, 2.3, 2.95] with flag
-   heart_open showing the light) + arena foresta_cuore (black canopy, luminous mushrooms, roots; cue first_light = a shaft
-   of dawn light through the canopy on death, elder_heart_open). Boss spawns at z ≈ 132 (north side).
-4. Then palude, devourer (arena_state pier_destroyed), caronte (soul_bridge / current, caronte_ferry).
-5. Optional bot polish (unchanged): Caronte NG+ 3.7 hits, Devourer 3.3–3.6 hits.
+1. Elder Tree model (tree family: treeSkeleton/treeBody; data/anim/tree.yaml now exists — check which of root_call,
+   branch_whip_l/r, branch_slam, shake_canopy, root_stomp, heart_pulse resolve to family clips and add RigVisualOpts.clips only
+   where they do not read; bark face in the trunk, black leaves, luminous mushrooms at the roots; heart part sphere
+   [0, 2.3, 2.95] with flag heart_open opening the trunk on a heart of light) + arena foresta_cuore (black canopy, roots,
+   luminous mushrooms; cue first_light = a shaft of dawn through the canopy on death; elder_heart_open). Boss spawns at
+   z ≈ 132 (north side). Fight-camera screenshots at two times of day.
+2. Then palude (model + palude_pozza), devourer (model + palude_molo, arena_state pier_destroyed), caronte (model +
+   fiume_traghetto, soul_bridge / current, caronte_ferry).
+3. Cavaliere polish (optional): pose screenshots of `counter_stance` / `salute` with fightPaused during the telegraph; the
+   night charge out of the dark (mist burst) seen from the fight camera at notte (meditate('notte') before
+   startFightDirect rendered an overcast day in the headless shots of chunk 4 — check the time-of-day call order).
+4. Optional bot polish (unchanged): Caronte NG+ 3.7 hits, Devourer 3.3–3.6 hits.
 
 ## Notes
 
@@ -123,3 +120,40 @@ tests/act1*.test.ts, docs/requests/act1.md.
 - End of chunk 3: `npx tsc --noEmit -p tsconfig.json` clean (whole tree); `npx vitest run tests/act1.test.ts
   tests/act1_models.test.ts tests/render_models.test.ts` 34/34 pass; `npm run registry && SM_PARTIAL=1 npm run data` ok
   (1071 it / 1071 en).
+
+- Chunk 4 (2026-11-04), Cavaliere volume pass (src/content/bosses/cavaliere_errante/garments.ts + model.ts): two skinned
+  sheets in the cape surface (DoubleSide). `surcoat`: sleeveless, collar to above the knee (kneeY + 0.075 H), faded
+  ochre-green with three sewn patches + stitches, split at the sides below the hips into front/back panels weighted 62% to
+  the thighs at the hem (left/right by side) so walk/lunge/counter stance move it; belt + buckle + pouch and the baldric now
+  sit over it. `cloak`: an arc across its bone chain (out = X × tangent: behind the back on foot, over the rump when
+  mounted), wrap ±102°, folds deepening to a frayed hem, half-width 0.66 → 1.02 m on foot. `limbArmor`: rerebraces,
+  couters with wings, flared vambraces (right one brass-trimmed), cuisses, big poleyns with wings, ridged greaves. Hood:
+  new lathe (r 0.106 R) with a 1.02 rad face opening narrower than the sallet + a pale lining edge — from the front the
+  green hood frames the visor slit (checked at 4.5 m). Removed the old flat humanoidBody cape, tasset skirt and bedroll;
+  saddlebags moved forward (0.46 L) clear of the cloak; foot lantern moved out to the belt side (0.145 H) clear of the
+  cuisse.
+- Mounted cloak: first try (all six cloak bones on the rider) streamed up off the rump like a flag — the rider leans in
+  the gallop and a 2 m rigid lever lifts. Fix: rider_cape_0..2 (springy, stiffness 80, gravity 1.5, weight 0.8) down the
+  back to the cantle, then cloak_rump_0..2 on the steed's pelvis along the rump and over the tail root. Their bind pose is
+  authored in the rider's rest frame (seated target minus the seat offset) so weights can blend rider and horse bones in one
+  bind frame, and CavaliereVisual.fixRump() adds the seat offset back to cloak_rump_0 every mounted frame. The rump
+  bones are scaled away with the rider on the dismount. Measured idle/run (scratchpad act1/measure2.test.ts): rump chain
+  rides the pelvis (y 3.12 → 2.72 over z -1.23 → -1.91), rider chain follows the lean.
+- Arena pianure_erba_alta (src/content/bosses/cavaliere_errante/arena.ts, registry: 2 arenas): ~19 leaning menhirs (tapered
+  displaced boxes, moss cover) at r 36.4–38.2 + foot stones + one fallen stone, openings ±0.36 rad at the fog gate and the
+  north road; a trilithon doorway over the road (two 6.8–7 m stones, lintel) with the Cercatori lantern mark cut in it
+  (GlowSet glint, lit once cavaliere_errante is defeated, brighter at night); two stones flanking the gate; a band of
+  waist-high golden grass (custom bent tapered-blade clumps, foliage slot with wind; 1700 / 1250 / 700 clumps high / medium /
+  low) between r 35.2 and 43, kept off the road, the gate and the stones. Cues: cavaliere_dismount = a billowing dust wall +
+  a trampled ring that lingers 9 s at the boss position; cavaliere_into_dark / out_of_dark = a cold mist wall (shrinking
+  when he returns); cavaliere_lantern = a warm additive glint at the lantern on his belt (x uHazeK), fading after 7 s;
+  arena_state:default clears it. One Parts build (matte + foliage) + GlowSet + 5 small meshes. Follow-camera scene stats
+  at alba: 48 calls, 121k triangles.
+- Screenshots (port 5181, 1280x576, scratchpad c4/): v1–v3 (giorno: mounted front/side/rear, on foot front/side/back,
+  hood close-up), a1 (tramonto follow camera: stone circle + doorway framing the knight), a2 (giorno wide + dust), a3
+  (alba: follow camera + inside the grass band with the saluting knight).
+- End of chunk 4: `npx tsc --noEmit -p tsconfig.json` clean (whole tree); `npx vitest run tests/act1.test.ts
+  tests/act1_models.test.ts tests/render_models.test.ts` 34/34; `npm run registry && SM_PARTIAL=1 npm run data` ok
+  (1089 it / 1089 en); balance-bot cavaliere_errante seeds=3: PASS perfect 3/3 avg 110 s / 180, 0.3 hits, sloppy wins 2/3
+  with 12.3 hits. tests/zz_act1_measure.test.ts (a measurement script committed by mistake in chunk 3) deleted: measurement
+  scripts live in the scratchpad.
