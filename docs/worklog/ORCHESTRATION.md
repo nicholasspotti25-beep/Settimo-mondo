@@ -69,3 +69,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - render-kit#5 done: Portatore readable (hero light, cream tunic, gold-bordered cloak), polearm poses, exposure probe from presented frame (stable stats), weapon trails by weapons stream, stale boss model bug fixed
 - started: weapons#2 (daylight Art pass, Act II weapons)
 - deployed e51953f (readable Portatore, polearm poses, world#4, cerbero, act3a partial)
+- act3a#1 done: all 4 act3a encounters sim-side playable (gigante, yeti, guardiano rocca, loki), 26 tests, bot 4/4 pass; models next
+- started: act3b#1 (sim-side)
