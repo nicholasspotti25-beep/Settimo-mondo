@@ -53,3 +53,6 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - deployed b11aa6e (ui review fixes, pose libraries); started act1#4
 - weapons#1 done: work log, buildWeapon (7 dedicated Act I models + 31 category fallbacks), installWeaponFx (trails, art flares, transizione flash), 14 Act I Arts tested, docs/WEAPONS.md DPS table; request #7 polearm poses -> render-kit
 - started: integrate#2 (ui#3 aimAssist, ui#4 Specchio NG+, open requests)
+- integrate#2 done: aimAssist gating, Specchio NG+ (everDefeated), smoke waits for build + stable resolution, onZoneEnter waits for world build; bot 12/12, tests 148/150 (strict gates)
+- lead: applied integration request #2 (resize deferred to next render: no black flash on resolution steps)
+- 2026-11-04 ~14:00 usage limit stopped act1#4; 16:18 resumed; started world#4

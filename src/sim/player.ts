@@ -766,7 +766,7 @@ export class Player {
     const lp = this.lockPos(sim, tmp2);
     if (lp) this.yaw = yawTo(this.pos, lp);
     else if (Math.hypot(input.moveX, input.moveZ) > 0.2) this.yaw = yawOf(input.moveX, input.moveZ);
-    else if (snap) {
+    else if (snap && sim.settings.aimAssist) {
       // soft auto-aim toward the nearest enemy in front (within 60 degrees, 1.3x reach)
       const t = sim.nearestEnemy(this.pos, 12 * Math.max(0.3, this.scale), this.yaw, 60 * DEG);
       if (t) this.yaw = yawTo(this.pos, t.pos);

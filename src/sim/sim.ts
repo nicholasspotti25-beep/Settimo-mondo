@@ -12,7 +12,7 @@ import { Actor, nextAttackUid, resetActorIds, spawnYawSpread, type AttackRuntime
 import { clearArtEffects, updateArtEffects, type ArtRuntime } from './arts';
 import type { BehaviorRegistry } from './behavior';
 import { applyDamageToActor, damagePlayer, killActor, type HitResult } from './combat';
-import { isDefeated, newGameState, playerBaseScale, skyShade, themeNotes, type CharacterLook, type GameStateData } from './gamestate';
+import { everDefeated, isDefeated, newGameState, playerBaseScale, skyShade, themeNotes, type CharacterLook, type GameStateData } from './gamestate';
 import { MetamondoController } from './metamondo';
 import { Player, type SwingRuntime } from './player';
 import { Pool, makeBarrier, makeHazard, makeProjectile, type Barrier, type Hazard, type Projectile } from './pools';
@@ -24,6 +24,8 @@ import { ZoneRuntime, type Interactable } from './world';
 export interface SimSettings {
   inputBuffer: number;
   latencyComp: number;
+  /** Aim assist: unlocked attacks, shots and Arts turn toward the nearest foe in front (a lock always aims). Default true. */
+  aimAssist: boolean;
 }
 
 export interface FightRuntime {
@@ -116,7 +118,7 @@ export class Sim {
     this.headless = opts.headless ?? false;
     this.state = opts.state ?? newGameState(c, { name: 'Portatore', build: 0.5, height: 0.5, skin: 2, hair: 1, hairColor: 0, eyes: 0, cloak: 0 });
     this.rng = new Rng(opts.seed ?? this.state.rng ?? 1);
-    this.settings = { inputBuffer: this.bal.player.input_buffer, latencyComp: 0 };
+    this.settings = { inputBuffer: this.bal.player.input_buffer, latencyComp: 0, aimAssist: true };
     this.applyStateToPlayer();
   }
 
@@ -1208,9 +1210,9 @@ export class Sim {
     const count = spec.count ?? 1;
     const origin = { x: pl.pos.x, y: pl.pos.y + 1.3 * pl.scale, z: pl.pos.z };
     const lock = pl.lock ? this.lockPointPos(pl.lock.actor, pl.lock.part, v3()) : null;
-    // aim assist: locked target, else nearest enemy in a 35-degree cone
+    // aim: locked target, else (aim assist on) the nearest enemy in a 35-degree cone; no aim -> no homing
     let aim = lock;
-    if (!aim) {
+    if (!aim && this.settings.aimAssist) {
       const t = this.nearestEnemy(pl.pos, 60, pl.yaw, 35 * DEG);
       if (t) aim = this.lockPointPos(t.id, -1, v3());
     }
@@ -2053,7 +2055,7 @@ export class Sim {
 
   /** Specchio dei Ricordi: replay a defeated boss from an altar with a chosen time of day, Form and challenges. */
   startMemoryFight(bossId: string, tod: TimeOfDay, form: string, challenges: Partial<Challenges>): void {
-    if (!isDefeated(this.state, bossId) || this.c.boss(bossId).scripted) return;
+    if (!everDefeated(this.state, bossId) || this.c.boss(bossId).scripted) return;
     this.memoryReturn = { zone: this.state.zone, altar: this.altarOpen ?? this.state.lastAltar };
     this.closeAltar();
     this.state.timeOfDay = tod;

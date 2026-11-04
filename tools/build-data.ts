@@ -79,24 +79,6 @@ function loadFile<T>(file: string, schema: z.ZodType<T>): T | null {
   }
   return validate(schema, readYaml(full), `data/${file}`);
 }
-function loadArrayFile<T>(file: string, schema: z.ZodType<T>): T[] {
-  const full = path.join(DATA, file);
-  if (!fs.existsSync(full)) {
-    errors.push(`missing data/${file}`);
-    return [];
-  }
-  const raw = readYaml(full);
-  if (!Array.isArray(raw)) {
-    errors.push(`data/${file}: expected a list`);
-    return [];
-  }
-  const out: T[] = [];
-  raw.forEach((item, i) => {
-    const v = validate(schema, item, `data/${file}[${i}]`);
-    if (v) out.push(v);
-  });
-  return out;
-}
 function loadKeyed(dir: string): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const f of listYaml(dir)) {

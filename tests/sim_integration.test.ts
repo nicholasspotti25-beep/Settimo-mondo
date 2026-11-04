@@ -1,12 +1,16 @@
 /**
  * Integration-pass sim contracts: one blow per hazard spawn (docs/requests/act2.md #1), the debug attack-shape accessor
- * (docs/requests/ui.md #2) and the abandoned-fight event that lets presentation drop a dropped fight's captions and cards.
+ * (docs/requests/ui.md #2), the abandoned-fight event that lets presentation drop a dropped fight's captions and cards,
+ * the Aim assist setting (docs/requests/ui.md #3) and the Specchio dei Ricordi in the Ciclo dell'Alba (ui.md #4).
  */
 import { describe, expect, it } from 'vitest';
+import { DEG, wrapAngle, yawTo } from '../src/core/math';
 import type { ShapeDef, SpawnDef } from '../src/core/types';
-import type { Sim } from '../src/sim/sim';
-import { emptyInput, type SimEvent } from '../src/sim/types';
-import { makeSim } from './helpers';
+import { everDefeated, isDefeated, newGamePlus } from '../src/sim/gamestate';
+import { Sim } from '../src/sim/sim';
+import { Btn, emptyInput, type SimEvent } from '../src/sim/types';
+import { BEHAVIORS } from '../src/generated/registry.sim';
+import { makeSim, press } from './helpers';
 
 function fightAtGate(): Sim {
   const sim = makeSim(3);
@@ -121,5 +125,72 @@ describe('fights dropped unfinished', () => {
     expect(first).toEqual([{ type: 'fightEnd', boss: 'guardiano_del_regno', won: true }]);
     sim.startFightDirect('cavaliere_errante', { skipIntro: true });
     expect(sim.drainEvents().filter((e) => e.type === 'fightEnd').length).toBe(0);
+  });
+});
+
+describe('aim assist setting', () => {
+  /** The boss frozen 4 m beyond its body, 30 degrees to the player's right; no lock. Returns the player's yaw error to it. */
+  function swingBeside(aimAssist: boolean): { before: number; after: number; turned: number } {
+    const sim = fightAtGate();
+    sim.settings.aimAssist = aimAssist;
+    sim.debug.invincible = true;
+    const boss = sim.boss!;
+    boss.attack = null;
+    boss.setState('idle');
+    boss.idleTimer = 99;
+    const pl = sim.player;
+    pl.lock = null;
+    const d = boss.radius * boss.scale + 4;
+    pl.pos.x = boss.pos.x;
+    pl.pos.z = boss.pos.z - d;
+    pl.yaw = yawTo(pl.pos, boss.pos) + 30 * DEG;
+    const yaw0 = pl.yaw;
+    const before = Math.abs(wrapAngle(pl.yaw - yawTo(pl.pos, boss.pos)));
+    sim.step(press(Btn.Light));
+    for (let i = 0; i < 3; i++) sim.step(emptyInput());
+    expect(pl.lock).toBeNull();
+    return { before, after: Math.abs(wrapAngle(pl.yaw - yawTo(pl.pos, boss.pos))), turned: Math.abs(wrapAngle(pl.yaw - yaw0)) };
+  }
+
+  it('on (default): an unlocked light attack turns toward the foe in front', () => {
+    expect(makeSim(1).settings.aimAssist).toBe(true);
+    const r = swingBeside(true);
+    expect(r.before).toBeCloseTo(30 * DEG, 3);
+    expect(r.after).toBeLessThan(2 * DEG);
+  });
+
+  it('off: an unlocked light attack keeps the player\'s facing', () => {
+    const r = swingBeside(false);
+    expect(r.turned).toBeLessThan(1e-6);
+    expect(r.after).toBeGreaterThan(25 * DEG);
+  });
+});
+
+describe('Specchio dei Ricordi in the Ciclo dell\'Alba', () => {
+  it('a boss defeated in the previous cycle can be replayed although NG+ resets the story', () => {
+    const first = makeSim(4);
+    first.startFightDirect('guardiano_del_regno', { skipIntro: true });
+    first.drainEvents();
+    const boss = first.boss!;
+    boss.hp = 0;
+    first.onBossDeath(boss);
+    for (let i = 0; i < 600 && first.fight; i++) first.step(emptyInput());
+    expect(isDefeated(first.state, 'guardiano_del_regno')).toBe(true);
+    const ng = newGamePlus(first.c, first.state);
+    expect(isDefeated(ng, 'guardiano_del_regno')).toBe(false);
+    expect(everDefeated(ng, 'guardiano_del_regno')).toBe(true);
+    expect(everDefeated(ng, 'cavaliere_errante')).toBe(false);
+    const sim = new Sim(first.c, { behaviors: BEHAVIORS, seed: 9, headless: true, state: ng });
+    sim.startMemoryFight('cavaliere_errante', 'notte', ng.equippedForm, {});
+    expect(sim.fight).toBeNull();
+    sim.startMemoryFight('guardiano_del_regno', 'notte', ng.equippedForm, {});
+    expect(sim.fight?.boss).toBe('guardiano_del_regno');
+    expect(sim.fight?.memory).toBe(true);
+    // a memory win does not advance this cycle's story
+    sim.drainEvents();
+    sim.boss!.hp = 0;
+    sim.onBossDeath(sim.boss!);
+    for (let i = 0; i < 600 && sim.fight; i++) sim.step(emptyInput());
+    expect(isDefeated(sim.state, 'guardiano_del_regno')).toBe(false);
   });
 });

@@ -1,0 +1,25 @@
+import { it } from 'vitest';
+import * as THREE from 'three';
+import { loadContent } from './helpers';
+import { Kit } from '../src/render/kit/index';
+import type { RenderCtx } from '../src/render/types';
+const content = loadContent();
+it('measure', async () => {
+  const id = process.env.BOSS!;
+  const kit = new Kit();
+  const ctx = { content, quality: 'high', palette: (p: string) => content.bundle.palettes[p] ?? {}, kit, time: 0, skyShade: 0 } as RenderCtx;
+  const mod = await import(`../src/content/bosses/${id}/model.ts`);
+  const def = content.boss(id);
+  const actor = { pos: { x: 0, y: 0, z: 0 }, prevPos: { x: 0, y: 0, z: 0 }, yaw: 0, prevYaw: 0, scale: 1, parts: [], flags: new Set<string>((process.env.FLAGS ?? '').split(',').filter(Boolean)), def, anim: 'idle', animStage: 'idle', animTime: 0, animDur: 1, moveSpeedNow: 0, airborne: false, hitFlash: 0, team: 'enemy', alive: true };
+  const sim = { player: { pos: { x: 0, y: 0, z: 8 }, scale: 1 }, groundAt: () => 0 } as never;
+  const v = mod.default(def, ctx, actor);
+  for (let i = 0; i < 30; i++) v.update(actor, 1, 1 / 30, sim);
+  v.root.updateMatrixWorld(true);
+  const out: string[] = [];
+  const p = new THREE.Vector3();
+  v.root.traverse((o: THREE.Object3D) => { if ((o as THREE.Bone).isBone && (process.env.BONES ?? '').split(',').includes(o.name)) { o.getWorldPosition(p); out.push(`${o.name}: ${p.x.toFixed(2)} ${p.y.toFixed(2)} ${p.z.toFixed(2)}`); } });
+  let tris = 0; const box = new THREE.Box3();
+  v.root.traverse((o: THREE.Object3D) => { const m = o as THREE.Mesh; if (m.isMesh && m.visible && !(m.userData.surface ?? '').startsWith('aura:')) { const g = m.geometry; tris += g.index ? g.index.count / 3 : g.attributes.position.count / 3; } });
+  box.setFromObject(v.root);
+  (await import('node:fs')).writeFileSync(process.env.OUT ?? '/dev/stderr', out.join('\n') + `\ntris ${tris} height ${v.height.toFixed(2)} bbox ${box.min.toArray().map((x: number) => x.toFixed(2))} ${box.max.toArray().map((x: number) => x.toFixed(2))}\n`);
+});

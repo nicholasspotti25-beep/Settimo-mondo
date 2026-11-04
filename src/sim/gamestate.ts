@@ -111,6 +111,14 @@ export function isDefeated(s: GameStateData, id: string): boolean {
   return s.defeated.includes(id);
 }
 
+/**
+ * Defeated in this cycle or in an earlier one (`todDefeats` is carried into the Ciclo dell'Alba): what the Specchio dei
+ * Ricordi may replay (Bible: "replay any defeated boss"). Story progression keeps using {@link isDefeated}.
+ */
+export function everDefeated(s: GameStateData, id: string): boolean {
+  return s.defeated.includes(id) || (s.todDefeats[id]?.length ?? 0) > 0;
+}
+
 /** Next encounter in the fixed order that is not completed. */
 export function nextEncounter(c: Content, s: GameStateData): string | null {
   for (const b of c.bosses) if (!s.defeated.includes(b.id)) return b.id;

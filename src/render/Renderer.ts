@@ -151,6 +151,12 @@ export class Renderer {
 
   render(sim: Sim, alpha: number, dt: number, camInput: { dx: number; dy: number }): void {
     if (this.contextLost) return;
+    // A resize clears the drawing buffer; doing it here (before drawing) instead of after the frame means a cleared buffer
+    // is never presented, so dynamic-resolution steps no longer flash a black frame on phones.
+    if (this.resizePending) {
+      this.resizePending = false;
+      this.resize();
+    }
     this.ctx.time += dt;
     this.ctx.skyShade = sim.skyShade() / 7;
     this.rig.update(sim, alpha, dt, camInput);
@@ -172,6 +178,9 @@ export class Renderer {
     this.adapt(dt);
   }
 
+  /** Set by the watchdog; applied at the start of the next render(). */
+  private resizePending = false;
+
   /** Dynamic resolution + watchdog. */
   private adapt(dt: number): void {
     const ms = dt * 1000;
@@ -192,7 +201,7 @@ export class Renderer {
       this.stableT = 0;
       if (this.resScale > 0.62) {
         this.resScale = Math.max(0.6, this.resScale - 0.08);
-        this.resize();
+        this.resizePending = true;
       } else if (this.qualitySetting === 'auto' && this.quality !== 'low') {
         this.quality = this.quality === 'high' ? 'medium' : 'low';
         this.applyQuality();
@@ -201,7 +210,7 @@ export class Renderer {
       this.stableT += 0.5;
       if (this.stableT > 4 && this.resScale < 1) {
         this.resScale = Math.min(1, this.resScale + 0.05);
-        this.resize();
+        this.resizePending = true;
         this.stableT = 0;
       }
     }

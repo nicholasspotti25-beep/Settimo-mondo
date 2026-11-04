@@ -72,14 +72,41 @@ async function main(): Promise<void> {
   const ids: string[] = await page.evaluate(() => (window as any).__game.content.bosses.map((b: { id: string }) => b.id));
   const zones: string[] = await page.evaluate(() => (window as any).__game.content.bundle.zones.map((z: { id: string }) => z.id));
   const sample = async (label: string) => {
+    // a zone build can outlast a fixed wait on a loaded machine (SwiftShader): wait for the world, then let the fade lift
+    const t0 = Date.now();
+    await page.waitForTimeout(100);
+    await page.waitForFunction(() => !(window as any).__game.renderer.world.busy, null, { timeout: 30000, polling: 100 }).catch(() => undefined);
+    const buildMs = Date.now() - t0;
     await page.waitForTimeout(2500);
+    // a dynamic-resolution step clears the canvas after the frame is drawn (docs/requests/integration.md #2): shoot only once
+    // the resolution has held for 1.2 s, so a cleared frame is not recorded as a blank scene
+    await page.evaluate(() => {
+      const w = window as any;
+      w.__res = w.__game.renderer.resScale;
+      w.__resT = performance.now();
+    });
+    await page
+      .waitForFunction(
+        () => {
+          const w = window as any;
+          const r = w.__game.renderer.resScale;
+          if (r !== w.__res) {
+            w.__res = r;
+            w.__resT = performance.now();
+          }
+          return performance.now() - w.__resT > 1200;
+        },
+        null,
+        { timeout: 10000, polling: 100 },
+      )
+      .catch(() => undefined);
     const stats = await page.evaluate(() => {
       const g = (window as any).__game;
-      return { ...g.renderer.stats, quality: g.renderer.quality, res: g.renderer.resScale, zone: g.sim.zone?.def.id, boss: g.sim.boss?.defId ?? null, bossState: g.sim.boss?.state ?? null };
+      return { ...g.renderer.stats, quality: g.renderer.quality, res: g.renderer.resScale, zone: g.sim.zone?.def.id, boss: g.sim.boss?.defId ?? null, bossState: g.sim.boss?.state ?? null, worldBusy: !!g.renderer.world.busy };
     });
     await page.screenshot({ path: path.join(OUT, `${label}.png`) });
-    report.push({ label, ...stats, errors: errors.splice(0) });
-    console.log(`${label.padEnd(36)} fps ${Number(stats.fps).toFixed(0).padStart(3)} calls ${String(stats.calls).padStart(4)} tris ${String(stats.triangles).padStart(7)} ${stats.zone}`);
+    report.push({ label, buildMs, ...stats, errors: errors.splice(0) });
+    console.log(`${label.padEnd(36)} fps ${Number(stats.fps).toFixed(0).padStart(3)} calls ${String(stats.calls).padStart(4)} tris ${String(stats.triangles).padStart(7)} build ${String(buildMs).padStart(5)} ms ${stats.zone}${stats.worldBusy ? ' (STILL BUILDING)' : ''}`);
   };
   if (doZones) {
     for (const z of zones) {

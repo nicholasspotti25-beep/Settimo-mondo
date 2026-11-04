@@ -97,6 +97,7 @@ export class Game {
     this.input.toggleGuard = s.toggleGuard;
     this.sim.settings.inputBuffer = Math.min(0.2, Math.max(0.15, s.inputBuffer));
     this.sim.settings.latencyComp = Math.min(this.content.balance.player.latency_comp_max, Math.max(0, s.latencyComp)) + (s.lenientWindows ? 0.04 : 0);
+    this.sim.settings.aimAssist = s.aimAssist;
     this.audio?.setVolumes(s.volume);
     this.ui?.applySettings(s);
   }
@@ -109,6 +110,7 @@ export class Game {
     const sim = new Sim(this.content, { behaviors: this.behaviors, state, seed: state.rng });
     sim.settings.inputBuffer = Math.min(0.2, Math.max(0.15, this.settings.inputBuffer));
     sim.settings.latencyComp = Math.min(this.content.balance.player.latency_comp_max, this.settings.latencyComp) + (this.settings.lenientWindows ? 0.04 : 0);
+    sim.settings.aimAssist = this.settings.aimAssist;
     sim.seq.lineTime = (key) => {
       const s = this.loc.t(key);
       return Math.min(9, 2.2 + s.length * 0.055);
@@ -271,11 +273,13 @@ export class Game {
   }
 
   private async onZoneEnter(): Promise<void> {
-    if (this.travelling) return;
+    if (this.travelling) return; // the running load below picks up the newer zone
     this.travelling = true;
     this.ui.setLoading(true);
     try {
       await this.renderer.world.loadZone(this.sim);
+      // a zoneEnter that arrived mid-build superseded that job: keep the loading state until the current zone is built
+      for (let guard = 0; this.renderer.world.busy && guard < 8; guard++) await this.renderer.world.loadZone(this.sim);
       this.renderer.rig.snapBehindPlayer(this.sim);
     } finally {
       this.ui.setLoading(false);

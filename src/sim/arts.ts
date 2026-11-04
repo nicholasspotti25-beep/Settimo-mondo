@@ -267,7 +267,7 @@ export function startArt(sim: Sim, pl: Player, weapon: WeaponDef, def: ArtDef, w
   const s = scaleOf(pl);
   const base = pl.baseDamage(sim, weapon) * pl.outgoingMult(sim);
   const total = base * p(def, 'damage_mult', which === 'prima' ? 2.2 : 3.2);
-  // aim: lock point, else the nearest enemy in a forward cone, else 8 m ahead
+  // aim: lock point, else (aim assist on) the nearest enemy in a forward cone, else 8 m ahead
   const targetPos = v3();
   let targetId = -1;
   const lock = pl.lock ? sim.lockPointPos(pl.lock.actor, pl.lock.part, tmp2) : null;
@@ -275,7 +275,7 @@ export function startArt(sim: Sim, pl: Player, weapon: WeaponDef, def: ArtDef, w
     targetPos.x = lock.x; targetPos.y = lock.y; targetPos.z = lock.z;
     targetId = pl.lock.actor;
   } else {
-    const e = sim.nearestEnemy(pl.pos, 24 * s, pl.yaw, 50 * DEG);
+    const e = sim.settings.aimAssist ? sim.nearestEnemy(pl.pos, 24 * s, pl.yaw, 50 * DEG) : null;
     if (e) {
       targetPos.x = e.pos.x; targetPos.y = e.pos.y + e.height * e.scale * 0.5; targetPos.z = e.pos.z;
       targetId = e.id;

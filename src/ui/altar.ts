@@ -9,7 +9,7 @@
  */
 import type { TimeOfDay, WeaponDef, FormDef, BossDef } from '../core/types';
 import { weaponDamage } from '../core/formulas';
-import { isDefeated } from '../sim/gamestate';
+import { everDefeated, isDefeated } from '../sim/gamestate';
 import type { UiCtx } from './ctx';
 import { clear, fmtPlaytime, h, svgIcon } from './dom';
 import { ICONS, TOD_ICONS, weaponGlyph } from './icons';
@@ -454,7 +454,7 @@ export class AltarMenu {
 
   private memoryBosses(): BossDef[] {
     const st = this.sim.state;
-    return this.ctx.game.content.bosses.filter((b) => !b.scripted && isDefeated(st, b.id)).sort((a, b) => a.order - b.order);
+    return this.ctx.game.content.bosses.filter((b) => !b.scripted && everDefeated(st, b.id)).sort((a, b) => a.order - b.order);
   }
 
   private mirror(p: HTMLElement): void {
