@@ -175,6 +175,7 @@ export default defineBehavior(() => ({
     a.flags.add('illusionist');
     a.bstate.mirror = -1;
     a.bstate.swaps = 0;
+    a.bstate.illusions = 0;
     a.bstate.mimic = [] as string[];
     a.bstate.mimicNow = '';
   },
@@ -193,14 +194,20 @@ export default defineBehavior(() => ({
     return true;
   },
 
-  selectAttack(a: Actor, sim: Sim) {
+  selectAttack(a: Actor, sim: Sim, cands: AttackDef[]) {
     // one blow at a time: he waits while one of his copies is winding up or striking
     for (const m of copiesOf(a, sim)) if (m.attack && m.attack.stage !== 'recovery') return null;
+    // the duel with illusions opens with the illusions
+    if (a.phaseIndex === 0 && !a.bstate.illusions) {
+      const twin = cands.find((d) => d.id === 'twin_illusion');
+      if (twin) return twin;
+    }
     return undefined;
   },
 
   onAttackStart(a: Actor, sim: Sim, atk: AttackRuntime) {
     const id = atk.def.id;
+    if (id === 'twin_illusion') a.bstate.illusions = (a.bstate.illusions ?? 0) + 1;
     if (MIRROR_ATTACKS.has(id)) {
       const exits = mirrorExits(sim);
       const i = pickMirror(sim, exits);

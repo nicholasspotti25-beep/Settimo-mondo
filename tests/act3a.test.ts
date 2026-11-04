@@ -460,13 +460,14 @@ describe('Loki', () => {
     const { sim, boss } = fight('loki', { seed: 11 });
     until(sim, (s) => copiesOf(s.boss!, s).length > 0, 5);
     for (let k = 0; k < 4; k++) {
+      force(sim, boss, 'mirror_swap');
+      until(sim, (s) => s.boss!.attack?.stage === 'active', 2);
       const spots = [boss, ...copiesOf(boss, sim)].map((x) => ({ x: x.pos.x, z: x.pos.z }));
       const before = { x: boss.pos.x, z: boss.pos.z };
-      force(sim, boss, 'mirror_swap');
-      record(sim, 0.4);
+      record(sim, 0.1);
       expect(Math.hypot(boss.pos.x - before.x, boss.pos.z - before.z)).toBeGreaterThan(0.5);
       expect(spots.some((p) => Math.hypot(p.x - boss.pos.x, p.z - boss.pos.z) < 0.5)).toBe(true);
-      record(sim, 1.2);
+      record(sim, 0.8);
     }
     expect(boss.bstate.swaps).toBe(4);
   });

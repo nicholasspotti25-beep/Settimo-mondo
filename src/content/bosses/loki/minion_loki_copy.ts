@@ -7,6 +7,7 @@ import type { AttackDef } from '../../../core/types';
 import type { Actor } from '../../../sim/actor';
 import { defineBehavior } from '../../../sim/behavior';
 import type { Sim } from '../../../sim/sim';
+import type { DamageEvent } from '../../../sim/types';
 
 export default defineBehavior(() => ({
   init(m: Actor) {
@@ -21,6 +22,11 @@ export default defineBehavior(() => ({
       if (o.attack && o.attack.stage !== 'recovery') return false;
     }
     return true;
+  },
+
+  modifyIncoming(m: Actor, _sim: Sim, dmg: DamageEvent) {
+    // an illusion: any blow shatters it
+    if (dmg.amount > 0) dmg.amount = Math.max(dmg.amount, m.hp + 1);
   },
 
   onDeath(m: Actor, sim: Sim) {

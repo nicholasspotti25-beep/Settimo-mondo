@@ -157,3 +157,9 @@
 - Verification chunk 4: `npx tsc --noEmit -p tsconfig.json` 0 errors (whole tree); `npx vitest run
   tests/world_kit.test.ts` 5/5; `npm run registry && SM_PARTIAL=1 npm run data` ok (1101 it / 1101 en strings);
   eslint on world files 0 errors (the two old unused-import warnings in castle_gate.ts / cover.ts removed).
+
+### Lead note (smoke shot boss_02, grandi_pianure tramonto fight camera)
+- A hard-edged orange/yellow elliptical blob (sun/glow disc on the horizon) top-left reads as a flat cut-out; soften it.
+- A huge black flat-shaded tree canopy hangs over the top of the frame near the camera (a giant tree placed too close to
+  the road/arena approach, or its LOD/shading is off) — move it away from the fight camera path or fix its shading.
+- Distant trees on the hills are dark flat silhouettes with hard edges; consider the atmospheric fade.
