@@ -1,3 +1,5 @@
+# Radura dei Tre Spiriti — a round clearing in the endless taiga (Grande Lupo). Deep snow between dark firs; three old
+# spirit stones (wolf, bear, raven) stand at the edge, north, east and west: cover from the storm wind.
 id: taiga_radura
 zone: taiga
 name_key: arena.taiga_radura.name
@@ -6,6 +8,9 @@ shape: circle
 radius: 28
 gate: {pos: [-110, 0, -78], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
-obstacles: []
+surface: snow
+obstacles:
+  - {type: cylinder, c: [-110, 0, -26], r: 1.3, h: 4.5}
+  - {type: cylinder, c: [-89.2, 0, -38], r: 1.3, h: 4.5}
+  - {type: cylinder, c: [-130.8, 0, -38], r: 1.3, h: 4.5}
 builder: taiga_radura

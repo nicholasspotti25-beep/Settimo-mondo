@@ -1,0 +1,4 @@
+# Voce dell'Alba lines at the Act III-B altars (played once, when meditating there after the listed bosses fall).
+- {key: voce.atto3.taiga_altare, altar: altare_taiga_01, after: [loki], priority: 1}
+- {key: voce.atto3.taiga_orso_altare, altar: altare_taiga_02, after: [grande_lupo], priority: 1}
+- {key: voce.atto3.taiga_tamburi_altare, altar: altare_taiga_03, after: [grande_orso], priority: 1}

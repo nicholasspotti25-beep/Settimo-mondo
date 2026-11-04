@@ -1,0 +1,269 @@
+# 18. Grande Orso — secondary · Taiga, Bosco dei Tronchi · D12.
+# A huge brown bear with moss in his fur, a collar of bones and ancient scars. Brute force: slams, the hug (grab: held
+# against his chest, crushed once, dropped — behavior), head-down charges; slow but devastating. Phase 2: he stands up
+# and shakes the forest: trees fall on the arena (long marked shadows first; forest_shake every TREE_INTERVAL s).
+# Second spirit of the Taiga, protector of the woods: he fights to know whether you can protect something.
+# Local frame: +Z forward, +Y up, +X = the bear's LEFT. On all fours ~5.6 m at the hump, ~10 m long; standing ~9 m.
+id: grande_orso
+order: 18
+name_key: boss.grande_orso.name
+title_key: boss.grande_orso.title
+class: secondary
+difficulty: 12
+act: 3
+arena: taiga_tronchi
+zone: taiga
+model: {builder: grande_orso, rig: quadruped, scale: 1.0, palette: act3_white_azure}
+equilibrio_max: 240
+body: {radius: 2.8, height: 5.6, mass: heavy}
+hurtboxes:
+  - {c: [0, 3.6, 4.4], r: 1.3}      # head
+  - {c: [0, 3.7, 2.0], r: 2.1}      # hump and shoulders
+  - {c: [0, 3.2, -0.6], r: 2.1}     # belly
+  - {c: [0, 3.0, -3.0], r: 1.8}     # hips
+  - {c: [0, 1.2, 2.4], r: 1.3}      # forelegs
+  - {c: [0, 1.2, -2.8], r: 1.3}     # hind legs
+move: {walk: 3.0, run: 7.5, turn: 1.7, preferred_range: [2, 6]}
+idle_gap: [1.1, 1.7]
+music: boss_grande_orso
+intro_sequence: grande_orso_intro
+defeat_sequence: grande_orso_defeat
+lore_key: boss.grande_orso.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_grande_orso_p1
+    opener: paw_swipe
+    patterns: [paw_swipe, maul_slam, hug, head_charge, rear_kick]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_grande_orso_p2
+    on_enter: [standing]
+    arena_state: forest_shaken
+    dialogue: boss.grande_orso.mid
+    transition: 3.0
+    speed_mult: 1.05
+    aggression: 1.1
+    opener: forest_shake
+    patterns: [paw_swipe, maul_slam, hug, head_charge, rear_kick, standing_slam, standing_swipe, forest_shake]
+attacks:
+  # A heavy swipe of the right paw; sometimes the left follows.
+  - id: paw_swipe
+    anim: claw_r
+    telegraph: 0.85
+    active: 0.3
+    recovery: 1.2
+    damage_mult: 1.25
+    poise: 24
+    flags: []
+    range: [0, 5]
+    weight: 1.3
+    cooldown: 2
+    track: 1.2
+    track_active: 0.15
+    combo_next: paw_swipe_l
+    combo_chance: 0.45
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 4}
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: arc, r: 6.6, angle: 130, yaw: 0, y: [0, 5]}}
+    sfx: orso_swipe
+  - id: paw_swipe_l
+    anim: claw_l
+    telegraph: 0.75
+    active: 0.3
+    recovery: 1.4
+    damage_mult: 1.25
+    poise: 24
+    flags: []
+    range: [0, 5]
+    weight: 0.01
+    cooldown: 2
+    track: 1.2
+    track_active: 0.15
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 4}
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: arc, r: 6.6, angle: 130, yaw: 0, y: [0, 5]}}
+    sfx: orso_swipe
+  # He rears a little and drives both forepaws into the ground (Colpo Rosso); the quake rolls out as a jumpable ring born
+  # 0.8 s later beyond where a roll out of the blow ends (r0 7.5 m): close range is the slam, far range the ring, never both.
+  - id: maul_slam
+    anim: slam
+    telegraph: 1.1
+    active: 0.9
+    recovery: 1.5
+    damage_mult: 1.6
+    poise: 30
+    flags: [red, knockdown]
+    range: [0, 6]
+    weight: 1.0
+    cooldown: 6
+    track: 1.0
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: cylinder, c: [0, 0, 3.4], r: 3.6, h: 4}}
+    spawns:
+      - {t: 0.8, type: shockwave, radius: 12, shape: {type: ring, r0: 7.5, r1: 12, width: 1.1, height: 0.7}, active: 0.4, damage_mult: 0.6}
+      - {t: 0.05, type: vfx, vfx: orso_slam_snow}
+    sfx: orso_slam
+  # The hug: he rises and closes both forelegs (unblockable grab). Held against his chest, crushed once, dropped.
+  - id: hug
+    anim: grab
+    telegraph: 0.95
+    active: 0.35
+    recovery: 1.6
+    damage_mult: 1.4
+    poise: 30
+    flags: [grab, unblockable]
+    range: [0, 3.5]
+    weight: 0.9
+    cooldown: 8
+    track: 1.1
+    track_active: 0.1
+    motion:
+      - {t: -0.15, dur: 0.3, type: forward, speed: 3}
+    hits:
+      - {t: 0.05, dur: 0.22, shape: {type: arc, r: 5.0, angle: 90, yaw: 0, y: [0, 4]}}
+    sfx: orso_hug
+  # Head down, he scrapes the ground and charges straight through (the line is fixed when he starts).
+  - id: head_charge
+    anim: charge
+    telegraph: 1.1
+    active: 1.0
+    recovery: 1.6
+    damage_mult: 1.5
+    poise: 30
+    flags: [knockdown]
+    range: [6, 30]
+    weight: 1.0
+    cooldown: 7
+    track: 1.2
+    track_active: 0.05
+    motion:
+      - {t: 0, dur: 0.95, type: charge_through, speed: 15}
+    hits:
+      - {t: 0.0, dur: 0.95, shape: {type: box, c: [0, 1.6, 3.2], half: [2.3, 1.6, 1.6]}}
+    spawns:
+      - {t: 0.0, type: vfx, vfx: orso_charge_snow}
+    sfx: orso_charge
+  # Whoever stands behind him: a backward kick of the hind legs (only from behind).
+  - id: rear_kick
+    anim: rear_stomp
+    telegraph: 0.75
+    active: 0.3
+    recovery: 1.1
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockback]
+    range: [0, 6]
+    weight: 1.6
+    cooldown: 4
+    track: 0
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: arc, r: 6.8, angle: 150, yaw: 180, y: [0, 4]}}
+    sfx: orso_kick
+  # Phase 2, standing: he rises to his full height and crashes down (Colpo Rosso); a wide jumpable quake follows.
+  - id: standing_slam
+    anim: slam
+    telegraph: 1.25
+    active: 1.0
+    recovery: 1.6
+    damage_mult: 1.7
+    poise: 30
+    flags: [red, knockdown]
+    range: [0, 7]
+    weight: 1.0
+    cooldown: 7
+    track: 1.0
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: cylinder, c: [0, 0, 3.6], r: 4.0, h: 5}}
+    spawns:
+      - {t: 0.9, type: shockwave, radius: 14, shape: {type: ring, r0: 8, r1: 14, width: 1.1, height: 0.7}, active: 0.55, damage_mult: 0.65}
+      - {t: 0.05, type: vfx, vfx: orso_slam_snow}
+    sfx: orso_slam
+  # Phase 2, standing: two wide swipes from above, a step apart; a landed swipe throws you out of the second.
+  - id: standing_swipe
+    anim: sweep_r
+    telegraph: 0.9
+    active: 0.95
+    recovery: 1.4
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockback]
+    range: [0, 6]
+    weight: 1.1
+    cooldown: 4
+    track: 1.1
+    track_active: 0.05
+    motion:
+      - {t: 0, dur: 0.8, type: forward, speed: 2}
+    hits:
+      - {t: 0.0, dur: 0.18, shape: {type: arc, r: 7.0, angle: 140, yaw: 0, y: [0, 7]}}
+      - {t: 0.7, dur: 0.2, shape: {type: arc, r: 7.0, angle: 140, yaw: 0, y: [0, 7]}}
+    sfx: orso_swipe
+  # Phase 2: he roars and shakes the forest. Trees fall on the arena: their long shadows are marked first (1.6 s).
+  - id: forest_shake
+    anim: roar
+    telegraph: 1.2
+    active: 2.0
+    recovery: 1.0
+    damage_mult: 1.2
+    poise: 30
+    flags: [knockdown]
+    global: true
+    range: [0, 40]
+    weight: 0.6
+    cooldown: 12
+    spawns:
+      - {t: 0.0, type: custom, event: forest_shake}
+      - {t: 0.0, type: hazard, id: orso_tree, at: around_target, count: 3, dist: 7.5, delay: 1.7, active: 0.45, damage_mult: 1.2, flags: [knockdown], shape: {type: box, c: [0, 0, 0], half: [0.9, 2.5, 4.5]}}
+      - {t: 0.3, type: hazard, id: orso_tree, at: random_arena, count: 2, delay: 1.7, active: 0.45, damage_mult: 1.2, flags: [knockdown], shape: {type: box, c: [0, 0, 0], half: [0.9, 2.5, 5]}}
+    sfx: orso_roar
+  # New Game+ (phase 1): a head charge, and at once a second one back along a new line (each with its own scrape).
+  - id: ng_double_charge
+    anim: charge
+    telegraph: 1.1
+    active: 1.0
+    recovery: 0.3
+    damage_mult: 1.4
+    poise: 30
+    flags: [knockdown]
+    range: [6, 30]
+    weight: 0.7
+    cooldown: 12
+    track: 1.2
+    track_active: 0.05
+    combo_next: head_charge
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.95, type: charge_through, speed: 15}
+    hits:
+      - {t: 0.0, dur: 0.95, shape: {type: box, c: [0, 1.6, 3.2], half: [2.3, 1.6, 1.6]}}
+    sfx: orso_charge
+  # New Game+ (phase 2): the whole forest falls: a ring of trunks around you, then more across the arena.
+  - id: ng_timber
+    anim: roar
+    telegraph: 1.3
+    active: 2.4
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 30
+    flags: [knockdown]
+    global: true
+    range: [0, 40]
+    weight: 0.6
+    cooldown: 16
+    spawns:
+      - {t: 0.0, type: custom, event: forest_shake}
+      - {t: 0.0, type: hazard, id: orso_tree, at: around_target, count: 5, dist: 7.5, delay: 1.6, active: 0.45, damage_mult: 1.1, flags: [knockdown], shape: {type: box, c: [0, 0, 0], half: [0.9, 2.5, 5]}}
+      - {t: 1.0, type: hazard, id: orso_tree, at: random_arena, count: 4, delay: 1.6, active: 0.45, damage_mult: 1.1, flags: [knockdown], shape: {type: box, c: [0, 0, 0], half: [0.9, 2.5, 5.5]}}
+    sfx: orso_roar
+time_of_day_variants:
+  alba: {weights: {head_charge: 0.5, hug: 1.4}, flags: [guarding], note_key: boss.grande_orso.tod.alba}
+  notte: {opener: head_charge, note_key: boss.grande_orso.tod.notte}
+dialogue_keys: [boss.grande_orso.intro, boss.grande_orso.mid, boss.grande_orso.defeat]
+drops_weapon: asce_gemelle_del_taglialegna
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_double_charge], p2: [ng_double_charge, ng_timber]}
+  idle_mult: 0.85

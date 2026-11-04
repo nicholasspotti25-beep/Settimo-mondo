@@ -1,0 +1,393 @@
+# 17. Grande Lupo — secondary · Taiga, Radura dei Tre Spiriti · D11.
+# A gray-silver wolf as tall as a house, amber eyes, wrapped in a cloud of snow. Very fast: leaps, bites, a howl that calls
+# a snowstorm (behavior: STORM_DUR s of wind that drifts the player and frost gusts; he rushes out of the snow, amber eyes
+# glint first). Phase 2: he splits into a spirit (minion spirito_lupo) that attacks alongside him — one blow at a time.
+# One of the Tre Spiriti della Taiga, guide and keeper: he tests whether you are Chaos; finding out you are not is his answer.
+# Local frame: +Z forward, +Y up, +X = the wolf's LEFT. Shoulder ~4.6 m, head ~6 m, body ~9 m long.
+id: grande_lupo
+order: 17
+name_key: boss.grande_lupo.name
+title_key: boss.grande_lupo.title
+class: secondary
+difficulty: 11
+act: 3
+arena: taiga_radura
+zone: taiga
+model: {builder: grande_lupo, rig: quadruped, scale: 1.0, palette: act3_white_azure}
+equilibrio_max: 200
+body: {radius: 2.4, height: 6.0, mass: heavy}
+hurtboxes:
+  - {c: [0, 4.7, 4.3], r: 1.2}      # head
+  - {c: [0, 3.5, 1.7], r: 1.9}      # chest
+  - {c: [0, 3.3, -0.8], r: 1.8}     # belly
+  - {c: [0, 3.1, -3.1], r: 1.6}     # hips
+  - {c: [0, 1.3, 2.2], r: 1.2}      # front legs
+  - {c: [0, 1.3, -2.8], r: 1.2}     # hind legs
+move: {walk: 4.6, run: 12, turn: 3.0, preferred_range: [3, 9]}
+idle_gap: [0.7, 1.2]
+music: boss_grande_lupo
+intro_sequence: grande_lupo_intro
+defeat_sequence: grande_lupo_defeat
+lore_key: boss.grande_lupo.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_grande_lupo_p1
+    opener: bite
+    patterns: [bite, leap_bite, pounce, flank_dash, tail_sweep, howl, storm_gust, storm_lunge]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_grande_lupo_p2
+    on_enter: [split]
+    dialogue: boss.grande_lupo.mid
+    transition: 2.6
+    speed_mult: 1.08
+    aggression: 1.15
+    opener: pack_lunge
+    patterns: [bite, leap_bite, pounce, flank_dash, tail_sweep, howl, storm_gust, storm_lunge, pack_lunge, spirit_call]
+attacks:
+  # A fast snap of the jaws, stepping in; often followed by a second snap.
+  - id: bite
+    anim: bite
+    telegraph: 0.6
+    active: 0.25
+    recovery: 0.9
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    range: [0, 5.5]
+    weight: 1.3
+    cooldown: 1.5
+    track: 1.3
+    track_active: 0.2
+    combo_next: bite_2
+    combo_chance: 0.5
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 7}
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: arc, r: 7.0, angle: 64, yaw: 0, y: [1.5, 6.5]}}
+    sfx: lupo_bite
+  - id: bite_2
+    anim: bite
+    telegraph: 0.5
+    active: 0.25
+    recovery: 1.2
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    range: [0, 5.5]
+    weight: 0.01
+    cooldown: 1.5
+    track: 1.4
+    track_active: 0.2
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 6}
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: arc, r: 7.0, angle: 64, yaw: 0, y: [1.5, 6.5]}}
+    sfx: lupo_bite
+  # The great leap: he crouches low in the snow and lands jaws first from far away.
+  - id: leap_bite
+    anim: leap
+    telegraph: 0.8
+    active: 0.8
+    recovery: 1.3
+    damage_mult: 1.3
+    poise: 26
+    flags: [knockdown]
+    range: [7, 30]
+    weight: 1.1
+    cooldown: 5
+    track: 1.3
+    motion:
+      - {t: 0, dur: 0.62, type: leap_to_target, height: 5}
+    hits:
+      - {t: 0.58, dur: 0.18, shape: {type: cylinder, c: [0, 0, 2.2], r: 3.0, h: 4}}
+    spawns:
+      - {t: 0.6, type: vfx, vfx: lupo_landing_snow}
+    sfx: lupo_leap
+  # A short hop at mid range: both forepaws come down where you stand.
+  - id: pounce
+    anim: leap
+    telegraph: 0.7
+    active: 0.6
+    recovery: 1.2
+    damage_mult: 1.15
+    poise: 26
+    flags: [knockdown]
+    range: [2.5, 10]
+    weight: 1.0
+    cooldown: 4
+    track: 1.4
+    motion:
+      - {t: 0, dur: 0.45, type: leap_to_target, height: 2.4, dist: 9}
+    hits:
+      - {t: 0.42, dur: 0.16, shape: {type: cylinder, c: [0, 0, 2.6], r: 3.0, h: 3}}
+    sfx: lupo_pounce
+  # Very fast: a bound to the side, then a lunging bite from the flank (the bound is the tell).
+  # Rhythm: bound (0.4 s), crouch low facing you (0.5 s), lunge.
+  - id: flank_dash
+    anim: charge
+    telegraph: 0.95
+    active: 0.5
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 22
+    flags: []
+    range: [0, 12]
+    weight: 0.9
+    cooldown: 5
+    track: 2.0
+    track_active: 0.2
+    motion:
+      - {t: -0.9, dur: 0.4, type: strafe_right, speed: 11}
+      - {t: 0, dur: 0.35, type: toward_target, speed: 16}
+    hits:
+      - {t: 0.3, dur: 0.16, shape: {type: arc, r: 6.2, angle: 76, yaw: 0, y: [0.5, 6]}}
+    sfx: lupo_dash
+  # Whoever slips behind him: the tail and hindquarters sweep the snow (only from behind).
+  - id: tail_sweep
+    anim: tail_sweep
+    telegraph: 0.7
+    active: 0.3
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 20
+    flags: [knockback]
+    range: [0, 6]
+    weight: 1.6
+    cooldown: 4
+    track: 0
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: arc, r: 7.5, angle: 170, yaw: 180, y: [0, 4]}}
+    sfx: lupo_tail
+  # The howl calls the snowstorm (behavior: wind that drifts you, gusts; STORM_DUR seconds).
+  - id: howl
+    anim: howl
+    telegraph: 1.2
+    active: 0.8
+    recovery: 0.8
+    damage_mult: 0.0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 40]
+    weight: 0.9
+    cooldown: 32
+    spawns:
+      - {t: 0.05, type: custom, event: storm_start}
+    sfx: lupo_howl
+  # In the storm: frozen gusts sweep the ground along a line toward you (marked first).
+  - id: storm_gust
+    anim: roar
+    telegraph: 0.8
+    active: 1.3
+    recovery: 0.9
+    damage_mult: 0.9
+    poise: 22
+    flags: []
+    element: ice
+    requires: storm
+    global: true
+    range: [0, 40]
+    weight: 1.0
+    cooldown: 6
+    spawns:
+      - {t: 0.0, type: hazard, id: lupo_gust, at: line_to_target, count: 5, dist: 3.6, delay: 1.1, active: 0.35, damage_mult: 0.9, shape: {type: cylinder, c: [0, 0, 0], r: 1.9, h: 3}}
+    sfx: lupo_gust
+  # Out of the snow: the amber eyes glint, then he rushes and bites (only in the storm).
+  - id: storm_lunge
+    anim: charge
+    telegraph: 0.8
+    active: 0.55
+    recovery: 1.2
+    damage_mult: 1.15
+    poise: 22
+    flags: []
+    requires: storm
+    range: [4, 30]
+    weight: 1.4
+    cooldown: 3
+    track: 1.4
+    track_active: 0.25
+    motion:
+      - {t: 0, dur: 0.45, type: toward_target, speed: 16}
+    hits:
+      - {t: 0.33, dur: 0.18, shape: {type: arc, r: 6.5, angle: 90, y: [0.5, 6]}}
+    sfx: lupo_rush
+  # Phase 2: he leaps, and his spirit leaps after him PACK_DELAY s later from his side (two clear leaps, never if you are down).
+  - id: pack_lunge
+    anim: leap
+    telegraph: 0.9
+    active: 0.8
+    recovery: 1.4
+    damage_mult: 1.2
+    poise: 26
+    flags: [knockdown]
+    requires: spirit
+    range: [5, 30]
+    weight: 1.0
+    cooldown: 9
+    track: 1.3
+    motion:
+      - {t: 0, dur: 0.62, type: leap_to_target, height: 5}
+    hits:
+      - {t: 0.58, dur: 0.18, shape: {type: cylinder, c: [0, 0, 2.2], r: 2.9, h: 4}}
+    spawns:
+      - {t: 0.0, type: custom, event: pack}
+    sfx: lupo_leap
+  # Phase 2: if the spirit was dispersed, after a while he howls it back out of the snow.
+  - id: spirit_call
+    anim: howl
+    telegraph: 1.3
+    active: 0.6
+    recovery: 0.8
+    damage_mult: 0.0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 40]
+    weight: 3.0
+    cooldown: 20
+    spawns:
+      - {t: 0.1, type: custom, event: split}
+    sfx: lupo_howl
+  # New Game+ (phase 1): three chained bites, each with its own short tell (0.65 / 0.45 / 0.5 s), stepping forward; the
+  # last one leaves him open. Committed lines: a roll to the side escapes each bite.
+  - id: ng_triple_bite
+    anim: bite
+    telegraph: 0.65
+    active: 0.25
+    recovery: 0.15
+    damage_mult: 0.8
+    poise: 14
+    flags: [knockback]
+    range: [0, 5]
+    weight: 0.9
+    cooldown: 7
+    track: 1.3
+    track_active: 0.05
+    combo_next: ng_bite_b
+    combo_chance: 1
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 5}
+    hits:
+      - {t: 0.03, dur: 0.16, shape: {type: arc, r: 6.6, angle: 60, y: [1.5, 6.5]}}
+    sfx: lupo_bite
+  - id: ng_bite_b
+    anim: bite
+    telegraph: 0.45
+    active: 0.25
+    recovery: 0.15
+    damage_mult: 0.8
+    poise: 14
+    flags: [knockback]
+    range: [0, 5]
+    weight: 0.01
+    cooldown: 7
+    track: 1.4
+    track_active: 0.05
+    combo_next: ng_bite_c
+    combo_chance: 1
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 5}
+    hits:
+      - {t: 0.03, dur: 0.16, shape: {type: arc, r: 6.6, angle: 60, y: [1.5, 6.5]}}
+    sfx: lupo_bite
+  - id: ng_bite_c
+    anim: bite
+    telegraph: 0.5
+    active: 0.25
+    recovery: 1.4
+    damage_mult: 1.0
+    poise: 18
+    flags: [knockback]
+    range: [0, 5]
+    weight: 0.01
+    cooldown: 7
+    track: 1.4
+    track_active: 0.05
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 6}
+    hits:
+      - {t: 0.03, dur: 0.16, shape: {type: arc, r: 6.8, angle: 64, y: [1.5, 6.5]}}
+    sfx: lupo_bite
+  # New Game+ (phase 2): a howl that brings the frost gales down around you (marked), then one more where you stand.
+  - id: ng_frost_gale
+    anim: howl
+    telegraph: 1.0
+    active: 1.8
+    recovery: 1.1
+    damage_mult: 0.85
+    poise: 22
+    flags: []
+    element: ice
+    global: true
+    range: [0, 40]
+    weight: 0.8
+    cooldown: 12
+    spawns:
+      - {t: 0.0, type: hazard, id: lupo_gust, at: around_target, count: 4, dist: 5.0, delay: 1.1, active: 0.35, damage_mult: 0.85, shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 3}}
+      - {t: 0.9, type: hazard, id: lupo_gust, at: target_predict, delay: 1.0, active: 0.35, damage_mult: 0.85, shape: {type: cylinder, c: [0, 0, 0], r: 2.6, h: 3}}
+    sfx: lupo_howl
+minions:
+  # The spirit he splits into: a pale translucent wolf of snow and light. One blow at a time (it waits for him, he for it).
+  - id: spirito_lupo
+    name_key: boss.grande_lupo.spirit
+    hp: 0.12
+    main_share: 0.4
+    body: {radius: 1.6, height: 4.2}
+    move: {walk: 4.4, run: 10.5, turn: 3.0, preferred_range: [3, 8]}
+    idle_gap: [2.2, 3.4]
+    model: {builder: grande_lupo, rig: quadruped, scale: 0.7, palette: act3_white_azure}
+    hurt:
+      - {c: [0, 2.6, 1.4], r: 1.4}
+      - {c: [0, 2.4, -1.2], r: 1.3}
+      - {c: [0, 3.3, 3.0], r: 0.9}
+    equilibrio: 60
+    attacks:
+      - id: spirit_bite
+        anim: bite
+        telegraph: 0.7
+        active: 0.25
+        recovery: 1.1
+        damage_mult: 0.8
+        poise: 16
+        flags: []
+        element: spirit
+        range: [0, 4.5]
+        weight: 1.2
+        cooldown: 2
+        track: 1.2
+        track_active: 0.2
+        motion:
+          - {t: -0.1, dur: 0.3, type: forward, speed: 6}
+        hits:
+          - {t: 0.03, dur: 0.18, shape: {type: arc, r: 5.0, angle: 64, y: [0.5, 4.5]}}
+        sfx: lupo_spirit_bite
+      - id: spirit_leap
+        anim: leap
+        telegraph: 0.75
+        active: 0.7
+        recovery: 1.3
+        damage_mult: 0.9
+        poise: 24
+        flags: []
+        element: spirit
+        range: [5, 26]
+        weight: 1.0
+        cooldown: 6
+        track: 1.3
+        motion:
+          - {t: 0, dur: 0.55, type: leap_to_target, height: 3.5}
+        hits:
+          - {t: 0.52, dur: 0.16, shape: {type: cylinder, c: [0, 0, 1.6], r: 2.6, h: 3}}
+        sfx: lupo_spirit_leap
+time_of_day_variants:
+  alba: {opener: flank_dash, weights: {flank_dash: 1.6, leap_bite: 0.7}, flags: [circling], note_key: boss.grande_lupo.tod.alba}
+  notte: {opener: howl, note_key: boss.grande_lupo.tod.notte}
+dialogue_keys: [boss.grande_lupo.intro, boss.grande_lupo.mid, boss.grande_lupo.defeat]
+drops_weapon: zanna_d_argento
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_triple_bite], p2: [ng_triple_bite, ng_frost_gale]}
+  idle_mult: 0.85

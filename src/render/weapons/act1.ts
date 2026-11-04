@@ -15,7 +15,7 @@ import { colorsOf, num, type WeaponMorph, type WeaponTemplate, type WeaponVisual
 
 const TAU = Math.PI * 2;
 
-function finish(def: WeaponDef, f: ReturnType<Forge['build']>, v: Omit<WeaponVisual, 'root' | 'dispose' | 'triangles' | 'def'>, extra: { dispose(): void }[] = []): WeaponVisual {
+export function finish(def: WeaponDef, f: ReturnType<Forge['build']>, v: Omit<WeaponVisual, 'root' | 'dispose' | 'triangles' | 'def'>, extra: { dispose(): void }[] = []): WeaponVisual {
   return {
     ...v,
     def,
@@ -30,7 +30,7 @@ function finish(def: WeaponDef, f: ReturnType<Forge['build']>, v: Omit<WeaponVis
 }
 
 /** Simple leather grip with a spiral wrap between z0 and z1. */
-function grip(f: Forge, z0: number, z1: number, r: number, leather: string, turns = 6): void {
+export function grip(f: Forge, z0: number, z1: number, r: number, leather: string, turns = 6): void {
   f.add('matte', latheZ([[0, z0 - 0.004], [r * 0.95, z0], [r, z0 + (z1 - z0) * 0.2], [r * 0.92, (z0 + z1) / 2], [r, z0 + (z1 - z0) * 0.8], [r * 0.95, z1], [0, z1 + 0.003]], f.seg(10, 6)), leather);
   f.add('matte', wrapZ(r * 1.02, z0 + 0.008, z1 - 0.008, turns, r * 0.2, 4, f.seg(48, 20)), shade(leather, 0.62));
 }

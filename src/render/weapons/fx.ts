@@ -53,6 +53,7 @@ const RIB_FRAG = /* glsl */ `
 uniform vec3 uCore;
 uniform vec3 uGlow;
 uniform float uAlpha;
+uniform float uDark;
 varying vec2 vRib;
 void main() {
   float age = clamp(vRib.x, 0.0, 1.0);
@@ -62,8 +63,15 @@ void main() {
   float edge = smoothstep(0.72, 1.0, side);
   vec3 col = mix(uGlow, uCore, edge * (1.0 - age * 0.6));
   float a = (body * 0.62 + edge * 1.15) * life * uAlpha;
-  gl_FragColor = vec4(col * a, 1.0);
+  // premultiplied: light added over a slightly darkened floor, so the ribbon reads on bright sand and snow too
+  gl_FragColor = vec4(col * a, min(0.5, a * uDark));
 }`;
+
+/** Premultiplied blending: rgb is added, alpha darkens what is behind (dark under-layer for bright effects). */
+const LIGHT_OVER_DARK = {
+  blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+  blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
+} as const;
 
 const CAP = 28; // samples
 const SUB = 3; // Catmull-Rom subdivisions per sample gap
@@ -92,8 +100,8 @@ class Ribbon {
     g.setIndex(idx);
     g.setDrawRange(0, 0);
     this.mat = new THREE.ShaderMaterial({
-      name: 'weapon-trail', vertexShader: RIB_VERT, fragmentShader: RIB_FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide, uniforms: { uCore: { value: new THREE.Color('#ffffff') }, uGlow: { value: new THREE.Color('#ffd080') }, uAlpha: { value: 1 } },
+      name: 'weapon-trail', vertexShader: RIB_VERT, fragmentShader: RIB_FRAG, transparent: true, depthWrite: false, ...LIGHT_OVER_DARK,
+      side: THREE.DoubleSide, uniforms: { uCore: { value: new THREE.Color('#ffffff') }, uGlow: { value: new THREE.Color('#ffd080') }, uAlpha: { value: 1 }, uDark: { value: 0.3 } },
     });
     this.mesh = new THREE.Mesh(g, this.mat);
     this.mesh.frustumCulled = false;
@@ -191,6 +199,7 @@ uniform vec3 uGlow;
 uniform float uHead;
 uniform float uTail;
 uniform float uAlpha;
+uniform float uDark;
 varying vec2 vUV;
 void main() {
   float u = vUV.x;
@@ -202,7 +211,7 @@ void main() {
   float head = smoothstep(uHead - 0.12, uHead, u);
   vec3 col = mix(uGlow, uCore, clamp(edge + head * 0.5, 0.0, 1.0));
   float a = (body * 0.7 + edge * 1.3 + head * edge * 0.7) * tail * uAlpha;
-  gl_FragColor = vec4(col * a, 1.0);
+  gl_FragColor = vec4(col * a, min(0.55, a * uDark));
 }`;
 
 /** Arc planes: 0 horizontal (a = 90deg forward, 0deg left), 1 vertical through forward (a = 0 forward, 90 up),
@@ -225,6 +234,8 @@ const _e = new THREE.Euler(0, 0, 0, 'YXZ');
 class Arcs {
   readonly group = new THREE.Group();
   private slots: ArcSlot[] = [];
+  /** Darkening under the next spawned arcs (0 pure light .. ~0.6 strong shadow); set before spawn, kept per slot. */
+  dark = 0.4;
 
   constructor(count: number) {
     const along = 40, g = new THREE.BufferGeometry();
@@ -243,10 +254,10 @@ class Arcs {
     g.setIndex(idx);
     for (let i = 0; i < count; i++) {
       const mat = new THREE.ShaderMaterial({
-        name: 'weapon-arc', vertexShader: ARC_VERT, fragmentShader: ARC_FRAG, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+        name: 'weapon-arc', vertexShader: ARC_VERT, fragmentShader: ARC_FRAG, transparent: true, depthWrite: false, ...LIGHT_OVER_DARK, side: THREE.DoubleSide,
         uniforms: {
           uA0: { value: 0 }, uA1: { value: 1 }, uR0: { value: 0.5 }, uR1: { value: 1 }, uCore: { value: new THREE.Color() }, uGlow: { value: new THREE.Color() },
-          uHead: { value: 0 }, uTail: { value: -1 }, uAlpha: { value: 0 },
+          uHead: { value: 0 }, uTail: { value: -1 }, uAlpha: { value: 0 }, uDark: { value: 0.4 },
         },
       });
       const mesh = new THREE.Mesh(g, mat);
@@ -284,7 +295,7 @@ class Arcs {
     u.uA0.value = a0; u.uA1.value = a1; u.uR0.value = Math.max(0, r - width); u.uR1.value = r;
     (u.uCore.value as THREE.Color).copy(core);
     (u.uGlow.value as THREE.Color).copy(glow);
-    u.uHead.value = 0; u.uTail.value = -1; u.uAlpha.value = alpha;
+    u.uHead.value = 0; u.uTail.value = -1; u.uAlpha.value = alpha; u.uDark.value = this.dark;
     s.pivot.visible = true;
   }
 
@@ -319,12 +330,12 @@ class Arcs {
 /* Pooled root tendrils (Radici Fameliche)                                                                           */
 /* ---------------------------------------------------------------------------------------------------------------- */
 
-interface RootSet { x: number; y: number; z: number; r: number; t: number; delay: number; hold: number; active: boolean; seed: number }
+interface RootSet { x: number; y: number; z: number; r: number; t: number; delay: number; hold: number; active: boolean; seed: number; tall: number }
 
 class Roots {
   readonly mesh: THREE.InstancedMesh;
   private sets: RootSet[] = [];
-  private readonly per = 9;
+  private readonly per = 11;
   private readonly m = new THREE.Matrix4();
   private readonly q = new THREE.Quaternion();
   private readonly p = new THREE.Vector3();
@@ -332,21 +343,21 @@ class Roots {
   private readonly e = new THREE.Euler(0, 0, 0, 'YXZ');
 
   constructor(material: THREE.Material) {
-    const g = geo.horn(1, 0.11, 1.5, 0.4, 10, 6);
-    geo.gradient(g, 1, '#2a1e14', '#6a8a3a');
+    const g = geo.horn(1, 0.15, 1.1, 0.35, 10, 7);
+    geo.gradient(g, 1, '#2a1e14', '#8ab84a');
     this.mesh = new THREE.InstancedMesh(g, material, this.per * 2);
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     this.mesh.frustumCulled = false;
     this.mesh.count = this.per * 2;
-    for (let i = 0; i < 2; i++) this.sets.push({ x: 0, y: 0, z: 0, r: 2, t: 0, delay: 0.4, hold: 2.5, active: false, seed: 0 });
+    for (let i = 0; i < 2; i++) this.sets.push({ x: 0, y: 0, z: 0, r: 2, t: 0, delay: 0.4, hold: 2.5, active: false, seed: 0, tall: 1 });
     this.m.makeScale(0, 0, 0);
     for (let i = 0; i < this.per * 2; i++) this.mesh.setMatrixAt(i, this.m);
     this.mesh.visible = false;
   }
 
-  spawn(x: number, y: number, z: number, r: number, delay: number, hold: number): void {
+  spawn(x: number, y: number, z: number, r: number, delay: number, hold: number, tall = 1): void {
     const s = this.sets[0].active ? this.sets[1] : this.sets[0];
-    s.x = x; s.y = y; s.z = z; s.r = r; s.t = 0; s.delay = delay; s.hold = hold; s.active = true; s.seed = rnd() * 6.28;
+    s.x = x; s.y = y; s.z = z; s.r = r; s.t = 0; s.delay = delay; s.hold = hold; s.active = true; s.seed = rnd() * 6.28; s.tall = tall;
     this.mesh.visible = true;
   }
 
@@ -362,14 +373,14 @@ class Roots {
       if (g > 0) any = true;
       for (let i = 0; i < this.per; i++) {
         const a = s.seed + (i / this.per) * Math.PI * 2;
-        const rr = s.r * (0.55 + ((i * 37) % 10) / 22);
-        this.p.set(s.x + Math.sin(a) * rr, s.y - 0.15, s.z + Math.cos(a) * rr);
+        const rr = s.r * (0.9 + ((i * 37) % 10) / 45);
+        this.p.set(s.x + Math.sin(a) * rr, s.y - 0.2, s.z + Math.cos(a) * rr);
         // lean inward over the target, writhing while it holds
         const writhe = Math.sin(time * 3.1 + i * 1.7) * 0.12;
         this.e.set(0, a + Math.PI + writhe, 0, 'YXZ');
         this.q.setFromEuler(this.e);
-        const h = (1.2 + ((i * 53) % 7) * 0.16) * Math.min(1.6, 0.6 + s.r * 0.25);
-        this.sc.set(g * 0.9 + 0.001, g * h + 0.001, g * h * 0.6 + 0.001);
+        const h = (1.5 + ((i * 53) % 7) * 0.2) * Math.min(1.8, 0.7 + s.r * 0.22) * s.tall;
+        this.sc.set(g * 1.7 + 0.001, g * h + 0.001, g * h * 0.5 + 0.001);
         this.m.compose(this.p, this.q, this.sc);
         this.mesh.setMatrixAt(k * this.per + i, this.m);
       }
@@ -383,6 +394,135 @@ class Roots {
   }
 }
 
+/* ---------------------------------------------------------------------------------------------------------------- */
+/* Pooled ground scorches (dark under-layer decals with a tinted rim: burns, frost, mud, impact craters, skid marks) */
+/* ---------------------------------------------------------------------------------------------------------------- */
+
+const SC_VERT = /* glsl */ `
+attribute vec4 aSc; // x alpha, y rim strength, z 0 disc .. 1 ring only, w seed
+attribute vec3 aTint;
+varying vec2 vUv;
+varying vec4 vSc;
+varying vec3 vTint;
+void main() {
+  vUv = uv * 2.0 - 1.0;
+  vSc = aSc;
+  vTint = aTint;
+  gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
+}`;
+const SC_FRAG = /* glsl */ `
+varying vec2 vUv;
+varying vec4 vSc;
+varying vec3 vTint;
+void main() {
+  float d = length(vUv);
+  if (d > 1.0 || vSc.x < 0.002) discard;
+  float ang = atan(vUv.y, vUv.x);
+  float rag = 0.84 + 0.09 * sin(ang * 7.0 + vSc.w) + 0.05 * sin(ang * 13.0 + vSc.w * 2.3) + 0.02 * sin(ang * 31.0 + vSc.w * 5.1);
+  float body = 1.0 - smoothstep(rag * 0.45, rag, d);
+  float ring = smoothstep(rag * 0.55, rag * 0.82, d) * (1.0 - smoothstep(rag * 0.86, rag, d));
+  // streaks radiating from the centre (scorch / crater spokes)
+  float spokes = 0.75 + 0.25 * sin(ang * 23.0 + vSc.w * 3.0) * sin(ang * 9.0 - vSc.w);
+  float dark = mix(body * spokes, ring, vSc.z) * vSc.x * 0.66;
+  vec3 rim = vTint * (ring * 0.9 + body * 0.12) * vSc.y * vSc.x;
+  gl_FragColor = vec4(rim, dark);
+}`;
+
+interface ScorchSlot { t: number; life: number; fadeIn: number; alpha: number; active: boolean }
+
+class Scorches {
+  readonly mesh: THREE.InstancedMesh;
+  private readonly slots: ScorchSlot[] = [];
+  private readonly sc: THREE.InstancedBufferAttribute;
+  private readonly tint: THREE.InstancedBufferAttribute;
+  private readonly m = new THREE.Matrix4();
+  private readonly q = new THREE.Quaternion();
+  private readonly p = new THREE.Vector3();
+  private readonly s = new THREE.Vector3();
+  private readonly e = new THREE.Euler(0, 0, 0, 'YXZ');
+
+  constructor(count: number) {
+    const g = new THREE.PlaneGeometry(2, 2, 1, 1);
+    g.rotateX(-Math.PI / 2);
+    this.sc = new THREE.InstancedBufferAttribute(new Float32Array(count * 4), 4).setUsage(THREE.DynamicDrawUsage);
+    this.tint = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3).setUsage(THREE.DynamicDrawUsage);
+    g.setAttribute('aSc', this.sc);
+    g.setAttribute('aTint', this.tint);
+    const mat = new THREE.ShaderMaterial({
+      name: 'weapon-scorch', vertexShader: SC_VERT, fragmentShader: SC_FRAG, transparent: true, depthWrite: false, ...LIGHT_OVER_DARK,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+    });
+    this.mesh = new THREE.InstancedMesh(g, mat, count);
+    this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    this.mesh.frustumCulled = false;
+    this.mesh.renderOrder = 10;
+    this.m.makeScale(0, 0, 0);
+    for (let i = 0; i < count; i++) {
+      this.mesh.setMatrixAt(i, this.m);
+      this.slots.push({ t: 0, life: 1, fadeIn: 0.06, alpha: 0, active: false });
+    }
+    this.mesh.visible = false;
+  }
+
+  /** A ground decal at (x, y, z): radius r (x `stretch` along `yaw`), dark body + `tint` rim; `ring` 0 disc .. 1 ring only. */
+  spawn(x: number, y: number, z: number, r: number, life: number, tint: THREE.Color, rim = 0.7, ring = 0, alpha = 1, stretch = 1, yaw = 0, fadeIn = 0.06): void {
+    let k = 0, worst = -1;
+    for (let i = 0; i < this.slots.length; i++) {
+      const s = this.slots[i];
+      if (!s.active) { k = i; break; }
+      const age = s.t / s.life;
+      if (age > worst) { worst = age; k = i; }
+    }
+    const s = this.slots[k];
+    s.t = 0; s.life = Math.max(0.1, life); s.fadeIn = fadeIn; s.alpha = alpha; s.active = true;
+    this.e.set(0, yaw, 0, 'YXZ');
+    this.q.setFromEuler(this.e);
+    this.p.set(x, y + 0.03, z);
+    this.s.set(r, 1, r * stretch);
+    this.m.compose(this.p, this.q, this.s);
+    this.mesh.setMatrixAt(k, this.m);
+    this.mesh.instanceMatrix.needsUpdate = true;
+    const a = this.sc.array as Float32Array, c = this.tint.array as Float32Array;
+    a[k * 4] = 0; a[k * 4 + 1] = rim; a[k * 4 + 2] = ring; a[k * 4 + 3] = rnd() * 6.28;
+    c[k * 3] = tint.r; c[k * 3 + 1] = tint.g; c[k * 3 + 2] = tint.b;
+    this.tint.needsUpdate = true;
+    this.mesh.visible = true;
+  }
+
+  update(dt: number): void {
+    if (!this.mesh.visible) return;
+    const a = this.sc.array as Float32Array;
+    let any = false;
+    for (let i = 0; i < this.slots.length; i++) {
+      const s = this.slots[i];
+      if (!s.active) continue;
+      s.t += dt;
+      const k = s.t / s.life;
+      if (k >= 1) {
+        s.active = false;
+        a[i * 4] = 0;
+        continue;
+      }
+      any = true;
+      // pops in, holds, fades over the last 45 %; the rim cools faster than the burn
+      a[i * 4] = s.alpha * smooth(s.t / s.fadeIn) * (1 - smooth((k - 0.55) / 0.45));
+      a[i * 4 + 1] *= Math.max(0, 1 - dt * 0.9);
+    }
+    this.sc.needsUpdate = true;
+    this.mesh.visible = any;
+  }
+
+  clear(): void {
+    const a = this.sc.array as Float32Array;
+    for (let i = 0; i < this.slots.length; i++) {
+      this.slots[i].active = false;
+      a[i * 4] = 0;
+    }
+    this.sc.needsUpdate = true;
+    this.mesh.visible = false;
+  }
+}
+
 function smooth(x: number): number {
   const t = Math.min(1, Math.max(0, x));
   return t * t * (3 - 2 * t);
@@ -393,27 +533,32 @@ function smooth(x: number): number {
 /* ---------------------------------------------------------------------------------------------------------------- */
 
 type VfxEvent = Extract<SimEvent, { type: 'vfx' }>;
-interface ArtCtx { fx: FxRenderer; sim: Sim; arcs: Arcs; roots: Roots; w: WeaponVisual | null; e: VfxEvent; phase: string; x: number; y: number; z: number; yaw: number; k: number; n: number }
+interface ArtCtx { fx: FxRenderer; sim: Sim; arcs: Arcs; roots: Roots; scorch: Scorches; w: WeaponVisual | null; e: VfxEvent; phase: string; x: number; y: number; z: number; yaw: number; k: number; n: number }
 type ArtFx = (c: ArtCtx) => void;
 
 const _b = new THREE.Vector3();
 const _t = new THREE.Vector3();
 const _c0 = new THREE.Color();
 const _c1 = new THREE.Color();
-const MORPH: WeaponMorph = { extend: 0, art: 0, swing: 0 };
+const MORPH: WeaponMorph = { extend: 0, art: 0, swing: 0, buff: 0 };
 /** Sim-time step of the current frame (scheduled visuals follow the sim through hit-stop and slow motion). */
 let SIM_DT = 0;
 /** Effects whose Arts swing the weapon (trail on during the Art). */
 const MELEE_ARTS = new Set(['dash_strike', 'spin', 'multi_strike', 'counter_stance', 'slam', 'grab_pull', 'dot_stab', 'throw_return', 'hazard_zone']);
 /** Weapon types whose blade extends on whip swings. */
 const EXTENDING = new Set(['spada_serpentina', 'frusta', 'catene', 'flagello']);
+/** Swing anims that throw a flexible weapon out to its reach. */
+const EXTEND_ANIM = /^(whip|chain|hook|lash|flail)/;
+/** Sim-time accumulator of the aura emitters (fractional particles carry over). */
+let AURA_ACC = 0;
 
 export function installWeaponFxImpl(fx: FxRenderer): void {
   const main = new Ribbon(), off = new Ribbon();
   const arcs = new Arcs(14);
-  const rootMat = fx.ctx.kit.surface({ vertexColors: true, roughness: 0.85, metalness: 0, detail: 'bark', detailScale: 6, detailStrength: 0.5, rim: 1.2, emissive: '#3a5a1a', emissiveIntensity: 0.25 });
+  const rootMat = fx.ctx.kit.surface({ vertexColors: true, roughness: 0.85, metalness: 0, detail: 'bark', detailScale: 6, detailStrength: 0.5, rim: 1.6, emissive: '#5a8a2a', emissiveIntensity: 0.45 });
   const roots = new Roots(rootMat);
-  fx.group.add(main.mesh, off.mesh, arcs.group, roots.mesh);
+  const scorches = new Scorches(18);
+  fx.group.add(scorches.mesh, main.mesh, off.mesh, arcs.group, roots.mesh);
   const core = new THREE.Color(), glow = new THREE.Color();
   let lastWeapon: WeaponVisual | null = null;
   let artGlow = 0;
@@ -447,19 +592,20 @@ export function installWeaponFxImpl(fx: FxRenderer): void {
         const t = sw.t;
         swingK = t < s0 ? smooth((t - s0 * 0.5) / (s0 * 0.5)) : t < s1 ? 1 : 1 - smooth((t - s1) / Math.max(0.05, (sw.dur - s1) * 0.5));
         emit = !!d.shape && t > s0 * 0.55 && t < s1 + (sw.dur - s1) * 0.22;
-        if (w?.def && EXTENDING.has(w.def.type) && d.anim.startsWith('whip')) extend = swingK;
+        if (w?.def && EXTENDING.has(w.def.type) && EXTEND_ANIM.test(d.anim)) extend = swingK;
       }
       const art = p.art;
       if (st === 'art' && art) {
         artGlow = Math.min(1, artGlow + dt * 8);
         const melee = MELEE_ARTS.has(art.effect);
         if (melee && art.t > 0.06 && art.t < art.dur * 0.82) emit = true;
-        if (w?.def && EXTENDING.has(w.def.type) && (art.effect === 'dash_strike' || art.effect === 'grab_pull')) extend = art.t < art.dur * 0.85 ? 1 : 0;
+        if (w?.def && EXTENDING.has(w.def.type) && (art.effect === 'dash_strike' || art.effect === 'grab_pull' || art.effect === 'multi_strike')) extend = art.t < art.dur * 0.85 ? 1 : 0;
         swingK = Math.max(swingK, melee ? 0.8 : 0);
       } else artGlow = Math.max(0, artGlow - dt * 2.5);
       MORPH.extend = extend;
       MORPH.art = artGlow;
       MORPH.swing = swingK;
+      MORPH.buff = p.buff && p.buff.time > 0 ? Math.min(1, p.buff.time) : 0;
       if (w) w.morph?.(MORPH);
       // trails
       if (w && w.trail) {
@@ -486,13 +632,15 @@ export function installWeaponFxImpl(fx: FxRenderer): void {
       main.update(sdt);
       off.update(sdt);
       arcs.update(sdt);
+      scorches.update(sdt);
       roots.update(dt, time);
+      aura(fx, w, sim, sdt);
       return true;
     },
     dispose: () => undefined,
   });
 
-  const ctx: ArtCtx = { fx, sim: null as unknown as Sim, arcs, roots, w: null, e: null as unknown as VfxEvent, phase: '', x: 0, y: 0, z: 0, yaw: 0, k: 0, n: 0 };
+  const ctx: ArtCtx = { fx, sim: null as unknown as Sim, arcs, roots, scorch: scorches, w: null, e: null as unknown as VfxEvent, phase: '', x: 0, y: 0, z: 0, yaw: 0, k: 0, n: 0 };
 
   fx.registerVfx('art_*', (e, sim) => {
     const i = e.id.indexOf(':');
@@ -555,12 +703,20 @@ export function installWeaponFxImpl(fx: FxRenderer): void {
     off.clear();
     arcs.clear();
     roots.clear();
+    scorches.clear();
   });
 }
 
 /* ---------------------------------------------------------------------------------------------------------------- */
 /* Art visuals                                                                                                        */
 /* ---------------------------------------------------------------------------------------------------------------- */
+
+const E3 = { x: 0, y: 0, z: 0 };
+/** Shared scratch position (sim queries that take a Vec3). */
+function e3(x: number, y: number, z: number): { x: number; y: number; z: number } {
+  E3.x = x; E3.y = y; E3.z = z;
+  return E3;
+}
 
 const FWD = { x: 0, z: 0 };
 function fwd(yaw: number): { x: number; z: number } {
@@ -569,10 +725,33 @@ function fwd(yaw: number): { x: number; z: number } {
   return FWD;
 }
 
-/** A light wake along the player's path for `dur` seconds (dash Arts). */
-function wake(c: ArtCtx, col: THREE.Color, dur: number, rate: number, size: number, cell: number = CELL.dot, back = 6): void {
+/**
+ * Dark under-layer: a soft shadow sprite (alpha, drawn before the additive layer) behind a bright burst so it reads on
+ * bright floors and skies. `col` tints the shadow (a deep version of the effect color).
+ */
+function under(fx: FxRenderer, x: number, y: number, z: number, size: number, life = 0.3, col: THREE.Color | null = null, alpha = 0.55): void {
+  const r = col ? col.r * 0.16 : 0.03, g = col ? col.g * 0.16 : 0.025, b = col ? col.b * 0.16 : 0.03;
+  fx.smoke.emitRaw(x, y, z, 0, 0, 0, life, size * 0.7, size * 1.05, r, g, b, alpha, CELL.dot, 0, 0, 0, 0, 0.03);
+}
+
+/** Ground height under (x, z) (scorches, skids). */
+function gy(sim: Sim, x: number, z: number): number {
+  return sim.groundAt(x, z);
+}
+
+/**
+ * A wake along the player's path for `dur` seconds (dash Arts): bright streaks over dark under-streaks, ground dust and
+ * a skid scorch along the whole dash (`dist` m from the start, tinted `rim`).
+ */
+function wake(c: ArtCtx, col: THREE.Color, dur: number, rate: number, size: number, cell: number = CELL.dot, back = 6, dist = 0, rim: THREE.Color | null = null, dust: THREE.Color | null = null): void {
   const fx = c.fx;
   let t = 0, acc = 0;
+  const stretch = cell === CELL.spark ? 0.08 : 0;
+  if (dist > 0) {
+    const p = c.sim.player, f = fwd(p.yaw);
+    const mx = p.pos.x + f.x * dist * 0.45, mz = p.pos.z + f.z * dist * 0.45;
+    c.scorch.spawn(mx, gy(c.sim, mx, mz), mz, 0.62 * p.scale, 1.6, rim ?? col, 0.9, 0, 0.75, (dist * 0.62) / (0.62 * p.scale), p.yaw, Math.max(0.06, dur * 0.6));
+  }
   fx.spawn({
     update: (_dt, sim) => {
       const dt = SIM_DT;
@@ -582,14 +761,52 @@ function wake(c: ArtCtx, col: THREE.Color, dur: number, rate: number, size: numb
       const f = fwd(p.yaw);
       while (acc >= 1) {
         acc -= 1;
-        const h = 0.3 + rnd() * 1.5;
-        fx.particles.emitRaw(p.pos.x + jit() * 0.35, p.pos.y + h, p.pos.z + jit() * 0.35, -f.x * back + jit() * 0.6, jit() * 0.4, -f.z * back + jit() * 0.6,
-          0.25 + rnd() * 0.25, size, size * 0.2, col.r, col.g, col.b, 1, cell, 0, 3, 0, cell === CELL.spark ? 0.06 : 0, 0.02);
+        const h = 0.25 + rnd() * 1.6, ox = jit() * 0.4, oz = jit() * 0.4;
+        const vx = -f.x * back + jit() * 0.6, vy = jit() * 0.4, vz = -f.z * back + jit() * 0.6, life = 0.28 + rnd() * 0.3;
+        // dark under-streak first (alpha layer, drawn beneath), then the bright streak on top
+        fx.smoke.emitRaw(p.pos.x + ox, p.pos.y + h, p.pos.z + oz, vx, vy, vz, life, size * 1.7, size * 0.5, col.r * 0.12, col.g * 0.1, col.b * 0.1, 0.4, cell, 0, 3, 0, stretch, 0.02);
+        fx.particles.emitRaw(p.pos.x + ox, p.pos.y + h, p.pos.z + oz, vx, vy, vz, life, size, size * 0.2, col.r, col.g, col.b, 1, cell, 0, 3, 0, stretch, 0.02);
       }
+      if (dust && rnd() < dt * 40) fx.puff(p.pos.x + jit() * 0.3, gy(sim, p.pos.x, p.pos.z), p.pos.z + jit() * 0.3, dust, 1, 0.75, 0.5, 0.35);
       return t < dur;
     },
     dispose: () => undefined,
   });
+}
+
+/** Ambient particles of the equipped weapon (cold breath, embers, crackling sparks, lava drops) along its blade line. */
+function aura(fx: FxRenderer, w: WeaponVisual | null, sim: Sim, dt: number): void {
+  const a = w?.aura;
+  if (!w || !a || dt <= 0 || !sim.player.alive || !w.root.visible) return;
+  const st = sim.player.state;
+  const busy = st === 'light' || st === 'heavy' || st === 'running' || st === 'jumping' ? 3 : 1;
+  const boost = Math.max(busy, (MORPH.art > 0.2 ? 4 : 1), 1 + (MORPH.buff ?? 0) * 3);
+  AURA_ACC += dt * a.rate * boost * (fx.ctx.quality === 'low' ? 0.5 : 1);
+  if (AURA_ACC < 1) return;
+  w.root.updateWorldMatrix(true, false);
+  _b.copy(w.base).applyMatrix4(w.root.matrixWorld);
+  _t.copy(w.tip).applyMatrix4(w.root.matrixWorld);
+  const col = fx.color(a.color);
+  const k0 = a.from ?? 0.3;
+  while (AURA_ACC >= 1) {
+    AURA_ACC -= 1;
+    const k = k0 + rnd() * (1 - k0);
+    const x = _b.x + (_t.x - _b.x) * k, y = _b.y + (_t.y - _b.y) * k, z = _b.z + (_t.z - _b.z) * k;
+    switch (a.kind) {
+      case 'mist':
+        fx.smoke.emitRaw(x, y, z, jit() * 0.25, -0.25 - rnd() * 0.3, jit() * 0.25, 0.9 + rnd() * 0.6, 0.08, 0.34, col.r, col.g, col.b, 0.32, CELL.smoke, -0.05, 1.2, jit() * 1.5, 0, 0.25);
+        break;
+      case 'ember':
+        fx.particles.emitRaw(x, y, z, jit() * 0.5, 0.8 + rnd() * 1.2, jit() * 0.5, 0.5 + rnd() * 0.5, 0.07, 0.02, col.r, col.g, col.b, 1, CELL.spark, -1.2, 1.5, 0, 0.05, 0.05);
+        break;
+      case 'spark':
+        fx.particles.emitRaw(x, y, z, jit() * 3, jit() * 3, jit() * 3, 0.08 + rnd() * 0.08, 0.09, 0.03, col.r, col.g, col.b, 1, CELL.spark, 0, 4, 0, 0.12, 0.01);
+        break;
+      case 'drip':
+        fx.particles.emitRaw(x, y, z, jit() * 0.2, -0.2, jit() * 0.2, 0.5 + rnd() * 0.3, 0.06, 0.04, col.r, col.g, col.b, 1, CELL.dot, 9, 0.5, 0, 0.04, 0.05);
+        break;
+    }
+  }
 }
 
 /** Run `fn` after `delay` seconds (scheduled visuals: the rising cut at the end of a dash). */
@@ -632,6 +849,7 @@ function genericArt(c: ArtCtx): void {
   const h = y + 1.1;
   switch (c.phase) {
     case 'hit': case 'impact': case 'burst': case 'counter': case 'throw': case 'emerge': case 'crush':
+      under(fx, x, h, z, 3.0, 0.34, ec);
       fx.flash(x, h, z, ec, 2.4, 0.3, CELL.rays, 2);
       fx.sparks(x, h, z, ec, 18, 8);
       break;
@@ -674,9 +892,10 @@ const ART_FX: Record<string, ArtFx> = {
     const { fx, sim } = c;
     const dawn = fx.color('#fff1d0'), gold = fx.color('#ffd99a');
     if (c.phase === 'dash') {
-      wake(c, dawn, 0.3, 120, 0.3, CELL.spark, 7);
-      fx.flash(c.x, c.y + 1.0, c.z, gold, 1.6, 0.2, CELL.star, 2);
-      fx.puff(c.x, c.y, c.z, fx.color('#b8aa98'), 5, 0.6, 0.6, 0.3);
+      wake(c, dawn, 0.34, 170, 0.5, CELL.spark, 8, c.k, gold, fx.color('#a89a84'));
+      under(fx, c.x, c.y + 1.0, c.z, 2.0, 0.24, gold);
+      fx.flash(c.x, c.y + 1.0, c.z, gold, 1.8, 0.22, CELL.star, 2);
+      fx.puff(c.x, c.y, c.z, fx.color('#a89a84'), 7, 0.7, 0.7, 0.3);
       later(c, 0.2, (s) => {
         const p = s.player;
         _c0.copy(dawn);
@@ -684,9 +903,11 @@ const ART_FX: Record<string, ArtFx> = {
       });
     } else if (c.phase === 'hit') {
       strikePoint(sim, 1.7 * sim.player.scale, _t);
-      fx.flash(_t.x, _t.y, _t.z, fx.color('#ffffff'), 2.2, 0.22, CELL.star, 3);
-      fx.flash(_t.x, _t.y, _t.z, gold, 3.4, 0.32, CELL.rays, -2);
-      fx.sparks(_t.x, _t.y, _t.z, dawn, 20, 9, 0.15);
+      under(fx, _t.x, _t.y, _t.z, 3.6, 0.36, gold);
+      fx.flash(_t.x, _t.y, _t.z, fx.color('#ffffff'), 2.4, 0.24, CELL.star, 3);
+      fx.flash(_t.x, _t.y, _t.z, gold, 3.8, 0.36, CELL.rays, -2);
+      fx.sparks(_t.x, _t.y, _t.z, dawn, 24, 9, 0.2);
+      c.scorch.spawn(_t.x, gy(sim, _t.x, _t.z), _t.z, 1.1, 1.2, gold, 1, 0, 0.7);
     }
   },
   // Ninnananna dell'Alba: two crossing cuts that hang as a cross of pale light, then burst
@@ -706,6 +927,8 @@ const ART_FX: Record<string, ArtFx> = {
       fx.sparks(p.pos.x + f.x * d, p.pos.y + 1.25 * s, p.pos.z + f.z * d, dawn, 8, 4, 0.12, 2);
     } else if (c.phase === 'burst') {
       const r = Math.max(1.5, c.k);
+      under(fx, c.x, c.y, c.z, r * 2.4, 0.42, dawn, 0.6);
+      c.scorch.spawn(c.x, gy(sim, c.x, c.z), c.z, r * 1.15, 1.8, dawn, 1.1, 0, 0.8);
       fx.flash(c.x, c.y, c.z, fx.color('#ffffff'), r * 1.4, 0.25, CELL.star, 2);
       fx.flash(c.x, c.y, c.z, dawn, r * 2.6, 0.45, CELL.rays, 1);
       fx.sparks(c.x, c.y, c.z, pale, 34, 10, 0.16, 4);
@@ -720,8 +943,8 @@ const ART_FX: Record<string, ArtFx> = {
     const { fx, sim } = c;
     const gold = fx.color('#ffe6a8'), white = fx.color('#ffffff'), spectral = fx.color('#cfe6ff');
     if (c.phase === 'dash') {
-      wake(c, gold, 0.42, 130, 0.26, CELL.spark, 11);
-      wake(c, spectral, 0.42, 40, 0.3, CELL.dot, 4);
+      wake(c, gold, 0.46, 170, 0.46, CELL.spark, 12, c.k, gold, null);
+      wake(c, spectral, 0.46, 46, 0.42, CELL.dot, 4);
       fx.ring(c.x, sim.groundAt(c.x, c.z), c.z, 2.4, gold, 0.4, 0.5);
       fx.puff(c.x, c.y, c.z, fx.color('#a89a84'), 8, 0.8, 1.0, 0.4);
       let t = 0;
@@ -738,6 +961,8 @@ const ART_FX: Record<string, ArtFx> = {
       const reach = artParam(sim, c, 'reach', 4.6) * sim.player.scale;
       strikePoint(sim, reach * 0.75, _t);
       const f = fwd(sim.player.yaw);
+      under(fx, _t.x, _t.y, _t.z, 4.4, 0.4, gold, 0.6);
+      c.scorch.spawn(_t.x, gy(sim, _t.x, _t.z), _t.z, 1.5, 1.6, gold, 1, 0, 0.75, 1.8, sim.player.yaw);
       fx.flash(_t.x, _t.y, _t.z, white, 2.8, 0.22, CELL.star, 4);
       fx.flash(_t.x, _t.y, _t.z, gold, 4.6, 0.4, CELL.rays, -1.5);
       for (let i = 0; i < fxN(fx, 26); i++) {
@@ -759,8 +984,12 @@ const ART_FX: Record<string, ArtFx> = {
       later(c, i * gap, (sm) => {
         const pl = sm.player;
         _c0.copy(silver);
-        c.arcs.spawn(pl.pos.x, pl.pos.y + (1.0 + i * 0.25) * s, pl.pos.z, pl.yaw, 0, i % 2 ? 0.12 : -0.12, r, r * 0.55, PI / 2 + i * 0.4, PI / 2 + i * 0.4 - PI * 2, _c0, pale, 0.22, 0.42, 0, 1.0, 0.85);
-        fx.ring(pl.pos.x, sm.groundAt(pl.pos.x, pl.pos.z), pl.pos.z, r, pale, 0.45, 0.6, 0, 0.6);
+        // the wheel is swept, then HANGS as a full silver disc edge before fading (readable at a glance)
+        c.arcs.dark = 0.55;
+        c.arcs.spawn(pl.pos.x, pl.pos.y + (1.0 + i * 0.25) * s, pl.pos.z, pl.yaw, 0, i % 2 ? 0.12 : -0.12, r, r * 0.42, PI / 2 + i * 0.4, PI / 2 + i * 0.4 - PI * 2, _c0, pale, 0.2, 0.95, 0.32, 1.1, 0.85);
+        c.arcs.dark = 0.4;
+        fx.ring(pl.pos.x, sm.groundAt(pl.pos.x, pl.pos.z), pl.pos.z, r, pale, 0.6, 0.6, 0, 0.6);
+        if (i === 0) c.scorch.spawn(pl.pos.x, gy(sm, pl.pos.x, pl.pos.z), pl.pos.z, r * 1.05, 1.6, silver, 1.2, 0.7, 0.85);
         for (let j = 0; j < fxN(fx, 22); j++) {
           const a = rnd() * PI * 2, sp = 7 + rnd() * 6;
           fx.particles.emitRaw(pl.pos.x + Math.sin(a) * r * 0.8, pl.pos.y + 1.0 * s, pl.pos.z + Math.cos(a) * r * 0.8, Math.sin(a) * sp, 1 + rnd() * 2, Math.cos(a) * sp,
@@ -777,7 +1006,7 @@ const ART_FX: Record<string, ArtFx> = {
     const { fx, sim } = c;
     const amber = fx.color('#e8b860'), warm = fx.color('#fff0d0');
     if (c.phase === 'dash') {
-      wake(c, amber, 0.3, 60, 0.16, CELL.dot, 3);
+      wake(c, amber, 0.32, 120, 0.4, CELL.spark, 6, c.k, amber, null);
       let t = 0;
       fx.spawn({
         update: (dt, s) => {
@@ -798,6 +1027,8 @@ const ART_FX: Record<string, ArtFx> = {
       });
     } else if (c.phase === 'hit') {
       strikePoint(sim, 1.9 * sim.player.scale, _t);
+      under(fx, _t.x, _t.y + 0.4, _t.z, 3.4, 0.36, amber);
+      c.scorch.spawn(_t.x, gy(sim, _t.x, _t.z), _t.z, 1.0, 1.2, amber, 1, 0, 0.7);
       fx.flash(_t.x, _t.y + 0.4, _t.z, warm, 2.2, 0.25, CELL.star, 2);
       fx.flash(_t.x, _t.y + 0.4, _t.z, amber, 3.2, 0.35, CELL.rays, 1);
     }
@@ -813,6 +1044,8 @@ const ART_FX: Record<string, ArtFx> = {
     c.arcs.spawn(p.pos.x, p.pos.y + 1.1 * s, p.pos.z, p.yaw, 0, -0.2, reach, reach * 0.6, PI / 2 + 1.45, PI / 2 - 1.45, _c0, amber, 0.1, 0.45, 0, 1.15);
     c.arcs.spawn(p.pos.x, p.pos.y + 1.3 * s, p.pos.z, p.yaw, 0, 0.25, reach * 0.9, reach * 0.35, PI / 2 - 1.2, PI / 2 + 1.2, _c0, amber, 0.12, 0.5, 0, 0.8);
     strikePoint(sim, 1.6 * s, _t);
+    under(fx, _t.x, _t.y, _t.z, 4.2, 0.4, amber, 0.6);
+    c.scorch.spawn(p.pos.x, gy(sim, p.pos.x, p.pos.z), p.pos.z, reach * 0.8, 1.2, amber, 1.1, 0.75, 0.7);
     fx.flash(_t.x, _t.y, _t.z, fx.color('#ffffff'), 2.6, 0.24, CELL.star, 4);
     fx.flash(_t.x, _t.y, _t.z, amber, 4.2, 0.4, CELL.rays, -2);
     fx.sparks(_t.x, _t.y, _t.z, amber, 26, 10, 0.14, 8);
@@ -823,12 +1056,19 @@ const ART_FX: Record<string, ArtFx> = {
   art_radici_fameliche: (c) => {
     const { fx, sim } = c;
     if (c.phase !== 'cast') return;
-    const r = Math.max(1.2, c.k), delay = c.n || 0.45;
+    const delay = c.n || 0.45;
     const bind = artParam(sim, c, 'bind_time', 2.6);
     const green = fx.color('#7fc85a'), lime = fx.color('#d8f08a'), earth = fx.color('#3a2c1e');
-    fx.ring(c.x, c.y, c.z, r * 1.1, green, delay + 0.1, 0.25, 0, r * 0.2);
-    fx.motes(c.x, c.y + 0.1, c.z, lime, 10, r * 0.8, 0.8, 0.14);
-    c.roots.spawn(c.x, c.y, c.z, r * 0.75, delay, bind);
+    // the roots close around the target's body (never inside it) and rise above its flanks
+    const tgt = sim.nearestEnemy(e3(c.x, c.y, c.z), 3, 0, PI);
+    const body = tgt ? tgt.radius * tgt.scale : 0;
+    const r = Math.max(1.2, c.k * 0.8, body + 0.5);
+    const tall = tgt ? Math.max(1, (tgt.height * tgt.scale) / 2.4) : 1;
+    const ground = gy(sim, c.x, c.z);
+    fx.ring(c.x, ground, c.z, r * 1.1, green, delay + 0.1, 0.25, 0, r * 0.2);
+    fx.motes(c.x, ground + 0.1, c.z, lime, 10, r * 0.8, 0.8, 0.14);
+    c.scorch.spawn(c.x, ground, c.z, r * 1.25, delay + bind + 0.6, green, 0.8, 0, 0.85, 1, 0, delay * 0.8);
+    c.roots.spawn(c.x, ground, c.z, r, delay, bind, tall);
     later(c, delay, () => {
       fx.puff(c.x, c.y, c.z, earth, 14, 1.0, r * 0.9, 0.9);
       fx.shards(c.x, c.y + 0.2, c.z, fx.color('#5a4a34'), 14, 5, 0.25);
@@ -847,6 +1087,7 @@ const ART_FX: Record<string, ArtFx> = {
       _t.copy(c.w.tip).applyMatrix4(c.w.root.matrixWorld);
       x = _t.x; y = _t.y; z = _t.z;
     }
+    under(fx, x, y, z, 2.6, 0.36, pink);
     fx.flash(x, y, z, white, 1.8, 0.22, CELL.star, 2);
     fx.flash(x, y, z, pink, 3.0, 0.4, CELL.petal, 1);
     for (let i = 0; i < fxN(fx, 30); i++) {
@@ -870,8 +1111,8 @@ const ART_FX: Record<string, ArtFx> = {
     const { fx, sim } = c;
     if (c.phase !== 'impact') return;
     const r = Math.max(1.5, c.k);
-    mudSplash(c, r);
     const life = artParam(sim, c, 'zone_time', 5);
+    mudSplash(c, r, life + 0.6);
     const mud = fx.color('#4a3a26'), dark = fx.color('#2a2016'), glint = fx.color('#c8d890');
     const x = c.x, y = c.y, z = c.z;
     let t = 0, a0 = rnd() * 6;
@@ -900,10 +1141,11 @@ const ART_FX: Record<string, ArtFx> = {
     const { fx, sim } = c;
     const venom = fx.color('#a8d060'), pale = fx.color('#e8ffb0');
     if (c.phase === 'dash') {
-      wake(c, venom, 0.36, 80, 0.2, CELL.spark, 6);
+      wake(c, venom, 0.38, 130, 0.38, CELL.spark, 7, c.k, venom, null);
       fx.flash(c.x, c.y + 1.0, c.z, pale, 1.4, 0.2, CELL.star);
     } else if (c.phase === 'hit') {
       strikePoint(sim, 3.0 * sim.player.scale, _t);
+      under(fx, _t.x, _t.y, _t.z, 3.4, 0.4, venom);
       fx.flash(_t.x, _t.y, _t.z, venom, 3.0, 0.35, CELL.rays, 2);
       for (let i = 0; i < fxN(fx, 18); i++) {
         fx.smoke.emitRaw(_t.x, _t.y, _t.z, jit() * 3, 1 + rnd() * 2, jit() * 3, 0.6 + rnd() * 0.4, 0.14, 0.08, venom.r * 0.7, venom.g * 0.8, venom.b * 0.4, 0.9, CELL.blob, 9, 1, 0, 0, 0.02);
@@ -928,6 +1170,8 @@ const ART_FX: Record<string, ArtFx> = {
       fx.flash(c.x, c.y + h * 0.5, c.z, venom, 2.4, 0.3, CELL.ring, 1);
       fx.sparks(c.x, c.y + h * 0.5, c.z, pale, 14, 5);
     } else if (c.phase === 'throw') {
+      under(fx, c.x, c.y + 1.0, c.z, 4.0, 0.4, venom, 0.6);
+      c.scorch.spawn(c.x, gy(sim, c.x, c.z), c.z, 1.8, 1.4, venom, 0.9, 0, 0.75);
       fx.flash(c.x, c.y + 1.0, c.z, pale, 2.6, 0.25, CELL.star, 3);
       fx.flash(c.x, c.y + 1.0, c.z, venom, 4.0, 0.4, CELL.rays, -2);
       for (let i = 0; i < fxN(fx, 22); i++) fx.smoke.emitRaw(c.x, c.y + 1, c.z, jit() * 5, 1 + rnd() * 3, jit() * 5, 0.7, 0.18, 0.08, 0.45, 0.62, 0.22, 0.9, CELL.blob, 9, 1, 0, 0, 0.02);
@@ -948,6 +1192,7 @@ const ART_FX: Record<string, ArtFx> = {
       _t.copy(c.w.tip).applyMatrix4(c.w.root.matrixWorld);
       x = _t.x; y = _t.y; z = _t.z;
     }
+    under(fx, x, y, z, 3.0, 0.45, spirit);
     fx.flash(x, y, z, white, 1.8, 0.25, CELL.star, 2);
     fx.flash(x, y, z, spirit, 3.4, 0.5, CELL.dot);
     fx.motes(x, y - 0.3, z, spirit, 22, 0.5, 1.6, 0.18);
@@ -971,12 +1216,14 @@ const ART_FX: Record<string, ArtFx> = {
         0.6 + rnd() * 0.4, 0.22, 0.1, foam.r, foam.g, foam.b, 0.75, CELL.blob, 12, 1.2, 0, 0.04, 0.02);
     }
     fx.ring(p.pos.x, sim.groundAt(p.pos.x, p.pos.z), p.pos.z, r * 1.1, water, 0.5, 0.6);
+    c.scorch.spawn(p.pos.x, gy(sim, p.pos.x, p.pos.z), p.pos.z, r * 1.05, 1.4, water, 1.1, 0.6, 0.6);
   },
 };
 
-function mudSplash(c: ArtCtx, r: number): void {
+function mudSplash(c: ArtCtx, r: number, life = 2.2): void {
   const { fx, x, y, z } = c;
   const mud = fx.color('#4a3a26'), wet = fx.color('#6a5a3a'), green = fx.color('#7a8a4a');
+  c.scorch.spawn(x, gy(c.sim, x, z), z, r * 1.1, life, green, 0.5, 0, 0.9);
   fx.puff(x, y, z, mud, 16, 1.2, r * 0.7, 0.8);
   for (let i = 0; i < fxN(fx, 40); i++) {
     const a = rnd() * PI * 2, sp = 3 + rnd() * r * 1.6;

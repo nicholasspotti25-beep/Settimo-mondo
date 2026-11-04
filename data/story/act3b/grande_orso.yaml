@@ -1,0 +1,17 @@
+# Grande Orso (secondary): one image and one line before, one line when he falls, then the Voce.
+- id: grande_orso_intro
+  skippable: true
+  steps:
+    - {camera: wide, dur: 2.2}
+    - {caption: story.atto3.orso_intro, dur: 3.2}
+    - {camera: boss_reveal, dur: 2.0}
+    - {say: boss.grande_orso.intro, speaker: grande_orso}
+    - {event: start_fight}
+- id: grande_orso_defeat
+  skippable: true
+  steps:
+    - {wait: 1.5}
+    - {say: boss.grande_orso.defeat, speaker: grande_orso}
+    - {event: cue, params: {id: orso_rest}}
+    - {caption: story.atto3.orso_tamburi, dur: 3.5}
+    - {voce: voce.atto3.orso_caduto}

@@ -4,13 +4,14 @@
  *   buildWeapon(def, ctx) -> WeaponVisual (attach `root` to the hand socket, +Z out of the fist; `base`/`tip` give the
  *                            blade line for trails; `update(dt, time)` every frame; `dispose()` on swap)
  *   installWeaponFx(fx)    -> registers swing trails, Art / Transizione visuals on the FxRenderer (src/render/weapons/fx.ts)
- * Types with a dedicated template: Act I (act1.ts). Every other type uses its category template (fallback.ts) until
- * its own template lands.
+ * Types with a dedicated template: Act I (act1.ts), Act II (act2.ts). Every other type uses its category template
+ * (fallback.ts) until its own template lands.
  */
 import type { WeaponDef } from '../../core/types';
 import type { RenderCtx } from '../types';
 import type { FxRenderer } from '../fx/FxRenderer';
 import { ACT1_TEMPLATES } from './act1';
+import { ACT2_TEMPLATES } from './act2';
 import { buildFallback } from './fallback';
 import { LIVE, installWeaponFxImpl } from './fx';
 import type { WeaponTemplate, WeaponVisual } from './types';
@@ -18,7 +19,7 @@ import type { WeaponTemplate, WeaponVisual } from './types';
 export type { WeaponMorph, WeaponTrail, WeaponVisual } from './types';
 
 /** Dedicated templates by weapon type. */
-export const WEAPON_TEMPLATES: Record<string, WeaponTemplate> = { ...ACT1_TEMPLATES };
+export const WEAPON_TEMPLATES: Record<string, WeaponTemplate> = { ...ACT1_TEMPLATES, ...ACT2_TEMPLATES };
 
 export function hasDedicatedTemplate(type: string): boolean {
   return type in WEAPON_TEMPLATES;

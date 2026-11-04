@@ -20,6 +20,19 @@ export interface WeaponMorph {
   art: number;
   /** 0..1 swing intensity (active window). */
   swing: number;
+  /** 0..1 elemental imbue on the Portatore (Lama Rovente's flames, buff_* Arts), fading out over its last second. */
+  buff?: number;
+}
+
+/** Ambient particles the equipped weapon sheds along its blade line (emitted by installWeaponFx, player only). */
+export interface WeaponAura {
+  /** mist: cold breath (alpha, drifting down); ember: rising sparks; spark: crackling arcs; drip: falling lava drops. */
+  kind: 'mist' | 'ember' | 'spark' | 'drip';
+  color: string;
+  /** Particles per second at rest (x3 while swinging, x4 under an Art or imbue). */
+  rate: number;
+  /** 0 hilt .. 1 tip: the part of the blade line that sheds (default 0.3 .. 1). */
+  from?: number;
 }
 
 export interface WeaponVisual {
@@ -35,6 +48,8 @@ export interface WeaponVisual {
   offTip?: THREE.Vector3;
   /** Swing-trail colors. */
   trail?: WeaponTrail;
+  /** Ambient particles shed along the blade line. */
+  aura?: WeaponAura;
   /** Triangle count (budget check: <= ~3k). */
   triangles?: number;
   /** The weapon definition this visual was built from. */

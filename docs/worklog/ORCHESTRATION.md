@@ -71,3 +71,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - deployed e51953f (readable Portatore, polearm poses, world#4, cerbero, act3a partial)
 - act3a#1 done: all 4 act3a encounters sim-side playable (gigante, yeti, guardiano rocca, loki), 26 tests, bot 4/4 pass; models next
 - started: act3b#1 (sim-side)
+- act3b#1 done: grande_lupo + grande_orso sim-side playable (14 tests, bot pass incl. NG+/ToD); 4 encounters left
+- started: act4#1 (sim-side)

@@ -5,16 +5,18 @@ import h1 from './cavaliere_errante';
 import h2 from './cerbero';
 import h3 from './elder_tree';
 import h4 from './gigante_di_fuoco';
-import h5 from './great_devourer';
-import h6 from './guardiano_rocca_di_brina';
-import h7 from './ice';
-import h8 from './loki';
-import h9 from './lucifero_1';
-import h10 from './mostro_della_palude';
-import h11 from './mostro_di_magma';
-import h12 from './pyro';
-import h13 from './thunder';
-import h14 from './yeti';
+import h5 from './grande_lupo';
+import h6 from './grande_orso';
+import h7 from './great_devourer';
+import h8 from './guardiano_rocca_di_brina';
+import h9 from './ice';
+import h10 from './loki';
+import h11 from './lucifero_1';
+import h12 from './mostro_della_palude';
+import h13 from './mostro_di_magma';
+import h14 from './pyro';
+import h15 from './thunder';
+import h16 from './yeti';
 
 export const BOT_HOOKS: Record<string, BotHook> = {
   "caronte": h0,
@@ -22,14 +24,16 @@ export const BOT_HOOKS: Record<string, BotHook> = {
   "cerbero": h2,
   "elder_tree": h3,
   "gigante_di_fuoco": h4,
-  "great_devourer": h5,
-  "guardiano_rocca_di_brina": h6,
-  "ice": h7,
-  "loki": h8,
-  "lucifero_1": h9,
-  "mostro_della_palude": h10,
-  "mostro_di_magma": h11,
-  "pyro": h12,
-  "thunder": h13,
-  "yeti": h14,
+  "grande_lupo": h5,
+  "grande_orso": h6,
+  "great_devourer": h7,
+  "guardiano_rocca_di_brina": h8,
+  "ice": h9,
+  "loki": h10,
+  "lucifero_1": h11,
+  "mostro_della_palude": h12,
+  "mostro_di_magma": h13,
+  "pyro": h14,
+  "thunder": h15,
+  "yeti": h16,
 };

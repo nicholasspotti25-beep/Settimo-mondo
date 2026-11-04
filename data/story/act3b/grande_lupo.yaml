@@ -1,0 +1,17 @@
+# Grande Lupo (secondary): one image and one line before, one line when he falls (his answer), then the Voce.
+- id: grande_lupo_intro
+  skippable: true
+  steps:
+    - {camera: wide, dur: 2.2}
+    - {caption: story.atto3.lupo_intro, dur: 3.2}
+    - {camera: boss_reveal, dur: 2.0}
+    - {say: boss.grande_lupo.intro, speaker: grande_lupo}
+    - {event: start_fight}
+- id: grande_lupo_defeat
+  skippable: true
+  steps:
+    - {wait: 1.5}
+    - {say: boss.grande_lupo.defeat, speaker: grande_lupo}
+    - {event: cue, params: {id: lupo_fade}}
+    - {caption: story.atto3.lupo_sentiero, dur: 3.5}
+    - {voce: voce.atto3.lupo_caduto}

@@ -1,3 +1,6 @@
+# Bosco dei Tronchi — a ring of giant firs around a clearing of fallen trunks, moss and old snow (Grande Orso). Two great
+# logs lie across the clearing (cover from the head charge). Phase 2 (forest_shaken, cue only): the bear shakes the
+# forest and trees come down on the arena (hazards orso_tree, telegraphed by their long shadow).
 id: taiga_tronchi
 zone: taiga
 name_key: arena.taiga_tronchi.name
@@ -6,6 +9,8 @@ shape: circle
 radius: 28
 gate: {pos: [110, 0, 22], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
-obstacles: []
+surface: snow
+obstacles:
+  - {type: box, c: [97, 0.9, 59], half: [0.9, 0.9, 4.5], yaw: 0.6}
+  - {type: box, c: [124, 0.9, 45], half: [0.9, 0.9, 4.5], yaw: -0.4}
 builder: taiga_tronchi
