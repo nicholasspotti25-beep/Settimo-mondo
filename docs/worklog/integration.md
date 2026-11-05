@@ -8,23 +8,93 @@ In other streams' files: only the small wiring edits a request in docs/requests 
 
 | # | Deliverable (per pass) | Status | Files |
 |---|---|---|---|
-| 1 | Open requests to integrator / lead / sim / app | done (pass #2): ui #3 aimAssist, ui #4 Specchio in NG+. Pass #1: act2 #1, ui #2, weapons #2 #5 (+ #1 #6 already applied). No other open request addressed to integrator/lead/sim/app (act1 has no request file) | src/sim/sim.ts, src/sim/player.ts, src/sim/gamestate.ts, src/app/Game.ts, src/sim/arts.ts + src/ui/altar.ts (one-line wiring each, per the request) |
-| 2 | Smoke-screenshot bug: captions / cards surviving a fight or zone change | DONE: ui applied docs/requests/integration.md #1; verified in pass #2 smoke (boss_05..08 clean) | — |
-| 3 | tsc + lint clean in owned files | done (pass #2): tsc 0 errors (whole tree); lint 0 errors, 0 warnings in owned files (removed dead `loadArrayFile` in tools/build-data.ts); 12 warnings remain, all other streams' | tools/build-data.ts |
-| 4 | Build + smoke + tests + bot | done (pass #2): all pass, see Notes | tools/smoke.ts (waits for the zone build) |
-| 5 | Requests and per-stream fix list | done (pass #2) | this file |
+| 1 | Open requests to integrator / lead / sim / app | done (pass #3): act4 #1 (bot approach at sub-scale). act3a and act3b filed no requests; their logs and act4's need no other sim API (addArenaCollider, addFightInteractable, pushPlayer, spawnMinion, hover/flying, set_scale all exist). Pass #2: ui #3, ui #4. Pass #1: act2 #1, ui #2, weapons #2 #5 | tools/bot/bot.ts |
+| 2 | Cross-stream health: shared patterns promoted | done (pass #3): `AttackDef.one_blow` (sim) replaces act3b's guardMultiHit (3 bosses, 2 streams, Acts V-VII next); enemy projectile aim/homing at `player.scale` (sim; act4's aimLow workaround); tools/bot/defense.ts (bot defenses 4 streams imported from act1/act2 hook files). Adoption requests: docs/requests/integration.md #3, #5 | src/core/types.ts, tools/schemas.ts, src/sim/actor.ts, src/sim/sim.ts, tools/bot/defense.ts, docs/BOSS_AUTHORING.md |
+| 3 | tsc + lint clean in owned files | done (pass #3): tsc 0 errors (whole tree); lint 0 errors, 10 warnings, none in owned files | — |
+| 4 | Build + smoke + tests + bot | done (pass #3): build ok, smoke 21 scenes 0 errors, vitest 210/212 (2 strict gates), bot 20/21 (regina_formica in progress, act4) | — |
+| 5 | Save compatibility | done (pass #3): a save written by the pre-Act-III build (30fa9fc) imports, continues in the browser and plays through every authored encounter; durable test tests/sim_save_compat.test.ts | tests/sim_save_compat.test.ts |
+| 6 | Requests and per-stream fix list | done (pass #3) | this file, docs/requests/integration.md #3-#6 |
 
-## Next (integration pass #3)
+## Next (integration pass #4)
 
-1. Re-read docs/requests/*.md for new items addressed to the integrator / lead / sim / app (weapons will add more Art hooks as
-   Act II-VII weapons land; act1 may file one for the Elder Tree / palude models).
-2. Smoke an Art-heavy fight (Innesto seed follows its target; Act I Art VFX legibility, weapons Next 1) with a scratch script:
-   equip each Act I weapon, fire both Arts with a lock, screenshot at the cue time.
-3. Smoke at `--quality=low` and `--quality=high` too and record draw calls / triangles per zone against D3 (vetta_attesa
-   Medium is 182 calls / 402k tris in the pass #2 smoke: over budget, world Next 1).
-4. tests/data.test.ts stays strict (it is the final gate and fails until every boss/zone/sequence exists); keep it so.
+1. Re-read docs/requests/*.md; check adoption of integration #3 (one_blow: act3b orso, act4 mantide) and #5 (hooks import
+   tools/bot/defense.ts); re-run their bot rows (they should not move).
+2. "One blow at a time" across foes (a minion / copy waits while another foe of the fight is in telegraph/active) is now
+   hand-written in act3a (loki `canUseAttack` + minion_loki_copy) and act3b (grande_lupo `busy`; lucifero_1's check is
+   about itself only): two streams, so not promoted yet. Promote it to a sim helper (e.g. `sim.foeMidBlow(except)` in
+   src/sim/behavior.ts) as soon as a third stream (Act V-VII minion bosses) writes it again.
+3. Carried from pass #2 (not done this pass): an Art-heavy smoke (equip each Act I/II weapon, fire both Arts with a lock,
+   screenshot at the cue time) and `npm run smoke -- --quality=low` / `--quality=high` with calls / tris per zone vs D3.
+4. When Act V lands: add a post-Act-IV save fixture next to the pre-Act-III one in tests/sim_save_compat.test.ts.
+5. tests/data.test.ts stays strict (final gate).
 
 ## Notes
+
+### Pass #3 (2026-11-05)
+Changes:
+- act4 #1: `Bot.decide` approach range `max(min(0.6, reach * 0.7), reach - 0.6)` (tools/bot/bot.ts): the generic bot now
+  closes inside a 0.25 m garden reach; identical for every reach >= 0.86 m.
+- `AttackDef.one_blow` (src/core/types.ts, tools/schemas.ts, src/sim/actor.ts `landedOn`): a multi-window attack lands once
+  per target (hit / blocked / parried; a dodged window does not count; tick windows unaffected). Same rule as act3b's
+  `guardMultiHit`, which grande_lupo, grande_orso and re_mantide (act4 imports it from act3b's file) run every tick; the
+  data field is also exact for windows overlapping in one tick. docs/BOSS_AUTHORING.md documents it (example block +
+  fairness checklist). Adoption: docs/requests/integration.md #3.
+- Enemy projectile aim (src/sim/sim.ts): `aimLift(id)` = `player.scale` for the player, 1 m for actors, used for the pitch
+  in `bossSpawn` and for enemy homing (was a fixed +1 m: over the head of the 0.18 m garden player, the knees of the x3
+  Gigante Form). Scale 1 unchanged. Homing no longer allocates a target vector per projectile per frame (`homeTgt`
+  scratch, also for player-team lock homing). FYI to act4: request #4.
+- tools/bot/defense.ts: the Act I / Act II bot defenses moved verbatim (names kept; cerbero's `ringJump` is
+  `shockRingJump`). Scratch A/B: cavaliere_errante and cerbero hooks rebuilt on it give identical win/time/hits per seed.
+  Adoption: request #5 (act1/act2 re-export, everyone else imports from '../defense').
+- Tests: tests/sim_integration.test.ts +2 (one_blow: two windows land twice without the field, once with it; aimLift
+  scales with the player); new tests/sim_save_compat.test.ts (the pre-Act-III save code embedded as a fixture).
+- Requests filed: integration.md #3 (act3b, act4: one_blow), #4 (act4 FYI: aim), #5 (act1-act4: bot defenses), #6
+  (render-kit: follow camera at player scale 0.1).
+
+Verification:
+- `npx tsc --noEmit -p tsconfig.json`: 0 errors. `npm run lint`: 0 errors, 10 warnings, none in owned files (weapons
+  arts.ts `d` 323; act1 guardiano_del_regno/model.ts `profile`; render-kit FxRenderer.ts `oy`, kit/model.ts `n`; ui altar.ts
+  `row`/`toggleCtl`, debug.ts / settings.ts `toggleCtl`, editor.ts `id`; tests/render_anim.test.ts `c`).
+- `SM_PARTIAL=1 npm run build`: ok (21 bosses, 38 weapons, 38 movesets, 49 transitions, 7 forms, 34 zones, 37 arenas,
+  42 altars, 46 sequences, 1209 it / 1209 en strings; partial warnings = not-yet-authored Act III-B/IV-VII bosses);
+  gen-sw 33 files (2.6 MB).
+- `npm run smoke`: 21 scenes, 0 console errors (1280x576 medium, SwiftShader 10-12 fps, 40-96 calls, 78k-290k tris;
+  vetta_attesa 92 calls / 239k, down from 182 / 402k thanks to render-kit's probe fix). Screenshots read: all new
+  encounters start with their boss card and bar; gigante, yeti, guardiano rocca, loki, lupo, orso, mantide, coleottero and
+  regina still draw as generic figures (no model builders yet: their item 14); bocca_vulcano / corona_bianca / rocca_brina /
+  taiga are scaffold plains (item 16); in the Little Garden the 0.1-scale player is under the boss bar (coleottero, regina)
+  or hidden (mantide): request #6 (render-kit).
+- `npx vitest run`: 210/212 after the new tests (207/209 in the full run before them); the 2 failures are the strict final
+  gates in tests/data.test.ts (strict data build 56 errors, down from 81: references to not-yet-authored content; canon
+  audit 76 mismatches, up from 68: more authored bosses without model builders / music themes).
+- `npx tsx tools/balance-bot.ts --seeds=3`: 20/21 PASS. perfect avg s / hits | sloppy wins: guardiano 77 / 0.0 | 2/3,
+  cavaliere 110 / 0.3 | 2/3, elder_tree 95 / 2.3 | 1/3, palude 149 / 0.7 | 0/3, devourer 220 / 3.3 (target 240) | 0/3,
+  caronte 181 / 1.3, cerbero 134 / 0.7, pyro 144 / 4.3, thunder 160 / 4.0, ice 173 / 6.3, magma 185 / 7.3 (all sloppy 0/3),
+  lucifero_1 scripted 122 / 3.3 (sloppy 3/3 by design), gigante 191 / 1.7, yeti 203 / 3.0, guardiano rocca 225 / 1.3,
+  loki 275 / 4.3, grande_lupo 254 / 5.7, grande_orso 206 / 3.3, re_mantide 255 / 0.3 (target 380), coleottero 331 / 0.0
+  (target 400) (all sloppy 0/3). FAIL regina_formica: perfect 3/3 but 845 s avg (target 400), 5.3 hits; act4 is authoring
+  it right now (files modified on disk). A/B (perfect, 3 seeds) with the old aim and/or the old approach range: regina
+  774-921 s in every configuration, so not caused by this pass; re_mantide 239 -> 255 s and coleottero 313 -> 331 s move
+  within seed noise, still far inside target. Acts I-III identical to pass #2 / their streams' logs.
+- Save compatibility: archived the pre-Act-III tree read-only (`git archive 30fa9fc` into the scratchpad) and played a new
+  game there through the Guardiano del Regno and the Cavaliere Errante; its save (JSON + SM1 code) in the current build:
+  `deserialize` == `importCode`; loads at altare_vetta_01 (vetta_attesa); headless it then plays every authored encounter
+  in story order through Act IV (elder_tree ... regina_formica, garden scale 0.1, forms + Specchio, 21 weapons) and
+  round-trips; in the browser `importSave` -> reload -> `continueGame(1)` -> game mode at vetta_attesa -> elder_tree fight in
+  foresta_oscura, 0 console errors. Durable gate: tests/sim_save_compat.test.ts.
+
+Open problems / what each stream must fix:
+- act4: regina_formica perfect bot 845 s vs 400 s target (FAIL); adopt integration #3 (one_blow on cross_slash,
+  ambush_cross, ng_green_ambush) and #5; with render-kit check camera framing at 0.1 scale (#6); `gardenOffense` optional now.
+- act3b: adopt #3 (grande_orso standing_swipe; drop guardMultiHit once re_mantide no longer imports it) and #5; sciamano,
+  grande_aquila_reale, drago_di_fuoco, kraken still missing; lupo 5.7 perfect hits.
+- act3a: adopt #5; models, arena dressing, zone dressing (smoke shows generic figures on scaffold plains), reperti.
+- act2: #5 (cerbero.ts re-exports from tools/bot/defense.ts); remaining models (pyro, thunder, ice, magma, lucifero_1).
+- act1: #5 (cavaliere_errante.ts re-exports); devourer 220 s vs 240 s target.
+- render-kit: #6 follow camera at player scale 0.1.
+- weapons: arts.ts lint warning (`d`, line 323).
+- ui: 5 unused-import/variable lint warnings (altar, debug, settings, editor).
+- audio / forms: music themes for authored bosses, Form dioramas (canon audit).
 
 ### Pass #2 (2026-11-04)
 Changes:

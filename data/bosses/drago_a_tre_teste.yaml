@@ -1,0 +1,344 @@
+# 28. Drago a Tre Teste — mini boss · I Nidi (Rupe dei Nidi) · D15 · no dialogue, no lore.
+# A green-and-brown dragon about 16 m long among nests carved in the rock, with three different heads on three necks:
+# FIRE (left, ember-orange throat), POISON (center, sickly green), LIGHTNING (right, crackling yellow horns).
+# Each head has its own element and its OWN Equilibrio bar (lockable parts): choosing which to bring down first is the
+# key. Fire breathes a cone and spits flame; Poison sprays venom puddles (damage over time) and bites; Lightning calls
+# marked strikes that follow you and lashes. The heads attack ONE AT A TIME and in turn (the same head never strikes twice
+# in a row while another stands): the head that is about to strike swings forward to the center and lowers (readable,
+# and that is when it can be reached).
+# A head falls when its Equilibrio breaks: it crashes to the ground (Colpo di Grazia on it during the Spezzato) and never
+# rises again; the others become enraged and faster (×1.12 rate and rhythm per fallen head) and gain their fury attacks.
+# Phase 2 (fury) begins at the first head's fall (behavior; the HP threshold 0.3 only covers a player who never aims a
+# head). The last head standing does not fall: its Equilibrio break is a long Spezzato, then it rises (bar ×1.3).
+# Behavior: src/content/bosses/drago_a_tre_teste/behavior.ts.
+# Local frame: +Z forward, +Y up, +X = the dragon's LEFT. Heads rest ~2.8 m high, 5.5–6.4 m forward.
+id: drago_a_tre_teste
+order: 28
+name_key: boss.drago_a_tre_teste.name
+class: mini
+difficulty: 15
+act: 5
+arena: nidi_rupe
+zone: nidi
+model: {builder: drago_a_tre_teste, rig: dragon, scale: 1.0, palette: act5_gold_white_midnight}
+equilibrio_max: 300
+body: {radius: 3.0, height: 6.5, mass: immovable}
+hurtboxes:
+  - {c: [0, 2.4, 2.0], r: 2.3}        # chest
+  - {c: [0, 2.2, -1.2], r: 2.3}       # belly
+  - {c: [1.8, 1.0, 2.2], r: 1.0}      # left foreleg
+  - {c: [-1.8, 1.0, 2.2], r: 1.0}     # right foreleg
+  - {c: [1.9, 1.0, -2.4], r: 1.0}     # left hind leg
+  - {c: [-1.9, 1.0, -2.4], r: 1.0}    # right hind leg
+  - {c: [0, 1.3, -5.6], r: 1.3}       # tail base
+  - {c: [0, 0.8, -8.4], r: 0.9}       # tail tip
+parts:
+  - {id: testa_fuoco, name_key: boss.drago_a_tre_teste.part.fuoco, hurt: [{c: [2.6, 2.8, 5.6], r: 1.3}], equilibrio: 100, lockable: true, damage_mult: 1.15}
+  - {id: testa_veleno, name_key: boss.drago_a_tre_teste.part.veleno, hurt: [{c: [0, 3.0, 6.4], r: 1.3}], equilibrio: 100, lockable: true, damage_mult: 1.15}
+  - {id: testa_fulmine, name_key: boss.drago_a_tre_teste.part.fulmine, hurt: [{c: [-2.6, 2.8, 5.6], r: 1.3}], equilibrio: 100, lockable: true, damage_mult: 1.15}
+move: {walk: 2.6, run: 6.5, turn: 1.5, preferred_range: [1.5, 7]}
+idle_gap: [1.0, 1.4]
+music: boss_drago_a_tre_teste
+phases:
+  - id: p1
+    hp_range: [1.0, 0.3]
+    music: boss_drago_a_tre_teste_p1
+    opener: fire_breath
+    patterns: [fire_breath, fire_spit, venom_spray, venom_bite, bolt_strikes, bolt_lash, tail_sweep, wing_buffet]
+  - id: p2
+    hp_range: [0.3, 0.0]
+    music: boss_drago_a_tre_teste_p2
+    on_enter: [fury]
+    arena_state: fury
+    transition: 2.0
+    patterns: [fire_breath, fire_spit, venom_spray, venom_bite, bolt_strikes, bolt_lash, tail_sweep, wing_buffet, rage_fire_sweep, rage_venom_rain, rage_bolt_line]
+attacks:
+  # FIRE — the left head swings to the center, the throat glows orange for 1.0 s, then a cone of flame that follows a little.
+  - id: fire_breath
+    anim: breath_fire
+    part: testa_fuoco
+    telegraph: 1.0
+    active: 1.4
+    recovery: 1.4
+    damage_mult: 0.4
+    poise: 0
+    flags: []
+    element: fire
+    range: [2, 14]
+    weight: 1.0
+    cooldown: 8
+    track: 1.0
+    track_active: 0.25
+    hits:
+      - {t: 0.0, dur: 1.4, tick: 0.35, element: fire, status: {kind: burn, dur: 2.0}, shape: {type: arc, r: 14, angle: 40, yaw: 0, y: [0, 4.2], c: [0, 0, 2.5]}}
+    spawns:
+      - {t: -0.9, type: vfx, id: tre_teste_fire_glow, part: testa_fuoco}
+    sfx: tre_teste_fire
+  # FIRE — three balls of flame in a fan (gaps between them), bursting where they land.
+  - id: fire_spit
+    anim: spit
+    part: testa_fuoco
+    telegraph: 0.75
+    active: 0.3
+    recovery: 1.2
+    damage_mult: 0.9
+    poise: 18
+    flags: [projectile]
+    element: fire
+    range: [5, 24]
+    weight: 0.9
+    cooldown: 5
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: tre_teste_fireball, part: testa_fuoco, count: 3, spread: 26, speed: 16}
+    sfx: tre_teste_spit
+  # POISON — the center head rears and sprays three globs of venom: puddles (marked 0.9–1.0 s) that burn for 6 s.
+  - id: venom_spray
+    anim: spray
+    part: testa_veleno
+    telegraph: 0.85
+    active: 0.4
+    recovery: 1.3
+    damage_mult: 0.3
+    poise: 0
+    flags: []
+    element: poison
+    range: [3, 18]
+    weight: 1.0
+    cooldown: 8
+    track: 1.0
+    spawns:
+      - {t: 0.0, type: hazard, id: tre_teste_venom, at: target_predict, count: 1, delay: 0.9, active: 6, flags: [dot], status: {kind: poison, dur: 3}, shape: {type: cylinder, c: [0, 0, 0], r: 2.4, h: 1.2}}
+      - {t: 0.1, type: hazard, id: tre_teste_venom, at: around_target, count: 2, dist: 5, radius: 2.2, delay: 1.0, active: 6, flags: [dot], status: {kind: poison, dur: 3}, shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 1.2}}
+    sfx: tre_teste_spray
+  # POISON — a straight lunge of the center head; the fangs poison.
+  - id: venom_bite
+    anim: bite
+    part: testa_veleno
+    telegraph: 0.65
+    active: 0.3
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 22
+    flags: []
+    element: poison
+    range: [0, 9]
+    weight: 1.1
+    cooldown: 2.5
+    track: 1.3
+    track_active: 0.1
+    motion:
+      - {t: -0.05, dur: 0.3, type: forward, speed: 7}
+    hits:
+      - {t: 0.05, dur: 0.22, status: {kind: poison, dur: 3}, shape: {type: capsule, a: [0, 1.6, 5.0], b: [0, 2.2, 10.0], r: 1.5}}
+    sfx: tre_teste_bite
+  # LIGHTNING — the right head raises its horns to the sky: three strikes follow you, each marked 0.9 s on your predicted
+  # spot (keep moving). One attack, one blow: once a strike lands the others are spent (behavior: bolt events).
+  - id: bolt_strikes
+    anim: roar_sky
+    part: testa_fulmine
+    telegraph: 0.8
+    active: 1.0
+    recovery: 1.2
+    damage_mult: 1.1
+    poise: 20
+    flags: []
+    element: lightning
+    global: true
+    weight: 1.0
+    cooldown: 8
+    track: 0.8
+    spawns:
+      - {t: 0.0, type: custom, event: bolt}
+      - {t: 0.45, type: custom, event: bolt}
+      - {t: 0.9, type: custom, event: bolt}
+    sfx: tre_teste_thunder
+  # LIGHTNING — a fast sideways lash of the right head (short tell, short reach).
+  - id: bolt_lash
+    anim: lash
+    part: testa_fulmine
+    telegraph: 0.55
+    active: 0.25
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 20
+    flags: []
+    element: lightning
+    range: [0, 7]
+    weight: 1.0
+    cooldown: 2.5
+    track: 1.4
+    track_active: 0.1
+    hits:
+      - {t: 0.05, dur: 0.18, element: lightning, shape: {type: arc, r: 9.5, angle: 130, yaw: 0, y: [0, 3.6]}}
+    sfx: tre_teste_lash
+  # BODY — the tail answers a player beside or behind it: low, jump or roll.
+  - id: tail_sweep
+    anim: tail_sweep
+    telegraph: 0.9
+    active: 0.4
+    recovery: 1.3
+    damage_mult: 1.1
+    poise: 26
+    flags: [knockback]
+    range: [0, 9]
+    weight: 1.3
+    cooldown: 3
+    track: 0.6
+    track_active: 0
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 11.5, angle: 200, yaw: 180, y: [0, 1.4]}}
+    sfx: tre_teste_tail
+  # BODY — the wings open (0.8 s) and beat down in front: knockback, no follow-up.
+  - id: wing_buffet
+    anim: wing_beat
+    telegraph: 0.8
+    active: 0.3
+    recovery: 1.2
+    damage_mult: 0.9
+    poise: 22
+    flags: [knockback]
+    range: [0, 5]
+    weight: 0.8
+    cooldown: 5
+    track: 1.0
+    track_active: 0
+    hits:
+      - {t: 0.05, dur: 0.2, shape: {type: arc, r: 8, angle: 160, yaw: 0, y: [0, 3.0]}}
+    sfx: tre_teste_wings
+  # FURY (phase 2) — fire: the breath sweeps from the dragon's left to its right in three beats (it starts where the head is).
+  - id: rage_fire_sweep
+    anim: breath_sweep
+    part: testa_fuoco
+    telegraph: 1.1
+    active: 1.5
+    recovery: 1.5
+    damage_mult: 0.4
+    poise: 0
+    flags: []
+    element: fire
+    range: [2, 14]
+    weight: 1.1
+    cooldown: 9
+    track: 1.0
+    track_active: 0
+    hits:
+      - {t: 0.0, dur: 0.5, tick: 0.3, element: fire, status: {kind: burn, dur: 2.0}, shape: {type: arc, r: 14, angle: 38, yaw: 40, y: [0, 4.2], c: [0, 0, 2.5]}}
+      - {t: 0.5, dur: 0.5, tick: 0.3, element: fire, status: {kind: burn, dur: 2.0}, shape: {type: arc, r: 14, angle: 38, yaw: 0, y: [0, 4.2], c: [0, 0, 2.5]}}
+      - {t: 1.0, dur: 0.5, tick: 0.3, element: fire, status: {kind: burn, dur: 2.0}, shape: {type: arc, r: 14, angle: 38, yaw: -40, y: [0, 4.2], c: [0, 0, 2.5]}}
+    spawns:
+      - {t: -1.0, type: vfx, id: tre_teste_fire_glow, part: testa_fuoco}
+    sfx: tre_teste_fire
+  # FURY — poison: a rain of venom: five puddles in a ring around you and one on you (marked 1.1 s; walk out between them).
+  - id: rage_venom_rain
+    anim: spray_high
+    part: testa_veleno
+    telegraph: 1.0
+    active: 0.4
+    recovery: 1.4
+    damage_mult: 0.3
+    poise: 0
+    flags: []
+    element: poison
+    global: true
+    weight: 1.0
+    cooldown: 11
+    track: 0.8
+    spawns:
+      - {t: 0.0, type: hazard, id: tre_teste_venom, at: around_target, count: 5, dist: 5.5, delay: 1.1, active: 5, flags: [dot], status: {kind: poison, dur: 3}, shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 1.2}}
+    sfx: tre_teste_spray
+  # FURY — lightning: a line of seven strikes from the dragon through you (marked 1.0 s): step aside.
+  - id: rage_bolt_line
+    anim: roar_sky
+    part: testa_fulmine
+    telegraph: 0.9
+    active: 0.5
+    recovery: 1.3
+    damage_mult: 1.1
+    poise: 20
+    flags: []
+    element: lightning
+    global: true
+    weight: 1.0
+    cooldown: 9
+    track: 1.0
+    spawns:
+      - {t: 0.0, type: hazard, id: tre_teste_bolt, at: line_to_target, count: 7, dist: 3.2, delay: 1.0, active: 0.3, shape: {type: cylinder, c: [0, 0, 0], r: 1.7, h: 10}}
+    sfx: tre_teste_thunder
+  # New Game+ phase 1 — fire: two fans of flame, the second with its own 0.55 s tell, re-aimed at you.
+  - id: ng_fire_volley
+    anim: spit
+    part: testa_fuoco
+    telegraph: 0.75
+    active: 0.3
+    recovery: 0.3
+    damage_mult: 0.9
+    poise: 18
+    flags: [projectile]
+    element: fire
+    range: [4, 24]
+    weight: 0.9
+    cooldown: 8
+    track: 1.2
+    combo_next: ng_fire_volley_2
+    combo_chance: 1
+    spawns:
+      - {t: 0.05, type: projectile, id: tre_teste_fireball, part: testa_fuoco, count: 3, spread: 30, speed: 16}
+    sfx: tre_teste_spit
+  - id: ng_fire_volley_2
+    anim: spit
+    part: testa_fuoco
+    telegraph: 0.55
+    active: 0.3
+    recovery: 1.3
+    damage_mult: 0.9
+    poise: 18
+    flags: [projectile]
+    element: fire
+    range: [0, 30]
+    weight: 0
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: tre_teste_fireball, part: testa_fuoco, count: 4, spread: 36, speed: 16}
+    sfx: tre_teste_spit
+  # New Game+ phase 2 — lightning: a cage of six strikes around you and one on you, marked 1.2 s; roll out between them.
+  - id: ng_bolt_cage
+    anim: roar_sky
+    part: testa_fulmine
+    telegraph: 0.9
+    active: 0.5
+    recovery: 1.3
+    damage_mult: 1.1
+    poise: 20
+    flags: []
+    element: lightning
+    global: true
+    weight: 0.8
+    cooldown: 12
+    track: 0.8
+    spawns:
+      - {t: 0.0, type: hazard, id: tre_teste_bolt, at: around_target, count: 6, dist: 4.6, delay: 1.2, active: 0.3, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 10}}
+    sfx: tre_teste_thunder
+  # Not selected: the strike blueprint the behavior drops on your predicted spot (bolt events of bolt_strikes).
+  - id: bolt_drop
+    anim: idle
+    telegraph: 0.5
+    active: 0.2
+    recovery: 0.2
+    damage_mult: 1.1
+    poise: 20
+    flags: []
+    element: lightning
+    weight: 0
+    range: [999, 999]
+time_of_day_variants:
+  # At night the lightning head rules the sky: it opens with the strikes and calls them more often (rhythm, not strength).
+  notte: {opener: bolt_strikes, weights: {bolt_strikes: 1.4, rage_bolt_line: 1.3}}
+dialogue_keys: []
+drops_weapon: tridente_delle_tre_punte
+unlocks_form: null
+metamondo_reaction: null
+ng_plus:
+  add_patterns: {p1: [ng_fire_volley], p2: [ng_fire_volley, ng_bolt_cage]}
+  speed_mult: 1.06
+  idle_mult: 0.82

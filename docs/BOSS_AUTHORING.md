@@ -73,6 +73,7 @@ Then `npm run registry` (behaviors/models/arenas/hooks registries are generated 
     - {t: 0.0, type: hazard, id: crack, at: target_predict, count: 3, dist: 4, delay: 1.0, active: 0.4, shape: {type: cylinder, c: [0,0,0], r: 2.2, h: 4}}
     - {t: 0.0, type: projectile, id: fireball, count: 3, spread: 30, speed: 16, from: [0, 3, 2]}
   combo_next: tail_sweep_2  # optional chained follow-up
+  one_blow: true            # multi-window attack lands ONCE per target (an X cut, two swipes): later windows skip a target already hit/blocked/parried; a dodged window does not count; tick windows unaffected
   part: head_left           # multi-head: the part performing it (unavailable while broken/Spezzato)
 ```
 Shapes: `sphere {c, r}`, `capsule {a, b, r}`, `arc {r, r_in?, angle (deg), yaw (deg), y: [lo, hi], c?}`, `box {c, half, yaw?}`,
@@ -149,5 +150,6 @@ kill. Keep secondary bosses to 1–2 lines; only principal bosses, the Rituale a
 ## Fairness checklist (C4/D7)
 Every attack avoidable by timing; telegraph readable (pose + VFX + sound); no tracking through the whole active window; no
 unreadable overlapping attacks in phases 1–2; Colpi Rossi only where the card or design wants a must-dodge; give recovery
-windows to punish (0.8–1.6 s); avoid stun-locks (multi-hit windows that knock down then hit again); hazards always telegraph.
+windows to punish (0.8–1.6 s); avoid stun-locks (multi-hit windows that knock down then hit again: give such attacks
+`one_blow: true`; one spawn of several hazards is already one blow); hazards always telegraph.
 Use the bot: perfect profile must win inside the target and take few hits; sloppy profile must not win untouched.

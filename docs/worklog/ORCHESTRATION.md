@@ -78,3 +78,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - started: integrate#3
 - act4#1 done: re_mantide + coleottero_imperiale sim-side pass bot; regina_formica playable but fails balance (834 s vs 400); uruk not started; request act4#1 (bot reach at 0.1 scale)
 - started: act5#1 (sim-side)
+- integrate#3 done: one_blow attack field, projectiles aim at player scale, shared tools/bot/defense.ts, save-compat test; bot 20/21 (regina_formica fail), tests 210/212
+- started: act1#5 (Elder Tree model + foresta_cuore arena)

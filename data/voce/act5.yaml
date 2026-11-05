@@ -1,0 +1,4 @@
+# Voce dell'Alba lines at the Act V altars (played once, when meditating there after the listed bosses fall).
+- {key: voce.atto5.ossa_altare, altar: altare_ossa_01, after: [uruk], priority: 1}
+- {key: voce.atto5.nidi_altare, altar: altare_nidi_01, after: [drago_di_ghiaccio], priority: 1}
+- {key: voce.atto5.osservatorio_altare, altar: altare_osservatorio_01, after: [drago_a_tre_teste], priority: 1}

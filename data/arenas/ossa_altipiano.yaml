@@ -1,3 +1,7 @@
+# Cimitero dei Draghi — a hollow among the bones of the Altipiano delle Ossa (Drago di Ghiaccio): old frost on stone, two
+# colossal rib bones rising from the ground inside the ring (cover against the breath, but the tail sweeps around them),
+# a skull half buried by the wall. Yggdrasil stands on the horizon beyond the far rim. Phase 2 (storm): the blizzard comes
+# down, stalactites form in the clouds above the hollow (cue arena_state:storm; the ice patches are the dragon's own).
 id: ossa_altipiano
 zone: altipiano_ossa
 name_key: arena.ossa_altipiano.name
@@ -7,5 +11,9 @@ radius: 32
 gate: {pos: [0, 0, 48], yaw: 0, width: 6}
 floor_y: 0
 surface: stone
-obstacles: []
+obstacles:
+  - {type: cylinder, c: [-17, 4, 88], r: 1.6, h: 8}
+  - {type: cylinder, c: [18, 4, 71], r: 1.6, h: 8}
+variants:
+  storm: {radius: 32}
 builder: ossa_altipiano

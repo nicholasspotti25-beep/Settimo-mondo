@@ -70,6 +70,12 @@ export function nextAttackUid(): number {
   return attackUids++;
 }
 
+/** True when any hit window of this attack has already landed on `tid` (hit, blocked or parried): `one_blow` attacks. */
+export function landedOn(atk: AttackRuntime, tid: number): boolean {
+  for (const w of atk.windows) if (w.hitTargets.has(tid)) return true;
+  return false;
+}
+
 const tmp = v3();
 const tmp2 = v3();
 const contact = v3();
@@ -637,7 +643,7 @@ export class Actor {
         if (h.tick) {
           const last = st.lastTick.get(tid) ?? -999;
           if (atk.activeTime - last < h.tick) return;
-        } else if (st.hitTargets.has(tid) || st.dodged.has(tid)) return;
+        } else if (st.hitTargets.has(tid) || st.dodged.has(tid) || (def.one_blow && landedOn(atk, tid))) return;
         if (!shapeHits(h.shape, origin, this.yaw, this.scale, progress, vol, contact)) return;
         const mult = h.damage_mult ?? def.damage_mult;
         const flags: HitFlag[] = h.flags ? [...def.flags, ...h.flags] : def.flags;

@@ -1,0 +1,18 @@
+# Act V intro: leaving the park. Back at real scale (112%: taller than mortals, set again here in case the Ascesa was
+# skipped), you walk out of the park whose flowerbed was the Little Garden, onto the Altipiano delle Ossa: a plateau of
+# dragon bones; Yggdrasil rises on the horizon, its crown above the clouds (cue act5_yggdrasil_reveal for the camera).
+- id: act5_intro
+  skippable: true
+  steps:
+    - {fade: out, dur: 0.1}
+    - {event: set_scale, params: {scale: 1.12}}
+    - {camera: vista, dur: 0.1}
+    - {wait: 0.6}
+    - {fade: in, dur: 2.6}
+    - {title: story.atto5.titolo, dur: 4.2}
+    - {caption: story.atto5.intro.01, dur: 5.5}
+    - {caption: story.atto5.intro.02, dur: 5.5}
+    - {event: cue, params: {id: act5_yggdrasil_reveal}}
+    - {caption: story.atto5.intro.03, dur: 5.5}
+    - {voce: voce.atto5.intro}
+    - {event: autosave, params: {reason: act}}

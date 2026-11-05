@@ -194,3 +194,46 @@ describe('Specchio dei Ricordi in the Ciclo dell\'Alba', () => {
     expect(isDefeated(sim.state, 'guardiano_del_regno')).toBe(false);
   });
 });
+
+describe('one_blow attacks (integration #3: promoted from act3b guardMultiHit)', () => {
+  function twoWindowHurts(oneBlow: boolean): number {
+    const sim = fightAtGate();
+    const boss = sim.boss!;
+    sim.debug.invincible = false;
+    // the player 2 m in front of the boss, both windows cover them, 0.35 s apart (a second cut of the same blow)
+    sim.player.pos.x = boss.pos.x + Math.sin(boss.yaw) * 2;
+    sim.player.pos.z = boss.pos.z + Math.cos(boss.yaw) * 2;
+    const base = boss.def.attacks[0];
+    const shape: ShapeDef = { type: 'sphere', c: [0, 1, 2], r: 3 };
+    const def = {
+      ...base, id: 'test_two_cuts', telegraph: 0.2, active: 0.8, recovery: 0.5, motion: undefined, spawns: undefined, flags: [],
+      hits: [{ t: 0, dur: 0.1, shape }, { t: 0.45, dur: 0.1, shape }], one_blow: oneBlow, track: 0, track_active: 0,
+    };
+    boss.startAttack(sim, def);
+    let hurt = 0;
+    for (let i = 0; i < 90; i++) {
+      sim.step(emptyInput());
+      // keep the player in place, upright and unable to act (no dodge, no input)
+      sim.player.pos.x = boss.pos.x + Math.sin(boss.yaw) * 2;
+      sim.player.pos.z = boss.pos.z + Math.cos(boss.yaw) * 2;
+      hurt += sim.drainEvents().filter((e) => e.type === 'playerHurt').length;
+    }
+    return hurt;
+  }
+
+  it('without the flag each window can land; with it the attack lands once', () => {
+    expect(twoWindowHurts(false)).toBe(2);
+    expect(twoWindowHurts(true)).toBe(1);
+  });
+});
+
+describe('enemy projectile aim follows the player scale (integration #3)', () => {
+  it('aims at 1 m at scale 1 and at 0.1 m for the Little Garden player', () => {
+    const sim = fightAtGate();
+    expect(sim.aimLift(-1)).toBeCloseTo(1, 5);
+    sim.player.baseScale = 0.1;
+    expect(sim.aimLift(-1)).toBeCloseTo(0.1, 5);
+    // an actor target keeps the 1 m aim
+    expect(sim.aimLift(sim.boss!.id)).toBe(1);
+  });
+});

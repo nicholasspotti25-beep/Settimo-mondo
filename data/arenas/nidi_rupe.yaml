@@ -1,3 +1,6 @@
+# Rupe dei Nidi — a terrace of rock among the nests carved in the cliff (Drago a Tre Teste): the dragon's own nest is a
+# wide bowl of stone; three old nests (low rims of rock and twigs) break the floor near the walls. Phase 2 (fury, at the
+# first head's fall): the cliff shakes, scorched and poisoned stains spread (cue arena_state:fury).
 id: nidi_rupe
 zone: nidi
 name_key: arena.nidi_rupe.name
@@ -7,5 +10,10 @@ radius: 30
 gate: {pos: [0, 0, 50], yaw: 0, width: 6}
 floor_y: 0
 surface: stone
-obstacles: []
+obstacles:
+  - {type: cylinder, c: [-19, 0.6, 90], r: 2.4, h: 1.2}
+  - {type: cylinder, c: [20, 0.6, 86], r: 2.4, h: 1.2}
+  - {type: cylinder, c: [2, 0.6, 104], r: 2.4, h: 1.2}
+variants:
+  fury: {radius: 30}
 builder: nidi_rupe

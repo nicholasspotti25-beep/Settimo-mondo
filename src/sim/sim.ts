@@ -61,6 +61,8 @@ const tmp2 = v3();
 const vol: TargetVol = { x: 0, y: 0, z: 0, r: 0, h: 0 };
 const hurt: { x: number; y: number; z: number; r: number }[] = [];
 const contact = v3();
+/** Scratch for projectile homing targets (no per-frame allocation). */
+const homeTgt = v3();
 
 export class Sim {
   readonly c: Content;
@@ -647,6 +649,14 @@ export class Sim {
     return t && t.alive ? t.pos : this.player.pos ?? fallback;
   }
 
+  /**
+   * Height above a target's feet that enemy projectiles aim and home at: the player's chest scales with the player
+   * (1 m at scale 1, 0.1 m in the Little Garden, 3 m in the Gigante Form); actors keep 1 m.
+   */
+  aimLift(id: number): number {
+    return id === -1 ? this.player.scale : 1;
+  }
+
   actorTargetVel(id: number): Vec3 {
     if (id === -1) return this.player.vel;
     const t = this.actorById(id);
@@ -995,7 +1005,7 @@ export class Sim {
           }
           const dx = target.x - p.pos.x, dz = target.z - p.pos.z;
           const dh = Math.hypot(dx, dz);
-          let pitch = s.pitch !== undefined ? s.pitch * DEG : Math.atan2(target.y + 1 - p.pos.y, Math.max(1, dh));
+          let pitch = s.pitch !== undefined ? s.pitch * DEG : Math.atan2(target.y + this.aimLift(atk.targetId) - p.pos.y, Math.max(1, dh));
           if (s.gravity ?? kind?.gravity) pitch = s.pitch !== undefined ? s.pitch * DEG : 0.35;
           if (s.at === 'sky_above_target') pitch = -Math.PI / 2;
           const cp = Math.cos(pitch);
@@ -1535,8 +1545,13 @@ export class Sim {
       // homing toward target
       if (p.homing > 0 && !p.returning) {
         let tgt: Vec3 | null = null;
-        if (p.team === 'enemy') tgt = p.target === -1 ? { x: this.player.pos.x, y: this.player.pos.y + 1, z: this.player.pos.z } : this.actorById(p.target)?.pos ?? null;
-        else if (p.target >= 0) tgt = this.lockPointPos(p.target, p.targetPart, v3());
+        if (p.team === 'enemy') {
+          if (p.target === -1) {
+            const pp = this.player.pos;
+            tgt = homeTgt;
+            homeTgt.x = pp.x; homeTgt.y = pp.y + this.aimLift(-1); homeTgt.z = pp.z;
+          } else tgt = this.actorById(p.target)?.pos ?? null;
+        } else if (p.target >= 0) tgt = this.lockPointPos(p.target, p.targetPart, homeTgt);
         if (tgt) {
           const sp = Math.hypot(p.vel.x, p.vel.y, p.vel.z);
           const dx = tgt.x - p.pos.x, dy = tgt.y - p.pos.y, dz = tgt.z - p.pos.z;

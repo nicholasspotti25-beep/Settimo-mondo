@@ -149,6 +149,12 @@ export interface AttackDef {
   /** Chain directly into another attack (skipping idle). */
   combo_next?: string;
   combo_chance?: number;
+  /**
+   * Multi-window attack that lands as ONE blow (e.g. an X cut, two swipes, a bite chain inside one attack): once a window
+   * resolves against a target (hit, blocked or parried), the attack's other windows skip that target. A dodged window does
+   * not count (the next one can still land). `tick` windows are unaffected.
+   */
+  one_blow?: boolean;
   /** Arena-wide attack: ignores range filter. */
   global?: boolean;
   /** Name key for named signature moves (shown nowhere, used by the Dio dei Draghi trial and Cthulhu nightmare). */

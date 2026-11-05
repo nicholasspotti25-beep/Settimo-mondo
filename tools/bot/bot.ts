@@ -230,7 +230,8 @@ export class Bot {
 
     // --- offense ---
     const window = this.openWindow(sim, boss, dist);
-    const wantRange = Math.max(0.6, reach - 0.6);
+    // stop short of the reach; a sub-scale player (Little Garden, reach ~0.25 m) must still close inside its reach
+    const wantRange = Math.max(Math.min(0.6, reach * 0.7), reach - 0.6);
     const graceTarget = pl.findGraceTarget(sim);
     if (graceTarget && (pl.state === 'idle' || pl.state === 'move')) {
       input.presses |= Btn.Heavy;

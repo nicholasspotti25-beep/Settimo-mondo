@@ -1,0 +1,8 @@
+# Act V hazard kinds (Il Regno dei Draghi).
+# Drago di Ghiaccio: the icy patches its frozen-fog breath leaves on the ground (drawn as ground ice, never damaging: the
+# footing slides on them), and the stalactites falling from the storm clouds in phase 2 (their spot is marked first).
+- {id: ghiaccio_ice, visual: ice, color: '#cfefff', element: ice}
+- {id: ghiaccio_stalactite, visual: spikes, color: '#e8f8ff', element: ice}
+# Drago a Tre Teste: the poison head's venom puddles (damage over time) and the lightning head's marked strikes.
+- {id: tre_teste_venom, visual: acid, color: '#8fdc3a', element: poison}
+- {id: tre_teste_bolt, visual: lightning, color: '#fff27a', element: lightning}

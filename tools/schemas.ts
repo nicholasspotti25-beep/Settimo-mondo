@@ -55,7 +55,7 @@ export const attack = z.object({
   range: range2.optional(), weight: num.optional(), cooldown: num.optional(), track: num.optional(), track_active: num.optional(),
   hits: z.array(hitWindow).optional(), motion: z.array(motion).optional(), spawns: z.array(spawn).optional(), element: element.optional(),
   sfx: str.optional(), vfx: str.optional(), part: str.optional(), requires: str.optional(), combo_next: str.optional(), combo_chance: num.optional(),
-  global: z.boolean().optional(), signature: str.optional(),
+  one_blow: z.boolean().optional(), global: z.boolean().optional(), signature: str.optional(),
 }).strict();
 
 const phase = z.object({
