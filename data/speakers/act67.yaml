@@ -1,0 +1,5 @@
+# Acts VI–VII speakers (synth vocal tones). Lucifero II keeps the Act II voice, a little lower and more tired. Mini bosses and
+# Cthulhu do not speak (his voice is the sound of all the voices of the fallen worlds: audio cue, not dialogue).
+- {id: lucifero_2, name_key: boss.lucifero_2.name, color: '#e8c070', voice: {base: 78, formant: 0.84, wave: sawtooth, vibrato: 0.008, breath: 0.6}}
+- {id: regina_drago, name_key: boss.regina_drago.name, color: '#b07aff', voice: {base: 132, formant: 1.2, wave: triangle, vibrato: 0.02, breath: 0.5}}
+- {id: dio_dei_draghi, name_key: boss.dio_dei_draghi.title, color: '#ffe6a8', voice: {base: 70, formant: 0.8, wave: sine, vibrato: 0.012, breath: 0.4}}

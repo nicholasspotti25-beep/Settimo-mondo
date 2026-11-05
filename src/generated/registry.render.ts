@@ -6,6 +6,7 @@ type Loader = () => Promise<any>;
 export const BOSS_MODELS: Record<string, Loader> = {
   "cavaliere_errante": () => import('../content/bosses/cavaliere_errante/model'),
   "cerbero": () => import('../content/bosses/cerbero/model'),
+  "elder_tree": () => import('../content/bosses/elder_tree/model'),
   "guardiano_del_regno": () => import('../content/bosses/guardiano_del_regno/model'),
 };
 
@@ -13,6 +14,7 @@ export const BOSS_MODELS: Record<string, Loader> = {
 export const ARENA_BUILDERS: Record<string, Loader> = {
   "pianure_erba_alta": () => import('../content/bosses/cavaliere_errante/arena'),
   "dite_soglia": () => import('../content/bosses/cerbero/arena'),
+  "foresta_cuore": () => import('../content/bosses/elder_tree/arena'),
   "vetta_piazzale": () => import('../content/bosses/guardiano_del_regno/arena'),
 };
 

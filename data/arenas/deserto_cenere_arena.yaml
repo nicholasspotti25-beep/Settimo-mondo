@@ -6,6 +6,11 @@ shape: circle
 radius: 34
 gate: {pos: [0, 0, 56], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
+surface: sand
 obstacles: []
+# The Verme Mangiamondi swallows the rim of the arena three times (behavior: swallow_1/2/3 at 82%, 62%, 30% Health).
+variants:
+  swallow_1: {radius: 29}
+  swallow_2: {radius: 25}
+  swallow_3: {radius: 21}
 builder: deserto_cenere_arena

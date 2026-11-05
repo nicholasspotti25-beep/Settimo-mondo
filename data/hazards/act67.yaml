@@ -1,0 +1,21 @@
+# Acts VI–VII hazard kinds.
+# Lucifero II: rays of the Stella where the ball lands; black feathers falling like blades; blades of the sky; the marked
+# landing of his fire dive; the red-hot glass floor of the Cathedral of embers (p2+, permanent patches); the rings of the
+# ball's impacts (golden, then embers).
+- {id: lucifero2_rays, visual: light, color: '#ffd27a', element: light}
+- {id: lucifero2_feather, visual: shadow, color: '#241a26', element: void}
+- {id: lucifero2_sky_blade, visual: light, color: '#fff0c8', element: light}
+- {id: lucifero2_dive_mark, visual: fire, color: '#ff5a2a', element: fire}
+- {id: lucifero2_glass, visual: glass, color: '#ff6a3a', element: fire}
+- {id: lucifero2_star_ring, visual: circle, color: '#ffd27a', element: light}
+- {id: lucifero2_ember_ring, visual: embers, color: '#ff7a3a', element: fire}
+# Drago del Vuoto: gravity holes (they pull), the black hole of phase 2, the marked drop from the sky-ground, void pulses.
+- {id: vuoto_hole, visual: whirlpool, color: '#6a3aff', element: void}
+- {id: vuoto_black_hole, visual: void, color: '#140a1e', element: void}
+- {id: vuoto_drop_mark, visual: shadow, color: '#3a2a5a', element: void}
+- {id: vuoto_ring, visual: void, color: '#8a6aff', element: void}
+# Verme Mangiamondi: the ripple where it erupts, the band of rim it swallows, rings of ash, falling devoured landscape.
+- {id: verme_erupt, visual: crack, color: '#b08a6a', element: physical}
+- {id: verme_swallow, visual: crack, color: '#7a4a3a', element: physical}
+- {id: verme_ash_ring, visual: circle, color: '#9a8a7a', element: physical}
+- {id: verme_debris_fall, visual: crack, color: '#8a7a6a', element: physical}

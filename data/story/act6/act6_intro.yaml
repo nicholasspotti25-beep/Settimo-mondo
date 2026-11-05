@@ -1,0 +1,14 @@
+# Act VI intro (travel into radice_discesa): a hollow root descends from Yggdrasil's crown to the Inferno; the descent is a
+# backward journey through everything crossed. The sky is less violet: four principal bosses have brightened it.
+- id: act6_intro
+  skippable: true
+  steps:
+    - {wait: 0.05}
+    - {fade: in, dur: 2.2}
+    - {title: act.6.name, dur: 4.2}
+    - {camera: wide, dur: 0.1}
+    - {caption: story.atto6.intro_01, dur: 5.2}
+    - {caption: story.atto6.intro_02, dur: 5.6}
+    - {caption: story.atto6.intro_03, dur: 4.8}
+    - {voce: voce.atto6.radice}
+    - {event: autosave, params: {reason: story}}

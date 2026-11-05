@@ -1,0 +1,400 @@
+# 33. Lucifero, l'Arcangelo Caduto (second encounter) — principal · Cattedrale Caduta · D18 · Stella del Mattino.
+# He has left the throne: the burned black wings open fully, the cracked golden armor is recomposed in black and gold, the
+# eyes are pale and tired. Opening line by the first encounter (lucifero_choice): fought / begged.
+#  - p1: duel with the Stella del Mattino (the golden spiked ball on a black chain): wide blows; feathers falling like blades.
+#  - p2: the Cathedral turns to embers: patches of red-hot glass on the floor of the side aisles (static burn zones laid by
+#    the behavior; the central lane stays clear) and blades of the sky falling from above (marked spots).
+#  - p3, la Caduta: wings of fire, dives, and the final blow — the same unavoidable attack as the first encounter (Il Rifiuto,
+#    now la Caduta) — this time PARRYABLE with perfect timing by any weapon (flags unavoidable, red, parry_final). A parry
+#    breaks his Equilibrio (Colpo di Grazia); an unparried blow hurts badly but is never a kill from full Health.
+# Defeated, he opens the Porta Rovesciata behind the throne. Local frame: +Z forward, +Y up, +X = Lucifero's LEFT.
+id: lucifero_2
+order: 33
+name_key: boss.lucifero_2.name
+title_key: boss.lucifero_2.title
+class: principal
+difficulty: 18
+act: 6
+arena: cattedrale_navata
+zone: cattedrale_caduta
+model: {builder: lucifero_2, rig: humanoid, scale: 1.0, palette: act6_violet_red_black}
+equilibrio_max: 420
+body: {radius: 2.2, height: 9.0, mass: immovable}
+hurtboxes:
+  - {c: [0, 1.4, 0], r: 1.2}      # black-and-gold greaves
+  - {c: [0, 3.4, 0], r: 1.4}      # tassets
+  - {c: [0, 5.4, 0.1], r: 1.6}    # recomposed cuirass
+  - {c: [0, 7.4, 0.2], r: 0.85}   # head, pale eyes
+  - {c: [2.6, 6.0, -1.0], r: 1.2} # left wing root
+  - {c: [-2.6, 6.0, -1.0], r: 1.2}
+move: {walk: 3.0, run: 6.8, turn: 2.6, preferred_range: [2, 8]}
+idle_gap: [1.0, 1.6]
+music: boss_lucifero_2
+intro_sequence: lucifero_2_intro
+defeat_sequence: lucifero_2_defeat
+metamondo_reaction: null
+brightens_sky: true
+phases:
+  - id: p1
+    hp_range: [1.0, 0.66]
+    music: boss_lucifero_2_p1
+    opener: star_sweep
+    patterns: [star_sweep, star_backhand, star_overhead, star_whirl, star_throw, feather_fall, wing_buffet, step_cleave]
+  - id: p2
+    hp_range: [0.66, 0.33]
+    music: boss_lucifero_2_p2
+    on_enter: [embers]
+    arena_state: embers
+    dialogue: boss.lucifero_2.mid
+    speed_mult: 1.05
+    aggression: 1.1
+    transition: 2.6
+    opener: sky_blades
+    patterns: [star_sweep, star_backhand, star_overhead, ember_slam, star_throw, sky_blades, sky_blade_line, wing_buffet, step_cleave]
+  - id: p3
+    hp_range: [0.33, 0.0]
+    music: boss_lucifero_2_p3
+    on_enter: [embers, wings_of_fire, airborne_capable]
+    arena_state: la_caduta
+    dialogue: boss.lucifero_2.caduta
+    speed_mult: 1.1
+    aggression: 1.2
+    transition: 3.0
+    opener: caduta_finale
+    patterns: [fire_dive, wing_fire_sweep, star_overhead, ember_slam, sky_blades, feather_fall, caduta_finale, step_cleave]
+attacks:
+  # A wide horizontal swing of the Stella from his right to his left: the ball sweeps the front of the nave.
+  - id: star_sweep
+    anim: flail_sweep
+    telegraph: 1.0
+    active: 0.42
+    recovery: 1.15
+    damage_mult: 0.9
+    poise: 22
+    flags: [knockback]
+    element: light
+    range: [0, 9]
+    weight: 1.2
+    cooldown: 2.5
+    track: 1.0
+    track_active: 0.15
+    hits:
+      - {t: 0.06, dur: 0.3, shape: {type: arc, r: 9.5, r_in: 1.5, angle: 190, yaw: 0, y: [0, 3.4]}}
+    motion:
+      - {t: -0.15, dur: 0.35, type: forward, speed: 3.5}
+    sfx: flail_whoosh
+  # The return swing, backhand: chained only sometimes, so the punish after the first sweep is not always safe.
+  - id: star_backhand
+    anim: flail_backhand
+    telegraph: 0.8
+    active: 0.4
+    recovery: 1.2
+    damage_mult: 0.95
+    poise: 20
+    flags: [knockback]
+    element: light
+    range: [0, 8]
+    weight: 0.8
+    cooldown: 3.5
+    track: 1.1
+    track_active: 0.1
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 9, r_in: 1.5, angle: 180, yaw: 0, y: [0, 3.4]}}
+    sfx: flail_whoosh
+  # Both hands raise the chain: the golden ball comes down in front of him. Sidestep it.
+  - id: star_overhead
+    anim: flail_overhead
+    telegraph: 1.05
+    active: 0.5
+    recovery: 1.35
+    damage_mult: 1.05
+    poise: 28
+    flags: [knockdown]
+    element: light
+    range: [0, 11]
+    weight: 1.0
+    cooldown: 3.5
+    track: 1.2
+    track_active: 0
+    hits:
+      - {t: 0.0, dur: 0.18, shape: {type: capsule, a: [0, 0.5, 2], b: [0, 0.5, 9.5], r: 1.6}}
+    sfx: flail_slam
+  # He spins the chain twice around himself: one blow, the second turn only catches who walked back in.
+  - id: star_whirl
+    anim: flail_whirl
+    telegraph: 1.15
+    active: 1.0
+    recovery: 1.4
+    damage_mult: 0.95
+    poise: 24
+    flags: [knockback]
+    element: light
+    range: [0, 7]
+    weight: 0.9
+    cooldown: 6
+    one_blow: true
+    hits:
+      - {t: 0.05, dur: 0.38, shape: {type: arc, r: 8.5, r_in: 1.0, angle: 360, y: [0, 3.2]}}
+      - {t: 0.55, dur: 0.38, shape: {type: arc, r: 8.5, r_in: 1.0, angle: 360, y: [0, 3.2]}}
+    sfx: flail_whirl
+  # Alba Spezzata in his hands: the ball flies at range and bursts into golden rays where it lands.
+  - id: star_throw
+    anim: flail_throw
+    telegraph: 1.0
+    active: 0.7
+    recovery: 1.2
+    damage_mult: 0.9
+    poise: 18
+    flags: []
+    element: light
+    range: [8, 60]
+    weight: 1.0
+    cooldown: 5
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: lucifero2_star, speed: 22, from: [0, 4.2, 2.0]}
+      - {t: 0.0, type: hazard, id: lucifero2_rays, at: target_predict, delay: 0.95, active: 0.35, damage_mult: 0.8, shape: {type: cylinder, c: [0, 0, 0], r: 3.4, h: 3}}
+    sfx: flail_throw
+  # He opens the wings: black feathers rise and fall like blades around you. Each spot is marked first.
+  - id: feather_fall
+    anim: wings_open
+    telegraph: 0.85
+    active: 1.1
+    recovery: 0.9
+    damage_mult: 0.75
+    poise: 14
+    flags: []
+    element: void
+    global: true
+    weight: 0.9
+    cooldown: 6
+    spawns:
+      - {t: 0.0, type: hazard, id: lucifero2_feather, at: target_predict, delay: 1.0, active: 0.3, damage_mult: 0.75, shape: {type: cylinder, c: [0, 0, 0], r: 1.4, h: 6}}
+      - {t: 0.35, type: hazard, id: lucifero2_feather, at: around_target, count: 5, dist: 3.8, delay: 1.0, active: 0.3, damage_mult: 0.7, shape: {type: cylinder, c: [0, 0, 0], r: 1.3, h: 6}}
+    sfx: feathers
+  # Who hides behind him or under the wings is thrown back by one beat of both wings.
+  - id: wing_buffet
+    anim: wings_beat
+    telegraph: 0.95
+    active: 0.35
+    recovery: 1.0
+    damage_mult: 0.6
+    poise: 20
+    flags: [knockback]
+    element: void
+    range: [0, 4.5]
+    weight: 0.9
+    cooldown: 5
+    hits:
+      - {t: 0.03, dur: 0.28, shape: {type: arc, r: 7, angle: 360, y: [0, 4]}}
+    sfx: wing_beat
+  # A long step and a falling cleave of the Stella: his gap closer when you keep away.
+  - id: step_cleave
+    anim: flail_leap
+    telegraph: 0.9
+    active: 0.75
+    recovery: 1.3
+    damage_mult: 1.05
+    poise: 26
+    flags: [knockdown]
+    element: light
+    range: [9, 40]
+    weight: 1.0
+    cooldown: 5
+    track: 1.0
+    track_active: 0.2
+    motion:
+      - {t: 0.0, dur: 0.5, type: leap_to_target, speed: 22, height: 3}
+    hits:
+      - {t: 0.5, dur: 0.18, shape: {type: sphere, c: [0, 0.6, 3.0], r: 3.0}}
+    spawns:
+      - {t: 0.52, type: shockwave, id: lucifero2_star_ring, shape: {type: ring, r0: 1, r1: 7, width: 1.0, height: 0.7}, active: 0.5, damage_mult: 0.5}
+    sfx: flail_slam
+  # --- p2: the Cathedral of embers ---
+  # The ball slams red-hot: a ring of embers runs along the floor (jump it).
+  - id: ember_slam
+    anim: flail_overhead
+    telegraph: 1.0
+    active: 0.9
+    recovery: 1.3
+    damage_mult: 0.9
+    poise: 26
+    flags: [knockdown, burn]
+    element: fire
+    range: [0, 12]
+    weight: 1.0
+    cooldown: 5
+    track: 1.1
+    hits:
+      - {t: 0.0, dur: 0.18, shape: {type: capsule, a: [0, 0.5, 2], b: [0, 0.5, 9], r: 1.6}}
+    spawns:
+      - {t: 0.05, type: shockwave, id: lucifero2_ember_ring, shape: {type: ring, r0: 3, r1: 16, width: 1.2, height: 0.8}, active: 0.9, damage_mult: 0.65, flags: [burn]}
+    sfx: flail_slam
+  # He points up: blades of the sky fall on you and around you. Every spot is marked before it falls.
+  - id: sky_blades
+    anim: raise_hand
+    telegraph: 0.8
+    active: 1.2
+    recovery: 0.9
+    damage_mult: 0.8
+    poise: 18
+    flags: []
+    element: light
+    global: true
+    weight: 1.0
+    cooldown: 6
+    spawns:
+      - {t: 0.0, type: hazard, id: lucifero2_sky_blade, at: target_predict, delay: 1.05, active: 0.35, damage_mult: 0.9, shape: {type: cylinder, c: [0, 0, 0], r: 1.8, h: 10}}
+      - {t: 0.45, type: hazard, id: lucifero2_sky_blade, at: around_target, count: 4, dist: 4.4, delay: 1.05, active: 0.35, damage_mult: 0.8, shape: {type: cylinder, c: [0, 0, 0], r: 1.6, h: 10}}
+    sfx: swords_rise
+  # A row of sky blades along the nave, from him to you: step off the line.
+  - id: sky_blade_line
+    anim: point
+    telegraph: 0.8
+    active: 0.8
+    recovery: 1.0
+    damage_mult: 0.9
+    poise: 18
+    flags: []
+    element: light
+    range: [6, 60]
+    weight: 0.9
+    cooldown: 5
+    spawns:
+      - {t: 0.0, type: hazard, id: lucifero2_sky_blade, at: line_to_target, count: 9, dist: 4.0, delay: 0.9, active: 0.35, damage_mult: 0.9, shape: {type: cylinder, c: [0, 0, 0], r: 1.5, h: 10}}
+    sfx: swords_rise
+  # --- p3, la Caduta: wings of fire ---
+  # He rises on burning wings and dives where you stand; the landing spot is marked, the impact rings out (jump it).
+  - id: fire_dive
+    anim: dive
+    telegraph: 1.1
+    active: 1.5
+    recovery: 1.5
+    damage_mult: 1.15
+    poise: 28
+    flags: [knockdown, burn]
+    element: fire
+    range: [0, 60]
+    global: true
+    weight: 1.1
+    cooldown: 5
+    track: 1.2
+    motion:
+      - {t: 0.0, dur: 0.6, type: rise, height: 12, speed: 20}
+      - {t: 0.75, dur: 0.55, type: dive_to_target, speed: 34, track: 0.6}
+    spawns:
+      - {t: 0.15, type: hazard, id: lucifero2_dive_mark, at: target_predict, delay: 1.1, active: 0.25, damage_mult: 1.15, flags: [knockdown, burn], shape: {type: cylinder, c: [0, 0, 0], r: 3.6, h: 6}}
+      - {t: 1.3, type: shockwave, id: lucifero2_ember_ring, shape: {type: ring, r0: 2, r1: 11, width: 1.1, height: 0.8}, active: 0.6, damage_mult: 0.55, flags: [burn]}
+    sfx: wing_dive
+  # One wing of fire sweeps the floor of its side; then the other answers only if you stayed (one blow).
+  - id: wing_fire_sweep
+    anim: wings_fire_sweep
+    telegraph: 1.0
+    active: 0.95
+    recovery: 1.25
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback, burn]
+    element: fire
+    range: [0, 12]
+    weight: 1.0
+    cooldown: 4
+    one_blow: true
+    hits:
+      - {t: 0.05, dur: 0.32, shape: {type: arc, r: 12, r_in: 1.2, angle: 140, yaw: 55, y: [0, 3.0]}}
+      - {t: 0.55, dur: 0.32, shape: {type: arc, r: 12, r_in: 1.2, angle: 140, yaw: -55, y: [0, 3.0]}}
+    sfx: wing_fire
+  # La Caduta: the same blow as the first encounter. It covers the whole nave and cannot be dodged or blocked: only a perfect
+  # parry at the instant the light breaks (any weapon) turns it. Long, unmistakable wind-up; a flash marks the parry moment.
+  - id: caduta_finale
+    anim: rifiuto
+    telegraph: 3.0
+    active: 0.4
+    recovery: 3.2
+    damage_mult: 1.9
+    poise: 40
+    flags: [unavoidable, red, parry_final, knockdown]
+    element: light
+    global: true
+    weight: 0.6
+    cooldown: 26
+    signature: sig.lucifero.caduta
+    hits:
+      - {t: 0.0, dur: 0.2, shape: {type: box, c: [0, 4, 0], half: [48, 9, 60]}}
+    spawns:
+      - {t: 0.0, type: custom, event: caduta_strike}
+    sfx: lucifero_rifiuto
+  # --- New Game+ (Ciclo dell'Alba) ---
+  # p1: sweep and backhand in one breath (one blow: the backhand only lands if the sweep was dodged).
+  - id: ng_star_double
+    anim: flail_double
+    telegraph: 1.0
+    active: 1.0
+    recovery: 1.4
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    element: light
+    range: [0, 9]
+    weight: 1.0
+    cooldown: 6
+    one_blow: true
+    track: 1.0
+    track_active: 0.12
+    hits:
+      - {t: 0.05, dur: 0.3, shape: {type: arc, r: 9.5, r_in: 1.5, angle: 200, yaw: 0, y: [0, 3.4]}}
+      - {t: 0.6, dur: 0.3, shape: {type: arc, r: 9.5, r_in: 1.5, angle: 200, yaw: 0, y: [0, 3.4]}}
+    sfx: flail_whoosh
+  # p2: two lines of sky blades crossing at you.
+  - id: ng_blade_cross
+    anim: point
+    telegraph: 0.85
+    active: 1.0
+    recovery: 1.0
+    damage_mult: 0.85
+    poise: 18
+    flags: []
+    element: light
+    global: true
+    weight: 0.9
+    cooldown: 8
+    spawns:
+      - {t: 0.0, type: hazard, id: lucifero2_sky_blade, at: line_to_target, count: 8, dist: 4.2, delay: 1.0, active: 0.35, damage_mult: 0.85, shape: {type: cylinder, c: [0, 0, 0], r: 1.4, h: 10}}
+      - {t: 0.3, type: hazard, id: lucifero2_sky_blade, at: grid, count: 6, dist: 6.0, delay: 1.1, active: 0.35, damage_mult: 0.8, shape: {type: cylinder, c: [0, 0, 0], r: 1.4, h: 10}}
+    sfx: swords_rise
+  # p3: two dives in a row; the second spot is marked only after the first impact.
+  - id: ng_twin_dive
+    anim: dive
+    telegraph: 1.1
+    active: 2.9
+    recovery: 1.6
+    damage_mult: 1.05
+    poise: 26
+    flags: [knockdown, burn]
+    element: fire
+    global: true
+    weight: 0.8
+    cooldown: 9
+    motion:
+      - {t: 0.0, dur: 0.6, type: rise, height: 12, speed: 20}
+      - {t: 0.75, dur: 0.55, type: dive_to_target, speed: 34, track: 0.6}
+      - {t: 1.45, dur: 0.5, type: rise, height: 10, speed: 20}
+      - {t: 2.1, dur: 0.55, type: dive_to_target, speed: 34, track: 0.6}
+    spawns:
+      - {t: 0.15, type: hazard, id: lucifero2_dive_mark, at: target_predict, delay: 1.1, active: 0.25, damage_mult: 1.05, flags: [knockdown, burn], shape: {type: cylinder, c: [0, 0, 0], r: 3.4, h: 6}}
+      - {t: 1.55, type: hazard, id: lucifero2_dive_mark, at: target_predict, delay: 1.05, active: 0.25, damage_mult: 1.05, flags: [knockdown, burn], shape: {type: cylinder, c: [0, 0, 0], r: 3.4, h: 6}}
+    sfx: wing_dive
+ng_plus:
+  add_patterns: {p1: [ng_star_double], p2: [ng_blade_cross], p3: [ng_twin_dive]}
+  idle_mult: 0.85
+time_of_day_variants:
+  # dawn: he opens with a salute of the Stella (the overhead, slow and honest); fewer falling feathers
+  alba: {opener: star_overhead, weights: {feather_fall: 0.7}, flags: [dawnlit]}
+  giorno: {weights: {star_throw: 1.2}}
+  # sunset: the embers of the Cathedral glow early, he prefers the ranged blows
+  tramonto: {opener: star_throw, weights: {star_throw: 1.3, sky_blade_line: 1.2}, flags: [embers_glow]}
+  # night: the feathers are many more, but they fall slower (more time to read the marks)
+  notte: {opener: feather_fall, spawn_mult: 1.4, projectile_speed_mult: 0.85, weights: {feather_fall: 1.4}, flags: [night_wings]}
+dialogue_keys: [boss.lucifero_2.fought, boss.lucifero_2.begged, boss.lucifero_2.no, boss.lucifero_2.mid, boss.lucifero_2.caduta, boss.lucifero_2.parried, boss.lucifero_2.defeat, boss.lucifero_2.porta]
+drops_weapon: stella_del_mattino
+unlocks_form: abisso_rosso

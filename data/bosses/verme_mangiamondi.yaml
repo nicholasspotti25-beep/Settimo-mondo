@@ -1,0 +1,301 @@
+# 35. Verme Mangiamondi — mini boss · Il Rovescio, Deserto di Cenere · D17 · Trivella Divorante. No dialogue, no lore.
+# A gigantic segmented worm, a circular mouth with spiral teeth, fragments of landscapes glued to its body (trees, towers,
+# bridges). It rears from the ash and does not walk: it dives and erupts where you stand (the spot is marked).
+#  - It swallows pieces of the arena, which SHRINKS: at 82%, 62% and 30% of its Health it sinks and erupts at the rim; the
+#    band of rim it eats is marked first (1.6 s), then the arena switches to the variants swallow_1/2/3 (radius 34→29→25→21).
+#  - p2: the body splits into segments that roll like millstones (minions `macina`). One blow at a time: a millstone starts a
+#    roll only while nothing else is attacking, and the head waits while a millstone rolls.
+# Local frame: +Z forward (the mouth faces you), +Y up, +X = its LEFT.
+id: verme_mangiamondi
+order: 35
+name_key: boss.verme_mangiamondi.name
+class: mini
+difficulty: 17
+act: 6
+arena: deserto_cenere_arena
+zone: deserto_cenere
+model: {builder: verme_mangiamondi, rig: serpent, scale: 1.0, palette: act6_violet_red_black}
+equilibrio_max: 360
+body: {radius: 4.4, height: 14, mass: immovable}
+hurtboxes:
+  - {c: [0, 2.6, 0], r: 3.8}      # base of the body, half in the ash
+  - {c: [0, 6.4, 0.6], r: 3.2}    # trunk with glued towers and trees
+  - {c: [0, 10.0, 1.6], r: 2.8}   # spiral mouth
+move: {walk: 0, run: 0, turn: 1.5, preferred_range: [0, 13]}
+idle_gap: [1.0, 1.6]
+music: boss_verme_mangiamondi
+metamondo_reaction: null
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_verme_mangiamondi_p1
+    opener: erupt
+    patterns: [maw_lunge, body_slam, spiral_grind, debris_spit, coil_sweep, erupt]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_verme_mangiamondi_p2
+    on_enter: [split]
+    speed_mult: 1.05
+    aggression: 1.05
+    transition: 2.6
+    opener: quake_rings
+    patterns: [maw_lunge, body_slam, spiral_grind, debris_spit, erupt, quake_rings]
+minions:
+  # A segment of its body, rolling like a millstone (a ring of ash-stone with a bridge or a tower still stuck to it).
+  - id: macina
+    name_key: boss.verme_mangiamondi.segment
+    hp: 0.07
+    main_share: 0.6
+    body: {radius: 2.4, height: 4.8}
+    move: {walk: 2.4, run: 0, turn: 2.0, preferred_range: [5, 30]}
+    idle_gap: [2.4, 3.4]
+    model: {builder: verme_mangiamondi, rig: serpent, scale: 0.42, palette: act6_violet_red_black}
+    hurt:
+      - {c: [0, 2.4, 0], r: 2.4}
+    equilibrio: 70
+    attacks:
+      # It spins up in place facing you (dust and a grinding sound), then rolls straight through: sidestep the line.
+      - id: roll
+        anim: roll
+        telegraph: 1.15
+        active: 1.8
+        recovery: 1.6
+        damage_mult: 0.9
+        poise: 26
+        flags: [knockdown]
+        element: physical
+        range: [0, 40]
+        weight: 1
+        cooldown: 4
+        track: 1.3
+        track_active: 0
+        motion:
+          - {t: 0.0, dur: 1.7, type: charge_through, speed: 15}
+        hits:
+          - {t: 0.0, dur: 1.7, shape: {type: sphere, c: [0, 2.0, 1.4], r: 2.4}}
+        sfx: millstone
+ng_plus:
+  add_patterns: {p1: [ng_double_erupt], p2: [ng_debris_rain]}
+  idle_mult: 0.85
+attacks:
+  # The mouth lunges forward along the ground: a long line in front of it.
+  - id: maw_lunge
+    anim: lunge
+    telegraph: 0.95
+    active: 0.4
+    recovery: 1.25
+    damage_mult: 1.05
+    poise: 26
+    flags: [knockdown]
+    element: physical
+    range: [0, 15]
+    weight: 1.1
+    cooldown: 3
+    track: 1.3
+    track_active: 0.1
+    hits:
+      - {t: 0.05, dur: 0.28, shape: {type: capsule, a: [0, 1.6, 2], b: [0, 1.6, 15], r: 2.3}}
+    sfx: worm_lunge
+  # It rears high and slams the trunk down in front of it; the ash rings out (jump the ring).
+  - id: body_slam
+    anim: slam
+    telegraph: 1.15
+    active: 0.9
+    recovery: 1.4
+    damage_mult: 1.1
+    poise: 28
+    flags: [knockdown]
+    element: physical
+    range: [0, 14]
+    weight: 1.0
+    cooldown: 4
+    track: 1.1
+    hits:
+      - {t: 0.0, dur: 0.2, shape: {type: box, c: [0, 1.5, 8], half: [3.2, 2.0, 6.5]}}
+    spawns:
+      - {t: 0.05, type: shockwave, id: verme_ash_ring, shape: {type: ring, r0: 2, r1: 13, width: 1.2, height: 0.8, c: [0, 0, 8]}, active: 0.85, damage_mult: 0.55}
+    sfx: worm_slam
+  # The spiral teeth grind at close range: who hugs its base is chewed.
+  - id: spiral_grind
+    anim: grind
+    telegraph: 0.8
+    active: 0.5
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 22
+    flags: []
+    element: physical
+    range: [0, 5]
+    weight: 1.0
+    cooldown: 3
+    track: 1.4
+    track_active: 0.15
+    hits:
+      - {t: 0.05, dur: 0.4, shape: {type: sphere, c: [0, 1.8, 4.2], r: 3.2}}
+    sfx: worm_grind
+  # It spits fragments of devoured landscapes (a piece of tower, a tree, a span of bridge) in arcs.
+  - id: debris_spit
+    anim: spit
+    telegraph: 0.9
+    active: 0.6
+    recovery: 1.0
+    damage_mult: 0.8
+    poise: 16
+    flags: []
+    element: physical
+    range: [8, 60]
+    weight: 1.0
+    cooldown: 4
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: verme_debris, count: 3, spread: 34, speed: 17, pitch: 18, from: [0, 10, 3]}
+    sfx: worm_spit
+  # The body coils and sweeps all around its base.
+  - id: coil_sweep
+    anim: coil
+    telegraph: 0.9
+    active: 0.4
+    recovery: 1.2
+    damage_mult: 0.85
+    poise: 22
+    flags: [knockback]
+    element: physical
+    range: [0, 6]
+    weight: 0.9
+    cooldown: 5
+    hits:
+      - {t: 0.03, dur: 0.32, shape: {type: arc, r: 9.5, r_in: 2, angle: 360, y: [0, 3]}}
+    sfx: worm_coil
+  # It dives into the ash and erupts under you: the spot ripples and is marked before it breaks open.
+  - id: erupt
+    anim: burrow
+    telegraph: 0.8
+    active: 2.0
+    recovery: 1.4
+    damage_mult: 1.1
+    poise: 28
+    flags: [knockdown, launch]
+    element: physical
+    range: [10, 80]
+    weight: 1.2
+    cooldown: 5
+    spawns:
+      - {t: 0.0, type: custom, event: burrow}
+      - {t: 0.05, type: hazard, id: verme_erupt, at: target_predict, delay: 1.3, active: 0.35, damage_mult: 1.1, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 4.6, h: 9}}
+      - {t: 1.36, type: custom, event: emerge}
+    sfx: worm_burrow
+  # --- the arena is eaten (behavior: at 82%, 62%, 30%): it sinks and erupts at the rim; the eaten band is marked ---
+  - id: swallow_1
+    anim: burrow
+    telegraph: 1.0
+    active: 2.3
+    recovery: 1.6
+    damage_mult: 1.0
+    poise: 26
+    flags: [knockdown]
+    element: physical
+    global: true
+    weight: 0
+    spawns:
+      - {t: 0.0, type: custom, event: burrow}
+      - {t: 0.0, type: hazard, id: verme_swallow, at: arena_center, delay: 1.6, active: 0.5, damage_mult: 1.0, flags: [knockdown], shape: {type: arc, r: 35, r_in: 28.5, angle: 360, y: [0, 4]}}
+      - {t: 1.62, type: custom, event: swallow}
+    sfx: worm_swallow
+  - id: swallow_2
+    anim: burrow
+    telegraph: 1.0
+    active: 2.3
+    recovery: 1.6
+    damage_mult: 1.0
+    poise: 26
+    flags: [knockdown]
+    element: physical
+    global: true
+    weight: 0
+    spawns:
+      - {t: 0.0, type: custom, event: burrow}
+      - {t: 0.0, type: hazard, id: verme_swallow, at: arena_center, delay: 1.6, active: 0.5, damage_mult: 1.0, flags: [knockdown], shape: {type: arc, r: 30, r_in: 24.5, angle: 360, y: [0, 4]}}
+      - {t: 1.62, type: custom, event: swallow}
+    sfx: worm_swallow
+  - id: swallow_3
+    anim: burrow
+    telegraph: 1.0
+    active: 2.3
+    recovery: 1.6
+    damage_mult: 1.0
+    poise: 26
+    flags: [knockdown]
+    element: physical
+    global: true
+    weight: 0
+    spawns:
+      - {t: 0.0, type: custom, event: burrow}
+      - {t: 0.0, type: hazard, id: verme_swallow, at: arena_center, delay: 1.6, active: 0.5, damage_mult: 1.0, flags: [knockdown], shape: {type: arc, r: 26, r_in: 20.5, angle: 360, y: [0, 4]}}
+      - {t: 1.62, type: custom, event: swallow}
+    sfx: worm_swallow
+  # --- p2 ---
+  # Its submerged length shudders: rings of ash run out one after the other (jump each).
+  - id: quake_rings
+    anim: quake
+    telegraph: 1.0
+    active: 2.0
+    recovery: 1.2
+    damage_mult: 0.7
+    poise: 18
+    flags: []
+    element: physical
+    global: true
+    weight: 0.8
+    cooldown: 8
+    spawns:
+      - {t: 0.0, type: shockwave, id: verme_ash_ring, shape: {type: ring, r0: 3, r1: 22, width: 1.1, height: 0.8}, active: 1.1, damage_mult: 0.7}
+      - {t: 1.0, type: shockwave, id: verme_ash_ring, shape: {type: ring, r0: 3, r1: 22, width: 1.1, height: 0.8}, active: 1.1, damage_mult: 0.7}
+    sfx: worm_quake
+  # --- New Game+ ---
+  # p1: it erupts under you, sinks again at once and erupts a second time (the second spot is marked after the first).
+  - id: ng_double_erupt
+    anim: burrow
+    telegraph: 0.8
+    active: 3.6
+    recovery: 1.5
+    damage_mult: 1.0
+    poise: 26
+    flags: [knockdown]
+    element: physical
+    range: [0, 80]
+    weight: 0.8
+    cooldown: 10
+    spawns:
+      - {t: 0.0, type: custom, event: burrow}
+      - {t: 0.05, type: hazard, id: verme_erupt, at: target_predict, delay: 1.3, active: 0.35, damage_mult: 1.0, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 4.4, h: 9}}
+      - {t: 1.36, type: custom, event: emerge}
+      - {t: 1.9, type: custom, event: burrow}
+      - {t: 1.95, type: hazard, id: verme_erupt, at: target_predict, delay: 1.3, active: 0.35, damage_mult: 1.0, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 4.4, h: 9}}
+      - {t: 3.26, type: custom, event: emerge}
+    sfx: worm_burrow
+  # p2: it vomits a rain of devoured landscape on the whole arena (every fall is marked).
+  - id: ng_debris_rain
+    anim: spit_up
+    telegraph: 1.0
+    active: 1.2
+    recovery: 1.2
+    damage_mult: 0.8
+    poise: 18
+    flags: []
+    element: physical
+    global: true
+    weight: 0.7
+    cooldown: 11
+    spawns:
+      - {t: 0.0, type: hazard, id: verme_debris_fall, at: target_predict, delay: 1.1, active: 0.3, damage_mult: 0.8, shape: {type: cylinder, c: [0, 0, 0], r: 2.0, h: 8}}
+      - {t: 0.2, type: hazard, id: verme_debris_fall, at: random_arena, count: 6, delay: 1.2, active: 0.3, damage_mult: 0.75, shape: {type: cylinder, c: [0, 0, 0], r: 2.0, h: 8}}
+    sfx: worm_spit
+time_of_day_variants:
+  # dawn: the ash is cold and still; it surfaces less and prefers its body blows
+  alba: {opener: body_slam, weights: {erupt: 0.8}, flags: [ash_cold]}
+  # night: it hunts from below — more eruptions
+  notte: {opener: erupt, weights: {erupt: 1.4, debris_spit: 0.8}, flags: [ash_glow]}
+  tramonto: {weights: {debris_spit: 1.3}}
+dialogue_keys: []
+drops_weapon: trivella_divorante
+unlocks_form: null

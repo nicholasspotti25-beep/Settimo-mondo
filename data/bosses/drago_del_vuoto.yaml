@@ -1,0 +1,252 @@
+# 34. Drago del Vuoto — mini boss · Il Rovescio, Pianura Capovolta · D16 · Chakram del Vuoto. No dialogue, no lore.
+# A black eyeless dragon that seems cut out of darkness; tiny stars move inside its scales. It moves in reverse: it walks
+# backward on the sky that has become ground (tail first; behavior `movement`), so its tail is often the side facing you.
+#  - p1: void breath (it turns round first: the turn is the read), bite, tail lash and reverse charge (only toward who is
+#    behind it), gravity holes that pull (hazards with `pull`, marked, escapable by running), stars shaken from its scales.
+#  - p2: it inverts the gravity of the whole arena (sim.setGravity(-1)); a black hole at the center, void pulses (jump the
+#    ring) and drops from the sky-ground. Gravity returns to normal when it dies.
+# Breath ticks carry no poise (never a flinch-lock). Local frame: +Z forward (head), +Y up, +X = its LEFT.
+id: drago_del_vuoto
+order: 34
+name_key: boss.drago_del_vuoto.name
+class: mini
+difficulty: 16
+act: 6
+arena: pianura_capovolta_arena
+zone: pianura_capovolta
+model: {builder: drago_del_vuoto, rig: dragon, scale: 1.0, palette: act6_violet_red_black}
+equilibrio_max: 340
+body: {radius: 4.2, height: 6.5, mass: heavy}
+hurtboxes:
+  - {c: [0, 3.4, 7.6], r: 1.6}    # eyeless head
+  - {c: [0, 3.8, 4.6], r: 1.8}    # neck
+  - {c: [0, 3.0, 0.4], r: 3.2}    # starry torso
+  - {c: [0, 2.8, -3.8], r: 2.6}   # haunches
+  - {c: [0, 1.8, -7.6], r: 1.7}   # tail
+move: {walk: 4.4, run: 8.0, turn: 1.9, preferred_range: [3, 11]}
+idle_gap: [1.0, 1.6]
+music: boss_drago_del_vuoto
+metamondo_reaction: null
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_drago_del_vuoto_p1
+    opener: gravity_hole
+    patterns: [void_breath, void_bite, tail_lash, reverse_charge, gravity_hole, star_scatter]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_drago_del_vuoto_p2
+    on_enter: [inverted]
+    arena_state: capovolta
+    speed_mult: 1.08
+    aggression: 1.1
+    transition: 2.8
+    opener: black_hole
+    patterns: [void_breath, void_bite, tail_lash, reverse_charge, gravity_hole, void_pulse, black_hole, sky_drop]
+attacks:
+  # It turns round to face you (the turn is the telegraph) and breathes the void in a narrow cone.
+  - id: void_breath
+    anim: breath
+    telegraph: 1.1
+    active: 1.3
+    recovery: 1.3
+    damage_mult: 0.3
+    poise: 0
+    flags: []
+    element: void
+    range: [0, 18]
+    weight: 1.0
+    cooldown: 5
+    track: 1.6
+    track_active: 0.12
+    hits:
+      - {t: 0.1, dur: 1.1, tick: 0.5, shape: {type: arc, r: 17, r_in: 2, angle: 38, y: [0, 4]}, status: {kind: void, dur: 2.0}}
+    sfx: void_breath
+  # A bite of the eyeless jaws.
+  - id: void_bite
+    anim: bite
+    telegraph: 0.8
+    active: 0.3
+    recovery: 1.05
+    damage_mult: 0.95
+    poise: 20
+    flags: []
+    element: void
+    range: [0, 6]
+    weight: 1.0
+    cooldown: 2.5
+    track: 1.3
+    track_active: 0.2
+    hits:
+      - {t: 0.05, dur: 0.22, shape: {type: sphere, c: [0, 2.4, 8.4], r: 2.6}}
+    motion:
+      - {t: -0.1, dur: 0.3, type: forward, speed: 6}
+    sfx: bite
+  # Walking backward, its tail is the side that faces you: it lashes behind it without turning (only toward who is behind).
+  - id: tail_lash
+    anim: tail_sweep
+    telegraph: 0.85
+    active: 0.4
+    recovery: 1.1
+    damage_mult: 0.9
+    poise: 22
+    flags: [knockback]
+    element: void
+    range: [0, 12]
+    weight: 1.2
+    cooldown: 3
+    track: 0
+    hits:
+      - {t: 0.05, dur: 0.32, shape: {type: arc, r: 12.5, r_in: 2, angle: 150, yaw: 180, y: [0, 3]}}
+    sfx: tail_sweep
+  # It charges backward, tail first, straight through where you stand (a line, sidestep it).
+  - id: reverse_charge
+    anim: reverse_charge
+    telegraph: 1.0
+    active: 0.9
+    recovery: 1.4
+    damage_mult: 1.05
+    poise: 26
+    flags: [knockdown]
+    element: void
+    range: [4, 26]
+    weight: 0.9
+    cooldown: 6
+    track: 0
+    motion:
+      - {t: 0.0, dur: 0.85, type: retreat, speed: 20}
+    hits:
+      - {t: 0.0, dur: 0.85, shape: {type: box, c: [0, 2, -6], half: [2.8, 2.5, 3.4]}}
+    sfx: charge
+  # Two gravity holes open near you and pull you in. Their centers bite; run against the pull or dodge out.
+  - id: gravity_hole
+    anim: roar_void
+    telegraph: 0.9
+    active: 0.8
+    recovery: 1.0
+    damage_mult: 0.35
+    poise: 10
+    flags: [dot]
+    element: void
+    global: true
+    weight: 1.0
+    cooldown: 9
+    spawns:
+      - {t: 0.0, type: hazard, id: vuoto_hole, at: around_target, count: 2, dist: 6.5, delay: 1.2, active: 3.5, pull: 2.4, damage_mult: 0.3, flags: [dot], shape: {type: cylinder, c: [0, 0, 0], r: 1.8, h: 3}}
+    sfx: gravity_hole
+  # It shakes its scales: the tiny stars inside fly out and drift toward you.
+  - id: star_scatter
+    anim: shake
+    telegraph: 0.85
+    active: 0.6
+    recovery: 0.9
+    damage_mult: 0.6
+    poise: 10
+    flags: []
+    element: void
+    range: [6, 60]
+    weight: 0.9
+    cooldown: 5
+    spawns:
+      - {t: 0.05, type: projectile, id: vuoto_star, count: 6, spread: 80, speed: 13, from: [0, 3.5, 1]}
+    sfx: stars
+  # --- p2: the arena is upside down ---
+  # A pulse of void from its body runs along the ground: jump the ring.
+  - id: void_pulse
+    anim: pulse
+    telegraph: 0.9
+    active: 1.0
+    recovery: 1.0
+    damage_mult: 0.8
+    poise: 18
+    flags: []
+    element: void
+    range: [0, 20]
+    weight: 0.9
+    cooldown: 6
+    spawns:
+      - {t: 0.0, type: shockwave, id: vuoto_ring, shape: {type: ring, r0: 4, r1: 20, width: 1.2, height: 0.8}, active: 1.0, damage_mult: 0.8}
+    sfx: void_pulse
+  # A black hole at the center of the arena pulls everything for a few seconds; it never bites far from its core.
+  - id: black_hole
+    anim: roar_void
+    telegraph: 1.2
+    active: 1.0
+    recovery: 1.2
+    damage_mult: 0.4
+    poise: 10
+    flags: [dot]
+    element: void
+    global: true
+    weight: 0.7
+    cooldown: 16
+    spawns:
+      - {t: 0.0, type: hazard, id: vuoto_black_hole, at: arena_center, delay: 1.4, active: 5.0, pull: 2.2, damage_mult: 0.35, flags: [dot], shape: {type: cylinder, c: [0, 0, 0], r: 3.2, h: 4}}
+    sfx: black_hole
+  # It lets go of the sky-ground, falls "up" and drops back where you are; the spot is marked.
+  - id: sky_drop
+    anim: dive
+    telegraph: 0.9
+    active: 1.5
+    recovery: 1.5
+    damage_mult: 1.05
+    poise: 26
+    flags: [knockdown]
+    element: void
+    global: true
+    weight: 0.9
+    cooldown: 7
+    motion:
+      - {t: 0.0, dur: 0.6, type: rise, height: 11, speed: 20}
+      - {t: 0.8, dur: 0.5, type: dive_to_target, speed: 32, track: 0.5}
+    spawns:
+      - {t: 0.1, type: hazard, id: vuoto_drop_mark, at: target_predict, delay: 1.15, active: 0.25, damage_mult: 1.05, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 4.2, h: 6}}
+      - {t: 1.3, type: shockwave, id: vuoto_ring, shape: {type: ring, r0: 3, r1: 11, width: 1.0, height: 0.7}, active: 0.6, damage_mult: 0.5}
+    sfx: dive
+  # --- New Game+ ---
+  # p1: three holes in a row between it and you.
+  - id: ng_hole_chain
+    anim: roar_void
+    telegraph: 0.95
+    active: 0.8
+    recovery: 1.1
+    damage_mult: 0.35
+    poise: 10
+    flags: [dot]
+    element: void
+    range: [6, 60]
+    weight: 0.8
+    cooldown: 11
+    spawns:
+      - {t: 0.0, type: hazard, id: vuoto_hole, at: line_to_target, count: 3, dist: 7, delay: 1.2, active: 3.0, pull: 2.2, damage_mult: 0.3, flags: [dot], shape: {type: cylinder, c: [0, 0, 0], r: 1.8, h: 3}}
+    sfx: gravity_hole
+  # p2: the void breath sweeps a wide arc (it turns while breathing; the start side is shown by the head).
+  - id: ng_sweeping_breath
+    anim: breath_sweep
+    telegraph: 1.2
+    active: 1.8
+    recovery: 1.4
+    damage_mult: 0.3
+    poise: 0
+    flags: []
+    element: void
+    range: [0, 16]
+    weight: 0.8
+    cooldown: 9
+    track: 1.4
+    track_active: 0.3
+    hits:
+      - {t: 0.1, dur: 1.6, tick: 0.5, shape: {type: arc, r: 15, r_in: 2, angle: 36, y: [0, 4]}, status: {kind: void, dur: 2.0}}
+    sfx: void_breath
+ng_plus:
+  add_patterns: {p1: [ng_hole_chain], p2: [ng_sweeping_breath]}
+  idle_mult: 0.85
+time_of_day_variants:
+  # dawn: the stars inside the scales fade; it relies on its body
+  alba: {opener: void_bite, weights: {star_scatter: 0.6}, flags: [stars_faint]}
+  # night: the stars in its scales blaze; more of them fly, slower
+  notte: {opener: star_scatter, spawn_mult: 1.5, projectile_speed_mult: 0.8, weights: {star_scatter: 1.4}, flags: [stars_bright]}
+  tramonto: {weights: {gravity_hole: 1.2}}
+dialogue_keys: []
+drops_weapon: chakram_del_vuoto
+unlocks_form: null

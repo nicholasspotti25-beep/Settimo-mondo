@@ -1,0 +1,7 @@
+# Acts VI–VII projectile kinds.
+# Lucifero II: the Stella del Mattino thrown at range (a golden spiked ball; it bursts into rays where it lands: data hazard).
+- {id: lucifero2_star, radius: 0.9, speed: 22, life: 2.2, visual: ball, color: '#ffcf6a', trail: true, element: light, explode_radius: 2.4}
+# Drago del Vuoto: the tiny stars shaken out of its scales, drifting slowly toward you.
+- {id: vuoto_star, radius: 0.45, speed: 13, life: 3.2, homing: 0.5, visual: star, color: '#d8ccff', trail: true, element: void}
+# Verme Mangiamondi: fragments of devoured landscapes spat in arcs (a piece of tower, a tree, a span of bridge).
+- {id: verme_debris, radius: 0.95, speed: 17, life: 3.0, gravity: 9, visual: rock, color: '#8a7564', element: physical, explode_radius: 1.8}

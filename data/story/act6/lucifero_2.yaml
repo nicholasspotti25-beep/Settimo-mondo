@@ -1,0 +1,42 @@
+# Lucifero II (principal). The opening line depends on the first encounter (lucifero_choice); the defeat recalls what he left
+# you then (Piuma Nera or Cicatrice del Rifiuto) and opens the Porta Rovesciata behind the throne.
+- id: lucifero_2_intro
+  skippable: true
+  steps:
+    - {wait: 0.05}
+    - {camera: wide, dur: 2.8}
+    - {caption: story.atto6.lucifero_in_piedi, dur: 4.4}
+    - {camera: boss_reveal, dur: 2.6}
+    - {event: cue, params: {id: lucifero_wings_open}}
+    - {camera: boss_close, dur: 0.1}
+    - {if: "lucifero_choice == fought", goto: fought}
+    - {say: boss.lucifero_2.begged, speaker: lucifero_2}
+    - {goto: sfida}
+    - {label: fought}
+    - {say: boss.lucifero_2.fought, speaker: lucifero_2}
+    - {label: sfida}
+    - {say: boss.lucifero_2.no, speaker: lucifero_2}
+    - {camera: player_close, dur: 0.1}
+    - {event: cue, params: {id: lucifero_stella}}
+    - {event: start_fight}
+    - {end: true}
+- id: lucifero_2_defeat
+  skippable: true
+  steps:
+    - {wait: 1.6}
+    - {camera: boss_close, dur: 0.1}
+    - {say: boss.lucifero_2.defeat, speaker: lucifero_2}
+    - {if: "item:piuma_nera", goto: piuma}
+    - {if: "item:cicatrice_del_rifiuto", goto: cicatrice}
+    - {goto: porta}
+    - {label: piuma}
+    - {say: boss.lucifero_2.piuma, speaker: lucifero_2}
+    - {goto: porta}
+    - {label: cicatrice}
+    - {say: boss.lucifero_2.cicatrice, speaker: lucifero_2}
+    - {label: porta}
+    - {event: cue, params: {id: porta_rovesciata_opens}}
+    - {camera: wide, dur: 3.2}
+    - {say: boss.lucifero_2.porta, speaker: lucifero_2}
+    - {caption: story.atto6.porta_rovesciata, dur: 4.4}
+    - {event: autosave, params: {reason: story}}

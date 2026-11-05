@@ -5,23 +5,26 @@ import h1 from './cavaliere_errante';
 import h2 from './cerbero';
 import h3 from './coleottero_imperiale';
 import h4 from './drago_a_tre_teste';
-import h5 from './drago_di_ghiaccio';
-import h6 from './elder_tree';
-import h7 from './gigante_di_fuoco';
-import h8 from './grande_lupo';
-import h9 from './grande_orso';
-import h10 from './great_devourer';
-import h11 from './guardiano_rocca_di_brina';
-import h12 from './ice';
-import h13 from './loki';
-import h14 from './lucifero_1';
-import h15 from './mostro_della_palude';
-import h16 from './mostro_di_magma';
-import h17 from './pyro';
-import h18 from './re_mantide';
-import h19 from './regina_formica';
-import h20 from './thunder';
-import h21 from './yeti';
+import h5 from './drago_del_vuoto';
+import h6 from './drago_di_ghiaccio';
+import h7 from './elder_tree';
+import h8 from './gigante_di_fuoco';
+import h9 from './grande_lupo';
+import h10 from './grande_orso';
+import h11 from './great_devourer';
+import h12 from './guardiano_rocca_di_brina';
+import h13 from './ice';
+import h14 from './loki';
+import h15 from './lucifero_1';
+import h16 from './lucifero_2';
+import h17 from './mostro_della_palude';
+import h18 from './mostro_di_magma';
+import h19 from './pyro';
+import h20 from './re_mantide';
+import h21 from './regina_formica';
+import h22 from './thunder';
+import h23 from './verme_mangiamondi';
+import h24 from './yeti';
 
 export const BOT_HOOKS: Record<string, BotHook> = {
   "caronte": h0,
@@ -29,21 +32,24 @@ export const BOT_HOOKS: Record<string, BotHook> = {
   "cerbero": h2,
   "coleottero_imperiale": h3,
   "drago_a_tre_teste": h4,
-  "drago_di_ghiaccio": h5,
-  "elder_tree": h6,
-  "gigante_di_fuoco": h7,
-  "grande_lupo": h8,
-  "grande_orso": h9,
-  "great_devourer": h10,
-  "guardiano_rocca_di_brina": h11,
-  "ice": h12,
-  "loki": h13,
-  "lucifero_1": h14,
-  "mostro_della_palude": h15,
-  "mostro_di_magma": h16,
-  "pyro": h17,
-  "re_mantide": h18,
-  "regina_formica": h19,
-  "thunder": h20,
-  "yeti": h21,
+  "drago_del_vuoto": h5,
+  "drago_di_ghiaccio": h6,
+  "elder_tree": h7,
+  "gigante_di_fuoco": h8,
+  "grande_lupo": h9,
+  "grande_orso": h10,
+  "great_devourer": h11,
+  "guardiano_rocca_di_brina": h12,
+  "ice": h13,
+  "loki": h14,
+  "lucifero_1": h15,
+  "lucifero_2": h16,
+  "mostro_della_palude": h17,
+  "mostro_di_magma": h18,
+  "pyro": h19,
+  "re_mantide": h20,
+  "regina_formica": h21,
+  "thunder": h22,
+  "verme_mangiamondi": h23,
+  "yeti": h24,
 };

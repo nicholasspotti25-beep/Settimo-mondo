@@ -1,0 +1,8 @@
+# Voce dell'Alba lines at the Act VI–VII altars (played once, when meditating there after the listed bosses fall).
+- {key: voce.atto6.radice_altare, altar: altare_radice_vista, after: [re_drago], priority: 1}
+- {key: voce.atto6.cattedrale_altare, altar: altare_cattedrale_02, after: [re_drago], priority: 1}
+- {key: voce.atto6.capovolta_altare, altar: altare_capovolta_01, after: [lucifero_2], priority: 1}
+- {key: voce.atto6.deserto_altare, altar: altare_deserto_01, after: [drago_del_vuoto], priority: 1}
+- {key: voce.atto6.palazzo_altare, altar: altare_palazzo_01, after: [verme_mangiamondi], priority: 1}
+- {key: voce.atto7.terrazze_altare, altar: altare_terrazze_01, after: [regina_drago], priority: 1}
+- {key: voce.atto7.collasso_altare, altar: altare_collasso_01, after: [dio_dei_draghi], priority: 1}
