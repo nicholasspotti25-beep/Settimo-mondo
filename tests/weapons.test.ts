@@ -1,6 +1,6 @@
 /**
  * Weapons stream: data validity (38 weapons + movesets, canon types, parry flags, stamina, swing arcs), damage formula,
- * 49 Transizioni, locale keys, Arts observable headless (Act I weapons so far), weapon visuals (budget, blade line).
+ * 49 Transizioni, locale keys, Arts observable headless (Acts I and II so far), weapon visuals (budget, blade line).
  */
 import { describe, expect, it } from 'vitest';
 import * as fs from 'node:fs';
@@ -26,6 +26,10 @@ const IT = loc('it'), EN = loc('en');
 
 /** Weapons a player gets first: the starter, then Act I in story order. */
 const ACT1_WEAPONS = ['lama_della_culla', 'lancia_del_custode', 'brando_del_viandante', 'ramo_dell_antico', 'randello_del_pantano', 'zanna_strisciante', 'remo_del_traghettatore'];
+/** Act II in story order: Cerbero, Pyro, Thunder, Ice, Mostro di Magma. */
+const ACT2_WEAPONS = ['triplice_guinzaglio', 'brace_eterna', 'tuono_spezzacielo', 'brina_silente', 'fenditura_ardente'];
+/** Weapons whose dedicated templates and Art visuals have landed. */
+const DONE_WEAPONS = [...ACT1_WEAPONS, ...ACT2_WEAPONS];
 
 function swingsOf(w: WeaponDef): SwingDef[] {
   const ms = content.bundle.movesets.find((m) => m.type === w.type)!;
@@ -131,7 +135,9 @@ function castArt(weaponId: string, which: 'prima' | 'seconda', setup?: (sim: Sim
   const boss = sim.boss!;
   boss.idleTimer = 99;
   const w = content.weapon(weaponId);
-  const dist = w.category === 'catalyst' || w.category === 'ranged' ? 7 : w.arts[which].effect === 'grab_pull' ? 5.5 : 4.2;
+  // an imbue's burst (Lama Rovente) is a point-blank ring around the caster
+  const eff = w.arts[which].effect;
+  const dist = w.category === 'catalyst' || w.category === 'ranged' ? 7 : eff === 'grab_pull' ? 5.5 : eff === 'buff_self' ? 1.2 : 4.2;
   sim.player.pos = { x: boss.pos.x, y: boss.pos.y, z: boss.pos.z - dist - boss.radius * boss.scale };
   sim.player.yaw = 0;
   sim.player.eco = 300;
@@ -164,9 +170,9 @@ function castArt(weaponId: string, which: 'prima' | 'seconda', setup?: (sim: Sim
   return obs;
 }
 
-describe('Arts (Act I weapons) run headless with an observable effect', () => {
-  it('every Act I Art connects with the Guardiano and emits its visual cues', () => {
-    for (const id of ACT1_WEAPONS) {
+describe('Arts (Act I + II weapons) run headless with an observable effect', () => {
+  it('every Act I + II Art connects with the Guardiano and emits its visual cues', () => {
+    for (const id of DONE_WEAPONS) {
       const w = content.weapon(id);
       for (const which of ['prima', 'seconda'] as const) {
         const art = w.arts[which];
@@ -188,12 +194,20 @@ describe('Arts (Act I weapons) run headless with an observable effect', () => {
         if (art.effect === 'bind') expect(o.bound, label).toBe(true);
         if (art.params.status === 'slow' || art.params.pit) expect(o.slowed, label).toBe(true);
         if (art.effect === 'counter_stance') expect(o.counter, label).toBe(true);
+        if (art.effect === 'grab_pull') expect(o.pulled, label).toBeGreaterThan(0.5);
+        if (art.params.freeze || art.effect === 'buff_self' || art.effect === 'ground_wave' || art.effect === 'chain_lightning') {
+          expect(o.vfx.size, `${label} sim visuals ${[...o.vfx].join(',')}`).toBeGreaterThan(0);
+        }
+        if (art.params.freeze) expect(o.bound, label).toBe(true);
+        if (art.effect === 'ground_wave') expect(o.hazards, label).toBeGreaterThan(0);
+        if (art.params.projectile) expect(o.projectiles, label).toBeGreaterThanOrEqual(Math.round(Number(art.params.count ?? 1)));
+        if (art.effect === 'chain_lightning') expect([...o.vfx], label).toContain('lightning_arc');
       }
     }
   });
 
   it('Art damage stays within its budget (damage_mult x weapon damage, x1.15 for Equilibrio-free rounding)', () => {
-    for (const id of ACT1_WEAPONS) {
+    for (const id of DONE_WEAPONS) {
       const w = content.weapon(id);
       const dmg = weaponDamage(content.bundle.balance, w);
       for (const which of ['prima', 'seconda'] as const) {
@@ -217,7 +231,7 @@ describe('Arts (Act I weapons) run headless with an observable effect', () => {
       expect(a.vfx, a.id).toMatch(/^art_/);
       expect(a.anim, a.id).toBeTruthy();
     }
-    for (const id of ACT1_WEAPONS) {
+    for (const id of DONE_WEAPONS) {
       const w = content.weapon(id);
       for (const a of [w.arts.prima, w.arts.seconda]) expect(weaponArtVfxIds(), a.vfx).toContain(a.vfx);
     }
@@ -235,8 +249,32 @@ function ctxFor(quality: QualityLevel): RenderCtx {
 }
 
 describe('weapon visuals', () => {
-  it('Act I types have dedicated templates', () => {
-    for (const id of ACT1_WEAPONS) expect(hasDedicatedTemplate(content.weapon(id).type), id).toBe(true);
+  it('Act I + II types have dedicated templates', () => {
+    for (const id of DONE_WEAPONS) expect(hasDedicatedTemplate(content.weapon(id).type), id).toBe(true);
+  });
+
+  it('Act I + II visuals stay within ~3k triangles on high and carry trail colors', () => {
+    const ctx = ctxFor('high');
+    for (const id of DONE_WEAPONS) {
+      const v = buildWeapon(content.weapon(id), ctx);
+      expect(v.triangles ?? 0, id).toBeLessThanOrEqual(3000);
+      expect(v.trail?.color, id).toMatch(/^#/);
+      v.dispose();
+    }
+  });
+
+  it('the chains fly out to the lash reach and fall back to hang from the ring', () => {
+    const ctx = ctxFor('high');
+    const v = buildWeapon(content.weapon('triplice_guinzaglio'), ctx);
+    const rest = v.tip.length();
+    v.morph!({ extend: 1, art: 0, swing: 1 });
+    for (let i = 0; i < 60; i++) v.update!(1 / 60, i / 60);
+    expect(v.tip.z).toBeGreaterThan(4);
+    v.morph!({ extend: 0, art: 0, swing: 0 });
+    for (let i = 0; i < 150; i++) v.update!(1 / 60, 1 + i / 60);
+    expect(v.tip.z).toBeLessThan(0.5);
+    expect(Math.abs(v.tip.length() - rest)).toBeLessThan(0.25);
+    v.dispose();
   });
 
   it('every weapon builds on every quality: budget, finite blade line, update/morph without NaN, clean dispose', () => {

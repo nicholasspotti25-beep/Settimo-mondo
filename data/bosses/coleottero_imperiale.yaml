@@ -1,0 +1,328 @@
+# 24. Coleottero Imperiale — secondary · Little Garden, Bosco di Muschio (second gate) · D14.
+# An armored metallic-blue beetle with two huge stag mandibles and buzzing wings. Slow, armored, fearsome: the head,
+# pronotum and mandibles turn blows (front ×0.5 damage, ×0.5 poise; full from the flanks and behind, where his slow
+# turning lets you circle), head-down charges (line fixed when he lowers the head), mandibles that grab and crush (held in
+# the mandibles GRAB_TIME s, crushed once, dropped with i-frames — behavior). Whoever slips beside or behind him meets the
+# carapace slam (Colpo Rosso; the quake ring is born beyond where a roll out of it ends, jumpable).
+# Phase 2 (flag wings_open): the elytra open and he flies: take_off → bombing_run (a marked line of earth clods dropped
+# across you from above) → dive_bomb (he hovers, tracks, then dives on you; ring to jump), landing in a long punish window.
+# General of Uruk's court: he opens the second gate and recognizes a worthy opponent (at dawn he salutes first).
+# Local frame: +Z forward, +Y up, +X = his LEFT. ~4.6 m long with mandibles, 2.2 m tall at the shell; six legs on the
+# ground at ±1.2 m (low hurtboxes for the tiny player), abdomen tip low behind him.
+id: coleottero_imperiale
+order: 24
+name_key: boss.coleottero_imperiale.name
+title_key: boss.coleottero_imperiale.title
+class: secondary
+difficulty: 14
+act: 4
+arena: giardino_muschio
+zone: little_garden
+model: {builder: coleottero_imperiale, rig: insectoid, scale: 1.0, palette: act4_vivid}
+equilibrio_max: 200
+body: {radius: 1.3, height: 2.2, mass: heavy}
+hurtboxes:
+  - {c: [1.2, 0.3, 0.9], r: 0.5}      # left fore leg
+  - {c: [-1.2, 0.3, 0.9], r: 0.5}     # right fore leg
+  - {c: [1.3, 0.3, -0.3], r: 0.5}     # left mid leg
+  - {c: [-1.3, 0.3, -0.3], r: 0.5}    # right mid leg
+  - {c: [1.1, 0.3, -1.4], r: 0.5}     # left hind leg
+  - {c: [-1.1, 0.3, -1.4], r: 0.5}    # right hind leg
+  - {c: [0, 0.5, -2.1], r: 0.7}       # abdomen tip (soft, behind)
+  - {c: [0, 1.3, -0.6], r: 1.2}       # elytra
+  - {c: [0, 1.2, 1.3], r: 0.8}        # pronotum and head (armored)
+  - {c: [0, 0.4, 2.4], r: 0.45}       # mandibles (armored)
+move: {walk: 1.0, run: 2.2, turn: 1.4, preferred_range: [0.3, 1.5]}
+idle_gap: [1.1, 1.7]
+music: boss_coleottero_imperiale
+intro_sequence: coleottero_imperiale_intro
+defeat_sequence: coleottero_imperiale_defeat
+lore_key: boss.coleottero_imperiale.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_coleottero_imperiale_p1
+    opener: head_charge
+    patterns: [mandible_snap, mandible_grab, head_charge, horn_toss, carapace_slam, salute]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_coleottero_imperiale_p2
+    on_enter: [wings_open]
+    dialogue: boss.coleottero_imperiale.mid
+    transition: 2.8
+    speed_mult: 1.05
+    aggression: 1.1
+    opener: take_off
+    patterns: [mandible_snap, mandible_grab, buzz_charge, horn_toss, carapace_slam, take_off]
+attacks:
+  # The mandibles close in front of him (narrow, long).
+  - id: mandible_snap
+    anim: bite
+    telegraph: 0.8
+    active: 0.3
+    recovery: 1.2
+    damage_mult: 1.2
+    poise: 24
+    flags: []
+    range: [0, 1.8]
+    weight: 1.2
+    cooldown: 2
+    track: 1.0
+    track_active: 0.1
+    motion:
+      - {t: -0.1, dur: 0.25, type: forward, speed: 1.5}
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: arc, r: 3.0, angle: 70, yaw: 0, y: [0, 1.5]}}
+    sfx: coleottero_snap
+  # The mandibles open wide and the head lowers (unblockable grab): held, crushed once, dropped (behavior).
+  - id: mandible_grab
+    anim: grab
+    telegraph: 1.0
+    active: 0.35
+    recovery: 1.6
+    damage_mult: 1.5
+    poise: 30
+    flags: [grab, unblockable]
+    range: [0, 1.6]
+    weight: 0.8
+    cooldown: 8
+    track: 1.1
+    track_active: 0.1
+    motion:
+      - {t: -0.15, dur: 0.3, type: forward, speed: 2}
+    hits:
+      - {t: 0.05, dur: 0.22, shape: {type: arc, r: 2.9, angle: 60, yaw: 0, y: [0, 1.2]}}
+    sfx: coleottero_grab
+  # Head down, he scrapes the moss and charges straight through (the line is fixed when he starts).
+  - id: head_charge
+    anim: charge
+    telegraph: 1.1
+    active: 1.0
+    recovery: 1.6
+    damage_mult: 1.5
+    poise: 30
+    flags: [knockdown]
+    range: [3, 30]
+    weight: 1.0
+    cooldown: 6
+    track: 1.4
+    track_active: 0.05
+    motion:
+      - {t: 0, dur: 0.95, type: charge_through, speed: 7}
+    hits:
+      - {t: 0.0, dur: 0.95, shape: {type: box, c: [0, 0.7, 2.0], half: [1.2, 0.8, 1.0]}}
+    spawns:
+      - {t: 0.0, type: vfx, vfx: coleottero_moss_spray}
+    sfx: coleottero_charge
+  # An upward flick of the mandibles that throws you back.
+  - id: horn_toss
+    anim: toss
+    telegraph: 0.75
+    active: 0.3
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 22
+    flags: [knockback]
+    range: [0, 1.8]
+    weight: 1.0
+    cooldown: 3
+    track: 1.0
+    track_active: 0.1
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: arc, r: 2.8, angle: 110, yaw: 0, y: [0, 2]}}
+    sfx: coleottero_toss
+  # Beside or behind him (only then): he rears and drops his whole armored body (Colpo Rosso). The quake ring is born
+  # 0.8 s later beyond where a roll out of the slam ends: close range is the slam, far range the ring (jumpable).
+  - id: carapace_slam
+    anim: slam
+    telegraph: 1.0
+    active: 1.2
+    recovery: 1.5
+    damage_mult: 1.5
+    poise: 30
+    flags: [red, knockdown]
+    range: [0, 2.4]
+    weight: 1.6
+    cooldown: 5
+    track: 0.3
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: cylinder, c: [0, 0, 0], r: 2.5, h: 2.5}}
+    spawns:
+      - {t: 0.8, type: shockwave, radius: 8, shape: {type: ring, r0: 5.0, r1: 8, width: 0.6, height: 0.35}, active: 0.4, damage_mult: 0.6}
+      - {t: 0.05, type: vfx, vfx: coleottero_slam_moss}
+    sfx: coleottero_slam
+  # Dawn opener: the general lowers his mandibles to the moss in a salute (no blow).
+  - id: salute
+    anim: salute
+    telegraph: 0.4
+    active: 1.4
+    recovery: 0.3
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 30]
+    weight: 0.01
+    cooldown: 999
+    spawns:
+      - {t: 0.0, type: custom, event: salute}
+    sfx: coleottero_buzz
+  # Phase 2: wings buzzing, a faster, lower charge.
+  - id: buzz_charge
+    anim: charge
+    telegraph: 1.0
+    active: 1.0
+    recovery: 1.5
+    damage_mult: 1.5
+    poise: 30
+    flags: [knockdown]
+    range: [3, 30]
+    weight: 1.0
+    cooldown: 6
+    track: 1.4
+    track_active: 0.05
+    motion:
+      - {t: 0, dur: 0.9, type: charge_through, speed: 9}
+    hits:
+      - {t: 0.0, dur: 0.9, shape: {type: box, c: [0, 0.6, 2.0], half: [1.2, 0.7, 1.0]}}
+    sfx: coleottero_buzz_charge
+  # Phase 2 flight: the elytra spread and he rises on buzzing wings (no blow) → bombing_run → dive_bomb.
+  - id: take_off
+    anim: take_off
+    telegraph: 0.8
+    active: 0.8
+    recovery: 0.05
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 30]
+    weight: 0.9
+    cooldown: 16
+    track: 1.0
+    combo_next: bombing_run
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.8, type: rise, height: 3.2}
+    spawns:
+      - {t: 0.0, type: custom, event: fly}
+    sfx: coleottero_take_off
+  # From above he flies across you and drops clods of earth along his path: the line is marked 1.0 s before they land.
+  - id: bombing_run
+    anim: fly_run
+    telegraph: 0.6
+    active: 2.0
+    recovery: 0.05
+    damage_mult: 1.1
+    poise: 24
+    flags: []
+    global: true
+    range: [0, 30]
+    weight: 0.01
+    cooldown: 0
+    track: 1.4
+    combo_next: dive_bomb
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 2.0, type: hover, height: 3.2}
+      - {t: 0.1, dur: 1.5, type: charge_through, speed: 5}
+    spawns:
+      - {t: 0.0, type: hazard, id: coleottero_clod, at: line_to_target, count: 5, dist: 1.7, delay: 1.0, active: 0.3, shape: {type: cylinder, c: [0, 0, 0], r: 0.8, h: 3}}
+    sfx: coleottero_buzz
+  # He hovers and tracks you (the shadow under him), then dives on you; a ring rolls out of the impact (jumpable).
+  - id: dive_bomb
+    anim: dive
+    telegraph: 0.9
+    active: 0.9
+    recovery: 1.7
+    damage_mult: 1.5
+    poise: 30
+    flags: [knockdown]
+    global: true
+    range: [0, 30]
+    weight: 0.01
+    cooldown: 0
+    track: 1.6
+    motion:
+      - {t: -0.9, dur: 0.9, type: hover, height: 3.2}
+      - {t: 0, dur: 0.6, type: dive_to_target, speed: 10}
+    hits:
+      - {t: 0.6, dur: 0.15, shape: {type: cylinder, c: [0, 0, 0.5], r: 1.6, h: 2.5}}
+    spawns:
+      - {t: 0.0, type: custom, event: dive_mark}
+      - {t: 0.6, type: custom, event: landed}
+      - {t: 0.65, type: shockwave, radius: 6, shape: {type: ring, r0: 2.6, r1: 6, width: 0.6, height: 0.35}, active: 0.45, damage_mult: 0.6}
+    sfx: coleottero_dive
+  # New Game+ (phase 1): a head charge and at once a second one back along a new line (each with its own scrape).
+  - id: ng_double_charge
+    anim: charge
+    telegraph: 1.1
+    active: 1.0
+    recovery: 0.3
+    damage_mult: 1.4
+    poise: 30
+    flags: [knockdown]
+    range: [3, 30]
+    weight: 0.7
+    cooldown: 12
+    track: 1.4
+    track_active: 0.05
+    combo_next: head_charge
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.95, type: charge_through, speed: 7}
+    hits:
+      - {t: 0.0, dur: 0.95, shape: {type: box, c: [0, 0.7, 2.0], half: [1.2, 0.8, 1.0]}}
+    sfx: coleottero_charge
+  # New Game+ (phase 2): a longer flight: the carpet run drops a marked line across you and a ring of clods around you.
+  - id: ng_take_off
+    anim: take_off
+    telegraph: 0.8
+    active: 0.8
+    recovery: 0.05
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 30]
+    weight: 0.8
+    cooldown: 18
+    track: 1.0
+    combo_next: ng_carpet_run
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 0.8, type: rise, height: 3.2}
+    spawns:
+      - {t: 0.0, type: custom, event: fly}
+    sfx: coleottero_take_off
+  - id: ng_carpet_run
+    anim: fly_run
+    telegraph: 0.6
+    active: 2.4
+    recovery: 0.05
+    damage_mult: 1.0
+    poise: 24
+    flags: []
+    global: true
+    range: [0, 30]
+    weight: 0.01
+    cooldown: 0
+    track: 1.4
+    combo_next: dive_bomb
+    combo_chance: 1
+    motion:
+      - {t: 0, dur: 2.4, type: hover, height: 3.2}
+      - {t: 0.1, dur: 1.8, type: charge_through, speed: 5}
+    spawns:
+      - {t: 0.0, type: hazard, id: coleottero_clod, at: line_to_target, count: 5, dist: 1.7, delay: 1.0, active: 0.3, shape: {type: cylinder, c: [0, 0, 0], r: 0.8, h: 3}}
+      - {t: 1.2, type: hazard, id: coleottero_clod, at: around_target, count: 5, dist: 1.9, radius: 0.75, delay: 1.1, active: 0.3, shape: {type: cylinder, c: [0, 0, 0], r: 0.75, h: 3}}
+    sfx: coleottero_buzz
+time_of_day_variants:
+  alba: {opener: salute, weights: {mandible_grab: 0.6, horn_toss: 1.3}, flags: [chivalrous], note_key: boss.coleottero_imperiale.tod.alba}
+  notte: {opener: head_charge, weights: {head_charge: 1.5, buzz_charge: 1.5}, note_key: boss.coleottero_imperiale.tod.notte}
+dialogue_keys: [boss.coleottero_imperiale.intro, boss.coleottero_imperiale.mid, boss.coleottero_imperiale.defeat]
+drops_weapon: mandibole_imperiali
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_double_charge], p2: [ng_double_charge, ng_take_off]}
+  idle_mult: 0.85

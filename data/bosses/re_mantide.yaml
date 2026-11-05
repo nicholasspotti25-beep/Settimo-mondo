@@ -1,0 +1,331 @@
+# 23. Re Mantide — secondary · Little Garden, Prato dei Trifogli (first gate) · D13.
+# A jade-green mantis as tall as a cathedral next to you (player at 0.1 scale: ~0.18 m), crown of petals, chitin scythes.
+# Precise and quick: he camouflages among the clover leaves and reappears behind you (the leaves rustle and glint where he
+# will rise: cue mantide_rustle, 0.95 s before he appears, then a 0.7 s wind-up), crossed slashes, tight-rhythm combos
+# (a landed blow ends the chain: no stun-lock). Before striking he studies you with a naturalist's curiosity (study).
+# Phase 2: the crown blooms (flag crown_bloom) and throws bursts of sharp petals (aimed fans, marked petal falls).
+# Chief of the garden's guards: he opens the first gate.
+# Local frame: +Z forward, +Y up, +X = the mantis's LEFT. ~4 m tall (head at 3.5 m), thin body, four walking legs on the
+# ground around him (low hurtboxes: the tiny player hits the legs and the abdomen tip).
+id: re_mantide
+order: 23
+name_key: boss.re_mantide.name
+title_key: boss.re_mantide.title
+class: secondary
+difficulty: 13
+act: 4
+arena: giardino_trifogli
+zone: little_garden
+model: {builder: re_mantide, rig: insectoid, scale: 1.0, palette: act4_vivid}
+equilibrio_max: 150
+body: {radius: 0.7, height: 4.0, mass: heavy}
+hurtboxes:
+  - {c: [0.55, 0.3, 0.5], r: 0.5}     # left fore walking leg
+  - {c: [-0.55, 0.3, 0.5], r: 0.5}    # right fore walking leg
+  - {c: [0.6, 0.3, -0.5], r: 0.5}     # left hind walking leg
+  - {c: [-0.6, 0.3, -0.5], r: 0.5}    # right hind walking leg
+  - {c: [0, 0.8, -1.3], r: 0.7}       # abdomen (its tip near the ground)
+  - {c: [0, 1.9, 0.2], r: 0.45}       # thorax
+  - {c: [0, 3.5, 0.6], r: 0.4}        # head under the crown
+move: {walk: 1.4, run: 3.2, turn: 3.2, preferred_range: [0.4, 1.6]}
+idle_gap: [0.8, 1.3]
+music: boss_re_mantide
+intro_sequence: re_mantide_intro
+defeat_sequence: re_mantide_defeat
+lore_key: boss.re_mantide.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_re_mantide_p1
+    opener: study
+    patterns: [scythe_slash, cross_slash, combo_a, leap_strike, camouflage, study]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_re_mantide_p2
+    on_enter: [crown_bloom]
+    dialogue: boss.re_mantide.mid
+    transition: 2.5
+    speed_mult: 1.08
+    aggression: 1.15
+    opener: petal_burst
+    patterns: [scythe_slash, cross_slash, combo_a, leap_strike, camouflage, petal_burst, petal_rain]
+attacks:
+  # A diagonal cut of the right scythe; sometimes the left answers.
+  - id: scythe_slash
+    anim: slash_r
+    telegraph: 0.6
+    active: 0.25
+    recovery: 0.9
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    range: [0, 1.9]
+    weight: 1.3
+    cooldown: 1.5
+    track: 1.3
+    track_active: 0.15
+    combo_next: scythe_slash_l
+    combo_chance: 0.5
+    motion:
+      - {t: -0.1, dur: 0.2, type: forward, speed: 2}
+    hits:
+      - {t: 0.04, dur: 0.18, shape: {type: arc, r: 2.6, angle: 130, yaw: 0, y: [0, 2.6]}}
+    sfx: mantide_scythe
+  - id: scythe_slash_l
+    anim: slash_l
+    telegraph: 0.5
+    active: 0.25
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    range: [0, 1.9]
+    weight: 0.01
+    cooldown: 1.5
+    track: 1.3
+    track_active: 0.15
+    motion:
+      - {t: -0.1, dur: 0.2, type: forward, speed: 2}
+    hits:
+      - {t: 0.04, dur: 0.18, shape: {type: arc, r: 2.6, angle: 130, yaw: 0, y: [0, 2.6]}}
+    sfx: mantide_scythe
+  # Crossed slashes: both scythes raised, then an X (two windows; once one lands the other skips you).
+  - id: cross_slash
+    anim: cross_slash
+    telegraph: 0.8
+    active: 0.5
+    recovery: 1.2
+    damage_mult: 1.15
+    poise: 22
+    flags: []
+    range: [0, 2.0]
+    weight: 1.1
+    cooldown: 3
+    track: 1.2
+    track_active: 0.1
+    motion:
+      - {t: -0.1, dur: 0.25, type: forward, speed: 2}
+    hits:
+      - {t: 0.05, dur: 0.16, shape: {type: arc, r: 2.8, angle: 110, yaw: 20, y: [0, 2.8]}}
+      - {t: 0.28, dur: 0.16, shape: {type: arc, r: 2.8, angle: 110, yaw: -20, y: [0, 2.8]}}
+    sfx: mantide_cross
+  # Tight-rhythm combo: two quick cuts and a thrust, each with its own tell; a landed blow ends the chain (behavior).
+  - id: combo_a
+    anim: combo_1
+    telegraph: 0.55
+    active: 0.2
+    recovery: 0.12
+    damage_mult: 0.8
+    poise: 14
+    flags: []
+    range: [0, 1.8]
+    weight: 1.0
+    cooldown: 4
+    track: 1.3
+    track_active: 0.15
+    combo_next: combo_b
+    combo_chance: 1
+    hits:
+      - {t: 0.03, dur: 0.15, shape: {type: arc, r: 2.4, angle: 100, yaw: 15, y: [0, 2.4]}}
+    sfx: mantide_scythe
+  - id: combo_b
+    anim: combo_2
+    telegraph: 0.42
+    active: 0.2
+    recovery: 0.12
+    damage_mult: 0.8
+    poise: 14
+    flags: []
+    range: [0, 1.8]
+    weight: 0.01
+    cooldown: 4
+    track: 1.3
+    track_active: 0.15
+    combo_next: combo_c
+    combo_chance: 1
+    hits:
+      - {t: 0.03, dur: 0.15, shape: {type: arc, r: 2.4, angle: 100, yaw: -15, y: [0, 2.4]}}
+    sfx: mantide_scythe
+  - id: combo_c
+    anim: thrust
+    telegraph: 0.6
+    active: 0.25
+    recovery: 1.4
+    damage_mult: 1.2
+    poise: 26
+    flags: [knockdown]
+    range: [0, 2.2]
+    weight: 0.01
+    cooldown: 4
+    track: 1.2
+    track_active: 0.05
+    motion:
+      - {t: 0, dur: 0.2, type: forward, speed: 3}
+    hits:
+      - {t: 0.03, dur: 0.18, shape: {type: box, c: [0, 0.6, 1.6], half: [0.35, 0.7, 1.3]}}
+    sfx: mantide_thrust
+  # He springs over the clovers and lands scythes first (gap closer).
+  - id: leap_strike
+    anim: leap
+    telegraph: 0.75
+    active: 0.75
+    recovery: 1.3
+    damage_mult: 1.2
+    poise: 26
+    flags: [knockdown]
+    range: [2.5, 30]
+    weight: 0.8
+    cooldown: 5
+    track: 1.2
+    motion:
+      - {t: 0, dur: 0.55, type: leap_to_target, speed: 8}
+    hits:
+      - {t: 0.55, dur: 0.16, shape: {type: cylinder, c: [0, 0, 0.6], r: 1.3, h: 2}}
+    spawns:
+      - {t: 0.55, type: vfx, vfx: mantide_land_leaves}
+    sfx: mantide_leap
+  # Camouflage: he folds into the clover leaves and vanishes (hidden, untargetable). Where he will rise behind you the
+  # leaves rustle and glint (cue mantide_rustle at the spot, 0.95 s before he appears); then ambush_cross.
+  - id: camouflage
+    anim: camouflage
+    telegraph: 0.55
+    active: 1.5
+    recovery: 0.05
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 30]
+    weight: 0.8
+    cooldown: 9
+    track: 0.5
+    combo_next: ambush_cross
+    combo_chance: 1
+    spawns:
+      - {t: 0.0, type: custom, event: camo_hide}
+      - {t: 0.55, type: custom, event: camo_mark}
+    sfx: mantide_rustle
+  # Out of the leaves behind you: both scythes raised (0.7 s), then the X.
+  - id: ambush_cross
+    anim: cross_slash
+    telegraph: 0.7
+    active: 0.5
+    recovery: 1.3
+    damage_mult: 1.2
+    poise: 22
+    flags: []
+    range: [0, 30]
+    weight: 0.01
+    cooldown: 0
+    track: 1.4
+    track_active: 0.1
+    motion:
+      - {t: -0.1, dur: 0.25, type: forward, speed: 2.5}
+    hits:
+      - {t: 0.05, dur: 0.16, shape: {type: arc, r: 2.7, angle: 120, yaw: 20, y: [0, 2.8]}}
+      - {t: 0.28, dur: 0.16, shape: {type: arc, r: 2.7, angle: 120, yaw: -20, y: [0, 2.8]}}
+    sfx: mantide_cross
+  # The naturalist: head tilted, he steps around you and watches (no blow; a breath for both).
+  - id: study
+    anim: study
+    telegraph: 0.4
+    active: 1.6
+    recovery: 0.3
+    damage_mult: 0
+    poise: 0
+    flags: []
+    range: [2.0, 30]
+    weight: 0.5
+    cooldown: 16
+    track: 1
+    track_active: 0.3
+    motion:
+      - {t: 0, dur: 1.7, type: strafe_left, speed: 1.0}
+    spawns:
+      - {t: 0.0, type: custom, event: study}
+    sfx: mantide_click
+  # Phase 2: the crown opens and throws a fan of sharp petals (aimed low at you; gaps between them).
+  - id: petal_burst
+    anim: crown_burst
+    telegraph: 0.8
+    active: 0.5
+    recovery: 1.1
+    damage_mult: 0.7
+    poise: 10
+    flags: []
+    range: [1.5, 30]
+    weight: 1.0
+    cooldown: 5
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: mantide_petal, count: 5, spread: 48, speed: 7.5, from: [0, 3.6, 0.5]}
+      - {t: 0.05, type: custom, event: aim_petals}
+    sfx: mantide_petals
+  # Phase 2: a cloud of petals drifts up from the crown and falls on marked spots around you and across the meadow.
+  - id: petal_rain
+    anim: crown_rain
+    telegraph: 0.9
+    active: 1.6
+    recovery: 1.0
+    damage_mult: 0.8
+    poise: 16
+    flags: []
+    global: true
+    range: [0, 30]
+    weight: 0.8
+    cooldown: 10
+    spawns:
+      - {t: 0.0, type: hazard, id: mantide_petal_fall, at: around_target, count: 4, dist: 1.5, delay: 1.25, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 0.6, h: 3}}
+      - {t: 0.3, type: hazard, id: mantide_petal_fall, at: random_arena, count: 3, delay: 1.3, active: 0.35, shape: {type: cylinder, c: [0, 0, 0], r: 0.7, h: 3}}
+    sfx: mantide_petals
+  # New Game+ (both phases): Imboscata Verde — he crouches, scythes back, and dashes through you with a double cut.
+  - id: ng_green_ambush
+    anim: dash_cut
+    telegraph: 0.85
+    active: 0.6
+    recovery: 1.3
+    damage_mult: 1.1
+    poise: 22
+    flags: []
+    range: [1.2, 6]
+    weight: 0.8
+    cooldown: 8
+    track: 1.3
+    track_active: 0.0
+    motion:
+      - {t: 0, dur: 0.4, type: charge_through, speed: 8}
+    hits:
+      - {t: 0.0, dur: 0.4, shape: {type: box, c: [0, 0.6, 0.6], half: [0.5, 0.7, 0.6]}}
+      - {t: 0.42, dur: 0.15, shape: {type: arc, r: 2.0, angle: 120, yaw: 180, y: [0, 2.4]}}
+    sfx: mantide_dash
+  # New Game+ (phase 2): three petal fans in quick succession, alternating sides.
+  - id: ng_petal_volley
+    anim: crown_burst
+    telegraph: 0.9
+    active: 1.1
+    recovery: 1.2
+    damage_mult: 0.6
+    poise: 10
+    flags: []
+    range: [1.5, 30]
+    weight: 0.8
+    cooldown: 11
+    track: 1.2
+    track_active: 0.3
+    spawns:
+      - {t: 0.0, type: projectile, id: mantide_petal, count: 3, spread: 30, speed: 7, from: [0, 3.6, 0.5]}
+      - {t: 0.0, type: custom, event: aim_petals}
+      - {t: 0.45, type: projectile, id: mantide_petal, count: 4, spread: 44, speed: 7, from: [0, 3.6, 0.5]}
+      - {t: 0.45, type: custom, event: aim_petals}
+      - {t: 0.9, type: projectile, id: mantide_petal, count: 3, spread: 30, speed: 7, from: [0, 3.6, 0.5]}
+      - {t: 0.9, type: custom, event: aim_petals}
+    sfx: mantide_petals
+time_of_day_variants:
+  alba: {opener: study, weights: {study: 2.2, camouflage: 0.6}, flags: [curious], note_key: boss.re_mantide.tod.alba}
+  notte: {opener: camouflage, weights: {camouflage: 1.7, study: 0.5}, note_key: boss.re_mantide.tod.notte}
+dialogue_keys: [boss.re_mantide.intro, boss.re_mantide.mid, boss.re_mantide.defeat]
+drops_weapon: kama_della_mantide
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_green_ambush], p2: [ng_green_ambush, ng_petal_volley]}
+  idle_mult: 0.85

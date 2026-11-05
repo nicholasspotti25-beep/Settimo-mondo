@@ -1,0 +1,5 @@
+# Act IV hazard kinds (Il Giardino del Dio).
+# Re Mantide, phase 2: a cloud of sharp petals falling on marked spots.
+- {id: mantide_petal_fall, visual: flowers, color: '#ff9ad6'}
+# Coleottero Imperiale, phase 2: clods of earth dropped from above along his bombing run (their shadows are marked).
+- {id: coleottero_clod, visual: shadow, color: '#3a2a1a'}

@@ -10,28 +10,23 @@ data/projectiles/weapons.yaml, src/render/weapons/**, locales/{it,en}/weapons.ya
 | 1 | Movesets for all 38 types (light/heavy/run/jump keys, arc + anim, stamina, parry flags, ranged/catalyst/flexible specials) | done (data; validated by build-data, checked again by tests/weapons.test.ts) | data/movesets/*.yaml (38) |
 | 2 | 38 weapon files (canon ids/types/categories, source_boss/D, model params, two Arts with exact names, poise_bonus) | done (data) | data/weapons/*.yaml (38) |
 | 3 | 49 Transizioni (all ordered category pairs, names IT+EN) | done (data) | data/transitions/from_*.yaml (7 x 7) |
-| 4 | src/sim/arts.ts: all 24 effects for all 78 Arts, deterministic, allocation-free | partial — all effects implemented; Act I weapons (starter + 6) verified by tests/weapons.test.ts in chunk 1; the remaining 31 weapons' Arts are not yet verified one by one | src/sim/arts.ts |
-| 5 | Balance: roles distinct, DPS sanity table in docs/WEAPONS.md | partial — docs/WEAPONS.md written (damage model, roles, analytic DPS table for all 38); open item: catene / frusta / artigli light DPS 3.2–3.6x (multi-hit ticks) to be checked with the bot | docs/WEAPONS.md |
+| 4 | src/sim/arts.ts: all 24 effects for all 78 Arts, deterministic, allocation-free | partial — all effects implemented; Act I + II weapons (starter + 11, 24 Arts) verified one by one by tests/weapons.test.ts; the remaining 26 weapons' Arts are not yet verified one by one | src/sim/arts.ts |
+| 5 | Balance: roles distinct, DPS sanity table in docs/WEAPONS.md | done — analytic DPS table for all 38 + bot check of the multi-hit weapons (catene / frusta / artigli not dominant on cerbero, mostro_di_magma, yeti: no nerf); follow-up: catene / frusta underperform vs the Mostro di Magma | docs/WEAPONS.md |
 | 6 | Locales: desc for all, flavor for secondary/principal bosses' weapons (no flavor for the 7 mini-boss weapons), Art names + descs | done (320 lines IT + EN, build-data ok) | locales/{it,en}/weapons.yaml |
-| 7 | src/render/weapons: buildWeapon (one template per type, 38 unique looks, <= ~3k tris, trail colors), installWeaponFx (swing trails, 78 Art VFX, Transizione flashes, pooled) | partial — dedicated templates + Art VFX for the 7 Act I weapons (14 Arts); the other 31 types use category templates (fallback.ts); swing trails, pooled slash arcs, root tendrils, Transizione flash (generic), snake-sword extension morph done | src/render/weapons/{index,types,forge,act1,fallback,fx}.ts |
-| 8 | tests/weapons.test.ts (38 weapons + movesets valid, canon types, parry flags, damage formula, 49 transitions, every Art observable headless) | partial — all data checks + visuals for all 38; "Art observable" covers the 14 Act I Arts | tests/weapons.test.ts |
+| 7 | src/render/weapons: buildWeapon (one template per type, 38 unique looks, <= ~3k tris, trail colors), installWeaponFx (swing trails, 78 Art VFX, Transizione flashes, pooled) | partial — dedicated templates + Art VFX for the 7 Act I and 5 Act II weapons (24 Arts); the other 26 types use category templates (fallback.ts); swing trails, pooled slash arcs, root tendrils, ground scorch decals, weapon auras, Transizione flash (generic), snake-sword + chain extension morphs done | src/render/weapons/{index,types,forge,act1,act2,fallback,fx}.ts |
+| 8 | tests/weapons.test.ts (38 weapons + movesets valid, canon types, parry flags, damage formula, 49 transitions, every Art observable headless) | partial — all data checks + visuals for all 38; "Art observable" covers the 24 Act I + II Arts | tests/weapons.test.ts |
 
 ## Next
 
-1. Art VFX legibility pass in daylight: the Act I Art visuals exist but several read faintly on the bright sepia
-   Vetta/arena ground (additive light on a light floor): add a dark under-layer (alpha smoke ring / ground scorch decal)
-   under bright bursts, larger Primo Passo / Carica wake, Ruota d'Argento wheel held longer, Radici roots visible from
-   the follow camera; re-shoot each Art at its cue time (shoot script: scratchpad shoot.mjs, slow-mo 0.08–0.3).
-2. Act II weapon templates in story order (triplice_guinzaglio catene, brace_eterna spadone, tuono_spezzacielo
-   martello_da_guerra, brina_silente stocco, fenditura_ardente ascia_a_due_mani) + their 10 Art VFX + extend the
-   "Art observable" test to them.
-3. Balance check of catene / frusta / artigli multi-hit DPS with the bot (docs/WEAPONS.md open item).
-4. Act III–VII templates (remaining 26 types) + Art VFX for the remaining Arts; Transizione flashes per category pair
-   (today: one generic flash + linking arc for all 49).
-5. Remaining morphs driven from sim state: shape-shifter forms, shears splitting, chakram / harpoon leaving the hand,
-   bow string draw, chains/whip extension (EXTENDING already covers frusta/catene/flagello once their templates read
-   `morph.extend`).
-6. tests/weapons.test.ts: "every Art observable" for all 78 Arts; weapon gallery screenshot of all 38.
+1. Act III weapon templates in story order + their Art VFX + extend the "Art observable" test (then Acts IV–VII:
+   26 types remain on category templates); Transizione flashes per category pair (today: one generic flash + linking
+   arc for all 49).
+2. Remaining morphs driven from sim state: shape-shifter forms, shears splitting, chakram / harpoon leaving the hand,
+   bow string draw; frusta / flagello templates read `morph.extend` (EXTEND_ANIM already covers whip/chain/hook/lash/
+   flail anims).
+3. tests/weapons.test.ts: "every Art observable" for all 78 Arts; weapon gallery screenshot of all 38.
+4. Balance follow-up: catene / frusta underperform against the Mostro di Magma with the perfect bot (eff 0.24 / 0.45,
+   11–23 hits taken): look at their lash recoveries and the bot's reach handling when Act II bosses are tuned.
 
 ## Notes
 
@@ -59,3 +54,43 @@ data/projectiles/weapons.yaml, src/render/weapons/**, locales/{it,en}/weapons.ya
   Scene in the Guardiano arena with a weapon: ~85 calls / ~120k tris.
 - Requests: docs/requests/weapons.md #3 resolved on the weapons side (art_* claimed), #4 satisfied by PortatoreVisual,
   new #7 for render-kit (polearm poses: lances point straight up in the thrust clip).
+- Chunk 2 (2026-11-04): **daylight legibility pass** (Next 1 of chunk 1). fx.ts: trails and slash arcs now blend
+  premultiplied (`LIGHT_OVER_DARK`: rgb added, alpha darkens what is behind, `uDark` 0.3 trails / 0.4 arcs / 0.55 for
+  the Ruota wheel), so bright light reads on bright sand and snow; `under()` puts a soft dark sprite (alpha layer,
+  drawn before the additive one) behind every bright burst; new pooled `Scorches` (18-slot InstancedMesh, one draw
+  call): ground decals with a ragged dark body + tinted rim (burns, rime, mud, craters, skid marks); dash wakes are
+  bigger (bright streaks over dark under-streaks, ground dust, a skid scorch along the whole dash); the Ruota d'Argento
+  wheel is swept then HELD 0.32 s as a full disc edge with a ground ring; Radici roots close around the target's body
+  (radius >= body + 0.5 m, height scaled to the target), thicker, brighter rim/emissive, ground darkened for the whole
+  bind. `WeaponVisual.aura` (mist / ember / spark / drip shed along the blade line of the equipped weapon, x3 while
+  swinging, x4 under an Art or imbue) and `WeaponMorph.buff` (Lama Rovente imbue) added to the contract (types.ts).
+- Chunk 2: **Act II templates** (src/render/weapons/act2.ts, story order): catene (Triplice Guinzaglio — three
+  black-iron chains of instanced oval links hung from three points of a heavy ring, hanging under gravity in the weapon
+  frame at rest, thrown out to 4.4 m fanned like three heads with a travelling whip wave on chain_/hook_/lash anims and
+  on its Arts, barbed hooks with ember eyes, heat glints only when they bite), spadone (Brace Eterna — dark red
+  flamberge whose whole blade snakes, an incandescent core strip in both fullers, additive shader flame sheets licking
+  both edges that grow under Lama Rovente, flame-tongue quillons, ember pommel), martello_da_guerra (Tuono Spezzacielo
+  — azure head bound in silver, octagonal striking face, back spike, forked storm runes, four live arcs re-placed along
+  the haft every few frames, spark aura), stocco (Brina Silente — ultra-thin translucent ice blade with a sliver of
+  light, swept frost-crystal hilt with knuckle bow, side rings and crystal finials, cold-breath mist aura at the point),
+  ascia_a_due_mani (Fenditura Ardente — bearded black volcanic-rock blade, noise-displaced, lava veins branching from
+  the haft and a molten line inside the edge with a slow heartbeat, charred haft, obsidian crown spike, lava drips).
+  High-quality triangles: 2868 / 2932 / 2308 / 1794 / 2130.
+- Chunk 2: **Act II Art visuals** (fx.ts): Tre Morsi (three alternating lashes, each ending in two ember jaws snapping
+  shut), Guinzaglio (three hooks on ember lines, taut flickering chains while the target is dragged, slam crater),
+  Onda Incandescente (tall cut into the ground, a burning furrow of scorches + flame tongues racing with the wave),
+  Lama Rovente (flame ring, ground burn, fire climbing the blade; edge flames grow for the imbue), Schianto Tonante
+  (sky bolt into the impact, eight forked ground cracks over dark under-streaks, scorched crater), Catena di Fulmini
+  (bolt into the raised hammer; the sim's lightning_arc draws the bounces), Affondo Gelido (frost wake + rime skid,
+  crystal burst with a hanging frost ring), Danza dei Cristalli (three needle lines of cold light ending in crystal
+  stars), Frattura Magmatica (axe bite, crack scorches tearing forward with the fissure, spatter and black smoke),
+  Eruzione (ember leap, crater, lava fountains, black smoke, rock).
+- Tests: tests/weapons.test.ts covers the 12 Act I + II weapons (24 Arts) in the Art-observable and budget tests (pulls
+  for grab_pull, freeze -> bound, hazards for ground waves, projectiles for Danza, lightning_arc for Catena), dedicated
+  templates, <= 3000 tris on high + trail colors, and the chains extending to > 4 m and falling back to hang.
+  The imbue burst is cast point-blank (1.2 m) in castArt, as it is a ring around the caster.
+- Chunk 2: **bot check of the multi-hit weapons** (chunk 1 open item): perfect bot, forced single-weapon loadouts
+  (weapon given before `runFight`), cerbero / mostro_di_magma / yeti x 2 seeds, eff = damage / (time x weapon damage):
+  catene 1.23 / 0.24 / 0.85, frusta 1.37 / 0.45 / 1.01, artigli 1.48 / 1.35 / 1.26 vs stocco 1.26 / 1.11 / 1.28,
+  katana 1.64 / 1.24 / 1.31, spadone 1.33 / 1.44 / 1.34, alabarda 1.28 / 1.11 / 1.10. No weapon dominates; no nerf.
+  Table + verdict in docs/WEAPONS.md. Script: scratchpad dpsbot.ts.

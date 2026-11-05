@@ -1,0 +1,17 @@
+# Act IV intro: the ship touches the shore of the new continent; the Sguardo del Giardiniere shrinks you to a tenth of
+# your size, inside a garden closed by an endless hedge (the zone itself keeps the player at 0.1 scale until Uruk falls).
+- id: act4_intro
+  skippable: true
+  steps:
+    - {fade: out, dur: 0.1}
+    - {camera: vista, dur: 0.1}
+    - {wait: 0.6}
+    - {fade: in, dur: 2.6}
+    - {title: story.atto4.titolo, dur: 4.2}
+    - {caption: story.atto4.intro.01, dur: 5.0}
+    - {event: cue, params: {id: sguardo_giardiniere}}
+    - {caption: story.atto4.intro.02, dur: 5.0}
+    - {event: set_scale, params: {scale: 0.1}}
+    - {caption: story.atto4.intro.03, dur: 5.0}
+    - {voce: voce.atto4.intro}
+    - {event: autosave, params: {reason: act}}

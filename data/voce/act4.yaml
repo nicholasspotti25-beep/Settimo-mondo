@@ -1,0 +1,4 @@
+# Voce dell'Alba lines at the Act IV altars (played once, when meditating there after the listed bosses fall).
+- {key: voce.atto4.trifoglio_altare, altar: altare_giardino_01, after: [kraken], priority: 1}
+- {key: voce.atto4.muschio_altare, altar: altare_giardino_02, after: [re_mantide], priority: 1}
+- {key: voce.atto4.radici_altare, altar: altare_giardino_03, after: [coleottero_imperiale], priority: 1}

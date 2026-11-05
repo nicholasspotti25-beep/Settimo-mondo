@@ -1,0 +1,17 @@
+# Re Mantide (secondary): he studies you like a rare insect before striking; defeated, he opens the first gate.
+- id: re_mantide_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 0.1}
+    - {caption: story.atto4.mantide_intro, dur: 3.6}
+    - {say: boss.re_mantide.intro, speaker: re_mantide}
+    - {event: start_fight}
+- id: re_mantide_defeat
+  skippable: true
+  steps:
+    - {wait: 1.0}
+    - {say: boss.re_mantide.defeat, speaker: re_mantide}
+    - {event: cue, params: {id: mantide_gate_open}}
+    - {caption: story.atto4.primo_cancello, dur: 3.6}
+    - {voce: voce.atto4.mantide_caduta}
+    - {event: autosave, params: {reason: boss}}

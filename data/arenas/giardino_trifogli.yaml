@@ -1,3 +1,6 @@
+# Prato dei Trifogli — a meadow of giant clovers at the first gate (Re Mantide). The leaves arch overhead like vaults;
+# three clover stems stand inside the ring (cover from the petal fans; the mantis vanishes among the leaves and rises
+# behind you). Phase 2: cue only (the crown blooms; petals drift over the meadow).
 id: giardino_trifogli
 zone: little_garden
 name_key: arena.giardino_trifogli.name
@@ -6,6 +9,9 @@ shape: circle
 radius: 13
 gate: {pos: [-38, 0, -28], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
-obstacles: []
+surface: grass
+obstacles:
+  - {type: cylinder, c: [-31, 1.5, -9], r: 0.3, h: 3}
+  - {type: cylinder, c: [-46, 1.5, -11], r: 0.3, h: 3}
+  - {type: cylinder, c: [-36, 1.5, -3.5], r: 0.3, h: 3}
 builder: giardino_trifogli

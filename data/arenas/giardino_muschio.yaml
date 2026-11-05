@@ -1,3 +1,6 @@
+# Bosco di Muschio — a forest of moss at the second gate (Coleottero Imperiale): soft green carpet, sporophytes like
+# lamp posts, two mushroom stems inside the ring (cover from his charges). Phase 2: cue only (he opens his wings and the
+# spores rise in the buzz).
 id: giardino_muschio
 zone: little_garden
 name_key: arena.giardino_muschio.name
@@ -6,6 +9,8 @@ shape: circle
 radius: 13
 gate: {pos: [38, 0, -1], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
-obstacles: []
+surface: moss
+obstacles:
+  - {type: cylinder, c: [31.5, 1.2, 17], r: 0.45, h: 2.4}
+  - {type: cylinder, c: [45, 1.2, 8], r: 0.45, h: 2.4}
 builder: giardino_muschio

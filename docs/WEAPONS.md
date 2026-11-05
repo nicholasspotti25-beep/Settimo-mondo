@@ -75,7 +75,23 @@ safety, and the late weapons' raw damage is matched to their bosses' HP (TTK tar
 | brace_eterna | spadone | two_handed | 8 | 50 | 3 | 1.56 | 1.98 | 77.9 | 19.3 |  |
 
 Reading the table: ranged 1.2–1.5x, catalysts 1.3–1.9x, polearms 1.7–2.5x, two-handed 1.6–2.2x light but the best heavy
-hits, one-handed 1.5–2.7x, fists 2.4–3.6x. **Open balance item (next chunk):** catene (3.27x), frusta (3.23x) and artigli
-(3.55x) count every multi-hit tick (`hits`) as landing; on a real boss not every tick connects, but whips and chains
-also have the longest melee reach, so their `damage_mult` per tick must be checked with the balance bot (target: flexible
-<= 2.4x, fists <= 3.0x) before they ship.
+hits, one-handed 1.5–2.7x, fists 2.4–3.6x. The analytic catene (3.27x), frusta (3.23x) and artigli (3.55x) count every
+multi-hit tick (`hits`) as landing; the bot check below shows that on real bosses they do not.
+
+## Bot check of the multi-hit weapons (chunk 2, 2026-11-04)
+
+Perfect bot profile (tools/bot/bot.ts `runFight`), single-weapon loadout given before the fight, 2 seeds per cell;
+`eff` = damage dealt / (fight time x weapon damage), i.e. the real damage per second per point of weapon damage,
+including dodging, repositioning and the bot's Arts. Same boss, different weapons, so the rows compare directly.
+
+| boss (D) | catene | frusta | artigli | stocco | katana | spadone | alabarda |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| cerbero (7) | 1.23 | 1.37 | 1.48 | 1.26 | 1.64 | 1.33 | 1.28 |
+| mostro_di_magma (9) | 0.24 (lost 2/2) | 0.45 (lost 1/2) | 1.35 | 1.11 | 1.24 | 1.44 | 1.11 |
+| yeti (12) | 0.85 | 1.01 | 1.26 | 1.28 | 1.31 | 1.34 | 1.10 |
+
+Verdict: **no nerf**. Not every tick of a lash or claw flurry connects, so the flexible weapons land at or below the
+balanced and heavy ones (artigli sit with the katana, the best light DPS of the group, as a fast weapon should).
+Follow-up (not a dominance problem): catene and frusta underperform against the Mostro di Magma (long recoveries of
+the lashes against its lava bursts and slams; the bot takes 11–23 hits) — revisit their recovery / the bot's reach
+handling when the Act II bosses are tuned. Script: scratchpad `dpsbot.ts` (bosses, weapons and seeds as arguments).

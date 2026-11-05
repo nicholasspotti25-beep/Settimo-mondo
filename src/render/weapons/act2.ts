@@ -98,8 +98,8 @@ export const catene: WeaponTemplate = (def, ctx) => {
   const link = geo.torus(0.021, 0.0052, 3, f.q >= 0.8 ? 5 : 4);
   link.scale(1, 1.75, 1);
   link.rotateX(Math.PI / 2);
-  geo.gradient(link, 1, shade(iron, 1.7), mix(iron, ember, 0.22));
-  const linkMat = ctx.kit.surface({ vertexColors: true, metalness: 0.75, roughness: 0.48, detail: 'metal', detailScale: 9, detailStrength: 0.3, rim: 1.2, emissive: ember, emissiveIntensity: 0.12 });
+  geo.gradient(link, 1, shade(iron, 2.2), mix(iron, '#3a3036', 0.5));
+  const linkMat = ctx.kit.surface({ vertexColors: true, metalness: 0.8, roughness: 0.4, detail: 'metal', detailScale: 9, detailStrength: 0.3, rim: 1.3, emissive: ember, emissiveIntensity: 0.04 });
   const links = new THREE.InstancedMesh(link, linkMat, NC * NL);
   links.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   links.frustumCulled = false;
@@ -121,7 +121,7 @@ export const catene: WeaponTemplate = (def, ctx) => {
       _g.applyQuaternion(_qw.invert());
     }
     const e = smooth(extNow);
-    const restGap = LL * 0.62, L = EXT;
+    const restGap = LL * 0.5, L = EXT;
     const mid = (NC - 1) / 2;
     for (let ci = 0; ci < NC; ci++) {
       const fan = (ci - mid) * (0.34 + sw * 0.12);
@@ -130,7 +130,8 @@ export const catene: WeaponTemplate = (def, ctx) => {
         const t = i / NL, o = (ci * (NL + 1) + i) * 3;
         // hanging: straight down from the ring, a slow sway, the three chains a little apart
         const sway = Math.sin(time * 1.6 + ph) * 0.05 * t;
-        const rx = (ci - mid) * 0.02 + sway, ry = 0, rz = anchorZ;
+        // hung from three points of the ring, splaying a little as they fall
+        const rx = (ci - mid) * (0.03 + t * 0.07) + sway, ry = (ci - mid) * t * 0.04, rz = anchorZ;
         const hx = rx + _g.x * restGap * i, hy = ry + _g.y * restGap * i, hz = rz + _g.z * restGap * i;
         // thrown: out along +Z to the reach, fanned in the edge plane, a travelling whip wave
         const amp = (0.14 + sw * 0.12) * Math.sin(t * Math.PI);
@@ -183,7 +184,8 @@ export const catene: WeaponTemplate = (def, ctx) => {
       extNow += (ext - extNow) * k;
       if (extNow < 1e-3) extNow = 0;
       place();
-      linkMat.emissiveIntensity = 0.1 + extNow * 0.35 + art * 0.9 + Math.max(0, Math.sin(t * 6.1)) * 0.05;
+      // heat glints in the links only when they bite (lashes, Arts)
+      linkMat.emissiveIntensity = 0.04 + extNow * 0.3 + art * 0.8 + Math.max(0, Math.sin(t * 6.1)) * 0.03;
       if (glow) glow.emissiveIntensity = 1.8 + art * 2.5 + Math.sin(t * 4.3) * 0.3;
     },
   }, [link, linkMat, links]);
@@ -221,7 +223,7 @@ void main() {
 
 export const spadone: WeaponTemplate = (def, ctx) => {
   const c = colorsOf(def);
-  const f = new Forge(ctx, { metalRough: 0.34, metalness: 0.7, glowIntensity: 2.4 });
+  const f = new Forge(ctx, { metalRough: 0.38, metalness: 0.5, glowIntensity: 2.4 });
   const L = num(def, 'blade_len', 1.45), W = num(def, 'blade_w', 0.14), waves = num(def, 'wave', 7);
   const z0 = 0.2, th = 0.016;
   const steel = c.primary, dark = c.secondary, ember = c.accent;
@@ -244,10 +246,11 @@ export const spadone: WeaponTemplate = (def, ctx) => {
   const prof: [number, number][] = [[0, W * 0.5], [0.06, W * 0.47], [0.7, W * 0.4], [0.9, W * 0.26], [1, 0.001]];
   const wav = (t: number): number => Math.sin(t * waves * Math.PI) * W * 0.11 * (1 - t * 0.55) * smooth(t / 0.08);
   const bl = bladeZ(L, prof, th, f.seg(34, 20), wav);
-  f.grad('metal', bl, 2, shade(steel, 1.2), mix(steel, '#a04a30', 0.35), [0, 0, z0]);
+  f.grad('metal', bl, 2, mix(steel, '#8a2a1a', 0.35), mix(steel, '#c8603a', 0.5), [0, 0, z0]);
   // the incandescent core: a narrow glowing strip in the fuller of each flat, white-hot at the hilt, ember toward the point
   for (const s of [-1, 1]) {
-    const core = stripX(s * (th * 0.5 + 0.0006), z0 + 0.02, L * 0.84, f.seg(40, 18), (t) => W * (0.075 - t * 0.04), (t) => wav((0.02 + t * L * 0.84) / L));
+    // geo.blade adds a bevel of 0.42 x th on each flat: the strip sits just outside it
+    const core = stripX(s * (th * 0.92 + 0.0008), z0 + 0.02, L * 0.84, f.seg(40, 18), (t) => W * (0.075 - t * 0.04), (t) => wav((0.02 + t * L * 0.84) / L));
     f.grad('glow', core, 2, '#fff0b0', ember);
   }
   // flame sheets along both edges (own additive material)
@@ -418,11 +421,11 @@ export const stocco: WeaponTemplate = (def, ctx) => {
   const bladeGeo = bladeZ(L, prof, 0.0075, f.seg(16, 8));
   geo.gradient(bladeGeo, 2, mix(deep, ice, 0.55), mix(ice, '#ffffff', 0.4));
   bladeGeo.translate(0, 0, z0);
-  const iceMat = ctx.kit.surface({ vertexColors: true, metalness: 0.1, roughness: 0.06, transparent: true, opacity: 0.78, emissive: '#8fc8ff', emissiveIntensity: 0.45, rim: 2.6, detail: 'crystal', detailScale: 6, detailStrength: 0.25 });
+  const iceMat = ctx.kit.surface({ vertexColors: true, metalness: 0.1, roughness: 0.06, transparent: true, opacity: 0.86, emissive: '#9fd4ff', emissiveIntensity: 0.9, rim: 2.8, detail: 'crystal', detailScale: 6, detailStrength: 0.25 });
   const blade = new THREE.Mesh(bladeGeo, iceMat);
   blade.frustumCulled = false;
   blade.renderOrder = 2;
-  f.add('glow', inlay([[0, 0, z0 + 0.02], [0, 0, z0 + L * 0.93]], 0.0015, 3), '#ffffff');
+  f.add('glow', inlay([[0, 0, z0 + 0.02], [0, 0, z0 + L * 0.93]], 0.0026, 3), '#ffffff');
   const b = f.build();
   b.root.add(blade);
   b.triangles += geo.triCount(bladeGeo);
@@ -436,7 +439,7 @@ export const stocco: WeaponTemplate = (def, ctx) => {
       art = m.art;
     },
     update(_dt, time) {
-      iceMat.emissiveIntensity = 0.4 + Math.sin(time * 1.7) * 0.08 + art * 1.4;
+      iceMat.emissiveIntensity = 0.85 + Math.sin(time * 1.7) * 0.1 + art * 1.4;
       if (glow) glow.emissiveIntensity = 1.4 + Math.sin(time * 2.3 + 1) * 0.2 + art * 2.4;
     },
   }, [bladeGeo, iceMat]);

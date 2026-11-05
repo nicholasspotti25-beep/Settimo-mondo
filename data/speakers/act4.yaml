@@ -1,0 +1,5 @@
+# Act IV speakers (synth vocal tones). Little Garden's court speaks; the Queen of the ants does not.
+# Re Mantide: a dry, precise voice with a click at the edges, like a naturalist murmuring notes.
+- {id: re_mantide, name_key: boss.re_mantide.name, color: '#7fe0a8', voice: {base: 128, formant: 1.3, wave: triangle, vibrato: 0.006, breath: 0.25}}
+# Coleottero Imperiale: a deep, resonant voice with a buzz underneath, slow and formal.
+- {id: coleottero_imperiale, name_key: boss.coleottero_imperiale.name, color: '#5a8cff', voice: {base: 70, formant: 0.8, wave: sawtooth, vibrato: 0.012, breath: 0.4}}

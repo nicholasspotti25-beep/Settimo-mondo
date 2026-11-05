@@ -1,0 +1,18 @@
+# Coleottero Imperiale (secondary): the general of Uruk's court; defeated, he salutes a worthy opponent and opens the
+# second gate.
+- id: coleottero_imperiale_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 0.1}
+    - {caption: story.atto4.coleottero_intro, dur: 3.6}
+    - {say: boss.coleottero_imperiale.intro, speaker: coleottero_imperiale}
+    - {event: start_fight}
+- id: coleottero_imperiale_defeat
+  skippable: true
+  steps:
+    - {wait: 1.0}
+    - {say: boss.coleottero_imperiale.defeat, speaker: coleottero_imperiale}
+    - {event: cue, params: {id: coleottero_gate_open}}
+    - {caption: story.atto4.secondo_cancello, dur: 3.6}
+    - {voce: voce.atto4.coleottero_caduto}
+    - {event: autosave, params: {reason: boss}}

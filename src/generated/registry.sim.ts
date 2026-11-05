@@ -3,47 +3,51 @@ import type { BehaviorRegistry } from '../sim/behavior';
 import b0 from '../content/bosses/caronte/behavior';
 import b1 from '../content/bosses/cavaliere_errante/behavior';
 import b2 from '../content/bosses/cerbero/behavior';
-import b3 from '../content/bosses/elder_tree/behavior';
-import b4 from '../content/bosses/gigante_di_fuoco/behavior';
-import b5 from '../content/bosses/grande_lupo/behavior';
-import b6 from '../content/bosses/grande_lupo/minion_spirito_lupo';
-import b7 from '../content/bosses/grande_orso/behavior';
-import b8 from '../content/bosses/great_devourer/behavior';
-import b9 from '../content/bosses/guardiano_rocca_di_brina/behavior';
-import b10 from '../content/bosses/ice/behavior';
-import b11 from '../content/bosses/loki/behavior';
-import b12 from '../content/bosses/loki/minion_loki_copy';
-import b13 from '../content/bosses/lucifero_1/behavior';
-import b14 from '../content/bosses/mostro_della_palude/behavior';
-import b15 from '../content/bosses/mostro_della_palude/minion_annegato_canne';
-import b16 from '../content/bosses/mostro_della_palude/minion_annegato_lanterna';
-import b17 from '../content/bosses/mostro_della_palude/minion_annegato_ossa';
-import b18 from '../content/bosses/mostro_di_magma/behavior';
-import b19 from '../content/bosses/pyro/behavior';
-import b20 from '../content/bosses/thunder/behavior';
-import b21 from '../content/bosses/yeti/behavior';
+import b3 from '../content/bosses/coleottero_imperiale/behavior';
+import b4 from '../content/bosses/elder_tree/behavior';
+import b5 from '../content/bosses/gigante_di_fuoco/behavior';
+import b6 from '../content/bosses/grande_lupo/behavior';
+import b7 from '../content/bosses/grande_lupo/minion_spirito_lupo';
+import b8 from '../content/bosses/grande_orso/behavior';
+import b9 from '../content/bosses/great_devourer/behavior';
+import b10 from '../content/bosses/guardiano_rocca_di_brina/behavior';
+import b11 from '../content/bosses/ice/behavior';
+import b12 from '../content/bosses/loki/behavior';
+import b13 from '../content/bosses/loki/minion_loki_copy';
+import b14 from '../content/bosses/lucifero_1/behavior';
+import b15 from '../content/bosses/mostro_della_palude/behavior';
+import b16 from '../content/bosses/mostro_della_palude/minion_annegato_canne';
+import b17 from '../content/bosses/mostro_della_palude/minion_annegato_lanterna';
+import b18 from '../content/bosses/mostro_della_palude/minion_annegato_ossa';
+import b19 from '../content/bosses/mostro_di_magma/behavior';
+import b20 from '../content/bosses/pyro/behavior';
+import b21 from '../content/bosses/re_mantide/behavior';
+import b22 from '../content/bosses/thunder/behavior';
+import b23 from '../content/bosses/yeti/behavior';
 
 export const BEHAVIORS: BehaviorRegistry = {
   "caronte": b0,
   "cavaliere_errante": b1,
   "cerbero": b2,
-  "elder_tree": b3,
-  "gigante_di_fuoco": b4,
-  "grande_lupo": b5,
-  "grande_lupo:spirito_lupo": b6,
-  "grande_orso": b7,
-  "great_devourer": b8,
-  "guardiano_rocca_di_brina": b9,
-  "ice": b10,
-  "loki": b11,
-  "loki:loki_copy": b12,
-  "lucifero_1": b13,
-  "mostro_della_palude": b14,
-  "mostro_della_palude:annegato_canne": b15,
-  "mostro_della_palude:annegato_lanterna": b16,
-  "mostro_della_palude:annegato_ossa": b17,
-  "mostro_di_magma": b18,
-  "pyro": b19,
-  "thunder": b20,
-  "yeti": b21,
+  "coleottero_imperiale": b3,
+  "elder_tree": b4,
+  "gigante_di_fuoco": b5,
+  "grande_lupo": b6,
+  "grande_lupo:spirito_lupo": b7,
+  "grande_orso": b8,
+  "great_devourer": b9,
+  "guardiano_rocca_di_brina": b10,
+  "ice": b11,
+  "loki": b12,
+  "loki:loki_copy": b13,
+  "lucifero_1": b14,
+  "mostro_della_palude": b15,
+  "mostro_della_palude:annegato_canne": b16,
+  "mostro_della_palude:annegato_lanterna": b17,
+  "mostro_della_palude:annegato_ossa": b18,
+  "mostro_di_magma": b19,
+  "pyro": b20,
+  "re_mantide": b21,
+  "thunder": b22,
+  "yeti": b23,
 };

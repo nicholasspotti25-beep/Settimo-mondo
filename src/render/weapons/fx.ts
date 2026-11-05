@@ -633,7 +633,7 @@ export function installWeaponFxImpl(fx: FxRenderer): void {
       off.update(sdt);
       arcs.update(sdt);
       scorches.update(sdt);
-      roots.update(dt, time);
+      roots.update(sdt, time);
       aura(fx, w, sim, sdt);
       return true;
     },
@@ -1217,6 +1217,321 @@ const ART_FX: Record<string, ArtFx> = {
     }
     fx.ring(p.pos.x, sim.groundAt(p.pos.x, p.pos.z), p.pos.z, r * 1.1, water, 0.5, 0.6);
     c.scorch.spawn(p.pos.x, gy(sim, p.pos.x, p.pos.z), p.pos.z, r * 1.05, 1.4, water, 1.1, 0.6, 0.6);
+  },
+
+  /* --- Triplice Guinzaglio --------------------------------------------------------------------------------------- */
+  // Tre Morsi: three lashes, one per chain, each ending in a bite of ember jaws at the edge of the fan (three heads)
+  art_tre_morsi: (c) => {
+    const { fx, sim } = c;
+    if (c.phase !== 'strike') return;
+    const p = sim.player, s = p.scale;
+    const ember = fx.color('#ff5a2a'), hot = fx.color('#ffd0a0');
+    const reach = artParam(sim, c, 'reach', 5) * s, ang = (artParam(sim, c, 'angle', 70) * PI) / 180;
+    const k = c.k, dir = k % 2 ? -1 : 1, last = k >= c.n - 1;
+    const h = (0.75 + k * 0.32) * s;
+    c.arcs.spawn(p.pos.x, p.pos.y + h, p.pos.z, p.yaw, 0, dir * 0.15, reach, 0.34 * s, PI / 2 + dir * ang * 0.8, PI / 2 - dir * ang * 0.8, hot, ember, 0.1, 0.36, 0, 1.15, 0.6);
+    // the bite, where the lash ends: two jaws snapping shut
+    const by = p.yaw - dir * ang * 0.45;
+    const bx = p.pos.x + Math.sin(by) * reach * 0.86, bz = p.pos.z + Math.cos(by) * reach * 0.86, bh = p.pos.y + h;
+    const jr = (last ? 0.85 : 0.6) * s;
+    under(fx, bx, bh, bz, jr * 4.2, 0.36, ember, 0.6);
+    c.arcs.spawn(bx, bh + jr * 0.35, bz, by, 2, 0, jr, jr * 0.32, PI * 0.08, PI * 0.92, hot, ember, 0.07, 0.3, 0.04, 1.2, 0.8);
+    c.arcs.spawn(bx, bh - jr * 0.35, bz, by, 2, 0, jr, jr * 0.32, -PI * 0.08, -PI * 0.92, hot, ember, 0.07, 0.3, 0.04, 1.2, 0.8);
+    fx.flash(bx, bh, bz, ember, last ? 3.4 : 2.4, 0.3, CELL.rays, 2);
+    fx.sparks(bx, bh, bz, hot, last ? 24 : 14, 8, 0.16);
+    fx.puff(bx, bh - 0.3, bz, fx.color('#2a1a14'), last ? 5 : 3, 0.6, 0.4, 0.6);
+  },
+  // Guinzaglio: three hooks fly out on ember lines, bite the target, drag it in along taut chains, and slam it down
+  art_guinzaglio: (c) => {
+    const { fx, sim } = c;
+    const ember = fx.color('#ff5a2a'), hot = fx.color('#ffd0a0');
+    const p = sim.player, s = p.scale;
+    if (c.phase === 'cast') {
+      const range = Math.max(3, c.k), y = p.pos.y + 1.2 * s;
+      for (let i = 0; i < 3; i++) {
+        const a = p.yaw + (i - 1) * 0.12, sp = range / 0.24;
+        const vx = Math.sin(a) * sp, vz = Math.cos(a) * sp;
+        fx.smoke.emitRaw(p.pos.x, y, p.pos.z, vx, 0, vz, 0.24, 0.55, 0.35, 0.08, 0.04, 0.03, 0.45, CELL.spark, 0, 0, 0, 0.05, 0.02);
+        fx.particles.emitRaw(p.pos.x, y, p.pos.z, vx, 0, vz, 0.24, 0.36, 0.22, hot.r, hot.g, hot.b, 1, CELL.spark, 0, 0, 0, 0.05, 0.02);
+      }
+      fx.flash(p.pos.x + Math.sin(p.yaw) * 0.8, y, p.pos.z + Math.cos(p.yaw) * 0.8, ember, 1.5, 0.2, CELL.star);
+    } else if (c.phase === 'catch') {
+      const h = Math.max(1.5, c.n), cy = c.y + h * 0.55;
+      under(fx, c.x, cy, c.z, 3.6, 0.4, ember, 0.6);
+      fx.flash(c.x, cy, c.z, ember, 3.0, 0.35, CELL.rays, 2);
+      fx.sparks(c.x, cy, c.z, hot, 22, 8, 0.16);
+      // the taut chains: ember links flickering along the three lines while the target is dragged in
+      const tgt = sim.nearestEnemy(e3(c.x, c.y, c.z), 3, 0, PI);
+      let t = 0;
+      fx.spawn({
+        update: (_dt, sm) => {
+          t += SIM_DT;
+          const pl = sm.player;
+          if (!tgt || !tgt.alive || pl.state !== 'art' || SIM_DT <= 0) return t < 0.5 && pl.state === 'art';
+          const f = fwd(pl.yaw);
+          const ax = pl.pos.x + f.x * 0.5, ay = pl.pos.y + 1.15 * pl.scale, az = pl.pos.z + f.z * 0.5;
+          const tx = tgt.pos.x, ty = tgt.pos.y + tgt.height * tgt.scale * 0.5, tz = tgt.pos.z;
+          for (let ci = 0; ci < 3; ci++) {
+            const lat = (ci - 1) * 0.3;
+            for (let j = 0; j < 3; j++) {
+              const u = rnd(), sag = Math.sin(u * PI) * 0.35;
+              const x = ax + (tx - ax) * u + f.z * lat * Math.sin(u * PI), y = ay + (ty - ay) * u - sag, z = az + (tz - az) * u - f.x * lat * Math.sin(u * PI);
+              fx.particles.emitRaw(x, y, z, 0, 0, 0, 0.07, 0.16, 0.12, ember.r, ember.g, ember.b, 1, CELL.dot, 0, 0, 0, 0, 0.01);
+            }
+          }
+          return t < 0.5;
+        },
+        dispose: () => undefined,
+      });
+    } else if (c.phase === 'throw') {
+      const y = gy(sim, c.x, c.z);
+      under(fx, c.x, c.y + 1.0, c.z, 4.6, 0.45, ember, 0.65);
+      c.scorch.spawn(c.x, y, c.z, 2.4, 1.8, ember, 1.3, 0, 0.9);
+      fx.flash(c.x, c.y + 1.0, c.z, fx.color('#ffffff'), 2.6, 0.22, CELL.star, 3);
+      fx.flash(c.x, c.y + 1.0, c.z, ember, 4.4, 0.42, CELL.rays, -2);
+      fx.sparks(c.x, c.y + 0.6, c.z, hot, 30, 10, 0.18);
+      fx.shards(c.x, y + 0.2, c.z, fx.color('#2a2220'), 14, 6, 0.3);
+      fx.puff(c.x, y, c.z, fx.color('#3a2a22'), 10, 1.1, 1.4, 0.6);
+    } else if (c.phase === 'miss') {
+      fx.motes(c.x, c.y + 1, c.z, ember, 6, 0.4, 0.6, 0.1);
+    }
+  },
+
+  /* --- Brace Eterna ---------------------------------------------------------------------------------------------- */
+  // Onda Incandescente: a tall cut into the ground, then a burning furrow racing ahead with the wave of fire
+  art_onda_incandescente: (c) => {
+    const { fx, sim } = c;
+    if (c.phase !== 'release') return;
+    const p = sim.player, s = p.scale, f = fwd(p.yaw);
+    const fx0 = f.x, fz0 = f.z, x0 = p.pos.x, z0 = p.pos.z, yaw0 = p.yaw;
+    const len = Math.max(4, c.k), speed = Math.max(4, c.n), width = artParam(sim, c, 'width', 2.4) * s;
+    const ember = fx.color('#ff6a1a'), hot = fx.color('#ffd27a');
+    c.arcs.spawn(x0, p.pos.y + 0.9 * s, z0, yaw0, 1, 0, 2.5 * s, 1.0 * s, PI * 0.72, -0.35, hot, ember, 0.11, 0.42, 0, 1.1);
+    const gx = x0 + fx0 * 1.4, gz = z0 + fz0 * 1.4, g0 = gy(sim, gx, gz);
+    under(fx, gx, g0 + 0.5, gz, 3.4, 0.4, ember, 0.6);
+    fx.flash(gx, g0 + 0.5, gz, hot, 2.6, 0.3, CELL.rays, 2);
+    const N = 7;
+    for (let i = 0; i < N; i++) {
+      const d = 1.2 + (len - 1.2) * (i / (N - 1));
+      later(c, d / speed, (sm) => {
+        const x = x0 + fx0 * d, z = z0 + fz0 * d, y = gy(sm, x, z);
+        c.scorch.spawn(x, y, z, width * 0.5, 3.4, ember, 1.4, 0, 0.85, 1.4, yaw0);
+        for (let j = 0; j < fxN(fx, 8); j++) {
+          fx.particles.emitRaw(x + jit() * width * 0.4, y + 0.1, z + jit() * width * 0.4, jit() * 0.6, 2.5 + rnd() * 2.5, jit() * 0.6, 0.45 + rnd() * 0.3, 0.6, 0.16,
+            ember.r, ember.g, ember.b, 1, CELL.flame, -1.5, 1.2, jit() * 2, 0, 0.1);
+        }
+        fx.smoke.emitRaw(x, y + 0.7, z, jit() * 0.3, 1.4, jit() * 0.3, 1.4, 0.7, 2.0, 0.12, 0.09, 0.08, 0.45, CELL.smoke, -0.3, 1, jit(), 0, 0.15);
+      });
+    }
+  },
+  // Lama Rovente: the core's fire bursts out in a ring of flame and climbs the blade (the edge flames grow for the imbue)
+  art_lama_rovente: (c) => {
+    const { fx, sim } = c;
+    if (c.phase !== 'ignite') return;
+    const p = sim.player, r = Math.max(1.5, c.k);
+    const ember = fx.color('#ff6a1a'), hot = fx.color('#ffd27a');
+    const y = gy(sim, p.pos.x, p.pos.z);
+    under(fx, p.pos.x, p.pos.y + 1.1, p.pos.z, r * 1.8, 0.45, ember, 0.55);
+    c.scorch.spawn(p.pos.x, y, p.pos.z, r, 2.6, ember, 1.4, 0.3, 0.9);
+    fx.ring(p.pos.x, y, p.pos.z, r, ember, 0.5, 1.2, 0, 0.4);
+    for (let i = 0, n = fxN(fx, 36); i < n; i++) {
+      const a = (i / n) * PI * 2, rr = r * (0.7 + rnd() * 0.25);
+      fx.particles.emitRaw(p.pos.x + Math.sin(a) * rr, y + 0.1, p.pos.z + Math.cos(a) * rr, Math.sin(a) * 1.5, 3 + rnd() * 3, Math.cos(a) * 1.5, 0.5 + rnd() * 0.3, 0.75, 0.2,
+        ember.r, ember.g, ember.b, 1, CELL.flame, -1.2, 1.4, jit() * 2, 0, 0.08);
+    }
+    const w = c.w;
+    if (w) {
+      w.root.updateWorldMatrix(true, false);
+      _t.copy(w.tip).applyMatrix4(w.root.matrixWorld);
+      fx.flash(_t.x, _t.y, _t.z, fx.color('#ffffff'), 1.8, 0.24, CELL.star, 3);
+      fx.flash(_t.x, _t.y, _t.z, ember, 3.2, 0.4, CELL.rays, -2);
+      let t = 0;
+      fx.spawn({
+        update: (_dt, sm) => {
+          t += SIM_DT;
+          const ww = playerWeapon(sm, fx.group.parent);
+          if (!ww) return false;
+          ww.root.updateWorldMatrix(true, false);
+          _b.copy(ww.base).applyMatrix4(ww.root.matrixWorld);
+          _t.copy(ww.tip).applyMatrix4(ww.root.matrixWorld);
+          for (let i = 0; i < 3; i++) {
+            const k = Math.min(1, t / 0.5) * rnd();
+            fx.particles.emitRaw(_b.x + (_t.x - _b.x) * k, _b.y + (_t.y - _b.y) * k, _b.z + (_t.z - _b.z) * k, jit() * 0.4, 1.2 + rnd(), jit() * 0.4, 0.35, 0.34, 0.1,
+              hot.r, hot.g, hot.b, 1, CELL.flame, -1, 1, jit() * 3, 0, 0.1);
+          }
+          return t < 0.7;
+        },
+        dispose: () => undefined,
+      });
+    }
+  },
+
+  /* --- Tuono Spezzacielo ----------------------------------------------------------------------------------------- */
+  // Schianto Tonante: a bolt from the sky into the impact, forked lightning cracks racing out over the ground
+  art_schianto_tonante: (c) => {
+    const { fx, sim } = c;
+    if (c.phase !== 'impact') return;
+    const r = Math.max(2, c.k), y = gy(sim, c.x, c.z);
+    const azure = fx.color('#5aa8ff'), pale = fx.color('#d8f0ff'), white = fx.color('#ffffff');
+    under(fx, c.x, y + 0.8, c.z, r * 1.6, 0.42, azure, 0.6);
+    c.scorch.spawn(c.x, y, c.z, r * 0.85, 2.4, azure, 1.5, 0, 0.95);
+    fx.flash(c.x, y + 0.8, c.z, white, 3.0, 0.2, CELL.star, 4);
+    fx.flash(c.x, y + 0.8, c.z, azure, r * 1.4, 0.4, CELL.rays, -2);
+    for (let i = 0; i < fxN(fx, 14); i++) {
+      const hy = 2 + rnd() * 10;
+      fx.particles.emitRaw(c.x + jit() * 0.3, y + hy, c.z + jit() * 0.3, 0, -60, 0, Math.min(0.16, hy / 60), 0.55, 0.3, pale.r, pale.g, pale.b, 1, CELL.spark, 0, 0, 0, 0.12, 0.01);
+    }
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * PI * 2 + jit() * 0.3;
+      for (let j = 0; j < fxN(fx, 6); j++) {
+        const sp = r * (2.2 + rnd() * 2.5), a2 = a + jit() * 0.25, vx = Math.sin(a2) * sp, vz = Math.cos(a2) * sp, life = 0.22 + rnd() * 0.1;
+        fx.smoke.emitRaw(c.x, y + 0.08, c.z, vx, 0, vz, life, 0.5, 0.16, 0.03, 0.05, 0.1, 0.45, CELL.spark, 0, 5, 0, 0.1, 0.01);
+        fx.particles.emitRaw(c.x, y + 0.08, c.z, vx, 0, vz, life, 0.28, 0.08, pale.r, pale.g, pale.b, 1, CELL.spark, 0, 5, 0, 0.1, 0.01);
+      }
+    }
+    fx.sparks(c.x, y + 0.5, c.z, white, 30, 11, 0.16);
+    fx.shards(c.x, y + 0.2, c.z, fx.color('#3a3a44'), 12, 6, 0.3);
+  },
+  // Catena di Fulmini: a falling bolt strikes the raised hammer; the charge leaps on to the targets (sim arcs)
+  art_catena_fulmini: (c) => {
+    const { fx, sim } = c;
+    if (c.phase !== 'cast') return;
+    const p = sim.player;
+    const azure = fx.color('#5aa8ff'), pale = fx.color('#d8f0ff');
+    let x = p.pos.x, y = p.pos.y + 2.2 * p.scale, z = p.pos.z;
+    if (c.w) {
+      c.w.root.updateWorldMatrix(true, false);
+      _t.copy(c.w.tip).applyMatrix4(c.w.root.matrixWorld);
+      x = _t.x; y = _t.y; z = _t.z;
+    }
+    under(fx, x, y, z, 3.2, 0.4, azure, 0.6);
+    fx.flash(x, y, z, fx.color('#ffffff'), 2.4, 0.25, CELL.star, 4);
+    fx.flash(x, y, z, azure, 4.0, 0.4, CELL.rays, -2);
+    for (let i = 0; i < fxN(fx, 12); i++) {
+      const hy = 1 + rnd() * 10;
+      fx.particles.emitRaw(x + jit() * 0.2, y + hy, z + jit() * 0.2, 0, -60, 0, Math.min(0.15, hy / 60), 0.5, 0.3, pale.r, pale.g, pale.b, 1, CELL.spark, 0, 0, 0, 0.12, 0.01);
+    }
+    fx.sparks(x, y, z, pale, 20, 8, 0.14);
+    const g = gy(sim, p.pos.x, p.pos.z);
+    fx.ring(p.pos.x, g, p.pos.z, 2.4, azure, 0.4, 0.4);
+    c.scorch.spawn(p.pos.x, g, p.pos.z, 1.7, 1.4, azure, 1.3, 0.6, 0.8);
+  },
+
+  /* --- Brina Silente --------------------------------------------------------------------------------------------- */
+  // Affondo Gelido: a frost wake and a rime streak on the ground, an ice-crystal burst at the point (the freeze is sim's)
+  art_affondo_gelido: (c) => {
+    const { fx, sim } = c;
+    const frost = fx.color('#bfe6ff'), deep = fx.color('#4a8ad8'), white = fx.color('#ffffff'), mist = fx.color('#e4f6ff');
+    if (c.phase === 'dash') {
+      wake(c, frost, 0.3, 150, 0.42, CELL.spark, 8, c.k, deep, null);
+      under(fx, c.x, c.y + 1.0, c.z, 1.8, 0.22, deep);
+      fx.flash(c.x, c.y + 1.0, c.z, white, 1.4, 0.2, CELL.star);
+      let t = 0;
+      fx.spawn({
+        update: (_dt, sm) => {
+          t += SIM_DT;
+          const pl = sm.player;
+          if (rnd() < SIM_DT * 40) fx.smoke.emitRaw(pl.pos.x + jit() * 0.3, pl.pos.y + 0.3 + rnd() * 1.2, pl.pos.z + jit() * 0.3, jit() * 0.3, 0.1, jit() * 0.3, 0.9, 0.3, 1.1, mist.r, mist.g, mist.b, 0.4, CELL.smoke, -0.1, 1.2, jit(), 0, 0.15);
+          return t < 0.32;
+        },
+        dispose: () => undefined,
+      });
+    } else if (c.phase === 'hit' || c.phase === 'shatter') {
+      const p = sim.player;
+      strikePoint(sim, artParam(sim, c, 'reach', 3.4) * p.scale * 0.8, _t);
+      under(fx, _t.x, _t.y, _t.z, 3.4, 0.42, deep, 0.6);
+      fx.flash(_t.x, _t.y, _t.z, white, 2.2, 0.24, CELL.star, 3);
+      fx.flash(_t.x, _t.y, _t.z, frost, 3.6, 0.4, CELL.rays, -2);
+      fx.shards(_t.x, _t.y, _t.z, frost, 18, 7, 0.32);
+      c.arcs.spawn(_t.x, _t.y, _t.z, p.yaw, 2, 0, 0.9 * p.scale, 0.24, 0, PI * 2, white, frost, 0.08, 0.55, 0.16, 1.0, 0.9);
+      fx.puff(_t.x, _t.y - 0.4, _t.z, mist, 8, 0.8, 0.8, 0.3);
+      c.scorch.spawn(_t.x, gy(sim, _t.x, _t.z), _t.z, 1.3, 2.4, frost, 1.6, 0, 0.6);
+    }
+  },
+  // Danza dei Cristalli: three needle thrusts, each a line of cold light ending in a crystal star (the shards fly as projectiles)
+  art_danza_cristalli: (c) => {
+    const { fx, sim } = c;
+    if (c.phase !== 'strike') return;
+    const p = sim.player, s = p.scale, f = fwd(p.yaw);
+    const fx0 = f.x, fz0 = f.z;
+    const frost = fx.color('#bfe6ff'), deep = fx.color('#4a8ad8'), white = fx.color('#ffffff');
+    const reach = artParam(sim, c, 'reach', 3.3) * s;
+    const lat = ((c.k % 3) - 1) * 0.22 * s, rx = Math.cos(p.yaw), rz = -Math.sin(p.yaw);
+    const ox = p.pos.x + rx * lat, oz = p.pos.z + rz * lat, oy = p.pos.y + 1.15 * s;
+    for (let i = 0; i < fxN(fx, 6); i++) {
+      const sp = 26 + rnd() * 10, d0 = 0.5 + rnd() * 0.4, life = reach / sp;
+      fx.smoke.emitRaw(ox + fx0 * d0, oy, oz + fz0 * d0, fx0 * sp, 0, fz0 * sp, life, 0.5, 0.2, 0.03, 0.06, 0.12, 0.4, CELL.spark, 0, 0, 0, 0.12, 0.01);
+      fx.particles.emitRaw(ox + fx0 * d0, oy, oz + fz0 * d0, fx0 * sp, 0, fz0 * sp, life, 0.3, 0.12, frost.r, frost.g, frost.b, 1, CELL.spark, 0, 0, 0, 0.12, 0.01);
+    }
+    const tx = ox + fx0 * reach, tz = oz + fz0 * reach;
+    under(fx, tx, oy, tz, 2.0, 0.32, deep);
+    fx.flash(tx, oy, tz, white, 1.5, 0.2, CELL.star, 6);
+    c.arcs.spawn(tx, oy, tz, p.yaw, 2, c.k * 0.6, 0.5 * s, 0.14, 0, PI * 2, white, frost, 0.06, 0.34, 0.08, 1.0, 0.9);
+    fx.shards(tx, oy, tz, frost, 6, 4, 0.22);
+  },
+
+  /* --- Fenditura Ardente ----------------------------------------------------------------------------------------- */
+  // Frattura Magmatica: the axe bites the ground; a glowing crack tears forward with the fissure, smoke and spatter
+  art_frattura_magmatica: (c) => {
+    const { fx, sim } = c;
+    if (c.phase !== 'release') return;
+    const p = sim.player, s = p.scale, f = fwd(p.yaw);
+    const fx0 = f.x, fz0 = f.z, x0 = p.pos.x, z0 = p.pos.z, yaw0 = p.yaw;
+    const len = Math.max(4, c.k), speed = Math.max(4, c.n), width = artParam(sim, c, 'width', 1.8) * s;
+    const linger = artParam(sim, c, 'linger_time', 3);
+    const lava = fx.color('#ff5a1a'), hot = fx.color('#ffb040'), rock = fx.color('#2a2220');
+    const bx = x0 + fx0 * 1.2, bz = z0 + fz0 * 1.2, by = gy(sim, bx, bz);
+    under(fx, bx, by + 0.4, bz, 3.0, 0.4, lava, 0.6);
+    fx.flash(bx, by + 0.4, bz, lava, 3.0, 0.35, CELL.rays, 2);
+    fx.shards(bx, by + 0.2, bz, rock, 14, 6, 0.3);
+    fx.sparks(bx, by + 0.3, bz, hot, 20, 8, 0.16);
+    const N = 9;
+    for (let i = 0; i < N; i++) {
+      const d = 1.0 + (len - 1.0) * (i / (N - 1));
+      later(c, d / speed, (sm) => {
+        const x = x0 + fx0 * d, z = z0 + fz0 * d, y = gy(sm, x, z);
+        c.scorch.spawn(x, y, z, width * 0.42, linger + 1.2, lava, 1.7, 0, 0.95, 2.2, yaw0 + jit() * 0.25);
+        for (let j = 0; j < fxN(fx, 5); j++) {
+          const col = j % 2 ? hot : lava;
+          fx.particles.emitRaw(x + jit() * 0.4, y + 0.1, z + jit() * 0.4, jit() * 1.5, 3 + rnd() * 3, jit() * 1.5, 0.7 + rnd() * 0.3, 0.24, 0.12, col.r, col.g, col.b, 1, CELL.blob, 9, 0.6, 0, 0.03, 0.03);
+        }
+        fx.smoke.emitRaw(x, y + 0.5, z, jit() * 0.3, 1.2, jit() * 0.3, 1.6, 0.6, 2.0, 0.1, 0.08, 0.07, 0.5, CELL.smoke, -0.3, 1, jit(), 0, 0.15);
+      });
+    }
+  },
+  // Eruzione: a leap trailing embers, then the ground erupts: a crater, lava fountains, black smoke and rock
+  art_eruzione: (c) => {
+    const { fx, sim } = c;
+    const lava = fx.color('#ff5a1a'), hot = fx.color('#ffb040'), smoke = fx.color('#1a1412');
+    if (c.phase === 'leap') {
+      fx.puff(c.x, c.y, c.z, fx.color('#3a2a22'), 10, 0.9, 1.0, 0.5);
+      const dur = Math.max(0.2, c.n);
+      let t = 0;
+      fx.spawn({
+        update: (_dt, sm) => {
+          t += SIM_DT;
+          const pl = sm.player;
+          if (rnd() < SIM_DT * 70) fx.particles.emitRaw(pl.pos.x + jit() * 0.4, pl.pos.y + 0.6 + rnd() * 1.2, pl.pos.z + jit() * 0.4, jit() * 0.6, 0.4, jit() * 0.6, 0.45, 0.16, 0.05, hot.r, hot.g, hot.b, 1, CELL.spark, -0.5, 1.5, 0, 0.05, 0.03);
+          if (rnd() < SIM_DT * 20) fx.smoke.emitRaw(pl.pos.x, pl.pos.y + 1, pl.pos.z, 0, 0.3, 0, 0.8, 0.4, 1.0, 0.1, 0.08, 0.07, 0.4, CELL.smoke, 0, 1, jit(), 0, 0.15);
+          return t < dur;
+        },
+        dispose: () => undefined,
+      });
+    } else if (c.phase === 'impact') {
+      const r = Math.max(2, c.k), y = gy(sim, c.x, c.z);
+      under(fx, c.x, y + 1, c.z, r * 1.8, 0.5, lava, 0.65);
+      c.scorch.spawn(c.x, y, c.z, r * 0.95, 3.6, lava, 1.8, 0, 1.0);
+      fx.flash(c.x, y + 1, c.z, fx.color('#ffffff'), 3.2, 0.22, CELL.star, 4);
+      fx.flash(c.x, y + 1, c.z, lava, r * 1.5, 0.45, CELL.rays, -2);
+      for (let i = 0; i < fxN(fx, 56); i++) {
+        const a = rnd() * PI * 2, sp = 2 + rnd() * r * 1.4, col = i % 3 ? lava : hot;
+        fx.particles.emitRaw(c.x + Math.sin(a) * 0.5, y + 0.3, c.z + Math.cos(a) * 0.5, Math.sin(a) * sp, 6 + rnd() * 7, Math.cos(a) * sp, 0.9 + rnd() * 0.4, 0.32, 0.12,
+          col.r, col.g, col.b, 1, CELL.blob, 14, 0.4, 0, 0.03, 0.02);
+      }
+      fx.puff(c.x, y, c.z, smoke, 18, 1.6, r * 0.6, 2.2);
+      fx.shards(c.x, y + 0.3, c.z, fx.color('#2a2220'), 20, 8, 0.4);
+      fx.ring(c.x, y, c.z, r * 1.1, lava, 0.55, 1.0);
+    }
   },
 };
 
