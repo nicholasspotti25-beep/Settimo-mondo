@@ -13,3 +13,7 @@ boss.coleottero_imperiale.mid: "Still standing. Then you are worthy of my wings.
 boss.coleottero_imperiale.defeat: "A worthy opponent. I salute you, little warrior: the second gate is open."
 boss.coleottero_imperiale.tod.alba: "At dawn he salutes you before the fight, and grabs less."
 boss.coleottero_imperiale.tod.notte: "At night his shell catches no light: he charges out of the dark more often."
+boss.regina_formica.title: "Keeper of the Last Gate"
+boss.regina_formica.lore: "Queen of the anthill under the roots, her golden abdomen swollen, surrounded by luminous eggs. She never fought up close: she sent her workers. Behind the anthill begins the underground passage to Uruk's greenhouse."
+boss.regina_formica.tod.alba: "At dawn she tends her eggs: fewer workers march, and the eggs pulse more often."
+boss.regina_formica.tod.notte: "At night the eggs light the anthill: the workers march more often."

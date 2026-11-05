@@ -17,8 +17,9 @@ import h13 from './mostro_della_palude';
 import h14 from './mostro_di_magma';
 import h15 from './pyro';
 import h16 from './re_mantide';
-import h17 from './thunder';
-import h18 from './yeti';
+import h17 from './regina_formica';
+import h18 from './thunder';
+import h19 from './yeti';
 
 export const BOT_HOOKS: Record<string, BotHook> = {
   "caronte": h0,
@@ -38,6 +39,7 @@ export const BOT_HOOKS: Record<string, BotHook> = {
   "mostro_di_magma": h14,
   "pyro": h15,
   "re_mantide": h16,
-  "thunder": h17,
-  "yeti": h18,
+  "regina_formica": h17,
+  "thunder": h18,
+  "yeti": h19,
 };

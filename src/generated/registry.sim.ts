@@ -22,8 +22,9 @@ import b18 from '../content/bosses/mostro_della_palude/minion_annegato_ossa';
 import b19 from '../content/bosses/mostro_di_magma/behavior';
 import b20 from '../content/bosses/pyro/behavior';
 import b21 from '../content/bosses/re_mantide/behavior';
-import b22 from '../content/bosses/thunder/behavior';
-import b23 from '../content/bosses/yeti/behavior';
+import b22 from '../content/bosses/regina_formica/behavior';
+import b23 from '../content/bosses/thunder/behavior';
+import b24 from '../content/bosses/yeti/behavior';
 
 export const BEHAVIORS: BehaviorRegistry = {
   "caronte": b0,
@@ -48,6 +49,7 @@ export const BEHAVIORS: BehaviorRegistry = {
   "mostro_di_magma": b19,
   "pyro": b20,
   "re_mantide": b21,
-  "thunder": b22,
-  "yeti": b23,
+  "regina_formica": b22,
+  "thunder": b23,
+  "yeti": b24,
 };

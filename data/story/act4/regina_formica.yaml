@@ -1,0 +1,15 @@
+# Regina Formica (secondary, mute): captions only. Defeated, the anthill opens on the passage to the greenhouse.
+- id: regina_formica_intro
+  skippable: true
+  steps:
+    - {camera: boss_reveal, dur: 0.1}
+    - {caption: story.atto4.regina_intro, dur: 3.8}
+    - {event: start_fight}
+- id: regina_formica_defeat
+  skippable: true
+  steps:
+    - {wait: 1.0}
+    - {event: cue, params: {id: regina_passage_open}}
+    - {caption: story.atto4.terzo_cancello, dur: 3.8}
+    - {voce: voce.atto4.regina_caduta}
+    - {event: autosave, params: {reason: boss}}

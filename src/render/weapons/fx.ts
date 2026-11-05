@@ -1273,10 +1273,11 @@ const ART_FX: Record<string, ArtFx> = {
           const tx = tgt.pos.x, ty = tgt.pos.y + tgt.height * tgt.scale * 0.5, tz = tgt.pos.z;
           for (let ci = 0; ci < 3; ci++) {
             const lat = (ci - 1) * 0.3;
-            for (let j = 0; j < 3; j++) {
+            for (let j = 0; j < 4; j++) {
               const u = rnd(), sag = Math.sin(u * PI) * 0.35;
               const x = ax + (tx - ax) * u + f.z * lat * Math.sin(u * PI), y = ay + (ty - ay) * u - sag, z = az + (tz - az) * u - f.x * lat * Math.sin(u * PI);
-              fx.particles.emitRaw(x, y, z, 0, 0, 0, 0.07, 0.16, 0.12, ember.r, ember.g, ember.b, 1, CELL.dot, 0, 0, 0, 0, 0.01);
+              fx.smoke.emitRaw(x, y, z, 0, 0, 0, 0.09, 0.34, 0.3, 0.06, 0.03, 0.02, 0.5, CELL.dot, 0, 0, 0, 0, 0.01);
+              fx.particles.emitRaw(x, y, z, 0, 0, 0, 0.09, 0.24, 0.18, ember.r, ember.g, ember.b, 1, CELL.dot, 0, 0, 0, 0, 0.01);
             }
           }
           return t < 0.5;
@@ -1407,9 +1408,13 @@ const ART_FX: Record<string, ArtFx> = {
     under(fx, x, y, z, 3.2, 0.4, azure, 0.6);
     fx.flash(x, y, z, fx.color('#ffffff'), 2.4, 0.25, CELL.star, 4);
     fx.flash(x, y, z, azure, 4.0, 0.4, CELL.rays, -2);
-    for (let i = 0; i < fxN(fx, 12); i++) {
-      const hy = 1 + rnd() * 10;
-      fx.particles.emitRaw(x + jit() * 0.2, y + hy, z + jit() * 0.2, 0, -60, 0, Math.min(0.15, hy / 60), 0.5, 0.3, pale.r, pale.g, pale.b, 1, CELL.spark, 0, 0, 0, 0.12, 0.01);
+    // the bolt: a jagged column of flashes standing from the sky into the hammer for a few tenths (dark core behind it)
+    let jx = 0, jz = 0;
+    for (let i = 0; i < 16; i++) {
+      const hy = i * 0.7;
+      jx += jit() * 0.25; jz += jit() * 0.25;
+      fx.smoke.emitRaw(x + jx, y + hy, z + jz, 0, 0, 0, 0.32, 1.1, 0.9, 0.02, 0.04, 0.09, 0.5, CELL.dot, 0, 0, 0, 0, 0.02);
+      fx.flash(x + jx, y + hy, z + jz, i % 3 ? pale : fx.color('#ffffff'), 0.9 + rnd() * 0.5, 0.3 + rnd() * 0.1, CELL.star, jit() * 4);
     }
     fx.sparks(x, y, z, pale, 20, 8, 0.14);
     const g = gy(sim, p.pos.x, p.pos.z);
@@ -1485,12 +1490,18 @@ const ART_FX: Record<string, ArtFx> = {
     fx.flash(bx, by + 0.4, bz, lava, 3.0, 0.35, CELL.rays, 2);
     fx.shards(bx, by + 0.2, bz, rock, 14, 6, 0.3);
     fx.sparks(bx, by + 0.3, bz, hot, 20, 8, 0.16);
-    const N = 9;
+    const N = 12;
     for (let i = 0; i < N; i++) {
       const d = 1.0 + (len - 1.0) * (i / (N - 1));
       later(c, d / speed, (sm) => {
         const x = x0 + fx0 * d, z = z0 + fz0 * d, y = gy(sm, x, z);
-        c.scorch.spawn(x, y, z, width * 0.42, linger + 1.2, lava, 1.7, 0, 0.95, 2.2, yaw0 + jit() * 0.25);
+        // overlapping narrow decals join into one ragged crack with a molten rim
+        c.scorch.spawn(x, y, z, width * 0.34, linger + 1.2, lava, 2.4, 0, 1.0, 3.4, yaw0 + jit() * 0.3);
+        // the seam: low glowing lava streaks lying along the crack
+        for (let j = 0; j < 3; j++) {
+          const o = jit() * 0.4;
+          fx.particles.emitRaw(x + fx0 * o, y + 0.06, z + fz0 * o, fx0 * 0.6, 0, fz0 * 0.6, 0.9 + rnd() * 0.6, 0.5, 0.3, hot.r, hot.g, hot.b, 1, CELL.spark, 0, 2, 0, 0.6, 0.05);
+        }
         for (let j = 0; j < fxN(fx, 5); j++) {
           const col = j % 2 ? hot : lava;
           fx.particles.emitRaw(x + jit() * 0.4, y + 0.1, z + jit() * 0.4, jit() * 1.5, 3 + rnd() * 3, jit() * 1.5, 0.7 + rnd() * 0.3, 0.24, 0.12, col.r, col.g, col.b, 1, CELL.blob, 9, 0.6, 0, 0.03, 0.03);

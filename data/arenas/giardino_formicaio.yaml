@@ -1,3 +1,7 @@
+# Formicaio sotto le radici — the anthill under the roots at the third gate (Regina Formica): packed soil, two root
+# columns inside the ring, luminous eggs heaped by the walls; the workers pour out of the rim. Phase 2 (tunnels): the
+# floor is honeycombed with tunnels (cue arena_state:tunnels; holes open under you, marked first). Behind the anthill is
+# the underground passage to the greenhouse (cue regina_passage_open on the defeat).
 id: giardino_formicaio
 zone: little_garden
 name_key: arena.giardino_formicaio.name
@@ -6,6 +10,10 @@ shape: circle
 radius: 12
 gate: {pos: [0, 0, 36], yaw: 0, width: 6}
 floor_y: 0
-surface: stone
-obstacles: []
+surface: soil
+obstacles:
+  - {type: cylinder, c: [-6, 1.5, 52], r: 0.5, h: 3}
+  - {type: cylinder, c: [6.5, 1.5, 44.5], r: 0.5, h: 3}
+variants:
+  tunnels: {radius: 12}
 builder: giardino_formicaio

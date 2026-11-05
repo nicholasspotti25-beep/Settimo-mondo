@@ -94,3 +94,21 @@ data/projectiles/weapons.yaml, src/render/weapons/**, locales/{it,en}/weapons.ya
   catene 1.23 / 0.24 / 0.85, frusta 1.37 / 0.45 / 1.01, artigli 1.48 / 1.35 / 1.26 vs stocco 1.26 / 1.11 / 1.28,
   katana 1.64 / 1.24 / 1.31, spadone 1.33 / 1.44 / 1.34, alabarda 1.28 / 1.11 / 1.10. No weapon dominates; no nerf.
   Table + verdict in docs/WEAPONS.md. Script: scratchpad dpsbot.ts.
+- Chunk 2 verification: `npx tsc --noEmit -p tsconfig.json` 0 errors (whole tree); `npx vitest run
+  tests/weapons.test.ts` 14/14; `npm run registry && SM_PARTIAL=1 npm run data` ok (38 weapons, 38 movesets, 49
+  transitions). Headless 1280x576, **follow camera** (no inspect), Guardiano arena, each Art shot at its own cue +
+  a sim delay (scratchpad cueshot.mjs, hooks `fx.registerHandler('vfx')` to time the shot in sim seconds, clears the
+  weapon pools between shots via `zoneEnter`): all 24 Act I + II Arts by day (`giorno`, bright sepia paving), Act II +
+  Radici + Fioritura by night (`notte`). Looked at every sheet. Reads well by day: Ninnananna cross + burst, Carica
+  starburst, the held Ruota wheel, Fendente rising cut, Postura riposte, Radici roots now closing around the
+  Guardiano (they were invisible: Roots aged in real time and had sunk by the cue under slow motion; now sim time),
+  Fioritura fan, mud pits, Sibilo / Avvolgimento venom, Richiamo souls, Spinta water stroke, Tre Morsi jaws, Lama
+  Rovente burn ring, Schianto Tonante crater, frost rings and crystal stars, Eruzione crater. Fixed after the first
+  pass: Guinzaglio's chains (thicker taut line over a dark under-dot), Frattura Magmatica (12 overlapping narrow crack
+  decals with a molten rim + glowing seam streaks: now one molten line from the axe to the target, day and night),
+  Catena di Fulmini (a stationary jagged bolt column of flashes over a dark core from the sky into the hammer; the
+  falling streaks had left the frame by the cue). Act II weapons in hand looked at in close-ups (scratchpad
+  gallery.mjs): chains hang as three black-iron strands, flamberge dark red with its core and edge flames, azure
+  hammer, ice rapier, lava-veined rock axe. Scene with an Act II weapon: ~58–69 calls / ~110–125k tris.
+- Harness note: under swiftshader the sim advances ~0.1–0.3 s per real second (frame dt clamp), so shot scripts
+  must wait in sim time (`sim.time`), never in real time.

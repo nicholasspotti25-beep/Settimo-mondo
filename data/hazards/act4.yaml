@@ -3,3 +3,9 @@
 - {id: mantide_petal_fall, visual: flowers, color: '#ff9ad6'}
 # Coleottero Imperiale, phase 2: clods of earth dropped from above along his bombing run (their shadows are marked).
 - {id: coleottero_clod, visual: shadow, color: '#3a2a1a'}
+# Regina Formica: acid puddles (damage over time), the marching line of workers (low, moving: jump it), the eggs' pulse,
+# the hole she bursts out of in phase 2.
+- {id: regina_acid_pool, visual: acid, color: '#b8f03a'}
+- {id: regina_workers, visual: shadow, color: '#2a1608'}
+- {id: regina_egg_burst, visual: light, color: '#ffe48a'}
+- {id: regina_hole, visual: crack, color: '#4a3320'}

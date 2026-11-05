@@ -1,3 +1,5 @@
 # Act IV projectile kinds (Il Giardino del Dio: Little Garden at 0.1 player scale, sizes in world units).
 # Re Mantide's crown: sharp petals thrown in fans (re-aimed low at the tiny player by the behavior).
 - {id: mantide_petal, radius: 0.12, speed: 7.5, life: 2.0, visual: petal, color: '#ff8fcf', trail: true, element: physical}
+# Regina Formica: drops of acid spat in fans (re-aimed low at the tiny player by the behavior).
+- {id: regina_acid, radius: 0.14, speed: 7, life: 2.2, visual: orb, color: '#c6ff3a', trail: true, element: physical}

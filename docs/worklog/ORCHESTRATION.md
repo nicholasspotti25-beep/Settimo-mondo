@@ -74,3 +74,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - act3b#1 done: grande_lupo + grande_orso sim-side playable (14 tests, bot pass incl. NG+/ToD); 4 encounters left
 - started: act4#1 (sim-side)
 - 2026-11-05 ~01:00 usage limit stopped weapons#2 and act4#1; 04:18 both resumed
+- weapons#2 done: daylight Art legibility (dark under-layers, scorch decals, game-time aging fix), 5 Act II weapon models + 10 Art visuals, Art test 24/78, DPS bot check (no nerf)
+- started: integrate#3
