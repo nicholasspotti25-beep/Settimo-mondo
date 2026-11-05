@@ -1,0 +1,4 @@
+# Atto V — boss: nomi delle parti (i nomi dei boss sono in canon_names.yaml). I mini boss non hanno dialoghi né lore.
+boss.drago_a_tre_teste.part.fuoco: "Testa di Fuoco"
+boss.drago_a_tre_teste.part.veleno: "Testa di Veleno"
+boss.drago_a_tre_teste.part.fulmine: "Testa di Fulmine"

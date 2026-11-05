@@ -1,0 +1,4 @@
+# Act V — bosses: part names (boss names live in canon_names.yaml). Mini bosses have no dialogue and no lore.
+boss.drago_a_tre_teste.part.fuoco: "Fire Head"
+boss.drago_a_tre_teste.part.veleno: "Poison Head"
+boss.drago_a_tre_teste.part.fulmine: "Lightning Head"

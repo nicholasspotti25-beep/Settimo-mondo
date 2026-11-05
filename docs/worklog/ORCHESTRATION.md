@@ -80,3 +80,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - started: act5#1 (sim-side)
 - integrate#3 done: one_blow attack field, projectiles aim at player scale, shared tools/bot/defense.ts, save-compat test; bot 20/21 (regina_formica fail), tests 210/212
 - started: act1#5 (Elder Tree model + foresta_cuore arena)
+- deployed b78e106 (23 encounters incl. acts III-IV partial, weapons#2, integrate#3)

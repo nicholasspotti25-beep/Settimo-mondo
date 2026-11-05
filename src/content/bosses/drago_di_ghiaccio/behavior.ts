@@ -39,8 +39,8 @@ export const GALE_RANGE = 20;
 const SLIDE_STATES = new Set(['idle', 'move', 'light', 'heavy', 'running', 'drink', 'swap']);
 const FROM: [number, number, number] = [0, 0, 0];
 const DROP: SpawnDef = {
-  t: 0, type: 'hazard', id: 'ghiaccio_stalactite', at: 'self', from: FROM, delay: STALACTITE_DELAY, active: 0.35,
-  damage_mult: 1.3, flags: ['knockdown'], element: 'ice', shape: { type: 'cylinder', c: [0, 0, 0], r: 2.0, h: 8 },
+  t: 0, type: 'hazard', id: 'ghiaccio_stalactite', at: 'self', from: FROM, delay: STALACTITE_DELAY, active: 0.2,
+  damage_mult: 1.1, flags: ['knockdown'], element: 'ice', shape: { type: 'cylinder', c: [0, 0, 0], r: 1.9, h: 8 },
 };
 const tmp = { x: 0, y: 0, z: 0 };
 
@@ -53,8 +53,25 @@ function runtime(a: Actor, def: AttackDef): AttackRuntime {
   };
 }
 
-/** Drop one marked stalactite on a world point (delay = mark time). */
-export function dropStalactite(a: Actor, sim: Sim, x: number, z: number, delay = STALACTITE_DELAY): void {
+/**
+ * One attack, one blow for hazards a behavior drops one by one: tag the hazards of `kind` this actor spawned this tick with
+ * `group` (the sim spends a whole group on the player once one of its hazards resolved against them).
+ */
+export function groupNewHazards(sim: Sim, a: Actor, kind: string, group: number): void {
+  sim.hazards.forEachActive((h) => {
+    if (h.owner === a.id && h.kind === kind && h.age === 0 && h.team === 'enemy') h.group = group;
+  });
+}
+
+let groupSeq = 0;
+/** A fresh hazard group id (kept far above the sim's own ids). */
+export function newHazardGroup(): number {
+  groupSeq = (groupSeq + 1) % 1_000_000;
+  return 50_000_000 + groupSeq;
+}
+
+/** Drop one marked stalactite on a world point (delay = mark time); `group` makes several drops one blow. */
+export function dropStalactite(a: Actor, sim: Sim, x: number, z: number, delay = STALACTITE_DELAY, group = -1): void {
   const def = a.attackMap.get('stalactite_drop');
   if (!def) return;
   worldToLocal(a.pos, a.yaw, { x, y: a.pos.y, z }, tmp, a.scale);
@@ -65,6 +82,7 @@ export function dropStalactite(a: Actor, sim: Sim, x: number, z: number, delay =
   rt.uid = nextAttackUid();
   rt.target = { ...sim.player.pos };
   sim.bossSpawn(a, rt, DROP);
+  if (group >= 0) groupNewHazards(sim, a, 'ghiaccio_stalactite', group);
 }
 
 /** Lay one icy patch (non-damaging static hazard) at a world point. */
@@ -191,23 +209,24 @@ export default defineBehavior(() => ({
       const r = a.flags.has('storm') ? PATCH_R_STORM : PATCH_R;
       layIce(a, sim, a.pos.x + Math.sin(a.yaw) * d, a.pos.z + Math.cos(a.yaw) * d, r);
     } else if (event === 'stalactites') {
-      dropStalactite(a, sim, pl.x, pl.z);
+      const g = newHazardGroup();
+      dropStalactite(a, sim, pl.x, pl.z, STALACTITE_DELAY, g);
       for (let i = 0; i < 4; i++) {
         const p = sim.randomArenaPoint(5, sim.player.pos);
         if (Math.hypot(p.x - pl.x, p.z - pl.z) < 5) continue;
-        dropStalactite(a, sim, p.x, p.z, STALACTITE_DELAY + 0.2 * i);
+        dropStalactite(a, sim, p.x, p.z, STALACTITE_DELAY + 0.2 * i, g);
       }
     } else if (event === 'gale' && atk) {
       a.bstate.galeT = atk.def.active;
     } else if (event === 'ice_cage') {
       // gap on the side away from the dragon
       const away = Math.atan2(pl.x - a.pos.x, pl.z - a.pos.z);
-      for (let i = 0; i < 8; i++) {
-        if (i === 0) continue;
+      const g = newHazardGroup();
+      for (let i = 1; i < 8; i++) {
         const ang = away + (i / 8) * Math.PI * 2;
-        dropStalactite(a, sim, pl.x + Math.sin(ang) * 4.4, pl.z + Math.cos(ang) * 4.4, 1.6);
+        dropStalactite(a, sim, pl.x + Math.sin(ang) * 4.4, pl.z + Math.cos(ang) * 4.4, 1.6, g);
       }
-      dropStalactite(a, sim, pl.x, pl.z, 1.6);
+      dropStalactite(a, sim, pl.x, pl.z, 1.6, g);
     }
   },
   onAttackEnd(a: Actor, sim: Sim, atk: AttackRuntime) {
