@@ -83,3 +83,4 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - deployed b78e106 (23 encounters incl. acts III-IV partial, weapons#2, integrate#3)
 - act5#1 done: drago_di_ghiaccio + drago_a_tre_teste sim-side pass bot (NG+ not yet); requests act5 #1 (DoT ticks restart flinch -> pin) and #2 (local ice patches) for integrate#4
 - started: act67#1 (sim-side)
+- 2026-11-05 ~07:00 usage limit stopped act1#5 and act67#1; 09:29 both resumed
