@@ -15,19 +15,19 @@ SCALE: the player is 0.1 (~0.18 m, weapon reach ~0.25 m), moving at 60% (run 3 m
 
 | # | Deliverable | Status | Files |
 |---|---|---|---|
-| 1 | Boss data, all card elements (phases, attacks with fair telegraphs, parts, minions, music ids, lore, drops_weapon, Form) | partial: re_mantide, coleottero_imperiale done; regina_formica, uruk missing | data/bosses/*.yaml |
-| 2 | Behaviors (every card mechanic) | partial (unit-tested): re_mantide camouflage (hidden/untargetable → rustle cue behind you REVEAL_LEAD 1.0 s before he rises → ambush_cross 0.7 s wind-up), combos end when a blow lands (endComboIfLanded), X cuts guarded (guardMultiHit from act3b), study (flag studying), p2 petals aimed low (aimLow); coleottero front armor (×0.5 damage, ×0.5 poise; not when Spezzato), mandible grip (held 1.0 s, crushed once, dropped with i-frames), carapace slam only from the side/back, p2 flight chain take_off → bombing_run → dive_bomb (flag flying, never aloft outside it), dawn salute once; regina_formica, uruk missing | src/content/bosses/{re_mantide,coleottero_imperiale}/behavior.ts |
-| 3 | Time-of-day variants | partial: re_mantide alba (curious: opens by studying you) / notte (opens from the leaves, camouflages more); coleottero alba (chivalrous: salutes first, grabs less) / notte (charges from the dark more) | boss yamls |
-| 4 | NG+ `ng_plus` blocks (new attack per phase) | partial (bot-verified): re_mantide ng_green_ambush / + ng_petal_volley; coleottero ng_double_charge / + ng_take_off → ng_carpet_run (line + ring of clods) | boss yamls |
-| 5 | Story: act4_intro, intro/defeat per boss (Uruk cinematic + Ascesa, set_scale 1.12, verbatim quote) | partial: act4_intro (shore, Sguardo del Giardiniere cue, set_scale 0.1, Voce), re_mantide_intro/defeat (cue mantide_gate_open + Voce), coleottero_imperiale_intro/defeat (salute, cue coleottero_gate_open + Voce) | data/story/act4/*.yaml |
-| 6 | Speakers + Voce dell'Alba (4 altars + after-boss) | partial: speakers re_mantide, coleottero_imperiale; altar lines altare_giardino_01/02/03; after-boss mantide, coleottero; altare_serra_01 + regina/uruk missing | data/speakers/act4.yaml, data/voce/act4.yaml |
-| 7 | Locales IT+EN (verbatim canon quotes) | partial: every key referenced so far (unit-tested); Uruk's quote comes with item 1 | locales/{it,en}/act4_{bosses,story}.yaml |
-| 8 | Projectile + hazard kinds | partial: projectile mantide_petal; hazards mantide_petal_fall, coleottero_clod | data/projectiles/act4.yaml, data/hazards/act4.yaml |
-| 9 | Arena data (4, incl. phase variants) | partial: giardino_trifogli (grass, 3 clover stems), giardino_muschio (moss, 2 mushroom stems) done; giardino_formicaio, serra_giardiniere scaffold only | data/arenas/*.yaml |
-| 10 | Balance bot (perfect wins inside 120+20×D with few hits; sloppy not trivial), incl. NG+ and ToD probes | partial: re_mantide, coleottero_imperiale PASS (see Notes) | — |
-| 11 | Bot hooks for scripted mechanics | partial: re_mantide (+ shared gardenDecide/gardenOffense: reach-aware offense at 0.1 scale), coleottero_imperiale (dive landing spot, flank circling) | tools/bot/hooks/<id>.ts |
-| 12 | Unit tests tests/act4*.test.ts | partial: 13 tests (3 data/locales/intro + 5 mantide + 5 coleottero), 13/13 | tests/act4.test.ts |
-| 13 | Canon audit clean for act4 bosses | partial: mantide/coleottero only "no music theme data" (audio stream) and "no model builder" (item 14); regina_formica and uruk missing (Uruk's quote is already in weapons.yaml flavor; mine comes with item 1) | — |
+| 1 | Boss data, all card elements (phases, attacks with fair telegraphs, parts, minions, music ids, lore, drops_weapon, Form) | partial: re_mantide, coleottero_imperiale done; regina_formica authored (all card elements) but NOT balanced; uruk missing | data/bosses/*.yaml |
+| 2 | Behaviors (every card mechanic) | partial (unit-tested for mantide/coleottero): re_mantide camouflage (rustle cue behind you REVEAL_LEAD 1.0 s before he rises → ambush_cross 0.7 s wind-up), combos end when a blow lands (endComboIfLanded), X cuts guarded (guardMultiHit from act3b), study, p2 petals aimed low (aimLow); coleottero front armor ×0.5, mandible grip (1.0 s, crushed once, dropped with i-frames), carapace slam only from the side/back, p2 flight chain, dawn salute; regina_formica worker lines laid across the view through the player (layWave), no blow while a line is coming (waveIncoming), acid aimed low, p2 burrow → hole under you → emerges there (not unit-tested yet); uruk missing | src/content/bosses/{re_mantide,coleottero_imperiale,regina_formica}/behavior.ts |
+| 3 | Time-of-day variants | partial: re_mantide alba (curious) / notte (from the leaves); coleottero alba (salutes, grabs less) / notte (charges more); regina alba (tends the eggs: fewer waves, more pulses) / notte (more waves) — regina not probed | boss yamls |
+| 4 | NG+ `ng_plus` blocks (new attack per phase) | partial (bot-verified for mantide/coleottero): re_mantide ng_green_ambush / + ng_petal_volley; coleottero ng_double_charge / + ng_take_off → ng_carpet_run; regina ng_twin_wave (two lines 5.5 m apart) / + ng_burrow → ng_tunnel_chain (two holes) — not probed | boss yamls |
+| 5 | Story: act4_intro, intro/defeat per boss (Uruk cinematic + Ascesa, set_scale 1.12, verbatim quote) | partial: act4_intro, re_mantide_intro/defeat, coleottero_imperiale_intro/defeat, regina_formica_intro/defeat (mute: captions, cue regina_passage_open, Voce); uruk missing | data/story/act4/*.yaml |
+| 6 | Speakers + Voce dell'Alba (4 altars + after-boss) | partial: speakers re_mantide, coleottero_imperiale (the Queen is mute); altar lines for all 4 altars; after-boss mantide, coleottero, regina; uruk missing | data/speakers/act4.yaml, data/voce/act4.yaml |
+| 7 | Locales IT+EN (verbatim canon quotes) | partial: every key referenced so far (unit-tested for mantide/coleottero/intro; regina keys written IT+EN, not yet in the test list); Uruk's quote comes with item 1 | locales/{it,en}/act4_{bosses,story}.yaml |
+| 8 | Projectile + hazard kinds | partial: projectiles mantide_petal, regina_acid; hazards mantide_petal_fall, coleottero_clod, regina_acid_pool, regina_workers, regina_egg_burst, regina_hole; uruk's missing | data/projectiles/act4.yaml, data/hazards/act4.yaml |
+| 9 | Arena data (4, incl. phase variants) | partial: giardino_trifogli, giardino_muschio, giardino_formicaio (soil, 2 root columns, variant tunnels) done; serra_giardiniere scaffold only | data/arenas/*.yaml |
+| 10 | Balance bot (perfect wins inside 120+20×D with few hits; sloppy not trivial), incl. NG+ and ToD probes | partial: re_mantide, coleottero_imperiale PASS; regina_formica FAIL (perfect 3/3 but avg 834 s / 400, 5 hits; see Notes) | — |
+| 11 | Bot hooks for scripted mechanics | partial: re_mantide (+ shared gardenDecide/gardenOffense), coleottero_imperiale (dive landing spot, flank circling), regina_formica (jumps the worker lines, keeps the jump free while one approaches) | tools/bot/hooks/<id>.ts |
+| 12 | Unit tests tests/act4*.test.ts | partial: 13 tests (3 data/locales/intro + 5 mantide + 5 coleottero), 13/13; regina tests missing | tests/act4.test.ts |
+| 13 | Canon audit clean for act4 bosses | partial: mantide/coleottero/regina only "no music theme data" (audio stream) and "no model builder" (item 14); uruk missing | — |
 | 14 | Boss models (4) | missing (later chunk; RENDER_KIT.md) | src/content/bosses/<id>/model.ts |
 | 15 | Arena dressing (4) incl. cues | missing (later chunk; WORLD_KIT.md) | src/content/bosses/<id>/arena.ts |
 | 16 | Zones (2): little_garden (giant clovers, moss, flowers, glowing pollen, endless hedge, three gates), serra_giardiniere | partial: scaffold only | data/zones/*.yaml, src/content/zones/<zone>/** |
@@ -36,14 +36,15 @@ SCALE: the player is 0.1 (~0.18 m, weapon reach ~0.25 m), moving at 60% (run 3 m
 
 ## Next
 
-1. Regina Formica (D14, no dialogue beyond 1–2 lines; secondary): ranged queen that avoids melee (retreat/keep-away
-   movement, acid spit projectiles aimed low with aimLow, acid puddles as dot hazards), WAVES OF WORKERS across the arena
-   as low moving box hazards (`speed`, height ≤ 0.35 m: jump them; the jump apex is ~1.9 m at 0.1 scale) placed by a
-   behavior fix-up from the arena rim (never during her own blow), luminous eggs; p2 tunnels: marked holes open under
-   your feet (hazard delay ≥ 1 s) and she strikes from the holes (hidden/untargetable between, surfaced punish window);
-   arena giardino_formicaio (soil, roots) + p2 variant; speaker none if mute (card gives no voice: caption-only story),
-   Voce altare_serra_01 + after-boss; hook: jump the worker waves (shared ringJump does rings only; add a moving-box jump);
-   tests; bot + NG+/ToD probes.
+1. Regina Formica balance (data, behavior, story, locales, arena, hook exist): perfect bot 834 s / 400. Measured hits:
+   mandible_shove (5–8 per fight) and worker lines while she waits. Suspects to check first with the probe: she backs
+   away from melee (walk 0.8 → back-off 0.64 m/s) so every swing loses the reach; long dot puddles and lines keep the
+   bot's `danger` flag up so gardenOffense does not approach; the shove's lateral-roll geometry vs its 120° r 2.6 arc.
+   Likely fixes: a punish window after each acid attack / summon (she plants her legs: recovery ≥ 1.4 s), stop backing
+   off during recovery, shove arc 100°, an idle beat after the line passes; then NG+ / ToD probes and unit tests (wave
+   laid across the view through the player, low enough to jump: a raised player is not hit; no blow while a line is
+   coming; burrow → hidden → hole under the player ≥ 1.0 s → emerges there visible; never stays hidden; dawn/night
+   openers) and add regina_formica to the ACT4 test list.
 2. Uruk (principal, D15, 3 phases): Potatura (guillotine shears, carnivorous flowers sprouting as minions/hazards, cut
    like a dead branch), Annaffiatoio (watering: flowers grow in real time into barricades and traps via
    sim.addArenaCollider/removeArenaCollider + hazards; enormous drops raining, marked), Erbaccia (arena_state greenhouse
@@ -93,3 +94,14 @@ SCALE: the player is 0.1 (~0.18 m, weapon reach ~0.25 m), moving at 60% (run 3 m
   coleottero_wings_open, coleottero_take_off, coleottero_dive_mark (pos = player when the dive starts), coleottero_land,
   coleottero_gate_open (defeat); flags gripping, wings_open, flying, chivalrous; anims bite, grab, charge, toss, slam,
   salute, take_off, fly_run, dive.
+- Regina Formica (chunk 1, after the usage-limit reset; unbalanced). ~5.5 m ant (radius 1.2, mute), equilibrio 150.
+  P1 acid_spit (3-drop fan, aimLow, poison 3 s), acid_arc (marked puddle at your predicted spot + one elsewhere, dot
+  2.5 s), worker_wave (5 low boxes 2.4 m wide, 0.36 m high, 3.5 m/s; laid at the rim ≥ 3 m behind you, crossing the view;
+  one blow per line), mandible_shove (knockback + skitter back), egg_pulse (marked ring of 6 around her, 1.0 s). P2
+  (tunnels, arena_state tunnels): + burrow → tunnel_strike (hole under you 1.1 s; she emerges there, 1.8 s punish).
+  Bot runs: first 879 s (keep-away 3.5–7 m), then 834 s after keep-away [1.2, 4.5] / walk 0.8, shove window 0.15 s,
+  waves cd 9, equilibrio 150, puddles 2.5 s, perfect hook keeping the jump free; sloppy 0/3. Attribution probe with the
+  hazard kinds near the player: <scratchpad>/act4/probe2.ts.
+- Render side owed (later chunk): regina cues regina_workers (pos = line center at the rim), regina_dig, regina_emerge,
+  regina_tunnels, arena_state:tunnels, regina_passage_open; flags tunnels, tending, eggs_bright; the regina_workers hazard
+  is drawn as marching ants (visual shadow for now); anims spit, spit_high, summon, shove, egg_pulse, burrow, emerge.
