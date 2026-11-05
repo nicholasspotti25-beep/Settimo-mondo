@@ -9,7 +9,7 @@ import type { Sim } from '../../../src/sim/sim';
 import type { PlayerInput } from '../../../src/sim/types';
 import type { Bot } from '../bot';
 import type { BotHook } from '../hooks';
-import { act1Defense } from './cavaliere_errante';
+import { act1Defense } from '../defense';
 
 let nested = false;
 

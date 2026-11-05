@@ -31,8 +31,8 @@ export const GUST_WARN = 1.0;
 export const GUST_TIME = 2.4;
 export const GUST_SPEED = 1.3;
 export const GUST_EVERY: [number, number] = [9, 12];
-export const STALACTITE_EVERY: [number, number] = [7, 9.5];
-export const STALACTITE_DELAY = 1.5;
+export const STALACTITE_EVERY: [number, number] = [8.5, 11];
+export const STALACTITE_DELAY = 1.7;
 export const GALE_SPEED = 4.2;
 export const GALE_RANGE = 20;
 
@@ -40,11 +40,61 @@ const SLIDE_STATES = new Set(['idle', 'move', 'light', 'heavy', 'running', 'drin
 const FROM: [number, number, number] = [0, 0, 0];
 const DROP: SpawnDef = {
   t: 0, type: 'hazard', id: 'ghiaccio_stalactite', at: 'self', from: FROM, delay: STALACTITE_DELAY, active: 0.2,
-  damage_mult: 1.1, flags: ['knockdown'], element: 'ice', shape: { type: 'cylinder', c: [0, 0, 0], r: 1.9, h: 8 },
+  damage_mult: 1.1, flags: ['knockdown'], element: 'ice', shape: { type: 'cylinder', c: [0, 0, 0], r: 1.8, h: 8 },
 };
 const tmp = { x: 0, y: 0, z: 0 };
 
 interface Patch { h: Hazard; x: number; z: number; r: number; life: number }
+
+/** Seconds before a breath starts when the head stops turning (the aim is locked: run out of the cone). */
+export const AIM_LOCK = 0.45;
+
+/**
+ * Breath aim lock: during the last AIM_LOCK s of the wind-up of the listed tick attacks the boss stops turning, so the cone
+ * starts where the head pointed at the lock (then follows only a little, track_active).
+ */
+export function breathAimLock(a: Actor, ids: ReadonlySet<string>): void {
+  const atk = a.attack;
+  if (!atk || !ids.has(atk.def.id) || atk.stage !== 'telegraph') {
+    a.bstate.aimLockUid = -1;
+    return;
+  }
+  if (atk.time < atk.def.telegraph - AIM_LOCK) return;
+  if (a.bstate.aimLockUid !== atk.uid) {
+    a.bstate.aimLockUid = atk.uid;
+    a.bstate.aimLockYaw = a.yaw;
+  }
+  a.yaw = a.bstate.aimLockYaw;
+}
+
+/**
+ * No flinch-lock from damage over time: a tick of a breath or of a venom puddle must not chain flinches (each tick would
+ * restart the 0.4 s flinch and pin the player inside the cone/puddle). The engine flinches on every hit (request in
+ * docs/requests/act5.md); until then, a flinch that started this tick while only tick damage could have landed (`tickOnly`)
+ * is cancelled (the damage stays). Knockdowns are never touched. Call at the top of update() every tick.
+ */
+export function noTickFlinch(a: Actor, sim: Sim, tickOnly: boolean): void {
+  const pl = sim.player;
+  const hp = pl.hp;
+  const was = a.bstate.flinchHp as number | undefined;
+  a.bstate.flinchHp = hp;
+  if (was === undefined || hp >= was || !tickOnly) return;
+  if (pl.state === 'stagger' && pl.stateTime <= sim.dt * 1.5) pl.setState('idle');
+}
+
+/** True while the player stands in an active damage-over-time hazard of this actor. */
+export function inOwnDot(a: Actor, sim: Sim): boolean {
+  const p = sim.player.pos;
+  let inside = false;
+  sim.hazards.forEachActive((h) => {
+    if (inside || h.owner !== a.id || h.tick <= 0 || h.permanent || h.age < h.delay) return;
+    const r = sim.hazardRadius(h);
+    if (Math.hypot(p.x - h.pos.x, p.z - h.pos.z) < r + 0.8) inside = true;
+  });
+  return inside;
+}
+
+const BREATHS = new Set(['frost_breath', 'blizzard_breath']);
 
 function runtime(a: Actor, def: AttackDef): AttackRuntime {
   return {
@@ -181,6 +231,9 @@ export default defineBehavior(() => ({
       }
     }
     if (!a.alive || !sim.fight?.active || sim.fight.intro) return false;
+    const atk = a.attack;
+    noTickFlinch(a, sim, !!atk && BREATHS.has(atk.def.id) && atk.stage === 'active');
+    breathAimLock(a, BREATHS);
     slide(a, sim, dt);
     if (st.galeT > 0) {
       st.galeT -= dt;

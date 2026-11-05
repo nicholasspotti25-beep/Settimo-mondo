@@ -157,3 +157,10 @@ tests/act1*.test.ts, docs/requests/act1.md.
   (1089 it / 1089 en); balance-bot cavaliere_errante seeds=3: PASS perfect 3/3 avg 110 s / 180, 0.3 hits, sloppy wins 2/3
   with 12.3 hits. tests/zz_act1_measure.test.ts (a measurement script committed by mistake in chunk 3) deleted: measurement
   scripts live in the scratchpad.
+
+- Chunk 5 (2026-11-05), integration #5: tools/bot/hooks/cavaliere_errante.ts now imports `act1Defense` from the
+  integrator-owned tools/bot/defense.ts and re-exports `boxHazardDodge, hazardEscape, ringJump, chargeDodge, act1Defense`
+  from it (its own copy deleted; cerbero.ts still imports through the re-export); elder_tree / mostro_della_palude /
+  great_devourer / caronte hooks import `act1Defense` from '../defense'. Helper bodies were checked verbatim-identical by
+  diff first. Bot A/B (5 bosses, seeds=3, tools/out/bot-report.json before/after): byte-identical (`cmp`), every seed same
+  win/time/hits for perfect and sloppy; cerbero (seeds=2) still PASS.

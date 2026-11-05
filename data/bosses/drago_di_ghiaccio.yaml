@@ -6,7 +6,7 @@
 # circle around it (Colpo Rosso, low), a stomp whose frost ring is born beyond the stomp's own reach (no double blow).
 # Phase 2 (storm): it unleashes a blizzard (flag storm, arena_state storm): telegraphed wind gusts push you (cue
 # ghiaccio_gust 1.0 s before, pos = wind unit vector), stalactites fall from above on marked spots (the one on you is
-# always marked 1.5 s ahead and never falls while the dragon is winding up a blow), the wings raise a gale that pushes
+# always marked 1.7 s ahead and never falls while the dragon is winding up a blow), the wings raise a gale that pushes
 # you away across the ice, and the breath turns into a blizzard that paints a wider trail.
 # Behavior: src/content/bosses/drago_di_ghiaccio/behavior.ts.
 # Local frame: +Z forward, +Y up, +X = the dragon's LEFT. Quadruped: chest at 2.5 m, head on a low neck at ~7 m forward,
@@ -41,7 +41,6 @@ phases:
   - id: p1
     hp_range: [1.0, 0.5]
     music: boss_drago_di_ghiaccio_p1
-    opener: frost_breath
     patterns: [claw_swipe, bite, frost_breath, tail_sweep, tail_spin, frost_stomp]
   - id: p2
     hp_range: [0.5, 0.0]
@@ -67,7 +66,7 @@ attacks:
     weight: 1.3
     cooldown: 2
     track: 1.2
-    track_active: 0.15
+    track_active: 0.1
     combo_next: claw_swipe_l
     combo_chance: 0.4
     motion:
@@ -86,7 +85,7 @@ attacks:
     range: [0, 6]
     weight: 0
     track: 1.2
-    track_active: 0.15
+    track_active: 0.1
     motion:
       - {t: -0.1, dur: 0.25, type: forward, speed: 2.5}
     hits:
@@ -111,7 +110,8 @@ attacks:
     hits:
       - {t: 0.05, dur: 0.22, shape: {type: capsule, a: [0, 2.0, 5.0], b: [0, 2.6, 10.0], r: 1.6}}
     sfx: ghiaccio_bite
-  # Frozen fog: the throat glows azure during a 1.1 s inhale, then a slow cone that follows you a little. Where it
+  # Frozen fog: the throat glows azure during a 1.1 s inhale (the head stops turning 0.45 s before: run out of the cone),
+  # then a slow cone that follows you a little. Where it
   # passes it leaves icy patches on the ground (ice_trail events: the behavior lays them; they make you slide).
   - id: frost_breath
     anim: breath
@@ -126,9 +126,9 @@ attacks:
     weight: 1.0
     cooldown: 9
     track: 1.0
-    track_active: 0.15
+    track_active: 0.1
     hits:
-      - {t: 0.0, dur: 1.8, tick: 0.35, element: ice, status: {kind: slow, dur: 2.0, power: 0.35}, shape: {type: arc, r: 15, angle: 46, yaw: 0, y: [0, 4.5]}}
+      - {t: 0.0, dur: 1.8, tick: 0.45, element: ice, status: {kind: slow, dur: 1.2, power: 0.25}, shape: {type: arc, r: 15, angle: 42, yaw: 0, y: [0, 4.5]}}
     spawns:
       - {t: -1.0, type: vfx, id: ghiaccio_inhale}
       - {t: 0.45, type: custom, event: ice_trail}
@@ -204,9 +204,9 @@ attacks:
     weight: 1.0
     cooldown: 9
     track: 1.0
-    track_active: 0.18
+    track_active: 0.12
     hits:
-      - {t: 0.0, dur: 2.0, tick: 0.35, element: ice, status: {kind: slow, dur: 2.0, power: 0.35}, shape: {type: arc, r: 16, angle: 56, yaw: 0, y: [0, 5]}}
+      - {t: 0.0, dur: 2.0, tick: 0.45, element: ice, status: {kind: slow, dur: 1.2, power: 0.25}, shape: {type: arc, r: 16, angle: 52, yaw: 0, y: [0, 5]}}
     spawns:
       - {t: -1.0, type: vfx, id: ghiaccio_inhale}
       - {t: 0.4, type: custom, event: ice_trail}
@@ -214,7 +214,7 @@ attacks:
       - {t: 1.4, type: custom, event: ice_trail}
       - {t: 1.9, type: custom, event: ice_trail}
     sfx: ghiaccio_breath
-  # Phase 2: it roars at the storm and the stalactites hanging in the clouds come down: one marked on you (1.5 s), four
+  # Phase 2: it roars at the storm and the stalactites hanging in the clouds come down: one marked on you (1.7 s), four
   # elsewhere on the plateau at least 5 m from you (behavior: stalactites event).
   - id: stalactite_rain
     anim: roar_up
@@ -315,8 +315,8 @@ attacks:
     weight: 0
     range: [999, 999]
 time_of_day_variants:
-  # At night the frozen fog is thicker: it opens with the breath and breathes more often (rhythm, not strength).
-  notte: {opener: frost_breath, weights: {frost_breath: 1.4, blizzard_breath: 1.4}}
+  # At night the frozen fog is thicker: it breathes more often (rhythm, not strength).
+  notte: {weights: {frost_breath: 1.4, blizzard_breath: 1.4}}
   # At dawn it rests on the bones and lets you come: it opens by sweeping the circle around it.
   alba: {opener: tail_sweep, weights: {tail_spin: 0.7}}
 dialogue_keys: []

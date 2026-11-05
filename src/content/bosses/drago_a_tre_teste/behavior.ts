@@ -10,6 +10,8 @@
  * - The last head standing does not fall: its break is an ordinary Spezzato, then its bar grows ×LAST_BAR_MULT.
  * - Lightning strikes that follow you are dropped one by one (bolt events) but count as one blow (hazard group).
  * - A landed blow of a chain ends it (endComboIfLanded); the tail answers only a player beside or behind.
+ * - Fairness helpers shared with the Drago di Ghiaccio: the fire breath locks its aim 0.45 s before it starts; ticks of the
+ *   breath and of the venom puddles never chain flinches (noTickFlinch).
  */
 import type { AttackDef, SpawnDef } from '../../../core/types';
 import { worldToLocal } from '../../../core/math';
@@ -17,7 +19,7 @@ import { defineBehavior } from '../../../sim/behavior';
 import { nextAttackUid, type Actor, type AttackRuntime, type PartRuntime } from '../../../sim/actor';
 import type { Sim } from '../../../sim/sim';
 import { endComboIfLanded } from '../re_mantide/behavior';
-import { groupNewHazards, newHazardGroup } from '../drago_di_ghiaccio/behavior';
+import { breathAimLock, groupNewHazards, inOwnDot, newHazardGroup, noTickFlinch } from '../drago_di_ghiaccio/behavior';
 
 export const HEADS = ['testa_fuoco', 'testa_veleno', 'testa_fulmine'] as const;
 export const RAGE_STEP = 0.12;
@@ -27,6 +29,7 @@ export const STRIKE_DROP = 0.9;
 export const STRIKE_FORWARD = 1.3;
 export const FALLEN_DROP = 2.1;
 const ANCHOR_RATE = 4;
+const BREATHS = new Set(['fire_breath', 'rage_fire_sweep']);
 
 const FROM: [number, number, number] = [0, 0, 0];
 const BOLT: SpawnDef = {
@@ -110,6 +113,15 @@ export default defineBehavior(() => ({
   },
   update(a: Actor, sim: Sim, dt: number) {
     animateHeads(a, dt);
+    if (a.alive && sim.fight?.active && !sim.fight.intro) {
+      // ticks of the fire breath and of the venom puddles never chain flinches; a real blow landing meanwhile keeps its own
+      const atk = a.attack;
+      const live = !!atk && atk.stage === 'active';
+      const breath = live && BREATHS.has(atk!.def.id);
+      const blow = live && !breath && !!atk!.def.hits?.some((h) => !h.tick);
+      noTickFlinch(a, sim, breath || (!blow && inOwnDot(a, sim)));
+      breathAimLock(a, BREATHS);
+    }
     // a fallen head stays down once its Spezzato ends
     const falling = a.bstate.falling as string[];
     for (let i = falling.length - 1; i >= 0; i--) {
