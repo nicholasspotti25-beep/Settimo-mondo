@@ -23,25 +23,27 @@ tests/act1*.test.ts, docs/requests/act1.md.
 | 10 | Balance bot: perfect wins inside 120+20×D with few hits; sloppy not trivial | done (chunk 2): all 5 PASS base; NG+ and ToD variants all won by the perfect bot | tools/bot/hooks/*, data/bosses/great_devourer.yaml |
 | 11 | Bot hooks for scripted mechanics | done (chunk 1): all 5 hooks; shared act1Defense (box hazards, charge lines, ring jumps, round-hazard escape) | tools/bot/hooks/{cavaliere_errante,elder_tree,mostro_della_palude,great_devourer,caronte}.ts |
 | 12 | Unit tests tests/act1*.test.ts | done for sim (27); model tests started chunk 3 (3: Cavaliere budget, hurtbox alignment, dismount/horse leaves/retry) | tests/act1.test.ts, tests/act1_models.test.ts |
-| 13 | Canon audit clean for act1 bosses | partial: only "no music theme data" (audio stream) and "no model builder" (item 14) remain; canon quotes OK | — |
-| 14 | Boss models (5) | partial: cavaliere_errante done (chunk 4 volume pass: surcoat, limb plates, wide cloak draped over the rump, hood framing the helm); elder_tree, palude, devourer, caronte missing | src/content/bosses/cavaliere_errante/{model,garments}.ts |
-| 15 | Arena dressing (5) incl. first_light, pier_destroyed, soul_bridge/current, caronte_ferry cues | partial: pianure_erba_alta done (chunk 4); foresta_cuore, palude_pozza, palude_molo, fiume_traghetto missing | src/content/bosses/<id>/arena.ts |
+| 13 | Canon audit clean for act1 bosses | partial: "no music theme data" (audio stream) for all 5; "no model builder" left for palude, devourer, caronte (item 14); canon quotes OK | — |
+| 14 | Boss models (5) | partial: cavaliere_errante (chunk 4), elder_tree (chunk 5) done; palude, devourer, caronte missing | src/content/bosses/{cavaliere_errante,elder_tree}/model.ts (+ garments.ts) |
+| 15 | Arena dressing (5) incl. first_light, pier_destroyed, soul_bridge/current, caronte_ferry cues | partial: pianure_erba_alta (chunk 4), foresta_cuore with first_light + elder_heart_open (chunk 5) done; palude_pozza, palude_molo, fiume_traghetto missing | src/content/bosses/<id>/arena.ts |
 | 16 | Requests to other streams | none needed so far | docs/requests/act1.md |
+| 17 | Integration #5 (hooks on tools/bot/defense.ts) | done (chunk 5), per-seed results byte-identical | tools/bot/hooks/*.ts |
 
 ## Next
 
-1. Elder Tree model (tree family: treeSkeleton/treeBody; data/anim/tree.yaml now exists — check which of root_call,
-   branch_whip_l/r, branch_slam, shake_canopy, root_stomp, heart_pulse resolve to family clips and add RigVisualOpts.clips only
-   where they do not read; bark face in the trunk, black leaves, luminous mushrooms at the roots; heart part sphere
-   [0, 2.3, 2.95] with flag heart_open opening the trunk on a heart of light) + arena foresta_cuore (black canopy, roots,
-   luminous mushrooms; cue first_light = a shaft of dawn through the canopy on death; elder_heart_open). Boss spawns at
-   z ≈ 132 (north side). Fight-camera screenshots at two times of day.
-2. Then palude (model + palude_pozza), devourer (model + palude_molo, arena_state pier_destroyed), caronte (model +
-   fiume_traghetto, soul_bridge / current, caronte_ferry).
-3. Cavaliere polish (optional): pose screenshots of `counter_stance` / `salute` with fightPaused during the telegraph; the
-   night charge out of the dark (mist burst) seen from the fight camera at notte (meditate('notte') before
-   startFightDirect rendered an overcast day in the headless shots of chunk 4 — check the time-of-day call order).
-4. Optional bot polish (unchanged): Caronte NG+ 3.7 hits, Devourer 3.3–3.6 hits.
+1. Mostro della Palude model (colossus family: colossusSkeleton/colossusBody matter 'mud'; reeds, bones, UNLIT lanterns
+   hanging off it, the drowned Cercatori's shapes fused in the mud; hidden -> emerge from the water; the three split figures
+   annegato_canne / _lanterna / _ossa as `minions` builders) + arena palude_pozza (black pool, reeds, rotten walkway
+   remains, drowned seeker lanterns, heap of drowned Cercatori). Fight-camera screenshots at two times of day.
+2. Then devourer (model + palude_molo, arena_state pier_destroyed), caronte (model + fiume_traghetto, soul_bridge / current,
+   caronte_ferry).
+3. Elder Tree polish (optional): the open heart lips still read a little like two upright gold-rimmed pods from the low
+   follow camera; branch_whip_l/r end pose measured (tip ~10-11 m out at y ~1) but not yet seen in a frozen fight-camera shot
+   without the hitbox overlay; the canopy could take a few more sprays if the 65k triangle budget allows after Low/Medium
+   checks.
+4. Cavaliere polish (optional): pose screenshots of `counter_stance` / `salute`; the night charge out of the dark from the
+   fight camera at notte.
+5. Optional bot polish (unchanged): Caronte NG+ 3.7 hits, Devourer 3.3-3.6 hits.
 
 ## Notes
 
@@ -164,3 +166,43 @@ tests/act1*.test.ts, docs/requests/act1.md.
   great_devourer / caronte hooks import `act1Defense` from '../defense'. Helper bodies were checked verbatim-identical by
   diff first. Bot A/B (5 bosses, seeds=3, tools/out/bot-report.json before/after): byte-identical (`cmp`), every seed same
   win/time/hits for perfect and sloppy; cerbero (seeds=2) still PASS.
+- Chunk 5, Elder Tree model (src/content/bosses/elder_tree/model.ts, registry: 4 models): tree-family bone names
+  (data/anim/tree.yaml drives root_call/summon, shake_canopy/shake, root_stomp/stomp, heart_pulse/roar, death) on this
+  boss's own skeleton from data (H 18, R = 0.86 x body.radius): trunk_0..3 at y 0.3 / 4 / 8 / 11.4, crown 14 / 16.4; arms
+  from trunk_2 at y 9, out to ~13.5 m with a rest sag the idle deepens; 3-bone roots at 30 + 60i deg (the front wedge left
+  free for the heart), arching and diving into the soil, plus 5 static flares. Trunk = one 32-radial tube with a ridge
+  function: twisting furrows (faded on the face), buttress lobes at the roots, a forward face bulge, and the heart cleft
+  carved as a lens (y 0.75-3.9 m). Face: deep eye hollows with amber embers on trunk_2, heavy drooping brows, wrinkles, a
+  knotted nose, nasolabial folds, mouth hollow + upper lip, lower lip/chin on the jaw (hinge behind the lip, +x drops it), a
+  13-strand moss beard on the jaw. Black canopy = 12 clumps of 5-leaf sprays (oriented outward) around small dark cores,
+  hanging moss, teal/gold mushrooms in the root crevices, glowing shelf fungi on the sides. Heart: own bone + surface
+  (emissive driven per frame), veins, a concave lining, sap seams on the cleft edges, two bark lips on hinge bones
+  heart_door_l/r. On 'heart_open' (read every frame, so a save in p2 shows it open) the lips fold back 138 deg over ~3 s,
+  the heart grows 0.5 -> 1 and pushes 0.85 m forward, beats lub-dub (faster and brighter in the heart_pulse / spore_volley
+  wind-up), golden fresnel halo via flagAuras. 5 surfaces, 64.6k triangles on High (render_models test).
+- Model clips (measured with bone world positions in a frozen pose, scratchpad c5/bones.mjs): `branch_whip_l` (mirror
+  `branch_whip_r`): wind-up back-left, then a straight arm ~40 deg below horizontal sweeping to the front-right (tip ~10-11 m
+  out at y ~1 inside the r 12.5 arc); `branch_slam`: right arm raised overhead (bone 2 at y 17.9), then a straight arm along
+  the center line, tip (0.8, -0.3, 12.1) inside the slam box (z 2.6-13.8). First tries curled the arms in (tip 6.5 m out) and
+  dropped the slam at z 7.
+- Arena foresta_cuore (src/content/bosses/elder_tree/arena.ts, registry: 4 arenas): ring of colossal black trunks (r 31-38,
+  open at the fog gate and the north road) with buttress roots and boughs reaching in; black canopy masses 27-36 m up with a
+  gap only over the tree; hanging moss (wind); 13 flat black surface roots from the tree's foot across the floor
+  (render-only); teal / violet / gold mushroom clusters with halos ringing the clearing; a Cercatore's unlit lantern on a pole
+  and a helm at the western edge. Cues: elder_heart_open (and any p2 frame) = a pulsing gold pool in front of the trunk and
+  gold glints at the gold mushrooms; first_light = a slanted additive shaft (custom shader, x uHazeK, dust bands) from the
+  canopy gap onto the tree's spot + a pale-gold floor pool + 22 motes, easing in over ~4 s; once elder_tree is defeated the
+  ray stays at 60% on every load; arena_state:default resets. Two bugs found on the way: world `cyl()` is base-anchored (the
+  shaft was placed half a length too high), and a reversed `smoothstep(1.0, 0.72, x)` (undefined in GLSL, 0 on SwiftShader)
+  hid the shaft entirely. Fight view: 82-93 calls, 350-380k scene triangles at High.
+- Screenshots (port 5181, 1280x576, scratchpad c5/shots): fight camera p1 tramonto (Colpo Rosso slam lane), p2 tramonto and
+  notte (heart open + pool), giorno close-up of face and heart, whip / slam with hitboxes (front-high, side), alba wide with
+  first_light on the live tree, and a real kill (sim.debugKillBoss, defeat sequence running) at tramonto: at 16 s the tree
+  has dissolved and the ray stands in the clearing over the pool and the radiating roots.
+- `one_blow: true` on the two NG+ knockback double swipes (elder_tree ng_double_whip, caronte ng_double_sweep). Kept as real
+  combos (no knockback): cavaliere saddle_cleave / duel_combo, palude figures reed_flurry / ng_lantern_whirl. NG+ bot
+  (scratchpad act1/variants.ts, seeds 3) unchanged: elder 125/118/120 s, 2.7 hits; caronte 183/190/172 s, 3.7 hits.
+- End of chunk 5: `npx tsc --noEmit -p tsconfig.json` clean (whole tree, 0 errors); `npx vitest run tests/act1.test.ts
+  tests/act1_models.test.ts tests/render_models.test.ts` 36/36; `npm run registry && SM_PARTIAL=1 npm run data` ok (1244 it /
+  1244 en); balance-bot seeds=3: elder_tree PASS 95 s / 200, 2.3 hits, sloppy 1/3; caronte PASS 181 s / 240, 1.3 hits,
+  sloppy 0/3 (identical to before); canon audit: the elder_tree "no model builder" finding is gone.

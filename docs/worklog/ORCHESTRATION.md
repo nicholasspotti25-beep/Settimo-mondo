@@ -86,3 +86,6 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - 2026-11-05 ~07:00 usage limit stopped act1#5 and act67#1; 09:29 both resumed
 - act67#1 done: lucifero_2, drago_del_vuoto, verme_mangiamondi sim-side (not balanced yet); request act67 (sequence chaining skips first timed step) for integrate#4; NOTE strict npm run data does not write content.json -> always SM_PARTIAL=1 before bot runs
 - started: act3b#2 (sciamano, aquila, drago_di_fuoco, kraken)
+- act1#5 done: Elder Tree model (heart_open) + foresta_cuore arena (first_light ray), bot hooks on shared defense, one_blow on NG+ double swipes
+- lead: audio and forms were never started under the work-log system; visual lane runs audio#1 then forms#1 next
+- started: audio#1

@@ -332,6 +332,7 @@ attacks:
     cooldown: 6
     track: 1.0
     track_active: 0.2
+    one_blow: true      # two swipes land once per target (no knockback into the second swipe)
     hits:
       - {t: 0.05, dur: 0.3, shape: {type: arc, r: 8.0, r_in: 0.8, angle: 170, yaw: 10, y: [0, 1.0]}}
       - {t: 0.7, dur: 0.3, shape: {type: arc, r: 8.0, r_in: 0.8, angle: 170, yaw: -10, y: [0, 1.0]}}
