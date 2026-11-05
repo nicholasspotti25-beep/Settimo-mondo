@@ -57,7 +57,10 @@ const hook: BotHook = {
       }
       if (perfect && t < 0.5) return base; // keep the jump free
     }
-    return gardenDecide(sim, bot, base);
+    const r = gardenDecide(sim, bot, base);
+    // a line is on its way: the perfect profile starts no swing it could not jump out of
+    if (r && bot.profile === 'perfect' && !(r.presses & Btn.Dodge) && workerContact(sim, 1.2) >= 0) r.presses &= ~(Btn.Light | Btn.Heavy | Btn.ArtPrima | Btn.ArtSeconda);
+    return r;
   },
 };
 export default hook;
