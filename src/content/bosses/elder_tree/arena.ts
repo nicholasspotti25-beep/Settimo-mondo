@@ -48,7 +48,7 @@ function shaftMaterial(height: number): THREE.ShaderMaterial {
         vec3 vd = normalize(cameraPosition - vW);
         float face = abs(dot(normalize(vN), vd));
         float edge = pow(face, 1.6);
-        float vert = smoothstep(0.0, 0.18, vH) * smoothstep(1.0, 0.72, vH) * (0.55 + 0.45 * vH);
+        float vert = smoothstep(0.0, 0.18, vH) * (1.0 - smoothstep(0.72, 1.0, vH)) * (0.55 + 0.45 * vH);
         float bands = 0.75 + 0.25 * sin(vH * 38.0 + uTime * 0.7 + vW.x * 0.6) * sin(vH * 17.0 - uTime * 0.45 + vW.z * 0.4);
         float a = uOn * edge * vert * bands * 0.42 * uHazeK;
         gl_FragColor = vec4(uColor * a, a);

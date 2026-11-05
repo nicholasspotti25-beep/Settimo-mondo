@@ -84,3 +84,5 @@ items in ~50-80 tool calls; update the work log; never break the tree; no git; r
 - act5#1 done: drago_di_ghiaccio + drago_a_tre_teste sim-side pass bot (NG+ not yet); requests act5 #1 (DoT ticks restart flinch -> pin) and #2 (local ice patches) for integrate#4
 - started: act67#1 (sim-side)
 - 2026-11-05 ~07:00 usage limit stopped act1#5 and act67#1; 09:29 both resumed
+- act67#1 done: lucifero_2, drago_del_vuoto, verme_mangiamondi sim-side (not balanced yet); request act67 (sequence chaining skips first timed step) for integrate#4; NOTE strict npm run data does not write content.json -> always SM_PARTIAL=1 before bot runs
+- started: act3b#2 (sciamano, aquila, drago_di_fuoco, kraken)
