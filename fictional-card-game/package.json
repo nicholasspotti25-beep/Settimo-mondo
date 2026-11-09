@@ -1,0 +1,20 @@
+{
+  "name": "fictional-card-game",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Fictional Card Game: a two-player local game with Classic Draft, Tournament, Team Draft and Card Collector modes.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build && node scripts/inline.mjs",
+    "preview": "vite preview --host",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm run test"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "7.3.7",
+    "vitest": "4.1.11"
+  }
+}

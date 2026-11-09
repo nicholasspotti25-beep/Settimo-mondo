@@ -57,3 +57,8 @@ storage (IndexedDB inside the app's WebView). App icons and splash screens are g
 
 Three slots, autosave at altars, on boss defeat and when the app goes to the background. Settings → Save → **Export** gives a
 copyable text code (`SM1....`); **Import** restores it on any device.
+
+## Also in this repository
+
+`fictional-card-game/` is a separate, self-contained project (its own `package.json`): a two-player card game with
+Classic Draft, Tournament, Team Draft and Card Collector modes. See `fictional-card-game/README.md`.
