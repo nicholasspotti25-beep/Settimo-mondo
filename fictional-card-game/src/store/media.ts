@@ -183,6 +183,11 @@ export async function importMedia(file: File, expected: MediaKind): Promise<Impo
 
 export type BlobLoader = (key: string) => Promise<Blob | null>;
 let loader: BlobLoader = async () => null;
+let direct: ((key: string) => string | null) | null = null;
+/** Lets a storage backend hand out streamable URLs (account storage) instead of reading files into memory. */
+export function setDirectUrl(fn: ((key: string) => string | null) | null): void {
+  direct = fn;
+}
 const urlCache = new Map<string, Promise<string | null>>();
 
 export function setBlobLoader(l: BlobLoader): void {
@@ -197,6 +202,11 @@ export function mediaUrl(meta: MediaMeta | undefined, variant: 'full' | 'thumb')
   const useThumb = variant === 'thumb' && meta.hasThumb && !meta.animated;
   const key = useThumb ? thumbKey(meta.id) : meta.id;
   let p = urlCache.get(key);
+  const d = direct?.(key);
+  if (!p && d) {
+    p = Promise.resolve(d);
+    urlCache.set(key, p);
+  }
   if (!p) {
     p = loader(key).then((b) => (b ? URL.createObjectURL(b) : null)).catch(() => null);
     urlCache.set(key, p);
@@ -216,7 +226,7 @@ export async function mediaUrlInMemory(id: string): Promise<string | null> {
 export function forgetMediaUrls(id: string): void {
   for (const key of [id, thumbKey(id)]) {
     const p = urlCache.get(key);
-    if (p) p.then((u) => u && URL.revokeObjectURL(u));
+    if (p) p.then((u) => u && u.startsWith('blob:') && URL.revokeObjectURL(u));
     urlCache.delete(key);
   }
 }

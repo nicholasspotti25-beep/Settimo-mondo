@@ -61,10 +61,10 @@ export function tournamentScreen(): Screen {
     const tt = t;
     const champ = tt.participants[tt.champion]!.name;
     const res = { p1: playerResult(tt, 'p1'), p2: playerResult(tt, 'p2') };
-    const already = repo.player('p1').tournaments.some((x) => x.id === tt.id);
-    if (!already) {
-      const ok = await attempt(() => repo.mutate(['p1', 'p2'], (ps) => {
-        for (const p of ['p1', 'p2'] as const) {
+    const todo = (['p1', 'p2'] as const).filter((p) => !repo.player(p).tournaments.some((x) => x.id === tt.id));
+    if (todo.length) {
+      const ok = await attempt(() => repo.mutate([...todo], (ps) => {
+        for (const p of todo) {
           applyTournament(ps[p], { id: tt.id, at: Date.now(), size: tt.size, character: res[p].participant.name, placement: res[p].placement, reward: res[p].reward, champion: champ }, Date.now());
         }
       }, [repo.setPendingTournamentOp(null)], () => repo.setPendingTournamentLocal(null)), 'Could not save the tournament result');

@@ -147,6 +147,11 @@ function modeTab(mode: Mode, state: { q: string; status: Status; sort: Sort; rar
 function mediaTab(state: { mediaFilter: 'all' | 'image' | 'video' | 'unused' }, rerender: () => void): HTMLElement {
   const est = h('div', { class: 'storage-est muted' }, 'Checking storage…');
   void (async () => {
+    if (repo.storageKind === 'cloud') {
+      const u = await repo.storageUsage();
+      est.textContent = `Saved to your Claude account${u ? `: ${fmtBytes(u.bytes)} of ${fmtBytes(u.maxBytes)} used` : ''}. Files stay when you close the app.`;
+      return;
+    }
     try {
       const e = await navigator.storage?.estimate?.();
       const persisted = await navigator.storage?.persisted?.();
@@ -216,7 +221,7 @@ function mediaTab(state: { mediaFilter: 'all' | 'image' | 'video' | 'unused' }, 
   return h('div', { class: 'stack' },
     h('div', { class: 'panel' },
       h('div', { class: 'rd-head' }, h('div', { class: 'grow' }, h('h3', null, 'Media library'),
-        h('p', { class: 'muted' }, 'Every image and video imported into the game, stored on this device (IndexedDB) and included in backups.')),
+        h('p', { class: 'muted' }, repo.storageKind === 'cloud' ? 'Every image and video imported into the game, saved to your Claude account and included in backups.' : 'Every image and video imported into the game, stored on this device and included in backups.')),
         h('div', { class: 'rd-nums' },
           h('div', null, h('b', null, String(items.filter((m) => m.kind === 'image').length)), h('small', null, 'images')),
           h('div', null, h('b', null, String(items.filter((m) => m.kind === 'video').length)), h('small', null, 'videos')),

@@ -35,6 +35,10 @@ export function describeError(e: unknown): string {
 }
 
 export interface Store {
+  readonly kind?: 'cloud' | 'device' | 'memory';
+  /** Optional direct URL for a stored media file (streamed instead of read into memory). */
+  urlFor?(key: string): string | null;
+  usage?(): Promise<{ bytes: number; maxBytes: number } | null>;
   getAll<T>(store: StoreName): Promise<T[]>;
   get<T>(store: StoreName, key: IDBValidKey): Promise<T | undefined>;
   getAllKeys(store: StoreName): Promise<IDBValidKey[]>;
@@ -43,6 +47,7 @@ export interface Store {
 
 /** Used only when the browser refuses IndexedDB (private mode, blocked storage): the game runs but nothing is kept. */
 export class MemoryStore implements Store {
+  readonly kind = 'memory' as const;
   private data = new Map<StoreName, Map<string, unknown>>(STORES.map((s) => [s, new Map()]));
   private keyOf(store: StoreName, value: unknown, key?: IDBValidKey): string {
     return String(key ?? (store === 'blobs' || store === 'kv' ? '' : (value as { id: string }).id));
@@ -61,6 +66,7 @@ export class MemoryStore implements Store {
 }
 
 export class Idb implements Store {
+  readonly kind = 'device' as const;
   private constructor(private db: IDBDatabase) {
     db.onversionchange = () => db.close();
   }

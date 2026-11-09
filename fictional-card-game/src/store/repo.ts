@@ -17,9 +17,30 @@ import {
 } from '../model/types';
 import { type Issue, MIN_ENTRIES, validate } from '../model/validation';
 import { Idb, MemoryStore, type Op, type Store, StorageError, toBlob } from './idb';
-import { type Imported, forgetMediaUrls, setBlobLoader, thumbKey } from './media';
+import { type Imported, forgetMediaUrls, setBlobLoader, setDirectUrl, thumbKey } from './media';
+import { CloudStore, type AssetsApi, type DbApi } from './cloud';
 
 type Listener = () => void;
+export type SaveState = 'saving' | 'saved' | 'error';
+export type StorageKind = 'cloud' | 'device' | 'memory';
+
+const withTimeout = <T>(p: Promise<T>, ms: number): Promise<T | null> =>
+  Promise.race([p, new Promise<null>((r) => setTimeout(() => r(null), ms))]);
+
+/** Inside the Claude viewer: the artifact's private account storage, or null when this view cannot use it. */
+async function openCloud(): Promise<CloudStore | null> {
+  const c = (window as any).claude;
+  if (typeof c?.use !== 'function') return null;
+  const [db, user, assets] = await Promise.all([
+    withTimeout(c.use('db') as Promise<DbApi | null>, 12000).catch(() => null),
+    withTimeout(c.use('user') as Promise<{ id(): Promise<string | null> } | null>, 12000).catch(() => null),
+    withTimeout(c.use('assets') as Promise<AssetsApi | null>, 12000).catch(() => null),
+  ]);
+  if (!db || !user) return null;
+  const uid = await withTimeout(user.id(), 12000).catch(() => null);
+  if (!uid) return null;
+  return new CloudStore(db, assets, uid);
+}
 type EntryMaps = { [M in Mode]: Map<string, EntryByMode[M]> };
 
 export interface Readiness {
@@ -60,6 +81,9 @@ class Repo {
   persistent = true;
   private listeners = new Set<Listener>();
   private queue: Promise<unknown> = Promise.resolve();
+  private pendingWrites = 0;
+  private statusListeners = new Set<(s: SaveState) => void>();
+  storageKind: StorageKind = 'device';
   entries: EntryMaps = { classic: new Map(), tournament: new Map(), team: new Map(), collector: new Map() };
   players!: Record<PlayerId, PlayerProfile>;
   media = new Map<string, MediaMeta>();
@@ -69,7 +93,23 @@ class Repo {
   loadWarnings: string[] = [];
   ready = false;
 
-  async init(): Promise<void> {
+  async init(progress: (msg: string) => void = () => undefined): Promise<void> {
+    setBlobLoader((key) => this.getBlob(key));
+    const inViewer = typeof (window as any).claude?.use === 'function';
+    if (inViewer) {
+      progress('Connecting to your saved game…');
+      const cloud = await openCloud();
+      if (cloud) {
+        this.idb = cloud;
+        this.storageKind = 'cloud';
+        setDirectUrl((key) => cloud.urlFor(key));
+        progress('Loading your saved game…');
+        await this.load();
+        if (this.isEmpty()) await this.copyFromDevice(progress);
+        this.ready = true;
+        return;
+      }
+    }
     let fallback = '';
     try {
       this.idb = await Idb.open();
@@ -77,13 +117,57 @@ class Repo {
       fallback = (e as Error)?.message ?? String(e);
       this.idb = new MemoryStore();
       this.persistent = false;
+      this.storageKind = 'memory';
     }
-    setBlobLoader((key) => this.getBlob(key));
     await this.load();
     if (fallback) {
       this.loadWarnings.unshift(`Saving is not available in this browser (${fallback}) — the game works, but nothing you do now will be kept. Any data saved earlier has not been touched; reload to try again.`);
+    } else if (inViewer) {
+      this.loadWarnings.unshift('Your account storage could not be reached, so this visit saves only in this browser, which the Claude app may clear. Reload to reconnect, and export a backup before closing.');
     }
     this.ready = true;
+  }
+
+  private isEmpty(): boolean {
+    if (this.media.size) return false;
+    for (const m of MODES) if (this.entries[m].size) return false;
+    return PLAYERS.every((id) => { const p = this.players[id]; return p.fc === 0 && !p.packs.length && !p.ledger.length && !Object.keys(p.collection).length; });
+  }
+
+  /** First visit with account storage: bring over anything this browser still holds from before. Local data is kept. */
+  private async copyFromDevice(progress: (msg: string) => void): Promise<void> {
+    let local: Idb;
+    try { local = await Idb.open(); } catch { return; }
+    try {
+      const ops: Op[] = [];
+      let found = 0;
+      for (const s of [...MODES, 'media'] as const) for (const v of await local.getAll(s)) { ops.push({ store: s, type: 'put', value: v }); found++; }
+      const players = await local.getAll<PlayerProfile>('players');
+      const progressed = players.some((p) => p && (p.fc > 0 || p.packs?.length || p.ledger?.length));
+      if (!found && !progressed) return;
+      for (const p of players) ops.push({ store: 'players', type: 'put', value: p });
+      for (const k of ['settings', 'pendingTournament']) { const v = await local.get('kv', k); if (v) ops.push({ store: 'kv', type: 'put', key: k, value: v }); }
+      for (const k of await local.getAllKeys('blobs')) { const b = toBlob(await local.get('blobs', k)); if (b) ops.push({ store: 'blobs', type: 'put', key: String(k), value: b }); }
+      progress('Moving your game from this device to your account…');
+      await this.idb.run(ops);
+      await this.load();
+      this.loadWarnings.push('Your game was moved from this browser to your account storage. It is now kept when you close the app.');
+    } catch (e) {
+      this.loadWarnings.push(`Data found in this browser could not be moved to your account (${(e as Error)?.message ?? e}). It is still in this browser; reload to try again.`);
+    }
+  }
+
+  onSaveState(fn: (s: SaveState) => void): () => void {
+    this.statusListeners.add(fn);
+    return () => this.statusListeners.delete(fn);
+  }
+
+  private setSave(s: SaveState): void {
+    for (const l of this.statusListeners) { try { l(s); } catch { /* ignore */ } }
+  }
+
+  async storageUsage(): Promise<{ bytes: number; maxBytes: number } | null> {
+    return (await this.idb.usage?.()) ?? null;
   }
 
   private async load(): Promise<void> {
@@ -101,6 +185,7 @@ class Repo {
     }
     this.entries = entries;
     const media = new Map<string, MediaMeta>();
+    if (this.idb.kind === 'cloud') await this.idb.getAllKeys('blobs'); // index of stored files, so videos stream directly
     for (const m of await this.idb.getAll<MediaMeta>('media')) if (m && typeof m.id === 'string') media.set(m.id, m);
     this.media = media;
     const rawPlayers = await this.idb.getAll<PlayerProfile>('players');
@@ -139,9 +224,14 @@ class Repo {
   }
 
   /** Serialize writes so no change is ever based on stale state. */
-  private serial<T>(fn: () => Promise<T>): Promise<T> {
+  private serial<T>(fn: () => Promise<T>, silent = false): Promise<T> {
     const p = this.queue.then(fn, fn);
     this.queue = p.catch(() => undefined);
+    if (!silent) {
+      this.pendingWrites++;
+      this.setSave('saving');
+      p.then(() => { if (--this.pendingWrites === 0) this.setSave('saved'); }, () => { this.pendingWrites--; this.setSave('error'); });
+    }
     return p;
   }
 
@@ -334,7 +424,7 @@ class Repo {
       await this.idb.run(changed.map((value) => ({ store: 'players', type: 'put', value })));
       for (const c of changed) this.players[c.id] = c;
       this.emit();
-    });
+    }, true);
   }
 
   // ------------------------------------------------------------ settings & tournaments
@@ -392,8 +482,8 @@ class Repo {
       for (const [k, b] of blobs) ops.push({ store: 'blobs', type: 'put', key: k, value: b });
       ops.push({ store: 'kv', type: 'put', key: 'settings', value: data.settings });
       if (data.pendingTournament) ops.push({ store: 'kv', type: 'put', key: 'pendingTournament', value: data.pendingTournament });
-      await this.idb.run(ops);
       for (const id of this.media.keys()) forgetMediaUrls(id);
+      await this.idb.run(ops);
       await this.load();
       this.emit();
     });

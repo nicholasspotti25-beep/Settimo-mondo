@@ -125,6 +125,15 @@ export function settingsScreen(): Screen {
   const body = h('div', { class: 'wrap' });
   const storageInfo = h('p', { class: 'muted' }, 'Checking storage…');
   const refreshStorage = async (): Promise<void> => {
+    if (repo.storageKind === 'cloud') {
+      const u = await repo.storageUsage();
+      storageInfo.textContent = `Your game is saved to your Claude account (this game's private storage): it stays when you close the app and is the same wherever you open this game's link.${u ? ` Media uses ${fmtBytes(u.bytes)} of ${fmtBytes(u.maxBytes)}.` : ''} Deleting this artifact would delete its saved data, so keep a backup too.`;
+      return;
+    }
+    if (repo.storageKind === 'memory') {
+      storageInfo.textContent = 'Saving is not available in this browser: nothing you do now will be kept. Reload to try again, or open the game elsewhere.';
+      return;
+    }
     try {
       const e = await navigator.storage?.estimate?.();
       const persisted = await navigator.storage?.persisted?.();
@@ -153,7 +162,7 @@ export function settingsScreen(): Screen {
       sectionTitle('Storage & backup'),
       h('div', { class: 'panel stack' },
         storageInfo,
-        h('div', { class: 'row' },
+        repo.storageKind !== 'device' ? null : h('div', { class: 'row' },
           btn('Protect storage', async () => {
             const ok = await navigator.storage?.persist?.().catch(() => false);
             toast(ok ? 'Persistent storage granted' : 'The browser did not grant persistent storage — keep regular backups', ok ? 'ok' : 'info', 5000);

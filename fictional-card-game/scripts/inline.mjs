@@ -33,7 +33,7 @@ const fonts = [...html.matchAll(/<link [^>]*fonts\.(?:googleapis|gstatic)\.com[^
 const artifact = `<title>Fictional Card Game</title>
 ${fonts}
 <style>${css}${viewerCss}</style>
-<div id="app"><div id="screens"></div><div id="overlays"></div></div>
+<div id="app"><div id="screens"><div class="boot"><div class="spinner"></div><b>FICTIONAL CARD GAME</b><span id="boot-msg">Loading…</span></div></div><div id="overlays"></div></div>
 <script type="module">${js}</script>
 `;
 writeFileSync(join(dist, 'artifact.html'), artifact);

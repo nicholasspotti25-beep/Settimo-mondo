@@ -9,6 +9,7 @@ import { icon } from './ui/icons';
 import { initOverlay } from './ui/overlay';
 import { go, initRouter, register } from './ui/router';
 import { unlockMedia } from './ui/components/cutscene';
+import { initSavePill } from './ui/components/savepill';
 import { homeScreen } from './ui/screens/home';
 import { settingsScreen } from './ui/screens/settings';
 import { databaseScreen } from './ui/screens/database/manager';
@@ -36,8 +37,9 @@ function fatal(root: HTMLElement, message: string): void {
 async function main(): Promise<void> {
   const screens = document.getElementById('screens')!;
   initOverlay(document.getElementById('overlays')!);
+  const bootMsg = document.getElementById('boot-msg');
   try {
-    await repo.init();
+    await repo.init((m) => { if (bootMsg) bootMsg.textContent = m; });
   } catch (e) {
     console.error(e);
     fatal(screens, (e as Error)?.message ?? String(e));
@@ -48,6 +50,8 @@ async function main(): Promise<void> {
   };
   applyPrefs();
   repo.subscribe(applyPrefs);
+  screens.replaceChildren();
+  initSavePill();
   initRouter(screens);
   register('home', homeScreen);
   register('settings', settingsScreen);
