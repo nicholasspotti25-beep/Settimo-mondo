@@ -32,9 +32,23 @@ describe('backup', () => {
   });
   it('rejects foreign, truncated and damaged files', async () => {
     await expect(parseBackup(new Blob(['hello world, not a backup']))).rejects.toBeInstanceOf(BackupError);
+    const { writeZip } = await import('../src/store/zip');
+    await expect(parseBackup(await writeZip([{ name: 'other.txt', data: new Blob(['x']) }]))).rejects.toThrow(/not a Fictional/);
     const file = await buildBackup(data(), ['m1'], async () => new Blob([new Uint8Array(100)]));
     await expect(parseBackup(file.slice(0, file.size - 10))).rejects.toThrow(/incomplete/);
     const bad = { ...data(), players: [newPlayer('p1', 'x')] };
     await expect(parseBackup(await buildBackup(bad, [], async () => null))).rejects.toThrow(/player/);
+  });
+});
+
+describe('zip container', () => {
+  it('is a standard stored ZIP with backup.json first', async () => {
+    const file = await buildBackup(data(), ['m1'], async () => new Blob([new Uint8Array([7, 7, 7])], { type: 'image/png' }));
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    expect([...bytes.slice(0, 4)]).toEqual([0x50, 0x4b, 3, 4]);
+    expect(new TextDecoder().decode(bytes.slice(30, 41))).toBe('backup.json');
+    const { readZip } = await import('../src/store/zip');
+    const z = await readZip(file);
+    expect([...z.keys()]).toEqual(['backup.json', 'media/m1']);
   });
 });

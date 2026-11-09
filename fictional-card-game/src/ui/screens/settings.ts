@@ -12,14 +12,7 @@ import { formatDateTime } from '../../core/time';
 import { PLACEMENT_LABEL } from '../../engines/tournament';
 import { MODES, MODE_LABEL, RARITY_LABEL, EDITION_LABEL, type PlayerId } from '../../model/types';
 import { describeError } from '../../store/idb';
-
-function download(blob: Blob, name: string): void {
-  const url = URL.createObjectURL(blob);
-  const a = h('a', { href: url, download: name, style: 'display:none' });
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 60_000);
-}
+import { inClaudeViewer, saveFile } from '../../core/save';
 
 async function exportBackup(): Promise<void> {
   const b = busy('Preparing the backup (databases, profiles and all media)…');
@@ -33,11 +26,16 @@ async function exportBackup(): Promise<void> {
     const content = h('div', { class: 'stack' },
       h('p', null, `Your complete backup is ready: `, h('strong', null, name), ` (${fmtBytes(blob.size)}).`),
       h('p', { class: 'muted' }, 'It contains all four databases, every image and video, both players (collections, FC, pity counters, missions, achievements, histories) and settings. Keep it somewhere safe — it is the only way to recover the game if this device or its browser data is lost.'));
+    const share = !inClaudeViewer() && nav.canShare?.({ files: [file] });
     const m = modal({
       title: 'Backup ready', content,
       actions: [
-        nav.canShare?.({ files: [file] }) ? btn('Share / Save to Files', () => void navigator.share({ files: [file], title: name }).catch(() => undefined), 'ghost', 'upload') : null,
-        btn('Download', () => { download(blob, name); toast('Backup downloaded', 'ok'); m.close(); }, 'primary', 'download'),
+        share ? btn('Share / Save to Files', () => void navigator.share({ files: [file], title: name }).catch(() => undefined), 'ghost', 'upload') : null,
+        btn('Save backup', async () => {
+          const r = await saveFile(blob, name);
+          if (r === 'saved') { toast('Backup saved', 'ok'); m.close(); }
+          else if (r === 'unavailable') toast('Saving files is not available here. Open the game in a browser to export a backup.', 'err', 6000);
+        }, 'primary', 'download'),
       ].filter(Boolean) as Node[],
     });
   } catch (e) {
@@ -47,7 +45,7 @@ async function exportBackup(): Promise<void> {
 }
 
 async function importBackup(): Promise<void> {
-  const [file] = await chooseFiles('.fcgbackup,application/octet-stream,*/*');
+  const [file] = await chooseFiles('.zip,.fcgbackup,application/zip,application/octet-stream');
   if (!file) return;
   const b = busy('Checking the backup…');
   let parsed;

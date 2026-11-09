@@ -86,6 +86,6 @@ src/ui        DOM helpers, router, overlays, components (cards, media, picker, c
 styles/       design tokens and per-area stylesheets
 ```
 
-Backups (`.fcgbackup`) are a small binary container: a JSON header (databases, players, settings, media index)
-followed by the raw media bytes, so large videos are never loaded into memory at once. Imports are fully validated
+Backups are standard `.zip` files: `backup.json` (databases, players, settings, media index) plus every media file
+under `media/`, written and read with Blob slices so large videos are never loaded into memory at once. Imports are fully validated
 first and restored in a single transaction — an invalid or partial file never touches existing data.

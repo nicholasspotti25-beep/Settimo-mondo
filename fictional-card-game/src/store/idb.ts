@@ -34,7 +34,33 @@ export function describeError(e: unknown): string {
   return (e as Error)?.message || String(e);
 }
 
-export class Idb {
+export interface Store {
+  getAll<T>(store: StoreName): Promise<T[]>;
+  get<T>(store: StoreName, key: IDBValidKey): Promise<T | undefined>;
+  getAllKeys(store: StoreName): Promise<IDBValidKey[]>;
+  run(ops: Op[]): Promise<void>;
+}
+
+/** Used only when the browser refuses IndexedDB (private mode, blocked storage): the game runs but nothing is kept. */
+export class MemoryStore implements Store {
+  private data = new Map<StoreName, Map<string, unknown>>(STORES.map((s) => [s, new Map()]));
+  private keyOf(store: StoreName, value: unknown, key?: IDBValidKey): string {
+    return String(key ?? (store === 'blobs' || store === 'kv' ? '' : (value as { id: string }).id));
+  }
+  async getAll<T>(store: StoreName): Promise<T[]> { return [...this.data.get(store)!.values()] as T[]; }
+  async get<T>(store: StoreName, key: IDBValidKey): Promise<T | undefined> { return this.data.get(store)!.get(String(key)) as T | undefined; }
+  async getAllKeys(store: StoreName): Promise<IDBValidKey[]> { return [...this.data.get(store)!.keys()]; }
+  async run(ops: Op[]): Promise<void> {
+    for (const o of ops) {
+      const m = this.data.get(o.store)!;
+      if (o.type === 'put') m.set(this.keyOf(o.store, o.value, o.key), o.value);
+      else if (o.type === 'delete') m.delete(String(o.key));
+      else m.clear();
+    }
+  }
+}
+
+export class Idb implements Store {
   private constructor(private db: IDBDatabase) {
     db.onversionchange = () => db.close();
   }

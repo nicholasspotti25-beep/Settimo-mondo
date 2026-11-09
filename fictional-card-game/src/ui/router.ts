@@ -21,12 +21,22 @@ interface Frame { name: string; params: unknown; screen: Screen; scroll: number 
 let rootEl: HTMLElement;
 const stack: Frame[] = [];
 let ignorePop = 0;
+/** Use the browser history (Android back button) only when the game is the top-level page, never inside a frame. */
+const useHistory = ((): boolean => { try { return window.top === window; } catch { return false; } })();
+const hist = {
+  push(): void { if (useHistory) try { history.pushState({ fcg: stack.length }, ''); } catch { /* ignore */ } },
+  back(n = 1): boolean {
+    if (!useHistory) return false;
+    try { history.go(-n); return true; } catch { return false; }
+  },
+};
 let pending = false;
 
 export function initRouter(root: HTMLElement): void {
   rootEl = root;
-  try { history.replaceState({ fcg: 0 }, ''); } catch { /* sandboxed */ }
+  if (useHistory) try { history.replaceState({ fcg: 0 }, ''); } catch { /* sandboxed */ }
   window.addEventListener('popstate', () => {
+    if (!useHistory) return;
     if (ignorePop > 0) {
       ignorePop--;
       return;
@@ -66,7 +76,7 @@ export function go(name: string, params: unknown = {}): void {
   if (cur) cur.scroll = cur.screen.el.scrollTop;
   const frame: Frame = { name, params, screen: f(params), scroll: 0 };
   stack.push(frame);
-  try { history.pushState({ fcg: stack.length }, ''); } catch { /* sandboxed */ }
+  hist.push();
   mount(frame, 'fwd');
   window.scrollTo(0, 0);
 }
@@ -85,18 +95,18 @@ export function replace(name: string, params: unknown = {}): void {
 export async function back(fromBrowser = false): Promise<void> {
   const cur = top();
   if (!cur || stack.length <= 1) {
-    if (fromBrowser) try { history.pushState({ fcg: stack.length }, ''); } catch { /* ignore */ }
+    if (fromBrowser) hist.push();
     return;
   }
   if (cur.screen.canLeave && !(await cur.screen.canLeave())) {
-    if (fromBrowser) try { history.pushState({ fcg: stack.length }, ''); } catch { /* ignore */ }
+    if (fromBrowser) hist.push();
     return;
   }
   stack.pop();
   cur.screen.dispose?.();
-  if (!fromBrowser) {
+  if (!fromBrowser && useHistory) {
     ignorePop++;
-    try { history.back(); } catch { ignorePop--; }
+    if (!hist.back()) ignorePop--;
     setTimeout(() => { if (ignorePop > 0) ignorePop = 0; }, 400);
   }
   const t = top()!;
@@ -115,9 +125,11 @@ export async function home(): Promise<void> {
     popped++;
   }
   if (!popped) return;
-  ignorePop++;
-  try { history.go(-popped); } catch { ignorePop--; }
-  setTimeout(() => { ignorePop = 0; }, 600);
+  if (useHistory) {
+    ignorePop++;
+    if (!hist.back(popped)) ignorePop--;
+    setTimeout(() => { ignorePop = 0; }, 600);
+  }
   const t = top()!;
   mount(t, 'back');
   t.screen.refresh?.();

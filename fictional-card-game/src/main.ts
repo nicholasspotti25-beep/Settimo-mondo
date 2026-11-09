@@ -69,7 +69,7 @@ async function main(): Promise<void> {
 
   const firstGesture = (): void => {
     unlockMedia();
-    try { void navigator.storage?.persist?.(); } catch { /* not supported */ }
+    try { navigator.storage?.persist?.().catch(() => undefined); } catch { /* not supported */ }
   };
   document.addEventListener('click', firstGesture, { once: true, capture: true });
   document.addEventListener('touchend', firstGesture, { once: true, capture: true });

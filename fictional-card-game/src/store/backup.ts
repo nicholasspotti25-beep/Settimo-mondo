@@ -1,16 +1,17 @@
 /**
- * Complete backup file (.fcgbackup): every database, both players, settings, pending tournament AND every media file.
- *
- * Layout: "FCGBAK01" (8 bytes) · header length (uint32 LE) · header JSON (UTF-8) · media bytes back to back.
- * The header lists each stored blob with its offset/size inside the data section. Building and reading use Blob slices,
- * so even multi-gigabyte backups with large videos are never loaded into memory at once.
+ * Complete backup file: a standard ZIP archive containing `backup.json` (every database, both players, settings,
+ * pending tournament, media metadata) and every stored media file under `media/`. Built and read with Blob slices,
+ * so backups with large videos are never loaded into memory at once. Older single-file backups (FCGBAK01) still import.
  */
 import { MODES, type MediaMeta, type Mode, type PlayerProfile } from '../model/types';
 import type { RawData } from './repo';
+import { ZipError, crc32, readZip, writeZip } from './zip';
 
 export const MAGIC = 'FCGBAK01';
 export const FORMAT = 'fictional-card-game-backup';
 export const FORMAT_VERSION = 1;
+export const HEADER_NAME = 'backup.json';
+const mediaPath = (key: string): string => `media/${encodeURIComponent(key)}`;
 
 export interface BlobEntry {
   key: string;
@@ -39,21 +40,17 @@ export interface BackupSummary {
 export class BackupError extends Error {}
 
 export async function buildBackup(data: RawData, keys: string[], getBlob: (key: string) => Promise<Blob | null>): Promise<Blob> {
-  const parts: Blob[] = [];
   const blobs: BlobEntry[] = [];
-  let offset = 0;
+  const files: { name: string; data: Blob }[] = [];
   for (const key of keys) {
     const b = await getBlob(key);
     if (!b) continue;
-    blobs.push({ key, offset, size: b.size, type: b.type });
-    parts.push(b);
-    offset += b.size;
+    blobs.push({ key, offset: 0, size: b.size, type: b.type });
+    files.push({ name: mediaPath(key), data: b });
   }
   const header: BackupHeader = { format: FORMAT, version: FORMAT_VERSION, createdAt: Date.now(), data, blobs };
-  const headerBytes = new TextEncoder().encode(JSON.stringify(header));
-  const len = new Uint8Array(4);
-  new DataView(len.buffer).setUint32(0, headerBytes.length, true);
-  return new Blob([new TextEncoder().encode(MAGIC), len, headerBytes, ...parts], { type: 'application/octet-stream' });
+  const json = new Blob([JSON.stringify(header)], { type: 'application/json' });
+  return writeZip([{ name: HEADER_NAME, data: json }, ...files]);
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
@@ -97,10 +94,20 @@ export interface ParsedBackup {
   summary: BackupSummary;
 }
 
-export async function parseBackup(file: Blob): Promise<ParsedBackup> {
-  if (file.size < 12) throw new BackupError('This file is not a Fictional Card Game backup.');
+function summarize(header: BackupHeader, warnings: string[]): BackupSummary {
+  const d = header.data;
+  return {
+    createdAt: header.createdAt,
+    entries: Object.fromEntries(MODES.map((m) => [m, d.entries[m].length])) as Record<Mode, number>,
+    media: d.media.length,
+    mediaBytes: header.blobs.reduce((s, b) => s + b.size, 0),
+    players: d.players.map((p) => ({ name: p.name, fc: p.fc, cards: Object.values(p.collection).reduce((s, c) => s + (c?.qty ?? 0), 0) })),
+    warnings,
+  };
+}
+
+async function parseLegacy(file: Blob): Promise<ParsedBackup> {
   const head = new Uint8Array(await file.slice(0, 12).arrayBuffer());
-  if (new TextDecoder().decode(head.slice(0, 8)) !== MAGIC) throw new BackupError('This file is not a Fictional Card Game backup.');
   const len = new DataView(head.buffer).getUint32(8, true);
   if (12 + len > file.size) throw new BackupError('The backup file is incomplete.');
   let json: unknown;
@@ -113,19 +120,47 @@ export async function parseBackup(file: Blob): Promise<ParsedBackup> {
   const { header, warnings } = validateHeader(json, file.size - dataStart);
   const blobs = new Map<string, Blob>();
   for (const b of header.blobs) blobs.set(b.key, file.slice(dataStart + b.offset, dataStart + b.offset + b.size, b.type));
-  const d = header.data;
-  const summary: BackupSummary = {
-    createdAt: header.createdAt,
-    entries: Object.fromEntries(MODES.map((m) => [m, d.entries[m].length])) as Record<Mode, number>,
-    media: d.media.length,
-    mediaBytes: header.blobs.reduce((s, b) => s + b.size, 0),
-    players: d.players.map((p) => ({ name: p.name, fc: p.fc, cards: Object.values(p.collection).reduce((s, c) => s + (c?.qty ?? 0), 0) })),
-    warnings,
-  };
-  return { data: d, blobs, summary };
+  return { data: header.data, blobs, summary: summarize(header, warnings) };
+}
+
+export async function parseBackup(file: Blob): Promise<ParsedBackup> {
+  if (file.size < 12) throw new BackupError('This file is not a Fictional Card Game backup.');
+  const magic = new TextDecoder().decode(new Uint8Array(await file.slice(0, 8).arrayBuffer()));
+  if (magic === MAGIC) return parseLegacy(file);
+  let zip;
+  try {
+    zip = await readZip(file);
+  } catch (e) {
+    const m = (e as ZipError).message;
+    if (m === 'truncated') throw new BackupError('The backup file is incomplete (it was probably cut off while saving or copying).');
+    if (m === 'not a zip') {
+      const sig = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+      if (sig[0] === 0x50 && sig[1] === 0x4b && sig[2] === 3 && sig[3] === 4) throw new BackupError('The backup file is incomplete (it was probably cut off while saving or copying).');
+      throw new BackupError('This file is not a Fictional Card Game backup.');
+    }
+    throw new BackupError(`The backup file is damaged (${m}).`);
+  }
+  const h = zip.get(HEADER_NAME);
+  if (!h) throw new BackupError('This file is not a Fictional Card Game backup.');
+  const hb = h.blob('application/json');
+  if ((await crc32(hb)) !== h.crc) throw new BackupError('The backup is damaged: its contents do not match their checksum.');
+  let json: unknown;
+  try {
+    json = JSON.parse(await hb.text());
+  } catch {
+    throw new BackupError('The backup is damaged: its contents cannot be read.');
+  }
+  const { header, warnings } = validateHeader(json, Number.MAX_SAFE_INTEGER);
+  const blobs = new Map<string, Blob>();
+  for (const b of header.blobs) {
+    const z = zip.get(mediaPath(b.key));
+    if (!z || z.size !== b.size) throw new BackupError('The backup is incomplete: some media files are missing or damaged.');
+    blobs.set(b.key, z.blob(b.type));
+  }
+  return { data: header.data, blobs, summary: summarize(header, warnings) };
 }
 
 export function backupFileName(now = new Date()): string {
   const p = (n: number): string => String(n).padStart(2, '0');
-  return `fictional-card-game-backup-${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}-${p(now.getHours())}${p(now.getMinutes())}.fcgbackup`;
+  return `fictional-card-game-backup-${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())}-${p(now.getHours())}${p(now.getMinutes())}.zip`;
 }

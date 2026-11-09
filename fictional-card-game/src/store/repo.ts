@@ -16,7 +16,7 @@ import {
   type PlayerProfile, type Settings,
 } from '../model/types';
 import { type Issue, MIN_ENTRIES, validate } from '../model/validation';
-import { Idb, type Op, StorageError, toBlob } from './idb';
+import { Idb, MemoryStore, type Op, type Store, StorageError, toBlob } from './idb';
 import { type Imported, forgetMediaUrls, setBlobLoader, thumbKey } from './media';
 
 type Listener = () => void;
@@ -55,7 +55,9 @@ function mediaRefsOf(e: AnyEntry): MediaRef[] {
 }
 
 class Repo {
-  private idb!: Idb;
+  private idb!: Store;
+  /** false when the browser refused storage and the game runs from memory only. */
+  persistent = true;
   private listeners = new Set<Listener>();
   private queue: Promise<unknown> = Promise.resolve();
   entries: EntryMaps = { classic: new Map(), tournament: new Map(), team: new Map(), collector: new Map() };
@@ -68,9 +70,19 @@ class Repo {
   ready = false;
 
   async init(): Promise<void> {
-    this.idb = await Idb.open();
+    let fallback = '';
+    try {
+      this.idb = await Idb.open();
+    } catch (e) {
+      fallback = (e as Error)?.message ?? String(e);
+      this.idb = new MemoryStore();
+      this.persistent = false;
+    }
     setBlobLoader((key) => this.getBlob(key));
     await this.load();
+    if (fallback) {
+      this.loadWarnings.unshift(`Saving is not available in this browser (${fallback}) — the game works, but nothing you do now will be kept. Any data saved earlier has not been touched; reload to try again.`);
+    }
     this.ready = true;
   }
 
