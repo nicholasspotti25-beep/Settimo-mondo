@@ -6,7 +6,7 @@
  */
 import { Btn } from '../../../src/sim/types';
 import type { BotHook } from '../hooks';
-import { act2Defense } from './cerbero';
+import { act2Defense } from '../defense';
 
 const hook: BotHook = {
   input(sim, bot, base) {

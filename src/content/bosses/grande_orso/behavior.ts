@@ -8,14 +8,13 @@
  *  - Phase 2 (flag `standing`): he stands up and shakes the forest. Trees fall on the arena: forest_shake (or ng_timber in
  *    NG+) comes every TREE_INTERVAL s and never sooner than TREE_MIN s after the last one; each trunk's long shadow is
  *    marked 1.6 s before it lands (cue orso_forest_shake for the arena dressing).
- *  - No stun-lock: a landed standing swipe throws you out of the second (guardMultiHit).
+ *  - No stun-lock: a landed standing swipe throws you out of the second (data `one_blow` on standing_swipe).
  * Deterministic: no randomness of its own.
  */
 import type { AttackDef } from '../../../core/types';
 import type { Actor, AttackRuntime } from '../../../sim/actor';
 import { defineBehavior } from '../../../sim/behavior';
 import type { Sim } from '../../../sim/sim';
-import { guardMultiHit } from '../grande_lupo/behavior';
 
 export const HUG_TIME = 1.1;
 /** Held at this distance in front of his chest. */
@@ -46,7 +45,6 @@ export default defineBehavior(() => ({
   update(a: Actor, sim: Sim, dt: number) {
     const g = a.bstate;
     const pl = sim.player;
-    guardMultiHit(a);
     if (a.phaseIndex >= 1) g.sinceShake += dt;
     // the hug: held against the chest, then dropped
     if (pl.state === 'grabbed' && pl.grabbedBy === a.id) {

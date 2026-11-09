@@ -3,3 +3,7 @@
 - {id: grande_lupo, name_key: boss.grande_lupo.name, color: '#cdd8e6', voice: {base: 76, formant: 0.82, wave: triangle, vibrato: 0.008, breath: 0.65}}
 # The Grande Orso: the deepest voice of the taiga, slow, like wood that bends.
 - {id: grande_orso, name_key: boss.grande_orso.name, color: '#b08a5a', voice: {base: 54, formant: 0.68, wave: sawtooth, vibrato: 0.006, breath: 0.55}}
+# The Sciamano: an old, cracked voice that half sings, as if keeping time with the drum.
+- {id: sciamano, name_key: boss.sciamano.name, color: '#c9b48a', voice: {base: 98, formant: 0.9, wave: square, vibrato: 0.02, breath: 0.6}}
+# The Grande Aquila Reale: a high, metallic cry folded into words.
+- {id: grande_aquila_reale, name_key: boss.grande_aquila_reale.name, color: '#f2c14e', voice: {base: 210, formant: 1.25, wave: sawtooth, vibrato: 0.03, breath: 0.35}}

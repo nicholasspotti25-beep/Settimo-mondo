@@ -10,7 +10,6 @@
  *  - Phase 2 (flag `split`): he splits into a spirit (minion spirito_lupo) that fights alongside him. One blow at a time:
  *    he waits while the spirit strikes and the spirit waits while he does. pack_lunge sends the spirit's leap PACK_DELAY s
  *    after his own (never if the player is down). A dispersed spirit is howled back (spirit_call) RESPLIT_DELAY s later.
- *  - No stun-lock: once one window of a multi-hit blow (ng_triple_bite) lands, its later windows skip the player.
  *  - Dawn (flag `circling`): he circles and studies you for CIRCLE_TIME s before the first strike (guide and keeper).
  * Deterministic: sim.rng only (wind direction).
  */
@@ -32,7 +31,11 @@ export const SPIRIT_ID = 'spirito_lupo';
 /** Player target id in hit windows. */
 const PLAYER = -1;
 
-/** No stun-lock: after one window of a multi-hit blow lands on the player, the later windows skip them. */
+/**
+ * No stun-lock: after one window of a multi-hit blow lands on the player, the later windows skip them.
+ * @deprecated The sim's `one_blow` attack field does this (integration #3); no act3b boss calls it any more. Kept only
+ * while act4's re_mantide still imports it: delete once that import is gone.
+ */
 export function guardMultiHit(a: Actor): void {
   const atk = a.attack;
   if (!atk || atk.windows.length < 2) return;
@@ -101,7 +104,6 @@ export default defineBehavior(() => ({
       if (live && pl.state !== 'dead' && pl.state !== 'grace' && pl.state !== 'grabbed') sim.pushPlayer(g.windX * WIND_SPEED * dt, g.windZ * WIND_SPEED * dt);
       if (g.storm <= 0) stopStorm(a, sim);
     }
-    guardMultiHit(a);
     // phase 2: the spirit
     if (a.phaseIndex >= 1 && a.alive) {
       const sp = spiritOf(a, sim);

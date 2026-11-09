@@ -3,7 +3,7 @@
  * the shared Act II defenses; the hug and the back kick by the generic dodges.
  */
 import type { BotHook } from '../hooks';
-import { act2Defense } from './cerbero';
+import { act2Defense } from '../defense';
 
 const hook: BotHook = {
   input(sim, bot, base) {

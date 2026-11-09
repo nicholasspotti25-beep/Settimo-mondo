@@ -12,7 +12,7 @@ export type Recipe = (o: Out, t: number, p: SfxParams) => number;
 /* UI                                                                                                                  */
 /* ------------------------------------------------------------------------------------------------------------------ */
 
-const ui: Record<string, Recipe> = {
+export const ui: Record<string, Recipe> = {
   ui_move: (o, t) => tone(o, t, { f: 2093, dur: 0.06, a: 0.002, gain: 0.08, filter: { type: 'lowpass', f: 5000 } }),
   ui_confirm: (o, t) => {
     chime(o, t, 1318.5, 0.45, 0.14);

@@ -1,3 +1,6 @@
+# Cerchio dei Tamburi — a ring of standing stones and carved totem poles on packed snow, great drums hung between them
+# (Sciamano). Four totems stand at 15 m from the center (cover from a running spirit, never a trap: the circle is wide).
+# Phase 2 (sky_of_ravens, cue only): the sky darkens with ravens while he flies above the circle.
 id: taiga_tamburi
 zone: taiga
 name_key: arena.taiga_tamburi.name
@@ -7,5 +10,10 @@ radius: 26
 gate: {pos: [0, 0, 154], yaw: 0, width: 6}
 floor_y: 0
 surface: stone
-obstacles: []
+obstacles:
+  - {type: cylinder, c: [10.6, 0, 190.6], r: 0.7, h: 6}
+  - {type: cylinder, c: [-10.6, 0, 190.6], r: 0.7, h: 6}
+  - {type: cylinder, c: [10.6, 0, 169.4], r: 0.7, h: 6}
+  - {type: cylinder, c: [-10.6, 0, 169.4], r: 0.7, h: 6}
 builder: taiga_tamburi
+open_sky: true

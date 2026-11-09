@@ -22,9 +22,10 @@ import h18 from './mostro_di_magma';
 import h19 from './pyro';
 import h20 from './re_mantide';
 import h21 from './regina_formica';
-import h22 from './thunder';
-import h23 from './verme_mangiamondi';
-import h24 from './yeti';
+import h22 from './sciamano';
+import h23 from './thunder';
+import h24 from './verme_mangiamondi';
+import h25 from './yeti';
 
 export const BOT_HOOKS: Record<string, BotHook> = {
   "caronte": h0,
@@ -49,7 +50,8 @@ export const BOT_HOOKS: Record<string, BotHook> = {
   "pyro": h19,
   "re_mantide": h20,
   "regina_formica": h21,
-  "thunder": h22,
-  "verme_mangiamondi": h23,
-  "yeti": h24,
+  "sciamano": h22,
+  "thunder": h23,
+  "verme_mangiamondi": h24,
+  "yeti": h25,
 };

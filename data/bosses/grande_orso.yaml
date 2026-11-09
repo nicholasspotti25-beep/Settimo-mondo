@@ -181,9 +181,10 @@ attacks:
       - {t: 0.9, type: shockwave, radius: 14, shape: {type: ring, r0: 8, r1: 14, width: 1.1, height: 0.7}, active: 0.55, damage_mult: 0.65}
       - {t: 0.05, type: vfx, vfx: orso_slam_snow}
     sfx: orso_slam
-  # Phase 2, standing: two wide swipes from above, a step apart; a landed swipe throws you out of the second.
+  # Phase 2, standing: two wide swipes from above, a step apart; a landed swipe throws you out of the second (one blow).
   - id: standing_swipe
     anim: sweep_r
+    one_blow: true
     telegraph: 0.9
     active: 0.95
     recovery: 1.4

@@ -2,3 +2,6 @@
 - {key: voce.atto3.taiga_altare, altar: altare_taiga_01, after: [loki], priority: 1}
 - {key: voce.atto3.taiga_orso_altare, altar: altare_taiga_02, after: [grande_lupo], priority: 1}
 - {key: voce.atto3.taiga_tamburi_altare, altar: altare_taiga_03, after: [grande_orso], priority: 1}
+- {key: voce.atto3.nave_altare, altar: altare_nave_01, after: [sciamano], priority: 1}
+- {key: voce.atto3.porto_altare, altar: altare_porto_01, after: [grande_aquila_reale], priority: 1}
+- {key: voce.atto3.mare_altare, altar: altare_nave_02, after: [drago_di_fuoco], priority: 1}

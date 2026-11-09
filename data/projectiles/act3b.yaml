@@ -1,1 +1,5 @@
 # Act III-B projectile kinds (Il Bianco Silenzio: the Taiga, the Grande Fiume, the river port, the night sea).
+# Sciamano: the three spirits of the Taiga, called out of the drum (wolf: low and fast; bear: big and slow; ravens).
+- {id: sciamano_lupo, radius: 0.55, speed: 15, life: 3.0, element: spirit, visual: spirit, color: '#cfe3ff', trail: true}
+- {id: sciamano_orso, radius: 1.5, speed: 9.5, life: 4.0, element: spirit, visual: spirit, color: '#e0c08a', trail: true}
+- {id: sciamano_corvo, radius: 0.45, speed: 14, life: 3.0, element: spirit, visual: raven, color: '#3a4a66', trail: true}

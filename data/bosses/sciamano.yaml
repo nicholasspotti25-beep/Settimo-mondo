@@ -1,0 +1,353 @@
+# 19. Sciamano — secondary · Taiga, Cerchio dei Tamburi · D12.
+# An old hooded man with a deer mask, furs and bones, a drum and a totem staff. Ranged caster: wolf, bear and raven
+# spirits as projectiles. His DRUM sets the pattern: the behavior keeps a rhythm (lupo: fast beats → running wolves;
+# orso: slow heavy beats → the bear charges and rises from the ground; corvo: broken beats → flocks and dives) and only
+# the attacks of the current rhythm are chosen; every RHYTHM_TIME s he changes it with a drum roll (a punish window).
+# Phase 2: he fuses with the raven and flies above the arena (hover FLY_HEIGHT); after AIR_CASTS casts from above he
+# swoops and lands for LAND_TIME s (the punish window), then takes wing again. Binder of the three spirits; points to the
+# Grande Fiume and the Nave dei Cercatori: "Il fiume sa dov'è il mare. Il mare sa dov'è il giardino." (defeat line).
+# Local frame: +Z forward, +Y up, +X = his LEFT. A tall stooped figure ~3.6 m with antlers (the spirits swell him).
+id: sciamano
+order: 19
+name_key: boss.sciamano.name
+title_key: boss.sciamano.title
+class: secondary
+difficulty: 12
+act: 3
+arena: taiga_tamburi
+zone: taiga
+model: {builder: sciamano, rig: humanoid, scale: 1.0, palette: act3_white_azure}
+equilibrio_max: 150
+body: {radius: 1.2, height: 3.6, mass: heavy}
+hurtboxes:
+  - {c: [0, 3.15, 0.15], r: 0.6}    # deer mask and hood
+  - {c: [0, 2.3, 0], r: 0.95}       # chest, drum
+  - {c: [0, 1.3, 0], r: 0.85}       # furs
+  - {c: [0, 0.5, 0], r: 0.65}       # legs
+move: {walk: 2.6, run: 6.0, turn: 2.8, preferred_range: [2, 10], flying: true, hover_height: 0}
+idle_gap: [1.0, 1.6]
+music: boss_sciamano
+intro_sequence: sciamano_intro
+defeat_sequence: sciamano_defeat
+lore_key: boss.sciamano.lore
+phases:
+  - id: p1
+    hp_range: [1.0, 0.5]
+    music: boss_sciamano_p1
+    patterns: [wolf_spirits, wolf_run, bear_spirit, bear_ground, raven_flock, raven_dive, totem_sweep, spirit_step, drum_change]
+  - id: p2
+    hp_range: [0.5, 0.0]
+    music: boss_sciamano_p2
+    on_enter: [raven_fused]
+    arena_state: sky_of_ravens
+    dialogue: boss.sciamano.mid
+    transition: 3.0
+    speed_mult: 1.05
+    opener: take_wing
+    patterns: [wolf_spirits, wolf_run, bear_spirit, bear_ground, raven_flock, raven_dive, totem_sweep, drum_change, take_wing, sky_wolves, sky_bear, sky_ravens, raven_swoop]
+attacks:
+  # --- Rhythm of the wolf (fast beats): spirits that run along the ground ---
+  # Three wolf spirits leap from the drum and run at you in a fan.
+  - id: wolf_spirits
+    anim: drum_cast
+    requires: lupo
+    telegraph: 0.8
+    active: 0.6
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    element: spirit
+    range: [3, 40]
+    weight: 1.2
+    cooldown: 3
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: sciamano_lupo, count: 3, spread: 36, speed: 15, from: [0, 1.0, 1.2], pitch: 0}
+    sfx: sciamano_wolf_cast
+  # Two wolves run out wide on both sides and close in on you (slow homing: roll as they meet).
+  - id: wolf_run
+    anim: drum_cast
+    requires: lupo
+    telegraph: 0.75
+    active: 0.5
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    element: spirit
+    range: [5, 40]
+    weight: 1.0
+    cooldown: 5
+    track: 1.0
+    spawns:
+      - {t: 0.05, type: projectile, id: sciamano_lupo, count: 2, spread: 70, speed: 12, homing: 0.9, life: 3.2, from: [0, 1.0, 1.0], pitch: 0}
+    sfx: sciamano_wolf_cast
+  # --- Rhythm of the bear (slow heavy beats) ---
+  # A great bear spirit charges straight out of the drum (knocks down; the line is fixed when it leaves).
+  - id: bear_spirit
+    anim: drum_heavy
+    requires: orso
+    telegraph: 1.1
+    active: 0.6
+    recovery: 1.4
+    damage_mult: 1.5
+    poise: 30
+    flags: [knockdown]
+    element: spirit
+    range: [3, 40]
+    weight: 1.1
+    cooldown: 4
+    track: 1.1
+    spawns:
+      - {t: 0.05, type: projectile, id: sciamano_orso, count: 1, speed: 9.5, radius: 1.5, from: [0, 1.3, 1.6], pitch: 0, flags: [knockdown]}
+    sfx: sciamano_bear_cast
+  # He drives the totem into the ground: the bear rises under four marked circles (one on you, three around it).
+  - id: bear_ground
+    anim: totem_plant
+    requires: orso
+    telegraph: 0.95
+    active: 1.4
+    recovery: 1.2
+    damage_mult: 1.3
+    poise: 28
+    flags: [knockdown]
+    element: spirit
+    global: true
+    range: [0, 40]
+    weight: 1.0
+    cooldown: 6
+    spawns:
+      - {t: 0.0, type: hazard, id: sciamano_orso_rise, at: around_target, count: 3, dist: 5.5, delay: 1.25, active: 0.35, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.2, h: 4}}
+    sfx: sciamano_totem
+  # --- Rhythm of the raven (broken beats) ---
+  # A flock of five ravens spreads from his cloak (light homing).
+  - id: raven_flock
+    anim: cloak_cast
+    requires: corvo
+    telegraph: 0.75
+    active: 0.6
+    recovery: 1.0
+    damage_mult: 0.8
+    poise: 12
+    flags: []
+    element: spirit
+    range: [3, 40]
+    weight: 1.2
+    cooldown: 3
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: sciamano_corvo, count: 5, spread: 50, speed: 14, homing: 0.4, from: [0, 2.6, 0.8]}
+    sfx: sciamano_ravens
+  # Ravens circle high and dive on four marked spots (one on you).
+  - id: raven_dive
+    anim: cloak_cast
+    requires: corvo
+    telegraph: 0.6
+    active: 1.3
+    recovery: 1.1
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    element: spirit
+    global: true
+    range: [0, 40]
+    weight: 1.0
+    cooldown: 5
+    spawns:
+      - {t: 0.0, type: hazard, id: sciamano_corvo_dive, at: random_arena, count: 4, delay: 1.15, active: 0.3, shape: {type: cylinder, c: [0, 0, 0], r: 1.8, h: 4}}
+    sfx: sciamano_ravens
+  # --- Any rhythm ---
+  # Too close: a sweep of the totem staff.
+  - id: totem_sweep
+    anim: staff_sweep
+    telegraph: 0.75
+    active: 0.3
+    recovery: 1.1
+    damage_mult: 1.1
+    poise: 22
+    flags: [knockback]
+    range: [0, 3.5]
+    weight: 1.5
+    cooldown: 2
+    track: 1.2
+    track_active: 0.1
+    hits:
+      - {t: 0.04, dur: 0.2, shape: {type: arc, r: 4.4, angle: 160, yaw: 0, y: [0, 3.5]}}
+    sfx: sciamano_staff
+  # Pressed, he steps back through the spirits and reappears far away.
+  - id: spirit_step
+    anim: spirit_step
+    telegraph: 0.5
+    active: 0.3
+    recovery: 0.7
+    damage_mult: 0
+    poise: 0
+    flags: []
+    range: [0, 4]
+    weight: 0.4
+    cooldown: 14
+    motion:
+      - {t: 0.1, dur: 0.1, type: teleport_far, dist: 12}
+    sfx: sciamano_step
+  # The drum roll: the rhythm changes (behavior picks the next one). He is busy drumming: strike him now.
+  - id: drum_change
+    anim: drum_roll
+    telegraph: 0.6
+    active: 1.4
+    recovery: 0.6
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 40]
+    weight: 0.01
+    cooldown: 0
+    spawns:
+      - {t: 0.3, type: custom, event: rhythm}
+    sfx: sciamano_drum_roll
+  # --- Phase 2: fused with the raven ---
+  # He takes wing above the arena.
+  - id: take_wing
+    anim: take_wing
+    telegraph: 0.6
+    active: 1.0
+    recovery: 0.4
+    damage_mult: 0
+    poise: 0
+    flags: []
+    global: true
+    range: [0, 40]
+    weight: 0.01
+    cooldown: 0
+    motion:
+      - {t: 0, dur: 1.0, type: rise, height: 7.5}
+    spawns:
+      - {t: 0.0, type: custom, event: fly}
+    sfx: sciamano_wings
+  # From above (wolf rhythm): three wolf spirits fall upon you from the sky in a fan.
+  - id: sky_wolves
+    anim: air_cast
+    requires: lupo
+    telegraph: 0.8
+    active: 0.6
+    recovery: 0.9
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    element: spirit
+    global: true
+    range: [0, 40]
+    weight: 1.0
+    cooldown: 3
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: sciamano_lupo, count: 3, spread: 30, speed: 15, from: [0, 0.5, 1.0]}
+    sfx: sciamano_wolf_cast
+  # From above (bear rhythm): the bear falls on a wide marked circle where you stand, two more nearby.
+  - id: sky_bear
+    anim: air_cast
+    requires: orso
+    telegraph: 0.9
+    active: 1.6
+    recovery: 0.9
+    damage_mult: 1.4
+    poise: 30
+    flags: [knockdown]
+    element: spirit
+    global: true
+    range: [0, 40]
+    weight: 1.0
+    cooldown: 5
+    spawns:
+      - {t: 0.0, type: hazard, id: sciamano_orso_rise, at: target_predict, count: 1, delay: 1.35, active: 0.35, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 3.0, h: 5}}
+      - {t: 0.4, type: hazard, id: sciamano_orso_rise, at: random_arena, count: 2, delay: 1.35, active: 0.35, flags: [knockdown], shape: {type: cylinder, c: [0, 0, 0], r: 2.6, h: 5}}
+    sfx: sciamano_bear_cast
+  # From above (raven rhythm): seven ravens fan out of his wings.
+  - id: sky_ravens
+    anim: air_cast
+    requires: corvo
+    telegraph: 0.75
+    active: 0.6
+    recovery: 0.9
+    damage_mult: 0.8
+    poise: 12
+    flags: []
+    element: spirit
+    global: true
+    range: [0, 40]
+    weight: 1.0
+    cooldown: 3
+    track: 1.2
+    spawns:
+      - {t: 0.05, type: projectile, id: sciamano_corvo, count: 7, spread: 70, speed: 13, homing: 0.3, from: [0, 0.5, 1.0]}
+    sfx: sciamano_ravens
+  # The swoop: a cry, wings folded, he dives on you and lands (behavior: grounded for LAND_TIME s afterwards).
+  - id: raven_swoop
+    anim: swoop
+    telegraph: 1.0
+    active: 0.9
+    recovery: 1.6
+    damage_mult: 1.3
+    poise: 26
+    flags: [knockdown]
+    global: true
+    range: [0, 40]
+    weight: 0.01
+    cooldown: 0
+    track: 1.3
+    motion:
+      - {t: 0, dur: 0.7, type: dive_to_target}
+    hits:
+      - {t: 0.62, dur: 0.15, shape: {type: arc, r: 4.2, angle: 120, yaw: 0, y: [0, 4]}}
+    spawns:
+      - {t: 0.0, type: custom, event: swoop}
+      - {t: 0.7, type: vfx, vfx: sciamano_feathers}
+    sfx: sciamano_cry
+  # --- New Game+ ---
+  # Phase 1: the three spirits in one cast — wolves, then the bear, then the ravens, each with its own beat.
+  - id: ng_three_spirits
+    anim: drum_roll
+    telegraph: 1.1
+    active: 1.5
+    recovery: 1.3
+    damage_mult: 1.0
+    poise: 22
+    flags: []
+    element: spirit
+    range: [4, 40]
+    weight: 0.8
+    cooldown: 14
+    track: 1.1
+    track_active: 0.3
+    spawns:
+      - {t: 0.0, type: projectile, id: sciamano_lupo, count: 3, spread: 36, speed: 15, from: [0, 1.0, 1.2], pitch: 0}
+      - {t: 0.65, type: projectile, id: sciamano_orso, count: 1, speed: 9.5, radius: 1.5, from: [0, 1.3, 1.6], pitch: 0, damage_mult: 1.3, flags: [knockdown]}
+      - {t: 1.3, type: projectile, id: sciamano_corvo, count: 5, spread: 50, speed: 14, homing: 0.4, from: [0, 2.6, 0.8], damage_mult: 0.8}
+    sfx: sciamano_drum_roll
+  # Phase 2: a cage of ravens — five dives in a ring around you and one on you; the gaps between them are the way out.
+  - id: ng_raven_cage
+    anim: air_cast
+    telegraph: 0.8
+    active: 1.6
+    recovery: 1.0
+    damage_mult: 1.0
+    poise: 18
+    flags: []
+    element: spirit
+    global: true
+    range: [0, 40]
+    weight: 0.8
+    cooldown: 12
+    spawns:
+      - {t: 0.0, type: hazard, id: sciamano_corvo_dive, at: around_target, count: 5, dist: 5, delay: 1.35, active: 0.3, shape: {type: cylinder, c: [0, 0, 0], r: 1.7, h: 4}}
+    sfx: sciamano_ravens
+time_of_day_variants:
+  alba: {flags: [rhythm_lupo], note_key: boss.sciamano.tod.alba}
+  notte: {flags: [rhythm_corvo], projectile_speed_mult: 0.85, note_key: boss.sciamano.tod.notte}
+dialogue_keys: [boss.sciamano.intro, boss.sciamano.mid, boss.sciamano.defeat]
+drops_weapon: totem_degli_spiriti
+unlocks_form: null
+ng_plus:
+  add_patterns: {p1: [ng_three_spirits], p2: [ng_raven_cage]}
+  idle_mult: 0.85

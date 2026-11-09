@@ -11,7 +11,7 @@ import type { TimeOfDay } from '../src/core/types';
 import type { Actor } from '../src/sim/actor';
 import type { Sim } from '../src/sim/sim';
 import { emptyInput, type SimEvent } from '../src/sim/types';
-import { CIRCLE_TIME, PACK_DELAY, RESPLIT_DELAY, STORM_DUR, STORM_EARLIEST, WIND_SPEED, guardMultiHit, spiritOf } from '../src/content/bosses/grande_lupo/behavior';
+import { CIRCLE_TIME, PACK_DELAY, RESPLIT_DELAY, STORM_DUR, STORM_EARLIEST, WIND_SPEED, spiritOf } from '../src/content/bosses/grande_lupo/behavior';
 import { HUG_TIME, TREE_INTERVAL, TREE_MIN } from '../src/content/bosses/grande_orso/behavior';
 import { loadContent, makeSim } from './helpers';
 
@@ -219,14 +219,12 @@ describe('grande_lupo', () => {
     expect(back.alive).toBe(false);
   });
 
-  it('no stun-lock: after one window of a multi-hit blow lands, the later windows skip the player', () => {
-    const { sim, boss } = fight('grande_lupo', { ng: 1 });
-    boss.attackMap.set('probe', { id: 'probe', telegraph: 0.5, active: 1, recovery: 1, damage_mult: 1, poise: 10, flags: [], hits: [
-      { t: 0, dur: 0.1, shape: { type: 'sphere', c: [0, 0, 0], r: 1 } }, { t: 0.5, dur: 0.1, shape: { type: 'sphere', c: [0, 0, 0], r: 1 } }] });
-    force(sim, boss, 'probe');
-    boss.attack!.windows[0].hitTargets.add(-1);
-    guardMultiHit(boss);
-    expect(boss.attack!.windows[1].hitTargets.has(-1)).toBe(true);
+  it('no stun-lock: the multi-window blows of the taiga land once (sim one_blow), single-window blows need no guard', () => {
+    for (const id of ACT3B) for (const a of c.boss(id).attacks) {
+      const windows = (a.hits ?? []).filter((h) => !h.tick).length;
+      if (windows >= 2) expect(a.one_blow, `${id}.${a.id}`).toBe(true);
+    }
+    expect(c.boss('grande_orso').attacks.find((a) => a.id === 'standing_swipe')!.one_blow).toBe(true);
   });
 
   it('time of day: at dawn he circles first, at night the storm comes with the first howl; NG+ adds the bite chain', () => {

@@ -1,3 +1,5 @@
 # Act III-B hazard kinds (Il Bianco Silenzio: the Taiga, the Grande Fiume, the river port, the night sea).
 - {id: lupo_gust, visual: ice, color: '#e8f2ff', element: ice}
 - {id: orso_tree, visual: shadow, color: '#2e2418'}
+- {id: sciamano_orso_rise, visual: circle, color: '#e0c08a', element: spirit}
+- {id: sciamano_corvo_dive, visual: shadow, color: '#1c2436', element: spirit}

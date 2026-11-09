@@ -1,0 +1,18 @@
+# Sciamano (secondary): the drums, one line before; when he falls, the canonical words about the river and the sea
+# (verbatim, Bible C10), the image of the river, then the Voce (the Grande Fiume and the Nave dei Cercatori).
+- id: sciamano_intro
+  skippable: true
+  steps:
+    - {camera: wide, dur: 2.2}
+    - {caption: story.atto3.sciamano_intro, dur: 3.4}
+    - {camera: boss_reveal, dur: 2.0}
+    - {say: boss.sciamano.intro, speaker: sciamano}
+    - {event: start_fight}
+- id: sciamano_defeat
+  skippable: true
+  steps:
+    - {wait: 1.5}
+    - {say: boss.sciamano.defeat, speaker: sciamano}
+    - {event: cue, params: {id: sciamano_spirits_free}}
+    - {caption: story.atto3.sciamano_fiume, dur: 3.8}
+    - {voce: voce.atto3.sciamano_caduto}

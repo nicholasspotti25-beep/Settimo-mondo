@@ -27,10 +27,11 @@ import b23 from '../content/bosses/mostro_di_magma/behavior';
 import b24 from '../content/bosses/pyro/behavior';
 import b25 from '../content/bosses/re_mantide/behavior';
 import b26 from '../content/bosses/regina_formica/behavior';
-import b27 from '../content/bosses/thunder/behavior';
-import b28 from '../content/bosses/verme_mangiamondi/behavior';
-import b29 from '../content/bosses/verme_mangiamondi/minion_macina';
-import b30 from '../content/bosses/yeti/behavior';
+import b27 from '../content/bosses/sciamano/behavior';
+import b28 from '../content/bosses/thunder/behavior';
+import b29 from '../content/bosses/verme_mangiamondi/behavior';
+import b30 from '../content/bosses/verme_mangiamondi/minion_macina';
+import b31 from '../content/bosses/yeti/behavior';
 
 export const BEHAVIORS: BehaviorRegistry = {
   "caronte": b0,
@@ -60,8 +61,9 @@ export const BEHAVIORS: BehaviorRegistry = {
   "pyro": b24,
   "re_mantide": b25,
   "regina_formica": b26,
-  "thunder": b27,
-  "verme_mangiamondi": b28,
-  "verme_mangiamondi:macina": b29,
-  "yeti": b30,
+  "sciamano": b27,
+  "thunder": b28,
+  "verme_mangiamondi": b29,
+  "verme_mangiamondi:macina": b30,
+  "yeti": b31,
 };
