@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1a0f1e">
+<title>Soft-Body Character Physics Lab</title>
+<style>
+:root{--pink:#ff5fa2;--cyan:#39e6ff;--gold:#ffb35a;--panel:rgba(18,10,24,.82);--line:rgba(255,255,255,.12);--txt:#f4e9f1;--dim:#b9a6b8}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#120a16;color:var(--txt);
+  font:13px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overscroll-behavior:none;touch-action:none}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#hud{position:fixed;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 8px) 10px 0;pointer-events:none;z-index:5}
+#bar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+#title{font-weight:700;letter-spacing:.08em;font-size:11px;text-transform:uppercase;text-shadow:0 1px 6px #000}
+#title b{color:var(--pink)}
+#fps{margin-left:auto;font:600 11px ui-monospace,Menlo,monospace;background:var(--panel);border:1px solid var(--line);
+  padding:3px 7px;border-radius:999px;color:var(--cyan)}
+#cams{display:flex;gap:6px;overflow-x:auto;pointer-events:auto;padding-bottom:4px;scrollbar-width:none;touch-action:pan-x}
+#cams::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--txt);border-radius:999px;
+  padding:7px 11px;font:600 11px system-ui,sans-serif;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
+.chip.on{border-color:var(--pink);color:#fff;box-shadow:0 0 0 1px var(--pink) inset,0 0 14px rgba(255,95,162,.35)}
+#legend{position:fixed;right:10px;top:calc(env(safe-area-inset-top) + 86px);z-index:5;display:none;background:var(--panel);
+  border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:10px;letter-spacing:.06em;pointer-events:none}
+#legend .rampbar{width:150px;height:10px;border-radius:3px;margin:5px 0 3px;
+  background:linear-gradient(90deg,#0a1fd0,#00b7ff 25%,#17d94a 50%,#ffe019 75%,#ff2a12)}
+#legend .lab{display:flex;justify-content:space-between;color:var(--dim)}
+body.heat #legend{display:block}
+#drawer{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-top:1px solid var(--line);
+  border-radius:16px 16px 0 0;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transition:transform .28s cubic-bezier(.2,.8,.2,1);padding-bottom:env(safe-area-inset-bottom);max-height:62vh;display:flex;flex-direction:column;touch-action:pan-y}
+#drawer.closed{transform:translateY(calc(100% - 46px - env(safe-area-inset-bottom)))}
+#grip{flex:0 0 46px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;user-select:none;-webkit-user-select:none}
+#grip i{width:38px;height:4px;border-radius:4px;background:rgba(255,255,255,.35)}
+#grip span{font:700 11px system-ui;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+#body{overflow-y:auto;padding:0 14px 14px;-webkit-overflow-scrolling:touch}
+h4{margin:12px 0 6px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.btn{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--txt);border-radius:10px;padding:10px 8px;
+  font:600 12px system-ui;text-align:center;cursor:pointer;min-height:40px}
+.btn.on{background:linear-gradient(135deg,rgba(255,95,162,.35),rgba(57,230,255,.18));border-color:var(--pink)}
+.btn.wide{grid-column:1/-1}
+.row{display:grid;grid-template-columns:128px 1fr 44px;align-items:center;gap:8px;min-height:34px}
+.row label{color:var(--dim);font-size:12px}
+.row output{font:600 11px ui-monospace,Menlo,monospace;text-align:right;color:var(--cyan)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;margin:0;touch-action:pan-x}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:rgba(255,255,255,.2)}
+input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:rgba(255,255,255,.2)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--pink);
+  margin-top:-8px;border:2px solid #fff;box-shadow:0 0 10px rgba(255,95,162,.6)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--pink);border:2px solid #fff}
+.hint{color:var(--dim);font-size:11px;margin:10px 0 0}
+#loading{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:radial-gradient(120% 80% at 50% 100%,#5a1e3c,#1a0f1e 60%,#0b0610);transition:opacity .5s}
+#loading.done{opacity:0;pointer-events:none}
+#loading .ring{width:44px;height:44px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:var(--pink);animation:sp 1s linear infinite}
+#loading p{margin:0;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);text-align:center;padding:0 24px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.tap{position:fixed;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:2px solid var(--cyan);z-index:7;pointer-events:none;
+  animation:tp .45s ease-out forwards}
+@keyframes tp{to{transform:scale(4.5);opacity:0}}
+#toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 92px);transform:translateX(-50%);z-index:7;background:var(--panel);
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;font:600 11px system-ui;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+@media (min-width:820px){#drawer{left:auto;right:14px;bottom:14px;width:380px;border-radius:16px;border:1px solid var(--line)}
+  #drawer.closed{transform:translateY(calc(100% - 46px))}}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="hud">
+  <div id="bar"><div id="title"><b>Soft-Body</b> Character Physics Lab</div><div id="fps">-- fps</div></div>
+  <div id="cams">
+    <button class="chip" data-cam="follow">Behind Walk (Follow Cam)</button>
+    <button class="chip on" data-cam="hip">3/4 Glute &amp; Hip Physics Cam</button>
+    <button class="chip" data-cam="side">Side Profile</button>
+    <button class="chip" data-cam="hair">Upper Body &amp; Hair Cam</button>
+    <button class="chip" data-cam="ortho">Orthographic Turnaround Check</button>
+  </div>
+</div>
+<div id="legend"><div>DEFORMATION / JIGGLE WEIGHT</div><div class="rampbar"></div>
+  <div class="lab"><span>0.0 RIGID</span><span>0.5</span><span>1.0 SOFT</span></div></div>
+<div id="toast"></div>
+<div id="drawer" class="closed">
+  <div id="grip"><i></i><span>Controls</span><i></i></div>
+  <div id="body">
+    <h4>Animation State</h4>
+    <div class="grid" id="states">
+      <button class="btn on" data-state="walk">Sunset Strut (Walk)</button>
+      <button class="btn" data-state="jog">Athletic Jog</button>
+      <button class="btn" data-state="idle">Hip Sway / Weight Shift Idle</button>
+      <button class="btn" data-state="turn">180° Quick Turn (Hair Whip)</button>
+      <button class="btn wide" data-state="manual">Manual Impulse Test (tap the body)</button>
+    </div>
+    <h4>View Mode</h4>
+    <div class="grid" id="modes">
+      <button class="btn on" data-mode="0">Photoreal PBR</button>
+      <button class="btn" data-mode="1">Physics Heatmap &amp; Wireframe</button>
+    </div>
+    <h4>Real-Time Physics</h4>
+    <div class="row"><label for="sSpeed">Walk Speed</label><input id="sSpeed" type="range" min="0.4" max="1.8" step="0.01" value="1"><output></output></div>
+    <div class="row"><label for="sSway">Hip Sway Intensity</label><input id="sSway" type="range" min="0" max="2" step="0.01" value="1"><output></output></div>
+    <div class="row"><label for="sK">Soft-Body Stiffness k</label><input id="sK" type="range" min="80" max="900" step="1" value="380"><output></output></div>
+    <div class="row"><label for="sC">Jiggle Damping c</label><input id="sC" type="range" min="1" max="30" step="0.1" value="7"><output></output></div>
+    <div class="row"><label for="sBounce">Heel-Strike Bounce</label><input id="sBounce" type="range" min="0" max="3" step="0.01" value="1"><output></output></div>
+    <div class="row"><label for="sWind">Wind Speed</label><input id="sWind" type="range" min="0" max="3" step="0.01" value="0.6"><output></output></div>
+    <p class="hint">Tap hips, glutes, thighs, shoulders, chest or the ponytail to inject a physics impulse. 1 finger orbits, 2 fingers pinch-zoom and pan.</p>
+  </div>
+</div>
+<div id="loading"><div class="ring"></div><p id="loadmsg">Lofting anatomical mesh…</p></div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+"three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+/* ======================================================================
+   0. MATH UTILITIES
+   ====================================================================== */
+const {sin,cos,abs,min,max,sqrt,PI,exp,pow,floor,atan2}=Math;
+const TAU=PI*2, DEG=PI/180;
+const clamp=(x,a,b)=>x<a?a:x>b?b:x;
+const sat=x=>x<0?0:x>1?1:x;
+const lerp=(a,b,t)=>a+(b-a)*t;
+const sstep=(a,b,x)=>{const t=sat((x-a)/(b-a));return t*t*(3-2*t);};
+const smin=(a,b,k)=>{const h=max(k-abs(a-b),0)/k;return min(a,b)-h*h*k*0.25;};   // polynomial smooth union
+const smax=(a,b,k)=>-smin(-a,-b,k);
+const fract=x=>x-floor(x);
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+// Improved 3D Perlin noise (wind turbulence + procedural detail)
+const PERM=new Uint8Array(512);
+{const p=new Uint8Array(256);for(let i=0;i<256;i++)p[i]=i;let s=1337;
+ for(let i=255;i>0;i--){s=(s*1664525+1013904223)>>>0;const j=s%(i+1);const t=p[i];p[i]=p[j];p[j]=t;}
+ for(let i=0;i<512;i++)PERM[i]=p[i&255];}
+const fade=t=>t*t*t*(t*(t*6-15)+10);
+function grad3(h,x,y,z){const g=h&15,u=g<8?x:y,v=g<4?y:(g===12||g===14)?x:z;return((g&1)?-u:u)+((g&2)?-v:v);}
+function perlin3(x,y,z){
+  const X=floor(x)&255,Y=floor(y)&255,Z=floor(z)&255;x-=floor(x);y-=floor(y);z-=floor(z);
+  const u=fade(x),v=fade(y),w=fade(z),A=PERM[X]+Y,AA=PERM[A]+Z,AB=PERM[A+1]+Z,B=PERM[X+1]+Y,BA=PERM[B]+Z,BB=PERM[B+1]+Z;
+  return lerp(lerp(lerp(grad3(PERM[AA],x,y,z),grad3(PERM[BA],x-1,y,z),u),lerp(grad3(PERM[AB],x,y-1,z),grad3(PERM[BB],x-1,y-1,z),u),v),
+              lerp(lerp(grad3(PERM[AA+1],x,y,z-1),grad3(PERM[BA+1],x-1,y,z-1),u),lerp(grad3(PERM[AB+1],x,y-1,z-1),grad3(PERM[BB+1],x-1,y-1,z-1),u),v),w);
+}
+
+/* Parametric loft: cross-section channels sampled along an axis, interpolated with
+   non-uniform Catmull-Rom (cubic Hermite) splines and baked into a 2 mm lookup table. */
+function makeLoft(st,nch){
+  const n=st.length,t0=st[0][0],t1=st[n-1][0],N=Math.ceil((t1-t0)/0.002)+1,lut=new Float32Array(N*nch);
+  for(let c=1;c<=nch;c++){
+    const m=[];for(let i=0;i<n;i++){const a=st[max(i-1,0)],b=st[min(i+1,n-1)];m.push((b[c]-a[c])/(b[0]-a[0]));}
+    let s=0;
+    for(let k=0;k<N;k++){
+      const t=t0+(t1-t0)*k/(N-1);while(s<n-2&&t>st[s+1][0])s++;
+      const A=st[s],B=st[s+1],h=B[0]-A[0],u=sat((t-A[0])/h),u2=u*u,u3=u2*u;
+      lut[k*nch+c-1]=(2*u3-3*u2+1)*A[c]+(u3-2*u2+u)*h*m[s]+(-2*u3+3*u2)*B[c]+(u3-u2)*h*m[s+1];
+    }
+  }
+  return {t0,t1,N,nch,lut,inv:(N-1)/(t1-t0)};
+}
+function loftAt(L,t,o){
+  let f=(clamp(t,L.t0,L.t1)-L.t0)*L.inv,i=f|0;if(i>=L.N-1)i=L.N-2;f-=i;
+  const a=i*L.nch,b=a+L.nch,l=L.lut;for(let c=0;c<L.nch;c++)o[c]=l[a+c]+(l[b+c]-l[a+c])*f;
+}
+
+/* ======================================================================
+   1. ANATOMY FIELD: lofted cross-sections fused with smooth unions
+   Axes: +x = character's left, +y = up, +z = front. Units: metres (1.70 m tall).
+   ====================================================================== */
+// Torso stations: [y, half-width, half-depth, depth-centre, superellipse exponent]
+const TORSO=makeLoft([
+ [0.80,0.085,0.080,-0.006,2.2],[0.84,0.150,0.098,-0.008,2.3],[0.88,0.176,0.106,-0.010,2.4],[0.93,0.180,0.108,-0.012,2.4],
+ [0.98,0.168,0.101,-0.010,2.3],[1.04,0.142,0.089,-0.004,2.2],[1.10,0.123,0.082,0.002,2.2],[1.16,0.126,0.086,0.004,2.3],
+ [1.22,0.138,0.094,0.002,2.4],[1.28,0.150,0.100,-0.002,2.5],[1.34,0.157,0.097,-0.006,2.5],[1.385,0.156,0.082,-0.010,2.4],
+ [1.425,0.126,0.064,-0.012,2.2],[1.46,0.060,0.054,-0.010,2.0]],4);
+// Leg stations (mirrored): [y, centre-x, centre-z, radius-x, radius-z]
+const LEG=makeLoft([
+ [0.055,0.076,-0.022,0.030,0.036],[0.09,0.076,-0.024,0.0275,0.034],[0.16,0.077,-0.024,0.031,0.037],[0.26,0.079,-0.027,0.043,0.049],
+ [0.35,0.081,-0.029,0.052,0.058],[0.43,0.082,-0.020,0.048,0.053],[0.50,0.083,-0.012,0.050,0.056],[0.56,0.084,-0.008,0.056,0.062],
+ [0.64,0.086,-0.004,0.068,0.075],[0.73,0.089,-0.004,0.081,0.088],[0.81,0.091,-0.006,0.088,0.094],[0.88,0.092,-0.008,0.086,0.092],
+ [0.94,0.092,-0.008,0.080,0.085]],4);
+// Arm stations along the A-pose arm axis: [s, in-plane radius, depth radius]
+const ARM=makeLoft([[0,0.050,0.052],[0.07,0.047,0.050],[0.15,0.041,0.044],[0.23,0.035,0.038],[0.275,0.033,0.036],
+ [0.33,0.036,0.037],[0.40,0.031,0.032],[0.47,0.025,0.027],[0.525,0.021,0.026]],2);
+const ARM_B=27*DEG, SB=sin(ARM_B), CB=cos(ARM_B), SHX=0.166, SHY=1.388, SHZ=-0.012;
+const HEM=0.735, TOPB=1.288;                       // dress hem height / bare-back edge height
+
+const _t=new Float32Array(4),_l=new Float32Array(4),_a=new Float32Array(2);
+const ell=(dx,dy,dz,rx,ry,rz)=>(sqrt(dx*dx/(rx*rx)+dy*dy/(ry*ry)+dz*dz/(rz*rz))-1)*min(rx,ry,rz);
+
+function fTorsoCore(x,y,z){
+  loftAt(TORSO,y,_t);const rx=_t[0],rz=_t[1],n=_t[3];
+  let d=(pow(pow(abs(x)/rx,n)+pow(abs(z-_t[2])/rz,n),1/n)-1)*min(rx,rz);
+  d=smax(d,TORSO.t0-y,0.03);return smax(d,y-TORSO.t1,0.03);
+}
+const fGlute=(ax,y,z)=>ell(ax-0.080,y-0.905,z+0.078,0.094,0.102,0.086);
+const fBust=(ax,y,z)=>ell(ax-0.074,y-1.268,z-0.072,0.068,0.066,0.064);
+const fScap=(ax,y,z)=>ell(ax-0.078,y-1.325,z+0.082,0.052,0.066,0.030);
+function fLeg(ax,y,z){
+  loftAt(LEG,y,_l);const u=(ax-_l[0])/_l[2],v=(z-_l[1])/_l[3];
+  let d=(sqrt(u*u+v*v)-1)*min(_l[2],_l[3]);
+  d=smax(d,y-LEG.t1,0.03);d=smax(d,LEG.t0-y,0.02);
+  if(y<0.14){                                       // heel + forefoot, flattened on the ground plane
+    let f=smin(ell(ax-0.076,y-0.042,z+0.032,0.034,0.042,0.048),ell(ax-0.080,y-0.027,z-0.064,0.045,0.028,0.088),0.03);
+    d=smin(d,smax(f,-y,0.006),0.025);
+  }
+  return d;
+}
+function fArm(ax,y,z){
+  const px=ax-SHX,py=y-SHY,pz=z-SHZ,s=px*SB-py*CB,p=px*CB+py*SB;
+  loftAt(ARM,s,_a);const u=p/_a[0],v=pz/_a[1];
+  let d=(sqrt(u*u+v*v)-1)*min(_a[0],_a[1]);
+  d=smax(d,-s-0.02,0.03);d=smax(d,s-ARM.t1,0.02);
+  if(s>0.45){                                       // mitten hand + thumb
+    let h=ell(s-0.602,p,pz-0.004,0.078,0.0155,0.040);
+    h=smin(h,ell(s-0.570,p+0.004,pz-0.040,0.040,0.012,0.014),0.012);
+    d=smin(d,h,0.022);
+  }
+  return smin(d,ell(ax-0.172,y-1.366,z+0.012,0.050,0.060,0.056),0.03);   // deltoid cap
+}
+function fHeadNeck(ax,y,z){
+  const ny=sat((y-1.43)/0.125),dn=y-(1.43+0.125*ny),zn=z-(-0.016+0.016*ny);
+  let d=sqrt(ax*ax+dn*dn+zn*zn)-(0.048-0.006*ny);
+  if(y>1.47){
+    let h=ell(ax,y-1.612,z-0.008,0.075,0.094,0.094);                        // cranium
+    h=smin(h,ell(ax,y-1.560,z-0.030,0.051,0.054,0.062),0.03);               // jaw
+    h=smin(h,ell(ax,y-1.531,z-0.062,0.026,0.022,0.027),0.02);               // chin
+    h=smin(h,ell(ax-0.040,y-1.592,z-0.062,0.024,0.022,0.028),0.03);         // cheekbone
+    const ex=ax-0.031,ey=y-1.619,ez=z-0.106;
+    h=smax(h,0.0165-sqrt(ex*ex+ey*ey+ez*ez),0.014);                         // eye socket
+    h=smin(h,ell(ax,y-1.606,z-0.097,0.0105,0.027,0.014),0.012);             // nose bridge
+    h=smin(h,ell(ax,y-1.588,z-0.108,0.0145,0.0125,0.0155),0.010);           // nose tip
+    h=smin(h,ell(ax,y-1.560,z-0.089,0.024,0.0095,0.012),0.008);             // lips
+    h=smin(h,ell(ax-0.0765,y-1.603,z+0.004,0.010,0.028,0.017),0.006);       // ear
+    d=smin(d,h,0.02);
+  }
+  return d;
+}
+// Part fields of the last fBody() call: torso, head+neck, leg, arm (used for skin-weight ownership)
+const P=new Float32Array(4);
+function fBody(x,y,z){
+  const ax=abs(x);let t=1;
+  if(ax<0.27&&y>0.73&&y<1.53){
+    t=fTorsoCore(x,y,z);
+    const zb=_t[2]-_t[1];
+    if(y<1.06)t=smin(t,fGlute(ax,y,z),0.035);
+    if(y>1.12&&y<1.45){
+      t=smin(t,fBust(ax,y,z),0.03);t=smin(t,fScap(ax,y,z),0.03);
+    }
+    const gf=sstep(0.98,1.06,y)*sstep(1.42,1.34,y);                         // spinal furrow on the bare back
+    if(gf>0.01&&z<0){const gz=z-zb+0.004;t=smax(t,0.004*gf-sqrt(ax*ax+gz*gz),0.02*gf);}
+  }
+  P[0]=t;
+  P[1]=y>1.35?fHeadNeck(ax,y,z):1;
+  P[2]=y<0.98?fLeg(ax,y,z):1;
+  P[3]=(ax>0.085&&y>0.70&&y<1.48)?fArm(ax,y,z):1;
+  let d=smin(t,P[1],0.035);d=smin(d,P[2],0.022);return smin(d,P[3],0.028);
+}
+// Form-fitting dress: the body offset outward, with the two thighs wrapped by one skirt hull
+function fDress(x,y,z){
+  const ax=abs(x);let t=fTorsoCore(x,y,z);
+  if(y<1.06)t=smin(t,fGlute(ax,y,z),0.04);
+  if(y>1.12){
+    t=smin(t,fBust(ax,y,z),0.035);
+    t=smin(t,ell(ax,y-1.262,z-0.064,0.075,0.058,0.058),0.03);               // fabric bridging the bust
+    t=smin(t,fScap(ax,y,z),0.03);
+    if(y>1.35)t=smin(t,fHeadNeck(ax,y,z),0.035);
+  }
+  if(y<0.98){
+    t=smin(t,fLeg(ax,y,z),0.03);
+    loftAt(LEG,y,_l);const u=ax/(_l[0]+_l[2]*0.86),v=abs(z-_l[1])/(_l[3]*0.94);
+    let h=(Math.cbrt(u*u*u+v*v*v)-1)*_l[3]*0.94;
+    t=smin(t,smax(h,y-0.93,0.03),0.02);
+  }
+  return t-0.0055;
+}
+const hairMask=(x,y,z)=>0.8*(y-(1.545+0.085*sstep(-0.055,-0.02,z)+0.058*sstep(0.03,0.085,z)));   // forehead arc -> temple -> over the ear -> nape
+// Scalp hair shell (pulled back into the ponytail tie)
+function fHair(x,y,z){
+  const ax=abs(x);
+  let h=smin(ell(ax,y-1.612,z-0.008,0.075,0.094,0.094),ell(ax,y-1.585,z+0.020,0.066,0.070,0.072),0.03)
+       -(0.0025+0.0050*sstep(0.0,0.02,hairMask(x,y,z)));
+  return smin(h,ell(ax,y-1.664,z+0.080,0.030,0.028,0.030),0.025);
+}
+// Garment / hairline patterns in rest space (>0 = covered). Mirrored in GLSL for crisp pixel edges.
+function dressMask(x,y,z){
+  const ax=abs(x),t=sat((y-1.26)/0.205),hw=lerp(0.170,0.034,pow(t,0.8));
+  const tube=min(y-HEM,TOPB-y);
+  const bib=min(hw-ax,z-lerp(-0.012,0.012,t),1.470-y,y-1.25);
+  const strap=min(y-1.438,1.470-y,0.085-ax);
+  return max(tube,bib,strap);
+}
+
+/* ---- Physics heatmap: per-zone soft-tissue weights (reference image 2) ---- */
+// ZW = [gluteL, gluteR, thighL, thighR, chestL, chestR, core, deltoid/scapula]
+const ZW=new Float32Array(8);
+function zoneW(x,y,z,layer){
+  ZW.fill(0);if(layer===2)return 0;
+  const ax=abs(x),body=sstep(0.235,0.200,ax);
+  const sw=layer===1?0.03:lerp(0.002,0.02,sstep(0.79,0.86,y)),L=sstep(-sw,sw,x),R=1-L;
+  let q=sqrt(((ax-0.082)/0.118)**2+((y-0.905)/0.128)**2+((z+0.128)/0.105)**2);
+  const wg=sstep(1.0,0.38,q)*sstep(0.02,-0.04,z)*body;                      // 1.0  glute lobes
+  const wt=sstep(0.535,0.70,y)*sstep(0.945,0.845,y)*(0.42+0.38*sstep(0.02,-0.07,z))*(1-0.55*wg)*body; // 0.4-0.8 thighs
+  q=sqrt(((ax-0.074)/0.088)**2+((y-1.265)/0.086)**2+((z-0.112)/0.072)**2);
+  const wc=0.92*sstep(1.0,0.38,q)*sstep(0.0,0.04,z)*body;                     // 0.9  chest lobes
+  const wcore=0.45*sstep(0.955,1.03,y)*sstep(1.225,1.14,y)*body;             // 0.45 waist / lower back
+  q=sqrt(((ax-0.178)/0.085)**2+((y-1.372)/0.085)**2+((z+0.012)/0.085)**2);
+  let wd=0.42*sstep(1.0,0.3,q);                                              // 0.4  deltoids
+  q=sqrt(((ax-0.082)/0.085)**2+((y-1.325)/0.09)**2+((z+0.09)/0.07)**2);
+  wd=max(wd,0.36*sstep(1.0,0.3,q)*sstep(0.0,-0.03,z));                       // 0.35 scapulae
+  ZW[0]=wg*L;ZW[1]=wg*R;ZW[2]=wt*L;ZW[3]=wt*R;ZW[4]=wc*L;ZW[5]=wc*R;ZW[6]=wcore;ZW[7]=wd;
+  return max(wg,wt,wc,wcore,wd);
+}
+
+/* ---- Skeleton definition + analytic skin weights ---- */
+const B={pelvis:0,spine1:1,spine2:2,neck:3,head:4,armL:5,foreL:6,handL:7,armR:8,foreR:9,handR:10,
+         thighL:11,shinL:12,footL:13,thighR:14,shinR:15,footR:16}, NB=17;
+const JOINT=[[0,0.95,-0.005],[0,1.07,0],[0,1.24,-0.004],[0,1.445,-0.012],[0,1.535,0],
+ [SHX,SHY,SHZ],[SHX+SB*0.275,SHY-CB*0.275,SHZ],[SHX+SB*0.525,SHY-CB*0.525,SHZ],
+ [-SHX,SHY,SHZ],[-SHX-SB*0.275,SHY-CB*0.275,SHZ],[-SHX-SB*0.525,SHY-CB*0.525,SHZ],
+ [0.090,0.905,-0.006],[0.083,0.50,-0.012],[0.076,0.085,-0.024],
+ [-0.090,0.905,-0.006],[-0.083,0.50,-0.012],[-0.076,0.085,-0.024]].map(a=>new THREE.Vector3(...a));
+const PARENT=[-1,0,1,2,3, 2,5,6, 2,8,9, 0,11,12, 0,14,15];
+const BW=new Float32Array(NB);let armOwn=0;
+function skinW(x,y,z,layer){
+  BW.fill(0);armOwn=0;if(layer===2){BW[4]=1;return;}
+  fBody(x,y,z);
+  const ax=abs(x),m=min(P[0],P[1],P[2],P[3]),sg=0.012;
+  let wT=exp(-(P[0]-m)/sg),wH=exp(-(P[1]-m)/sg),wL=exp(-(P[2]-m)/sg),wA=layer===1?0:exp(-(P[3]-m)/sg);
+  const s=wT+wH+wL+wA;wT/=s;wH/=s;wL/=s;wA/=s;armOwn=wA;
+  const sw=layer===1?0.05:lerp(0.002,0.03,sstep(0.79,0.87,y)),L=sstep(-sw,sw,x),R=1-L;
+  const th=sstep(0.955,0.79,y),up1=sstep(0.98,1.10,y),up2=sstep(1.14,1.30,y),nk=sstep(1.405,1.47,y);
+  const sh=sstep(0.545,0.455,y),ft=sstep(0.115,0.06,y);
+  const s2=1-sstep(1.40,1.46,y),hd=sstep(1.50,1.565,y);
+  const as=(ax-SHX)*SB-(y-SHY)*CB,ua=sstep(-0.035,0.055,as),fa=sstep(0.235,0.315,as),hn=sstep(0.495,0.555,as);
+  BW[0]=wT*(1-up1)*(1-th)+wL*(1-th);
+  const tt=wT*th+wL*th*(1-sh);BW[11]=tt*L;BW[14]=tt*R;
+  BW[12]=wL*sh*(1-ft)*L;BW[15]=wL*sh*(1-ft)*R;BW[13]=wL*sh*ft*L;BW[16]=wL*sh*ft*R;
+  BW[1]=wT*up1*(1-up2);BW[2]=wT*up2*(1-nk)+wH*s2+wA*(1-ua);BW[3]=wT*up2*nk+wH*(1-s2)*(1-hd);BW[4]=wH*(1-s2)*hd;
+  const o=x>=0?5:8;BW[o]=wA*ua*(1-fa);BW[o+1]=wA*ua*fa*(1-hn);BW[o+2]=wA*ua*fa*hn;
+}
+
+/* ======================================================================
+   2. MESH EXTRACTION: one continuous quad surface per layer (Surface Nets),
+      Laplacian relaxation, re-projection onto the anatomy field, attribute bake
+   ====================================================================== */
+const EA=[0,2,4,6,0,1,4,5,0,1,2,3],EB=[1,3,5,7,2,3,6,7,4,5,6,7];
+function extract(field,b0,b1,h){
+  const nx=Math.round((b1[0]-b0[0])/h)+1,ny=Math.round((b1[1]-b0[1])/h)+1,nz=Math.round((b1[2]-b0[2])/h)+1,nxy=nx*ny;
+  const F=new Float32Array(nxy*nz),C=4,thr=C*h*1.5;
+  // two-level sampling: only blocks near the surface are evaluated densely
+  for(let k=0;k<nz;k+=C)for(let j=0;j<ny;j+=C)for(let i=0;i<nx;i+=C){
+    const d=field(b0[0]+(i+1.5)*h,b0[1]+(j+1.5)*h,b0[2]+(k+1.5)*h),near=abs(d)<thr;
+    const k1=min(k+C,nz),j1=min(j+C,ny),i1=min(i+C,nx);
+    for(let kk=k;kk<k1;kk++)for(let jj=j;jj<j1;jj++){
+      let o=i+jj*nx+kk*nxy;
+      for(let ii=i;ii<i1;ii++,o++)F[o]=near?field(b0[0]+ii*h,b0[1]+jj*h,b0[2]+kk*h):d;
+    }
+  }
+  const vid=new Int32Array(F.length).fill(-1),pos=[],quads=[],g=new Float32Array(8),R=[1,nx,nxy],ijk=[0,0,0];
+  for(let k=0;k<nz-1;k++)for(let j=0;j<ny-1;j++)for(let i=0;i<nx-1;i++){
+    const c=i+j*nx+k*nxy;let mask=0;
+    for(let n=0;n<8;n++){const v=F[c+(n&1)+((n>>1)&1)*nx+((n>>2)&1)*nxy];g[n]=v;if(v<0)mask|=1<<n;}
+    if(mask===0||mask===255)continue;
+    let sx=0,sy=0,sz=0,cnt=0;
+    for(let e=0;e<12;e++){
+      const a=EA[e],b=EB[e];if((g[a]<0)===(g[b]<0))continue;
+      const t=g[a]/(g[a]-g[b]),ax=a&1,ay=(a>>1)&1,az=(a>>2)&1;
+      sx+=ax+t*((b&1)-ax);sy+=ay+t*(((b>>1)&1)-ay);sz+=az+t*(((b>>2)&1)-az);cnt++;
+    }
+    vid[c]=pos.length/3;pos.push(b0[0]+(i+sx/cnt)*h,b0[1]+(j+sy/cnt)*h,b0[2]+(k+sz/cnt)*h);
+    ijk[0]=i;ijk[1]=j;ijk[2]=k;
+    for(let d=0;d<3;d++){
+      if((g[0]<0)===(g[1<<d]<0))continue;
+      const u=(d+1)%3,v=(d+2)%3;if(ijk[u]===0||ijk[v]===0)continue;
+      const A=vid[c],Bq=vid[c-R[u]],Cq=vid[c-R[u]-R[v]],Dq=vid[c-R[v]];
+      if(Bq<0||Cq<0||Dq<0)continue;
+      if(g[0]<0)quads.push(A,Bq,Cq,Dq);else quads.push(A,Dq,Cq,Bq);
+    }
+  }
+  return {pos:new Float32Array(pos),quads:new Uint32Array(quads)};
+}
+// Drop quads fully outside a garment pattern, then compact the vertex list
+function cullByMask(m,mask,margin){
+  const {pos,quads}=m,n=pos.length/3,keepV=new Uint8Array(n),inside=new Uint8Array(n);
+  for(let i=0;i<n;i++)inside[i]=mask(pos[i*3],pos[i*3+1],pos[i*3+2])>-margin?1:0;
+  const q2=[];
+  for(let q=0;q<quads.length;q+=4){
+    const a=quads[q],b=quads[q+1],c=quads[q+2],d=quads[q+3];
+    if(inside[a]|inside[b]|inside[c]|inside[d]){q2.push(a,b,c,d);keepV[a]=keepV[b]=keepV[c]=keepV[d]=1;}
+  }
+  const remap=new Int32Array(n),p2=[];let k=0;
+  for(let i=0;i<n;i++)if(keepV[i]){remap[i]=k++;p2.push(pos[i*3],pos[i*3+1],pos[i*3+2]);}
+  return {pos:new Float32Array(p2),quads:new Uint32Array(q2.map(i=>remap[i]))};
+}
+// Umbrella-operator Laplacian smoothing over the quad edge graph
+function relax(m,iters,lam){
+  const {pos,quads}=m,n=pos.length/3,acc=new Float32Array(n*3),cnt=new Uint16Array(n);
+  for(let it=0;it<iters;it++){
+    acc.fill(0);cnt.fill(0);
+    for(let q=0;q<quads.length;q+=4)for(let e=0;e<4;e++){
+      const a=quads[q+e]*3,b=quads[q+((e+1)&3)]*3;
+      acc[a]+=pos[b];acc[a+1]+=pos[b+1];acc[a+2]+=pos[b+2];cnt[a/3]++;
+      acc[b]+=pos[a];acc[b+1]+=pos[a+1];acc[b+2]+=pos[a+2];cnt[b/3]++;
+    }
+    for(let i=0;i<n;i++){const c=cnt[i];if(c<6)continue;          // open-boundary vertices stay put
+      for(let k=0;k<3;k++)pos[i*3+k]+=(acc[i*3+k]/c-pos[i*3+k])*lam;}
+  }
+}
+const tick=()=>new Promise(r=>setTimeout(r,0));
+async function buildCharacter(msg){
+  const LAYERS=[
+    {f:fBody ,b0:[-0.504,-0.012,-0.192],b1:[0.504,1.724,0.184],h:0.008,id:0,label:'Extracting body surface…'},
+    {f:fDress,b0:[-0.224,0.696,-0.192],b1:[0.224,1.504,0.168],h:0.008,id:1,mask:dressMask,label:'Tailoring halter dress…'},
+    {f:fHair ,b0:[-0.102,1.500,-0.126],b1:[0.102,1.728,0.120],h:0.006,id:2,mask:hairMask,label:'Combing scalp hair…'}];
+  const parts=[];let NV=0,NQ=0;
+  for(const Ly of LAYERS){
+    msg(Ly.label);await tick();
+    let m=extract(Ly.f,Ly.b0,Ly.b1,Ly.h);
+    if(Ly.mask)m=cullByMask(m,Ly.mask,0.016);
+    relax(m,2,0.5);
+    // Newton re-projection onto the iso-surface; the field gradient doubles as the analytic normal
+    const n=m.pos.length/3,nrm=new Float32Array(n*3),e=0.002,f=Ly.f,p=m.pos;
+    for(let i=0;i<n;i++){
+      let x=p[i*3],y=p[i*3+1],z=p[i*3+2];
+      const d=f(x,y,z),gx=f(x+e,y,z)-f(x-e,y,z),gy=f(x,y+e,z)-f(x,y-e,z),gz=f(x,y,z+e)-f(x,y,z-e);
+      const gl=sqrt(gx*gx+gy*gy+gz*gz)||1,st=clamp(d/(gl/(2*e)),-0.006,0.006);
+      p[i*3]=x-st*gx/gl;p[i*3+1]=y-st*gy/gl;p[i*3+2]=z-st*gz/gl;
+      nrm[i*3]=gx/gl;nrm[i*3+1]=gy/gl;nrm[i*3+2]=gz/gl;
+    }
+    parts.push({m,nrm,id:Ly.id,base:NV});NV+=n;NQ+=m.quads.length/4;
+  }
+  msg('Baking skin weights & physics heatmap…');await tick();
+  const pos=new Float32Array(NV*3),nrm=new Float32Array(NV*3),sI=new Float32Array(NV*4),sW=new Float32Array(NV*4),
+        zA=new Float32Array(NV*4),zB=new Float32Array(NV*4),misc=new Float32Array(NV*4),jg=new Float32Array(NV*3),
+        tri=new Uint32Array(NQ*6),edgeSet=new Set(),order=new Int32Array(NB);
+  let ti=0;
+  for(const pt of parts){
+    const {m,id,base}=pt,n=m.pos.length/3;
+    for(let i=0;i<n;i++){
+      const v=base+i;let x=m.pos[i*3],y=m.pos[i*3+1],z=m.pos[i*3+2];
+      const nx=pt.nrm[i*3],ny=pt.nrm[i*3+1],nz=pt.nrm[i*3+2];
+      skinW(x,y,z,id);const arm=armOwn;
+      for(let k=0;k<NB;k++)order[k]=k;
+      order.sort((a,b)=>BW[b]-BW[a]);
+      {let s=0;for(let k=0;k<4;k++)s+=BW[order[k]];for(let k=0;k<4;k++){sI[v*4+k]=order[k];sW[v*4+k]=BW[order[k]]/s;}}
+      if(id===0&&arm<0.5&&dressMask(x,y,z)>0.015){x-=nx*0.004;y-=ny*0.004;z-=nz*0.004;}   // tuck skin under the cloth
+      pos[v*3]=x;pos[v*3+1]=y;pos[v*3+2]=z;nrm[v*3]=nx;nrm[v*3+1]=ny;nrm[v*3+2]=nz;
+      // ambient occlusion from the field (creases: armpits, gluteal fold, neck, between thighs)
+      let ao=1;
+      if(id!==2){const r=0.035;ao=sat(0.25+0.75*fBody(x+nx*r,y+ny*r,z+nz*r)/r);}
+      // soft-tissue zones
+      let heat=zoneW(x,y,z,id),zid=0,zm=0.05;
+      for(let k=0;k<8;k++){if(k<4)zA[v*4+k]=ZW[k];else zB[v*4+k-4]=ZW[k];if(ZW[k]>zm){zm=ZW[k];zid=k+1;}}
+      if(zid===8&&x<0)zid=9;
+      if(id===2)heat=0.3+0.25*sstep(0.02,-0.08,z);
+      const d=0.004;
+      jg[v*3]=(zoneW(x+d,y,z,id)-zoneW(x-d,y,z,id))/(2*d);
+      jg[v*3+1]=(zoneW(x,y+d,z,id)-zoneW(x,y-d,z,id))/(2*d);
+      jg[v*3+2]=(zoneW(x,y,z+d,id)-zoneW(x,y,z-d,id))/(2*d);
+      misc[v*4]=heat;misc[v*4+1]=zid;misc[v*4+2]=id===0?0.3*arm:id;misc[v*4+3]=ao;
+    }
+    const q=m.quads;
+    for(let k=0;k<q.length;k+=4){
+      const a=q[k]+base,b=q[k+1]+base,c=q[k+2]+base,d=q[k+3]+base;
+      tri[ti++]=a;tri[ti++]=b;tri[ti++]=c;tri[ti++]=a;tri[ti++]=c;tri[ti++]=d;
+      edgeSet.add(min(a,b)*NV+max(a,b));edgeSet.add(min(b,c)*NV+max(b,c));edgeSet.add(min(c,d)*NV+max(c,d));edgeSet.add(min(d,a)*NV+max(d,a));
+    }
+    await tick();
+  }
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  geo.setIndex(new THREE.BufferAttribute(tri,1));
+  geo.computeVertexNormals();
+  // Prefer the analytic field normal; keep the mesh normal where the field gradient is degenerate (creases)
+  const mn=geo.attributes.normal.array;
+  for(let i=0;i<NV;i++){
+    const a=i*3;if(mn[a]*nrm[a]+mn[a+1]*nrm[a+1]+mn[a+2]*nrm[a+2]>0.6){mn[a]=nrm[a];mn[a+1]=nrm[a+1];mn[a+2]=nrm[a+2];}
+  }
+  geo.setAttribute('aSkinI',new THREE.BufferAttribute(sI,4));
+  geo.setAttribute('aSkinW',new THREE.BufferAttribute(sW,4));
+  geo.setAttribute('aZoneA',new THREE.BufferAttribute(zA,4));
+  geo.setAttribute('aZoneB',new THREE.BufferAttribute(zB,4));
+  geo.setAttribute('aMisc',new THREE.BufferAttribute(misc,4));
+  geo.setAttribute('aJigGrad',new THREE.BufferAttribute(jg,3));
+  geo.boundingSphere=new THREE.Sphere(new THREE.Vector3(0,0.9,0),1.6);
+  // quad-edge line list for the topology wireframe (shares every vertex buffer with the surface)
+  const lines=new Uint32Array(edgeSet.size*2);let li=0;
+  for(const k of edgeSet){lines[li++]=Math.floor(k/NV);lines[li++]=k%NV;}
+  const lineGeo=new THREE.BufferGeometry();
+  for(const k in geo.attributes)lineGeo.setAttribute(k,geo.attributes[k]);
+  lineGeo.setIndex(new THREE.BufferAttribute(lines,1));lineGeo.boundingSphere=geo.boundingSphere;
+  return {geo,lineGeo,verts:NV,tris:NQ*2};
+}
+
+/* ======================================================================
+   3. GLSL: GPU skinning + soft-tissue displacement, PBR skin / rib-knit / hair, heatmap
+   ====================================================================== */
+const GLSL_DEFORM=/*glsl*/`
+attribute vec4 aSkinI; attribute vec4 aSkinW; attribute vec4 aZoneA; attribute vec4 aZoneB; attribute vec4 aMisc; attribute vec3 aJigGrad;
+uniform mat4 uBones[${NB}];
+uniform mat4 uPelvisTransform;
+uniform vec4 uLeftGluteDisp, uRightGluteDisp, uLeftThighDisp, uRightThighDisp, uCoreDisp;
+uniform vec4 uChestDisp[2];
+uniform vec4 uScapDisp[2];
+uniform vec3 uPonyRoot;
+// xyz = spring displacement in bind space, w = axial compression (signed, metres)
+vec4 softTissue(vec3 p){
+  return aZoneA.x*uLeftGluteDisp + aZoneA.y*uRightGluteDisp + aZoneA.z*uLeftThighDisp + aZoneA.w*uRightThighDisp
+       + aZoneB.x*uChestDisp[0] + aZoneB.y*uChestDisp[1] + aZoneB.z*uCoreDisp
+       + aZoneB.w*(p.x>0.0?uScapDisp[0]:uScapDisp[1]);
+}
+void deformVertex(in vec3 p0,in vec3 n0,out vec3 wp,out vec3 wn,out vec3 wt,out vec4 soft){
+  soft=softTissue(p0);
+  // inertial lag + volume preservation: compression along the zone axis bulges the tissue along its normal
+  vec3 p=p0+soft.xyz+n0*(-0.45*soft.w);
+  vec3 n=normalize(n0-aJigGrad*dot(soft.xyz,n0));
+  vec3 t0=aMisc.z>1.5?(uPonyRoot-p0):vec3(0.0,1.0,0.0);
+  t0=t0-n0*dot(t0,n0);
+  mat4 sk=aSkinW.x*uBones[int(aSkinI.x)]+aSkinW.y*uBones[int(aSkinI.y)]+aSkinW.z*uBones[int(aSkinI.z)]+aSkinW.w*uBones[int(aSkinI.w)];
+  mat3 r=mat3(uPelvisTransform)*mat3(sk);
+  wp=(uPelvisTransform*(sk*vec4(p,1.0))).xyz;
+  wn=normalize(r*n);
+  wt=r*t0;
+}`;
+const GLSL_COMMON=/*glsl*/`
+uniform vec3 uSunDir,uSunCol,uSkyTop,uSkyHor,uGroundCol,uNeonAPos,uNeonACol,uNeonBPos,uNeonBCol;
+uniform float uTime,uMode;
+const float PI=3.14159265;
+float hash13(vec3 p){p=fract(p*0.1031);p+=dot(p,p.zyx+31.32);return fract((p.x+p.y)*p.z);}
+float vnoise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);
+  return mix(mix(mix(hash13(i),hash13(i+vec3(1,0,0)),f.x),mix(hash13(i+vec3(0,1,0)),hash13(i+vec3(1,1,0)),f.x),f.y),
+             mix(mix(hash13(i+vec3(0,0,1)),hash13(i+vec3(1,0,1)),f.x),mix(hash13(i+vec3(0,1,1)),hash13(i+vec3(1,1,1)),f.x),f.y),f.z);}
+vec3 ambient(vec3 N){float t=N.y*0.5+0.5;return mix(mix(uGroundCol,uSkyHor,smoothstep(0.0,0.55,t)),uSkyTop,smoothstep(0.5,1.0,t));}
+void getLight(int i,vec3 P,out vec3 L,out vec3 C){
+  if(i==0){L=uSunDir;C=uSunCol;}
+  else{vec3 d=(i==1?uNeonAPos:uNeonBPos)-P;float r2=dot(d,d);L=d*inversesqrt(r2);C=(i==1?uNeonACol:uNeonBCol)/(1.0+0.12*r2);}
+}
+// height-field bump mapping from screen-space derivatives (no UVs / tangents needed)
+vec3 bumpN(vec3 N,vec3 P,float h){
+  vec3 dpx=dFdx(P),dpy=dFdy(P);float hx=dFdx(h),hy=dFdy(h);
+  vec3 r1=cross(dpy,N),r2=cross(N,dpx);float det=dot(dpx,r1);
+  return normalize(abs(det)*N-sign(det)*(hx*r1+hy*r2));
+}
+float ggxD(float NoH,float a){float a2=a*a,d=NoH*NoH*(a2-1.0)+1.0;return a2/(PI*d*d);}
+vec3 specGGX(vec3 N,vec3 V,vec3 L,float rough,vec3 F0){
+  vec3 H=normalize(V+L);float NoH=max(dot(N,H),0.0),NoV=max(dot(N,V),1e-3),NoL=max(dot(N,L),0.0),VoH=max(dot(V,H),0.0);
+  float a=rough*rough,k=a*0.5;vec3 F=F0+(1.0-F0)*pow(1.0-VoH,5.0);
+  return F*(ggxD(NoH,a)*0.25/((NoV*(1.0-k)+k)*(NoL*(1.0-k)+k))*NoL*PI);
+}
+vec3 heatRamp(float t){
+  t=clamp(t,0.0,1.0);
+  vec3 c=mix(vec3(0.02,0.07,0.72),vec3(0.0,0.72,1.0),smoothstep(0.0,0.25,t));
+  c=mix(c,vec3(0.08,0.85,0.25),smoothstep(0.25,0.5,t));
+  c=mix(c,vec3(1.0,0.88,0.08),smoothstep(0.5,0.75,t));
+  return mix(c,vec3(1.0,0.10,0.04),smoothstep(0.75,1.0,t));
+}
+// Kajiya-Kay dual-lobe strand shading for the scalp shell and the ponytail
+vec3 shadeHair(vec3 P,vec3 N,vec3 T,vec3 V,float strand,float occ){
+  vec3 base=vec3(0.021,0.012,0.008)*(0.7+0.6*strand);
+  vec3 col=ambient(N)*base*1.3*occ;
+  for(int i=0;i<3;i++){vec3 L,C;getLight(i,P,L,C);
+    vec3 H=normalize(L+V);
+    float wrap=max((dot(N,L)+0.5)/1.5,0.0);
+    float th1=dot(normalize(T+N*(0.06+0.10*strand)),H),th2=dot(normalize(T-N*0.16),H);
+    float s1=pow(sqrt(max(1.0-th1*th1,0.0)),110.0),s2=pow(sqrt(max(1.0-th2*th2,0.0)),26.0);
+    col+=C*occ*(base*wrap*1.25+wrap*(vec3(1.0,0.86,0.72)*s1*0.10+vec3(0.50,0.24,0.10)*s2*0.11*(0.4+strand)));
+  }
+  return col;
+}`;
+const GLSL_MASKS=/*glsl*/`
+float dressMask(vec3 p){
+  float ax=abs(p.x),t=clamp((p.y-1.26)/0.205,0.0,1.0),hw=mix(0.170,0.034,pow(t,0.8));
+  float tube=min(p.y-${HEM.toFixed(4)},${TOPB.toFixed(4)}-p.y);
+  float bib=min(min(hw-ax,p.z-mix(-0.012,0.012,t)),min(1.470-p.y,p.y-1.25));
+  float strap=min(min(p.y-1.438,1.470-p.y),0.085-ax);
+  return max(tube,max(bib,strap));
+}
+float hairMask(vec3 p){return 0.8*(p.y-(1.545+0.085*smoothstep(-0.055,-0.02,p.z)+0.058*smoothstep(0.03,0.085,p.z)));}
+void clipLayers(vec3 R,float layer){
+  if(layer>1.5){if(hairMask(R)+(vnoise(R*150.0)-0.5)*0.005<0.0)discard;}
+  else if(layer>0.5){if(dressMask(R)<0.0)discard;}
+  else if(R.y>1.5){if(hairMask(R)>0.004)discard;}
+  else if(layer<0.15&&dressMask(R)>(R.y>0.80?0.030:0.014))discard;   // layer 0.3 = arm-owned skin, never under the dress
+}`;
+const BODY_VS=/*glsl*/`
+${GLSL_DEFORM}
+varying vec3 vWorld,vNormal,vTan,vRest,vRestN; varying vec4 vMisc,vSoft;
+uniform float uPush;
+void main(){
+  vec3 wp,wn,wt;vec4 soft;deformVertex(position,normal,wp,wn,wt,soft);
+  wp+=wn*uPush;
+  vWorld=wp;vNormal=wn;vTan=wt;vRest=position;vRestN=normal;vMisc=aMisc;vSoft=soft;
+  gl_Position=projectionMatrix*viewMatrix*vec4(wp,1.0);
+}`;
+const BODY_FS=/*glsl*/`
+varying vec3 vWorld,vNormal,vTan,vRest,vRestN; varying vec4 vMisc,vSoft;
+uniform vec2 uFlex; uniform float uFlashZone,uFlash; uniform vec3 uPonyRoot;
+${GLSL_COMMON}
+${GLSL_MASKS}
+vec3 shadeSkin(vec3 P,vec3 N,vec3 V,vec3 R,float ao){
+  vec3 base=vec3(0.455,0.262,0.165)*(0.90+0.20*vnoise(R*34.0));          // warm olive complexion
+  base=mix(base,base*vec3(1.10,0.80,0.72),(1.0-ao)*0.55);               // blood tint in creases
+  float rough=0.46,sheen=0.30+0.70*vnoise(R*46.0+3.7);                  // patchy sweat film
+  // painted facial features (rest space, front of the head only)
+  if(R.y>1.52&&R.z>0.045){
+    float ax=abs(R.x);vec2 e=vec2(ax-0.031,R.y-1.619);
+    float eye=1.0-smoothstep(0.85,1.0,length(e/vec2(0.0135,0.0060)));
+    float iris=1.0-smoothstep(0.0048,0.0058,length(e-vec2(-0.001,0.0003)));
+    float pupil=1.0-smoothstep(0.0018,0.0026,length(e-vec2(-0.001,0.0003)));
+    vec3 ec=mix(vec3(0.62,0.58,0.55),vec3(0.085,0.040,0.018),iris);ec=mix(ec,vec3(0.004),pupil);
+    base=mix(base,ec,eye);
+    float lash=(1.0-smoothstep(0.0,0.0016,abs(e.y-0.0052+e.x*e.x*22.0)))*(1.0-smoothstep(0.013,0.017,abs(e.x)));
+    base=mix(base,vec3(0.012,0.008,0.006),lash*0.9);
+    float by=R.y-(1.6385-14.0*(ax-0.034)*(ax-0.034));
+    float brow=(1.0-smoothstep(0.0016,0.0034,abs(by)))*smoothstep(0.008,0.014,ax)*(1.0-smoothstep(0.050,0.056,ax));
+    base=mix(base,vec3(0.030,0.018,0.012),brow*0.85);
+    float lip=1.0-smoothstep(0.75,1.0,length(vec2(R.x,R.y-1.5605+ax*ax*4.0)/vec2(0.0245,0.0088)));
+    base=mix(base,vec3(0.36,0.085,0.080),lip*0.8);rough=mix(rough,0.26,lip);sheen=mix(sheen,1.0,max(lip,eye));
+    float blush=1.0-smoothstep(0.0,0.034,length(vec2(ax-0.046,R.y-1.588)));
+    base=mix(base,base*vec3(1.12,0.78,0.74),blush*0.22);
+  }
+  // fine pores: fade out once they fall below the pixel footprint (no shimmer on mobile)
+  float fw=length(fwidth(R));
+  float pore=(vnoise(R*1100.0)*0.6+vnoise(R*2600.0)*0.4)*(1.0-smoothstep(0.0004,0.0022,fw));
+  N=bumpN(N,P,pore*0.00012);
+  float NoV=max(dot(N,V),0.0);
+  vec3 col=ambient(N)*base*ao;
+  for(int i=0;i<3;i++){vec3 L,C;getLight(i,P,L,C);
+    float nl=dot(N,L),wrap=max((nl+0.38)/1.38,0.0);
+    // subsurface approximation: warm red-orange bleed across the terminator
+    vec3 sss=vec3(1.0,0.27,0.11)*smoothstep(-0.45,0.10,nl)*(1.0-smoothstep(0.0,0.55,nl))*0.30;
+    float occ=i==0?mix(0.45,1.0,ao):1.0;
+    col+=C*occ*(base*(wrap*0.9+sss)+specGGX(N,V,L,rough,vec3(0.028))*0.55+specGGX(N,V,L,0.33,vec3(0.04))*0.22*sheen);
+  }
+  float fr=0.028+0.97*pow(1.0-NoV,5.0);
+  return col+ambient(reflect(-V,N))*fr*0.40*ao*(0.5+0.5*sheen);
+}
+vec3 shadeCloth(vec3 P,vec3 N,vec3 T,vec3 V,vec3 R,vec3 RN,float ao,float inside){
+  float ang=atan(R.x,R.z+0.012);
+  vec3 around=normalize(vec3(RN.z,0.0,-RN.x)+1e-5);
+  // rib-knit: 164 wales around the body; spacing opens where the body is wider, and shifts with the tissue underneath
+  float ribs=ang*26.101+dot(vSoft.xyz,around)*75.0+vSoft.w*30.0;
+  float fw=fwidth(ribs);if(fw>3.0)fw=0.0;                                // ignore the atan seam
+  float vis=1.0-smoothstep(0.16,0.42,fw);
+  float h=sqrt(0.5+0.5*cos(ribs*6.28318));
+  // tension folds across hips / glutes: driven by leg scissoring and live soft-tissue displacement
+  float band=smoothstep(${HEM.toFixed(3)},0.775,R.y)*(1.0-smoothstep(0.93,1.03,R.y));
+  float stress=(0.025+abs(uFlex.x-uFlex.y)*1.3+length(vSoft.xyz)*30.0)*band;
+  float lean=(uFlex.x-uFlex.y)*sign(R.z+0.01)*1.4;
+  float fold=sin((R.y+ang*0.085*clamp(lean,-1.0,1.0))*128.0+vnoise(R*9.0)*4.0)*stress*0.8;
+  fold+=sin(R.y*310.0+ang*3.0)*0.10*smoothstep(1.02,1.07,R.y)*(1.0-smoothstep(1.12,1.18,R.y));   // waist creases
+  N=bumpN(N,P,(h*0.00042*vis+fold*0.0011)*(1.0-smoothstep(0.0025,0.012,length(fwidth(R)))));
+  float mk=dressMask(R);
+  vec3 base=vec3(0.70,0.150,0.315)*mix(0.70,1.0,mix(0.85,h,vis))*(0.94+0.12*vnoise(R*520.0));
+  base*=mix(0.72,1.0,smoothstep(0.0,0.006,mk))*mix(1.0,0.86,smoothstep(0.012,0.006,mk)*smoothstep(0.004,0.006,mk));  // stitched hem
+  base*=1.0-0.35*inside;
+  float NoV=max(dot(N,V),0.0);
+  ao=mix(1.0,ao,0.72);
+  vec3 col=ambient(N)*base*ao;
+  for(int i=0;i<3;i++){vec3 L,C;getLight(i,P,L,C);
+    float nl=dot(N,L),wrap=max((nl+0.22)/1.22,0.0);vec3 H=normalize(L+V);
+    float th=dot(normalize(T),H),an=pow(sqrt(max(1.0-th*th,0.0)),42.0);   // anisotropic highlight running along the wales
+    float occ=i==0?mix(0.5,1.0,ao):1.0;
+    col+=C*occ*(base*wrap+wrap*(vec3(1.0,0.62,0.74)*an*0.16+vec3(1.0,0.50,0.66)*pow(1.0-NoV,3.5)*0.22));
+  }
+  return col+ambient(reflect(-V,N))*vec3(1.0,0.55,0.70)*pow(1.0-NoV,4.0)*0.22*ao;   // fabric sheen
+}
+void main(){
+  float layer=vMisc.z;
+  clipLayers(vRest,layer);
+  vec3 N=normalize(vNormal),V=normalize(cameraPosition-vWorld);
+  float inside=0.0;if(!gl_FrontFacing){N=-N;inside=1.0;}
+  vec3 col;
+  if(uMode>0.5){
+    col=heatRamp(vMisc.x)*(0.38+0.62*max(dot(N,V),0.0))+vec3(length(vSoft.xyz)*14.0);
+  }else if(layer>1.5){
+    vec3 T=normalize(vTan+1e-5);
+    vec3 B=cross(normalize(vRestN),normalize(uPonyRoot-vRest));
+    float strand=vnoise(vec3(dot(vRest,B)*1500.0,dot(vRest,B)*310.0+7.0,1.0));
+    col=shadeHair(vWorld,N,T,V,strand,0.75+0.25*vMisc.w);
+  }else if(layer>0.5){
+    col=shadeCloth(vWorld,N,vTan,V,vRest,vRestN,vMisc.w,inside);
+  }else{
+    col=shadeSkin(vWorld,N,V,vRest,vMisc.w);
+  }
+  col+=vec3(0.15,0.75,1.0)*uFlash*(abs(vMisc.y-uFlashZone)<0.5?0.45:0.0);
+  gl_FragColor=vec4(col,1.0);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+}`;
+const WIRE_FS=/*glsl*/`
+varying vec3 vRest; varying vec4 vMisc;
+${GLSL_COMMON}
+${GLSL_MASKS}
+void main(){clipLayers(vRest,vMisc.z);gl_FragColor=vec4(0.0,0.0,0.03,0.42);}`;
+const HAIR_VS=/*glsl*/`
+attribute vec3 aTan; attribute vec2 aUV;
+varying vec3 vWorld,vNormal,vTan; varying vec2 vUV;
+void main(){vWorld=position;vNormal=normal;vTan=aTan;vUV=aUV;gl_Position=projectionMatrix*viewMatrix*vec4(position,1.0);}`;
+const HAIR_FS=/*glsl*/`
+varying vec3 vWorld,vNormal,vTan; varying vec2 vUV;
+${GLSL_COMMON}
+void main(){
+  vec3 N=normalize(vNormal),V=normalize(cameraPosition-vWorld),T=normalize(vTan);
+  if(!gl_FrontFacing)N=-N;
+  vec3 col;
+  if(uMode>0.5){col=heatRamp(mix(0.30,1.0,smoothstep(0.05,0.85,vUV.x)))*(0.38+0.62*max(dot(N,V),0.0));}
+  else{
+    float strand=vnoise(vec3(vUV.y*90.0,vUV.x*5.0,vUV.y*13.0));
+    col=shadeHair(vWorld,N,T,V,strand,mix(0.55,1.0,smoothstep(0.0,0.35,vUV.x)));
+  }
+  gl_FragColor=vec4(col,1.0);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+}`;
+
+/* ======================================================================
+   4. RENDERER, GOLDEN-HOUR ENVIRONMENT, MATERIALS
+   ====================================================================== */
+const V3=THREE.Vector3;
+const canvas=$('#gl');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight,false);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
+const scene=new THREE.Scene();
+const FOG=new THREE.FogExp2(0x47223c,0.016);scene.fog=FOG;
+const persp=new THREE.PerspectiveCamera(36,innerWidth/innerHeight,0.05,400);
+const ortho=new THREE.OrthographicCamera(-1,1,1,-1,0.05,100);
+let camera=persp;
+
+const SUN_DIR=new V3(-0.74,0.30,-0.46).normalize();
+const LIGHTS={
+  uSunDir:{value:SUN_DIR},uSunCol:{value:new V3(1.0,0.64,0.38).multiplyScalar(1.7)},
+  uSkyTop:{value:new V3(0.13,0.115,0.25)},uSkyHor:{value:new V3(0.42,0.215,0.175)},uGroundCol:{value:new V3(0.085,0.045,0.04)},
+  uNeonAPos:{value:new V3(3.0,1.9,1.8)},uNeonACol:{value:new V3(1.0,0.10,0.48).multiplyScalar(1.5)},
+  uNeonBPos:{value:new V3(2.6,0.9,-2.3)},uNeonBCol:{value:new V3(0.06,0.78,1.0).multiplyScalar(1.05)},
+  uTime:{value:0},uMode:{value:0}};
+
+// ---- sky dome: sunset gradient, sun disc + glow, drifting fbm clouds, skyline silhouette ----
+const sky=new THREE.Mesh(new THREE.SphereGeometry(1,32,16),new THREE.ShaderMaterial({
+  side:THREE.BackSide,depthWrite:false,fog:false,uniforms:{uSunDir:LIGHTS.uSunDir,uTime:LIGHTS.uTime},
+  vertexShader:`varying vec3 vDir;void main(){vDir=position;vec4 p=projectionMatrix*mat4(mat3(viewMatrix))*vec4(position,1.0);gl_Position=p.xyww;}`,
+  fragmentShader:`varying vec3 vDir;uniform vec3 uSunDir;uniform float uTime;
+  float h2(vec2 p){p=fract(p*vec2(0.1031,0.1030));p+=dot(p,p.yx+33.33);return fract((p.x+p.y)*p.y);}
+  float n2(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(h2(i),h2(i+vec2(1,0)),f.x),mix(h2(i+vec2(0,1)),h2(i+vec2(1,1)),f.x),f.y);}
+  float fbm(vec2 p){float a=0.5,s=0.0;for(int i=0;i<4;i++){s+=a*n2(p);p=p*2.03+17.0;a*=0.5;}return s;}
+  void main(){
+    vec3 d=normalize(vDir);float y=d.y,t=clamp(y,0.0,1.0),sd=max(dot(d,uSunDir),0.0);
+    vec3 c=mix(vec3(1.0,0.50,0.23),vec3(0.50,0.21,0.42),smoothstep(0.0,0.26,t));
+    c=mix(c,vec3(0.10,0.09,0.27),smoothstep(0.18,0.85,t));
+    c+=vec3(1.0,0.52,0.20)*pow(sd,7.0)*0.85+vec3(1.0,0.80,0.50)*pow(sd,160.0)*2.2+vec3(1.0,0.95,0.80)*smoothstep(0.9992,0.9997,sd)*6.0;
+    vec2 uv=d.xz/(abs(y)+0.16)*1.25+vec2(uTime*0.006,0.0);
+    float cl=smoothstep(0.40,0.80,fbm(uv*1.15))*smoothstep(0.015,0.22,y);
+    vec3 cc=mix(vec3(0.27,0.12,0.29),vec3(1.0,0.47,0.36),clamp(pow(sd,2.0)*0.85+0.30*(1.0-t),0.0,1.0))+vec3(1.0,0.60,0.28)*pow(sd,6.0)*0.7;
+    c=mix(c,cc,cl*0.88);
+    float a=atan(d.x,d.z),cell=floor(a*46.0),sh=0.012+0.040*h2(vec2(cell,3.0))*step(0.45,h2(vec2(cell,9.0)));
+    c=mix(vec3(0.085,0.040,0.075),c,smoothstep(sh,sh+0.003,y));
+    gl_FragColor=vec4(c,1.0);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+  }`}));
+sky.frustumCulled=false;sky.renderOrder=-10;scene.add(sky);
+
+// ---- lights for the lit environment (the character uses the same rig analytically in its shader) ----
+const sun=new THREE.DirectionalLight(new THREE.Color(1.0,0.60,0.32),3.0);
+sun.position.copy(SUN_DIR).multiplyScalar(14).add(new V3(0,0.9,0));sun.target.position.set(0,0.9,0);
+sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.radius=3;sun.shadow.bias=-0.0008;sun.shadow.normalBias=0.01;
+Object.assign(sun.shadow.camera,{left:-1.3,right:1.3,top:1.3,bottom:-1.3,near:1,far:40});
+scene.add(sun,sun.target,new THREE.HemisphereLight(new THREE.Color(0.55,0.38,0.62),new THREE.Color(0.26,0.12,0.10),1.3));
+const neonA=new THREE.PointLight(new THREE.Color(1.0,0.12,0.5),26,16,2);neonA.position.copy(LIGHTS.uNeonAPos.value);
+const neonB=new THREE.PointLight(new THREE.Color(0.08,0.8,1.0),16,14,2);neonB.position.copy(LIGHTS.uNeonBPos.value);
+scene.add(neonA,neonB);
+
+// ---- ground: procedural wet asphalt with parking-bay lines; it scrolls under the character like a treadmill ----
+const TILE=5.2,WRAP=80;
+function asphaltTexture(){
+  const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');
+  g.fillStyle='#2b2630';g.fillRect(0,0,512,512);
+  let s=7;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  for(let i=0;i<9000;i++){const v=30+rnd()*46|0;g.fillStyle=`rgba(${v+8},${v},${v+12},${0.25+rnd()*0.5})`;g.fillRect(rnd()*512,rnd()*512,1+rnd()*2,1+rnd()*2);}
+  for(let i=0;i<14;i++){g.fillStyle=`rgba(18,14,22,${0.10+rnd()*0.14})`;g.beginPath();g.ellipse(rnd()*512,rnd()*512,30+rnd()*70,18+rnd()*40,rnd()*3,0,TAU);g.fill();}
+  g.strokeStyle='rgba(12,10,14,0.55)';g.lineWidth=1.2;
+  for(let i=0;i<5;i++){g.beginPath();let x=rnd()*512,y=rnd()*512;g.moveTo(x,y);for(let k=0;k<9;k++){x+=(rnd()-0.5)*70;y+=(rnd()-0.5)*70;g.lineTo(x,y);}g.stroke();}
+  g.fillStyle='rgba(226,214,196,0.80)';g.fillRect(40,120,300,9);g.fillRect(40,376,300,9);
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(23,23);t.colorSpace=THREE.SRGBColorSpace;
+  t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;
+}
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(TILE*23,TILE*23),new THREE.MeshStandardMaterial({map:asphaltTexture(),roughness:0.62,metalness:0.0}));
+ground.rotation.x=-PI/2;ground.receiveShadow=true;
+const env=new THREE.Group(),props=new THREE.Group();env.add(ground,props);scene.add(env);
+
+function neonSign(text,color,w,h){
+  const c=document.createElement('canvas');c.width=512;c.height=Math.round(512*h/w);const g=c.getContext('2d');
+  g.fillStyle='#07040a';g.fillRect(0,0,c.width,c.height);
+  g.font=`900 ${Math.round(c.height*0.62)}px Arial Black,Impact,system-ui,sans-serif`;g.textAlign='center';g.textBaseline='middle';
+  g.shadowColor=color;g.shadowBlur=26;g.fillStyle=color;
+  for(let i=0;i<3;i++)g.fillText(text,c.width/2,c.height*0.54);
+  g.shadowBlur=0;g.fillStyle='rgba(255,255,255,0.75)';g.fillText(text,c.width/2,c.height*0.54);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+  return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,color:new THREE.Color(1.7,1.7,1.7),fog:false}));
+}
+function building(z0,len,wall,text,signCol,stripA,stripB){
+  const g=new THREE.Group(),X=10,box=(w,h,d,mat,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);g.add(m);return m;};
+  box(6,3.4,len,new THREE.MeshStandardMaterial({color:wall,roughness:0.9}),X+3,1.7,0);
+  box(6.8,0.22,len+0.8,new THREE.MeshStandardMaterial({color:0x2a2030,roughness:0.8}),X+2.8,3.5,0);
+  box(0.07,0.07,len+0.8,new THREE.MeshBasicMaterial({color:new THREE.Color(...stripA)}),X-0.62,3.44,0);
+  box(0.07,0.07,len+0.8,new THREE.MeshBasicMaterial({color:new THREE.Color(...stripB)}),X-0.62,3.22,0);
+  const win=new THREE.MeshBasicMaterial({color:new THREE.Color(1.5,0.95,0.5)}),door=new THREE.MeshStandardMaterial({color:0x1d6f73,roughness:0.6});
+  for(let k=0;k<Math.floor(len/3.6);k++){const z=-len/2+1.8+k*3.6;box(0.05,1.1,1.5,win,X-0.03,1.75,z-0.55);box(0.06,2.1,0.95,door,X-0.03,1.05,z+1.0);}
+  const sign=neonSign(text,signCol,4.6,1.45);sign.rotation.y=-PI/2;sign.position.set(X-0.7,4.55,0);g.add(sign);
+  box(0.12,1.3,0.12,new THREE.MeshStandardMaterial({color:0x221a26}),X-0.7,3.9,-1.6);box(0.12,1.3,0.12,new THREE.MeshStandardMaterial({color:0x221a26}),X-0.7,3.9,1.6);
+  g.userData.z0=z0;props.add(g);
+}
+building(-20,22,0x5fa39a,'MOTEL','#ff3d6e',[5,0.5,2.4],[0.3,3.2,4.5]);
+building(20,15,0xb86a8f,'OPEN 24H','#39e6ff',[0.3,3.2,4.5],[5,0.5,2.4]);
+function palm(x,z0,seed){
+  let s=seed;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+  const g=new THREE.Group(),H=6.2+rnd()*2.6,lean=(rnd()-0.5)*1.8;
+  const curve=new THREE.CatmullRomCurve3([new V3(0,0,0),new V3(lean*0.2,H*0.4,0.1),new V3(lean*0.65,H*0.75,0),new V3(lean,H,0)]);
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(curve,10,0.15,6),new THREE.MeshStandardMaterial({color:0x2a1c18,roughness:1})));
+  const pos=[],idx=[];
+  for(let f=0;f<12;f++){
+    const a=f/12*TAU+rnd()*0.5,len=2.3+rnd()*1.1,up=0.25+rnd()*0.5,b=pos.length/3;
+    for(let k=0;k<=6;k++){const t=k/6,r=len*t,y=len*(up*t-0.75*t*t),w=0.36*sin(PI*(0.08+0.92*t));
+      pos.push(cos(a)*r-sin(a)*w,y-w*0.25,sin(a)*r+cos(a)*w,cos(a)*r+sin(a)*w,y-w*0.25,sin(a)*r-cos(a)*w);
+      if(k<6){const o=b+k*2;idx.push(o,o+1,o+2,o+1,o+3,o+2);}}
+  }
+  const cg=new THREE.BufferGeometry();cg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));cg.setIndex(idx);cg.computeVertexNormals();
+  const crown=new THREE.Mesh(cg,new THREE.MeshStandardMaterial({color:0x16301f,roughness:0.9,side:THREE.DoubleSide}));
+  crown.position.set(lean,H,0);g.add(crown);g.position.x=x;g.userData.z0=z0;props.add(g);
+}
+[[-4.6,-34],[-5.4,-17],[-4.2,-2],[-5.0,14],[-4.4,30],[6.6,-27],[7.2,-9],[6.4,9],[7.0,25],[-11,-25],[-12,5],[-10.5,36]].forEach((p,i)=>palm(p[0],p[1],91+i*37));
+let scrollZ=0;
+function scrollWorld(){
+  ground.position.z=-(((scrollZ%TILE)+TILE)%TILE);
+  for(const o of props.children)o.position.z=((((o.userData.z0-scrollZ+WRAP/2)%WRAP)+WRAP)%WRAP)-WRAP/2;
+}
+// diagnostic backdrop for the heatmap view
+const grid=new THREE.GridHelper(8,32,0x4a5262,0x262a33);grid.visible=false;scene.add(grid);
+
+// ---- character materials ----
+const v4=()=>new THREE.Vector4();
+const softU={
+  uBones:{value:Array.from({length:NB},()=>new THREE.Matrix4())},uPelvisTransform:{value:new THREE.Matrix4()},
+  uLeftGluteDisp:{value:v4()},uRightGluteDisp:{value:v4()},uLeftThighDisp:{value:v4()},uRightThighDisp:{value:v4()},
+  uCoreDisp:{value:v4()},uChestDisp:{value:[v4(),v4()]},uScapDisp:{value:[v4(),v4()]},uPonyRoot:{value:new V3(0,1.668,-0.088)}};
+const bodyMat=new THREE.ShaderMaterial({vertexShader:BODY_VS,fragmentShader:BODY_FS,side:THREE.DoubleSide,
+  uniforms:{...softU,...LIGHTS,uFlex:{value:new THREE.Vector2()},uFlashZone:{value:-1},uFlash:{value:0},uPush:{value:0}}});
+const wireMat=new THREE.ShaderMaterial({vertexShader:BODY_VS,fragmentShader:WIRE_FS,transparent:true,depthWrite:false,
+  uniforms:{...softU,...LIGHTS,uPush:{value:0.0012}}});
+const depthMat=new THREE.MeshDepthMaterial({side:THREE.DoubleSide});
+depthMat.onBeforeCompile=sh=>{
+  Object.assign(sh.uniforms,softU);
+  sh.vertexShader=sh.vertexShader.replace(/void\s+main\s*\(\s*\)\s*\{/,GLSL_DEFORM+'\nvoid main(){')
+    .replace('#include <begin_vertex>','vec3 _wp,_wn,_wt;vec4 _sf;deformVertex(position,normal,_wp,_wn,_wt,_sf);vec3 transformed=_wp;');
+};
+const hairMat=new THREE.ShaderMaterial({vertexShader:HAIR_VS,fragmentShader:HAIR_FS,side:THREE.DoubleSide,uniforms:{...LIGHTS}});
+
+const built=await buildCharacter(t=>{$('#loadmsg').textContent=t;});
+const body=new THREE.Mesh(built.geo,bodyMat);body.frustumCulled=false;body.castShadow=true;body.customDepthMaterial=depthMat;scene.add(body);
+const wire=new THREE.LineSegments(built.lineGeo,wireMat);wire.frustumCulled=false;wire.visible=false;wire.renderOrder=2;scene.add(wire);
+
+/* ======================================================================
+   5. SKELETON, IK AND BIOMECHANICAL LOCOMOTION
+   ====================================================================== */
+const M4=THREE.Matrix4,Q=THREE.Quaternion,AX=new V3(1,0,0),AY=new V3(0,1,0),AZ=new V3(0,0,1);
+const bonePos=JOINT.map(j=>j.clone()),boneRot=JOINT.map(()=>new Q()),boneW=JOINT.map(()=>new M4());   // character-root space
+const wPos=JOINT.map(j=>j.clone()),wRot=JOINT.map(()=>new Q());                                         // world space
+const TINV=JOINT.map(j=>new M4().makeTranslation(-j.x,-j.y,-j.z));
+const rootQ=new Q(),rootM=new M4();let rootYaw=0;
+const L1=JOINT[11].distanceTo(JOINT[12]),L2=JOINT[12].distanceTo(JOINT[13]);
+const HIP_OFF=[JOINT[11].clone().sub(JOINT[0]),JOINT[14].clone().sub(JOINT[0])];
+const HINGE=[new V3(-CB,-SB,0),new V3(-CB,SB,0)];                         // elbow hinge axes in bind space
+const _q=new Q(),_q2=new Q(),_v=new V3(),_u=new V3(),_w=new V3(),_f=new V3(),_k=new V3(),_m=new M4(),_x=new V3(),_y=new V3(),_z=new V3(),ONE=new V3(1,1,1);
+function frameQ(out,yv,fw){                                               // orthonormal frame: Y along the bone, Z toward the knee hint
+  _y.copy(yv).normalize();_x.crossVectors(_y,fw).normalize();_z.crossVectors(_x,_y);
+  return out.setFromRotationMatrix(_m.makeBasis(_x,_y,_z));
+}
+const BIND_INV=[11,12,14,15].map(i=>frameQ(new Q(),_v.copy(JOINT[i]).sub(JOINT[i+1]),AZ).invert());
+const eul=(q,pitch,yaw,roll)=>q.setFromAxisAngle(AY,yaw).multiply(_q2.setFromAxisAngle(AZ,roll)).multiply(_q2.setFromAxisAngle(AX,pitch));
+function fk(i,lq){
+  const p=PARENT[i];
+  bonePos[i].copy(JOINT[i]).sub(JOINT[p]).applyQuaternion(boneRot[p]).add(bonePos[p]);
+  boneRot[i].copy(boneRot[p]).multiply(lq);
+}
+const KEYS=['px','py','pz','pRoll','pYaw','pPitch','s1Roll','s1Yaw','s1Pitch','s2Roll','s2Yaw','s2Pitch','nYaw','nPitch','hRoll','hYaw','hPitch',
+  'aLf','aLa','aLe','aRf','aRa','aRe','fLx','fLy','fLz','fLp','fRx','fRy','fRz','fRp','speed','reach'];
+const newPose=()=>{const o={};for(const k of KEYS)o[k]=0;o.py=0.95;o.fLx=0.076;o.fRx=-0.076;o.fLy=o.fRy=0.085;o.fLz=o.fRz=-0.024;o.reach=0.9995;return o;};
+const REACT={p:0,r:0,y:0,vp:0,vr:0,vy:0};                                  // tap-driven upper-body reaction spring (radians)
+const flex=[0,0];                                                         // live thigh flexion per side (drives cloth tension folds)
+
+function solveSkeleton(P){
+  // --- pelvis: height is limited by how far each planted leg can reach (gives the natural vertical bob) ---
+  eul(boneRot[0],P.pPitch,P.pYaw,P.pRoll);
+  let py=P.py;const lm=(L1+L2)*P.reach;
+  for(let s=0;s<2;s++){
+    _v.copy(HIP_OFF[s]).applyQuaternion(boneRot[0]);
+    const fx=s?P.fRx:P.fLx,fy=s?P.fRy:P.fLy,fz=s?P.fRz:P.fLz,dx=fx-(P.px+_v.x),dz=fz-(P.pz+_v.z);
+    py=smin(py,fy+sqrt(max(lm*lm-dx*dx-dz*dz,0.04))-_v.y,0.012);
+  }
+  bonePos[0].set(P.px,py,P.pz);
+  // --- spine chain with counter-rotation (shoulders stay level while the pelvis lists and rotates) ---
+  fk(1,eul(_q,P.s1Pitch,P.s1Yaw,P.s1Roll));
+  fk(2,eul(_q,P.s2Pitch+REACT.p,P.s2Yaw+REACT.y,P.s2Roll+REACT.r));
+  fk(3,eul(_q,P.nPitch-REACT.p*0.4,P.nYaw,-REACT.r*0.3));
+  fk(4,eul(_q,P.hPitch,P.hYaw,P.hRoll));
+  // --- arms ---
+  fk(5,_q.setFromAxisAngle(AX,-P.aLf).multiply(_q2.setFromAxisAngle(AZ,-P.aLa)));
+  fk(6,_q.setFromAxisAngle(HINGE[0],P.aLe));fk(7,_q.identity());
+  fk(8,_q.setFromAxisAngle(AX,-P.aRf).multiply(_q2.setFromAxisAngle(AZ,P.aRa)));
+  fk(9,_q.setFromAxisAngle(HINGE[1],P.aRe));fk(10,_q.identity());
+  // --- legs: analytic two-bone IK from hip joint to ankle target ---
+  for(let s=0;s<2;s++){
+    const iT=s?14:11,H=bonePos[iT],K=bonePos[iT+1],A=bonePos[iT+2];
+    H.copy(HIP_OFF[s]).applyQuaternion(boneRot[0]).add(bonePos[0]);
+    A.set(s?P.fRx:P.fLx,s?P.fRy:P.fLy,s?P.fRz:P.fLz);
+    _u.copy(A).sub(H);let d=_u.length();const dm=(L1+L2)*0.999;
+    if(d>dm){_u.multiplyScalar(dm/d);d=dm;A.copy(H).add(_u);}
+    _u.multiplyScalar(1/d);
+    const ca=clamp((L1*L1+d*d-L2*L2)/(2*L1*d),-1,1),sa=sqrt(1-ca*ca);
+    _f.set(s?-0.10:0.10,0,1).applyAxisAngle(AY,P.pYaw*0.5).normalize();     // knee points forward, slightly outward
+    _w.copy(_f).addScaledVector(_u,-_u.dot(_f)).normalize();
+    K.copy(H).addScaledVector(_u,L1*ca).addScaledVector(_w,L1*sa);
+    frameQ(boneRot[iT],_v.copy(H).sub(K),_f).multiply(BIND_INV[s*2]);
+    frameQ(boneRot[iT+1],_v.copy(K).sub(A),_f).multiply(BIND_INV[s*2+1]);
+    boneRot[iT+2].setFromAxisAngle(AY,s?-0.10:0.10).multiply(_q2.setFromAxisAngle(AX,s?P.fRp:P.fLp));
+    flex[s]=atan2(K.z-H.z,H.y-K.y);
+  }
+  // --- matrices: uPelvisTransform carries the root motion, uBones are relative to the pelvis ---
+  rootQ.setFromAxisAngle(AY,rootYaw);rootM.makeRotationFromQuaternion(rootQ);
+  for(let i=0;i<NB;i++){
+    boneW[i].compose(bonePos[i],boneRot[i],ONE);
+    wPos[i].copy(bonePos[i]).applyQuaternion(rootQ);wRot[i].copy(rootQ).multiply(boneRot[i]);
+  }
+  _m.copy(boneW[0]).invert();
+  const ub=softU.uBones.value;
+  for(let i=0;i<NB;i++)ub[i].multiplyMatrices(_m,boneW[i]).multiply(TINV[i]);
+  softU.uPelvisTransform.value.multiplyMatrices(rootM,boneW[0]);
+  bodyMat.uniforms.uFlex.value.set(flex[0],flex[1]);
+}
+
+/* ---- gait generator: foot trajectories + contra-lateral pelvic kinematics ---- */
+const GAITS={
+  walk:{v:1.05,duty:0.62,zS:0.27,zO:-0.33,strike:-0.22,toe:0.62,lift:0.045,width:0.032,hip:0.945,bob:0,
+        list:0.105,yaw:0.15,shift:0.024,lean:0.035,arm:0.36,armAdd:0.37,elbow:0.16,elbowSw:0.22,heel:1.0,reach:0.9945},
+  jog: {v:2.25,duty:0.40,zS:0.20,zO:-0.42,strike:0.02,toe:0.92,lift:0.20,width:0.045,hip:0.915,bob:0.032,
+        list:0.075,yaw:0.19,shift:0.012,lean:0.15,arm:0.72,armAdd:0.40,elbow:1.45,elbowSw:0.25,heel:1.5,reach:0.987}};
+function footPath(P,side,p,g,sm){
+  const D=g.duty,zS=g.zS*sm,zO=g.zO*sm;let z,th,y;
+  const offDz=t=>0.085*sin(t)+0.12*(1-cos(t)),offY=t=>0.085*cos(t)+0.12*sin(t);
+  if(p<D){                                                   // stance: heel strike -> flat -> heel-off roll onto the toes
+    const s=p/D;th=lerp(g.strike,0,sstep(0,0.2,s))+g.toe*sstep(0.66,1,s);
+    z=lerp(zS,zO,s)+(th>0?offDz(th):0);y=th>0?offY(th):0.085+0.055*-th;
+  }else{                                                     // swing: Hermite arc that retracts into ground speed before contact
+    const u=(p-D)/(1-D),u2=u*u,u3=u2*u,m=(zO-zS)/D*(1-D),z0=zO+offDz(g.toe);
+    z=(2*u3-3*u2+1)*z0+(u3-2*u2+u)*m+(-2*u3+3*u2)*zS+(u3-u2)*m;
+    const e=sstep(0,1,u);y=lerp(offY(g.toe),0.085+0.055*-min(g.strike,0),e)+g.lift*pow(sin(PI*u),1.3);
+    th=lerp(g.toe,g.strike,sstep(0.2,0.92,u));
+  }
+  if(side){P.fRx=-g.width;P.fRy=y;P.fRz=z;P.fRp=th;}else{P.fLx=g.width;P.fLy=y;P.fLz=z;P.fLp=th;}
+}
+function gaitPose(P,g,ph,sway,sm){
+  footPath(P,0,fract(ph),g,sm);footPath(P,1,fract(ph+0.5),g,sm);
+  const a=ph*TAU,c=cos(a),s=sin(a);
+  P.px=g.shift*sway*s;P.pz=0;
+  P.py=g.hip+g.bob*cos(2*a-TAU*(g.duty+0.5));                // jog: ballistic arc peaking mid-flight
+  P.pRoll=g.list*sway*sin(a+0.30);                           // stance hip rises, swing hip drops
+  P.pYaw=-g.yaw*(0.6+0.4*sway)*c;                            // swing-side hip rotates forward
+  P.pPitch=0.05+g.lean*0.3;
+  P.s1Roll=-0.55*P.pRoll;P.s1Yaw=-0.60*P.pYaw;P.s1Pitch=g.lean*0.5;
+  P.s2Roll=-0.50*P.pRoll;P.s2Yaw=-0.80*P.pYaw;P.s2Pitch=g.lean*0.5;
+  P.nYaw=0.25*P.pYaw;P.nPitch=-g.lean*0.6;P.hYaw=0.15*P.pYaw;P.hRoll=0.05*P.pRoll;P.hPitch=-g.lean*0.25;
+  P.aLf=-g.arm*c;P.aRf=g.arm*c;P.aLa=P.aRa=g.armAdd;
+  P.aLe=g.elbow+g.elbowSw*max(-c,0);P.aRe=g.elbow+g.elbowSw*max(c,0);
+  P.speed=g.v*sm;P.reach=g.reach;
+}
+function idlePose(P,t,sway){
+  Object.assign(P,newPose());
+  const w=sin(t*TAU/4.4),w2=sin(t*TAU/4.4+0.7),br=sin(t*1.7);
+  P.px=0.046*w*sway;P.py=0.932-0.008*abs(w);P.pRoll=0.105*w*sway;P.pYaw=0.06*w2*sway;P.pPitch=0.04;
+  P.s1Roll=-0.065*w*sway;P.s2Roll=-0.050*w*sway;P.s1Yaw=-0.03*w2*sway;P.s2Pitch=0.012*br;
+  P.hYaw=0.12*sin(t*0.41);P.hRoll=-0.03*w;P.nPitch=-0.01*br;
+  P.aLa=P.aRa=0.36;P.aLf=0.05*w2;P.aRf=-0.05*w2;P.aLe=P.aRe=0.15;
+  P.fLx=0.085;P.fRx=-0.085;P.reach=0.997;
+  const uR=max(w,0)*sway,uL=max(-w,0)*sway;                  // the unweighted leg relaxes: heel lifts, knee breaks forward
+  P.fRz+=0.035*uR;P.fRp=0.30*uR;P.fRy=0.085+0.035*uR;P.fLz+=0.035*uL;P.fLp=0.30*uL;P.fLy=0.085+0.035*uL;
+}
+function manualPose(P,t){Object.assign(P,newPose());P.s2Pitch=0.008*sin(t*1.7);}
+
+/* ---- animation state machine ---- */
+const ANIM={state:'walk',prev:'walk',blend:1,phase:0,t:0,turnT:-1,turnFrom:0,turnDir:1,turnWait:0.5};
+const poseA=newPose(),poseB=newPose(),pose=newPose();
+const PARAM={speed:1,sway:1,k:380,c:7,bounce:1,wind:0.6};
+function evalState(name,P){
+  const sm=sqrt(PARAM.speed);
+  if(name==='walk')gaitPose(P,GAITS.walk,ANIM.phase,PARAM.sway,sm);
+  else if(name==='jog')gaitPose(P,GAITS.jog,ANIM.phase,PARAM.sway,sm);
+  else if(name==='manual')manualPose(P,ANIM.t);
+  else idlePose(P,ANIM.t,PARAM.sway);
+}
+let onHeelStrike=()=>{};
+function setState(n){if(n===ANIM.state)return;ANIM.prev=ANIM.state;ANIM.state=n;ANIM.blend=0;ANIM.turnWait=0.45;ANIM.turnT=-1;}
+function updateAnimation(dt){
+  ANIM.t+=dt;ANIM.blend=min(1,ANIM.blend+dt/0.45);
+  const gait=GAITS[ANIM.state]||GAITS[ANIM.prev]||GAITS.walk,sm=sqrt(PARAM.speed);
+  const cadence=gait.v*sm*PARAM.speed**0.5*gait.duty/((gait.zS-gait.zO)*sm),ph0=ANIM.phase;
+  ANIM.phase+=cadence*dt;
+  const moving=(GAITS[ANIM.state]?ANIM.blend:0)+(GAITS[ANIM.prev]?1-ANIM.blend:0);
+  if(moving>0.5){
+    if(floor(ANIM.phase)!==floor(ph0))onHeelStrike(0,gait.heel);
+    if(floor(ANIM.phase+0.5)!==floor(ph0+0.5))onHeelStrike(1,gait.heel);
+  }
+  evalState(ANIM.state,poseB);
+  if(ANIM.blend<1){evalState(ANIM.prev,poseA);const e=sstep(0,1,ANIM.blend);for(const k of KEYS)pose[k]=lerp(poseA[k],poseB[k],e);}
+  else for(const k of KEYS)pose[k]=poseB[k];
+  // 180° quick turn: the skull leads, the torso follows, the ponytail whips around behind
+  if(ANIM.state==='turn'){
+    if(ANIM.turnT<0){ANIM.turnWait-=dt;if(ANIM.turnWait<=0){ANIM.turnT=0;ANIM.turnFrom=rootYaw;ANIM.turnDir=-ANIM.turnDir;}}
+    else{
+      ANIM.turnT+=dt/0.52;const u=min(ANIM.turnT,1),e=u*u*u*(u*(u*6-15)+10),b=sin(PI*u);
+      rootYaw=ANIM.turnFrom+ANIM.turnDir*PI*e;
+      pose.hYaw+=ANIM.turnDir*0.55*sin(PI*min(u*1.6,1));pose.nYaw+=ANIM.turnDir*0.2*b;pose.s2Yaw+=ANIM.turnDir*0.22*b;
+      pose.py-=0.035*b;pose.aLa-=0.2*b;pose.aRa-=0.2*b;pose.fRy+=0.04*b;pose.s2Pitch+=0.05*b;
+      if(u>=1){ANIM.turnT=-1;ANIM.turnWait=1.7;rootYaw=Math.round(rootYaw/PI)*PI;}
+    }
+  }
+  scrollZ+=pose.speed*PARAM.speed**0.5*cos(rootYaw)*dt;
+  solveSkeleton(pose);
+}
+
+/* ======================================================================
+   6. SOFT-TISSUE SOLVER: independent 2nd-order spring-mass-dampers per zone
+      F = -k x - c v - m a_bone + F_heel + F_gravity_sag      (integrated at 120 Hz)
+   ====================================================================== */
+const H=1/120;
+class SoftZone{
+  constructor(bone,anchor,axis,uni,o={}){
+    this.bone=bone;this.anchor=new V3(...anchor).sub(JOINT[bone]);this.axis=new V3(...axis).normalize();this.u=uni;
+    this.m=o.m||1;this.kM=o.k||1;this.cM=o.c||1;this.max=o.max||0.03;this.sag=o.sag===undefined?0.08:o.sag;this.inr=o.inr||1;
+    this.x=new V3();this.v=new V3();this.acc=new V3();this.gl=new V3();this.drive=new V3();
+    this.pw=new V3();this.pv=new V3();this.cw=new V3();this.init=false;
+  }
+  kinematics(dt){                                             // bone-anchor acceleration by finite differences, in bone space
+    this.cw.copy(this.anchor).applyQuaternion(wRot[this.bone]).add(wPos[this.bone]);
+    if(!this.init){this.pw.copy(this.cw);this.init=true;}
+    _v.copy(this.cw).sub(this.pw).multiplyScalar(1/dt);       // velocity
+    _u.copy(_v).sub(this.pv).multiplyScalar(1/dt);            // acceleration
+    const l=_u.length();if(l>32)_u.multiplyScalar(32/l);
+    this.pw.copy(this.cw);this.pv.copy(_v);
+    _q.copy(wRot[this.bone]).invert();
+    this.acc.lerp(_u.applyQuaternion(_q).multiplyScalar(this.inr),0.6);        // m*a_bone, scaled by how loosely the zone is coupled
+    this.gl.set(0,-9.81*this.sag,0).applyQuaternion(_q);
+  }
+  step(k,c){
+    const x=this.x,v=this.v,r=x.length()/this.max,ks=k*this.kM*(1+2.5*r*r)/this.m,cs=c*this.cM/this.m;   // progressive stiffening = tissue envelope
+    v.x+=H*(-ks*(x.x-this.drive.x)-cs*v.x-this.acc.x+this.gl.x);
+    v.y+=H*(-ks*(x.y-this.drive.y)-cs*v.y-this.acc.y+this.gl.y);
+    v.z+=H*(-ks*(x.z-this.drive.z)-cs*v.z-this.acc.z+this.gl.z);
+    x.addScaledVector(v,H);
+    const l=x.length();if(l>this.max*1.6){x.multiplyScalar(this.max*1.6/l);v.multiplyScalar(0.5);}
+  }
+  write(){this.u.set(this.x.x,this.x.y,this.x.z,this.x.dot(this.axis));}   // w: axial compression -> radial bulge in the shader
+  kick(dir,s){this.v.addScaledVector(dir,s/this.m);}
+}
+const ZONES={
+  gluteL:new SoftZone(0,[0.082,0.905,-0.10],[0.25,-0.1,-1],softU.uLeftGluteDisp.value,{max:0.030,inr:0.62}),
+  gluteR:new SoftZone(0,[-0.082,0.905,-0.10],[-0.25,-0.1,-1],softU.uRightGluteDisp.value,{max:0.030,inr:0.62}),
+  thighL:new SoftZone(11,[0.09,0.74,-0.03],[0.3,0,-1],softU.uLeftThighDisp.value,{k:1.3,max:0.022,inr:0.22}),
+  thighR:new SoftZone(14,[-0.09,0.74,-0.03],[-0.3,0,-1],softU.uRightThighDisp.value,{k:1.3,max:0.022,inr:0.22}),
+  chestL:new SoftZone(2,[0.074,1.265,0.09],[0.2,0,1],softU.uChestDisp.value[0],{k:1.5,c:1.15,max:0.016,inr:0.40}),
+  chestR:new SoftZone(2,[-0.074,1.265,0.09],[-0.2,0,1],softU.uChestDisp.value[1],{k:1.5,c:1.15,max:0.016,inr:0.40}),
+  core:new SoftZone(1,[0,1.08,0.05],[0,0,1],softU.uCoreDisp.value,{k:1.7,c:1.2,max:0.012,inr:0.35}),
+  scapL:new SoftZone(2,[0.12,1.35,-0.07],[0.5,0,-1],softU.uScapDisp.value[0],{k:2.0,c:1.6,max:0.012,sag:0,inr:0.15}),
+  scapR:new SoftZone(2,[-0.12,1.35,-0.07],[-0.5,0,-1],softU.uScapDisp.value[1],{k:2.0,c:1.6,max:0.012,sag:0,inr:0.15})};
+const ZLIST=Object.values(ZONES),pending=[];
+// Heel-strike shockwave: travels up the planted leg and reaches thigh, glute, then torso a few ms apart
+onHeelStrike=(side,strength)=>{
+  const J=0.21*strength*PARAM.bounce,S=side?'R':'L',O=side?'L':'R',sx=side?-1:1;
+  pending.push({t:0.020,z:ZONES['thigh'+S],d:new V3(0.05*sx,0.85,-0.30),s:J*0.8},
+               {t:0.045,z:ZONES['glute'+S],d:new V3(0.06*sx,1.00,-0.38),s:J},
+               {t:0.070,z:ZONES['glute'+O],d:new V3(0,1,-0.2),s:J*0.22},
+               {t:0.090,z:ZONES.core,d:new V3(0,1,0),s:J*0.30},
+               {t:0.110,z:ZONES.chestL,d:new V3(0,1,0.1),s:J*0.30},{t:0.110,z:ZONES.chestR,d:new V3(0,1,0.1),s:J*0.30});
+};
+function stepSoftBodies(frameDt,steps){
+  for(const z of ZLIST)z.kinematics(frameDt);
+  // scapular glide: the shoulder blades slide around the ribcage as the arms swing and the torso twists
+  ZONES.scapL.drive.set(0.007*pose.aLf+0.004*pose.s2Yaw,0.004*pose.aLf,0.006*pose.aLf);
+  ZONES.scapR.drive.set(-0.007*pose.aRf+0.004*pose.s2Yaw,0.004*pose.aRf,0.006*pose.aRf);
+  for(let s=0;s<steps;s++){
+    for(let i=pending.length-1;i>=0;i--){const p=pending[i];p.t-=H;if(p.t<=0){p.z.kick(p.d,p.s);pending.splice(i,1);}}
+    for(const z of ZLIST)z.step(PARAM.k,PARAM.c);
+    REACT.vp+=H*(-95*REACT.p-9*REACT.vp);REACT.vr+=H*(-95*REACT.r-9*REACT.vr);REACT.vy+=H*(-95*REACT.y-9*REACT.vy);
+    REACT.p+=REACT.vp*H;REACT.r+=REACT.vr*H;REACT.y+=REACT.vy*H;
+  }
+  for(const z of ZLIST)z.write();
+}
+
+/* ======================================================================
+   7. HAIR: 14-node Verlet chains, capsule collisions, Perlin wind, strand tubes
+   ====================================================================== */
+const HN=14;
+const COLL=[  // analytic colliders in bind space: [bone, ax,ay,az, bx,by,bz, radius]  (a==b -> sphere)
+  [4, 0,1.612,0.008, 0,1.612,0.008, 0, [0.0825,0.1015,0.1015]],   // cranium (ellipsoid incl. scalp hair)
+  [4, 0,1.575,0.024, 0,1.575,0.024, 0.081],        // jaw / face
+  [3, 0,1.440,-0.014, 0,1.550,0.000, 0.052],       // neck
+  [2, 0.165,1.385,-0.012, 0.165,1.385,-0.012, 0.080],   // left shoulder
+  [2,-0.165,1.385,-0.012,-0.165,1.385,-0.012, 0.080],   // right shoulder
+  [2,-0.105,1.365,-0.030, 0.105,1.365,-0.030, 0.088],   // trapezius / shoulder blades
+  [2, 0,1.180,-0.012, 0,1.400,-0.030, 0.098]];     // upper back
+const collW=COLL.map(c=>({a:new V3(),b:new V3(),r:0,ell:c[8]?new V3(...c[8]):null,q:new Q(),qi:new Q()}));
+function updateColliders(){
+  COLL.forEach((c,i)=>{const b=c[0],o=collW[i];
+    o.a.set(c[1],c[2],c[3]).sub(JOINT[b]).applyQuaternion(wRot[b]).add(wPos[b]);
+    o.b.set(c[4],c[5],c[6]).sub(JOINT[b]).applyQuaternion(wRot[b]).add(wPos[b]);o.r=c[7];o.q.copy(wRot[b]);o.qi.copy(wRot[b]).invert();});
+}
+class Chain{
+  constructor(root,dir,seg,o={}){
+    this.root=new V3(...root).sub(JOINT[4]);this.dir=new V3(...dir).normalize();this.seg=seg;
+    this.drag=o.drag||2.6;this.grav=o.grav||1;this.rad=o.rad===undefined?0.013:o.rad;
+    this.p=new Float32Array(HN*3);this.q=new Float32Array(HN*3);
+    this.r0=new V3();this.r1=new V3();this.pr0=new V3();this.pr1=new V3();this.init=false;
+  }
+  anchor(){                                                   // nodes 0 and 1 are kinematic: they follow the skull immediately
+    this.pr0.copy(this.r0);this.pr1.copy(this.r1);
+    this.r0.copy(this.root).applyQuaternion(wRot[4]).add(wPos[4]);
+    this.r1.copy(this.dir).applyQuaternion(wRot[4]).multiplyScalar(this.seg).add(this.r0);
+    if(!this.init){this.init=true;this.pr0.copy(this.r0);this.pr1.copy(this.r1);
+      for(let i=0;i<HN;i++){const k=min(i,1),d=max(i-1,0);_v.copy(this.r0).lerp(this.r1,k);_v.y-=d*this.seg;_v.z-=d*0.004;
+        this.p.set([_v.x,_v.y,_v.z],i*3);this.q.set([_v.x,_v.y,_v.z],i*3);}}
+  }
+  step(f,time,air){
+    const p=this.p,q=this.q,seg=this.seg;
+    _v.copy(this.pr0).lerp(this.r0,f);p[0]=q[0]=_v.x;p[1]=q[1]=_v.y;p[2]=q[2]=_v.z;
+    _v.copy(this.pr1).lerp(this.r1,f);p[3]=q[3]=_v.x;p[4]=q[4]=_v.y;p[5]=q[5]=_v.z;
+    const w=PARAM.wind*1.7;
+    for(let i=2;i<HN;i++){
+      const a=i*3,x=p[a],y=p[a+1],z=p[a+2];
+      let vx=(x-q[a])/H,vy=(y-q[a+1])/H,vz=(z-q[a+2])/H;
+      // air drag against the local wind field: steady breeze + gusts + 3D Perlin turbulence
+      const g=0.55+0.45*perlin3(time*0.35,1.7,x*0.3);
+      const wx=air.x+w*(0.85*g+0.6*perlin3(x*1.7+time*0.9,y*1.7,z*1.7)),
+            wy=air.y+w*0.30*perlin3(x*1.7,y*1.7+time*0.8,z*1.7+31.4),
+            wz=air.z+w*(0.35*g+0.6*perlin3(x*1.7+17.2,y*1.7,z*1.7+time*0.9));
+      const dr=this.drag*(0.7+0.6*i/HN);
+      vx+=H*(wx-vx)*dr;vy+=H*((wy-vy)*dr-9.81*this.grav);vz+=H*(wz-vz)*dr;
+      q[a]=x;q[a+1]=y;q[a+2]=z;p[a]=x+vx*H;p[a+1]=y+vy*H;p[a+2]=z+vz*H;
+    }
+    for(let it=0;it<3;it++){
+      for(let i=2;i<HN;i++){                                  // distance constraints (parent is heavier: base stays firm, tip whips)
+        const a=i*3,b=a-3;let dx=p[a]-p[b],dy=p[a+1]-p[b+1],dz=p[a+2]-p[b+2];
+        const d=sqrt(dx*dx+dy*dy+dz*dz)||1e-6,e=(d-seg)/d,wp=i>2?0.28:0,wc=1-wp;
+        p[b]+=dx*e*wp;p[b+1]+=dy*e*wp;p[b+2]+=dz*e*wp;p[a]-=dx*e*wc;p[a+1]-=dy*e*wc;p[a+2]-=dz*e*wc;
+      }
+      for(let i=2;i<HN;i++){                                  // bend limit: keeps a smooth S-curve, no kinks
+        const a=i*3,b=a-6;let dx=p[a]-p[b],dy=p[a+1]-p[b+1],dz=p[a+2]-p[b+2];
+        const d=sqrt(dx*dx+dy*dy+dz*dz)||1e-6,lim=seg*(i<5?1.90:1.72);
+        if(d<lim){const e=(lim-d)/d*0.5;p[a]+=dx*e;p[a+1]+=dy*e;p[a+2]+=dz*e;}
+      }
+      for(let i=2;i<HN;i++){                                  // push every node out of the body capsules
+        const a=i*3;
+        for(const c of collW){
+          let cx=c.a.x,cy=c.a.y,cz=c.a.z;
+          if(c.ell){                                           // ellipsoid: test in skull space, push out radially
+            _v.set(p[a]-cx,p[a+1]-cy,p[a+2]-cz).applyQuaternion(c.qi);
+            const ex=c.ell.x+this.rad,ey=c.ell.y+this.rad,ez=c.ell.z+this.rad,n=sqrt(_v.x*_v.x/(ex*ex)+_v.y*_v.y/(ey*ey)+_v.z*_v.z/(ez*ez));
+            if(n<1){_v.multiplyScalar(1/max(n,1e-4)).applyQuaternion(c.q);p[a]=cx+_v.x;p[a+1]=cy+_v.y;p[a+2]=cz+_v.z;
+              q[a]+=(p[a]-q[a])*0.12;q[a+1]+=(p[a+1]-q[a+1])*0.12;q[a+2]+=(p[a+2]-q[a+2])*0.12;}
+            continue;
+          }
+          const cr=c.r+this.rad;const ex=c.b.x-cx,ey=c.b.y-cy,ez=c.b.z-cz,l2=ex*ex+ey*ey+ez*ez;
+          if(l2>1e-8){const t=sat(((p[a]-cx)*ex+(p[a+1]-cy)*ey+(p[a+2]-cz)*ez)/l2);cx+=ex*t;cy+=ey*t;cz+=ez*t;}
+          const dx=p[a]-cx,dy=p[a+1]-cy,dz=p[a+2]-cz,d2=dx*dx+dy*dy+dz*dz;
+          if(d2<cr*cr){const d=sqrt(d2)||1e-6,s=cr/d;p[a]=cx+dx*s;p[a+1]=cy+dy*s;p[a+2]=cz+dz*s;
+            q[a]+=(p[a]-q[a])*0.12;q[a+1]+=(p[a+1]-q[a+1])*0.12;q[a+2]+=(p[a+2]-q[a+2])*0.12;}   // sliding friction
+        }
+        if(p[a+1]<0.02){p[a+1]=0.02;}
+      }
+    }
+  }
+  kick(dir,s,from=2){for(let i=from;i<HN;i++){const a=i*3,k=s*H*(0.4+0.6*i/HN);this.q[a]-=dir.x*k;this.q[a+1]-=dir.y*k;this.q[a+2]-=dir.z*k;}}
+}
+const PONY=[0,1.668,-0.088],PDIR=[0,0.32,-0.95];
+const CHAINS=[
+  new Chain(PONY,PDIR,0.0335),
+  new Chain([0.014,1.668,-0.086],[0.22,0.30,-0.93],0.0320,{drag:2.9}),
+  new Chain([-0.014,1.668,-0.086],[-0.22,0.30,-0.93],0.0328,{drag:2.4}),
+  new Chain([0,1.680,-0.084],[0,0.52,-0.85],0.0345,{drag:3.1,grav:0.92}),
+  new Chain([0,1.656,-0.090],[0,0.10,-1.0],0.0305,{drag:2.2}),
+  new Chain([0.048,1.680,0.032],[0.62,-0.15,0.77],0.0122,{drag:3.4,grav:0.9,rad:-0.003}),      // loose face-framing strands
+  new Chain([-0.048,1.680,0.032],[-0.62,-0.15,0.77],0.0118,{drag:3.6,grav:0.9,rad:-0.003})];
+const airV=new V3();
+function stepHair(steps,time){
+  updateColliders();
+  for(const c of CHAINS)c.anchor();
+  airV.set(0,0,-pose.speed*sqrt(PARAM.speed)*0.55).applyQuaternion(rootQ);          // apparent headwind while moving
+  for(let s=1;s<=steps;s++)for(const c of CHAINS)c.step(s/steps,time+s*H,airV);
+}
+// ---- strand tubes: layered clumps interpolated between the simulated chains ----
+const NSTR=30,NRING=HN*2-1,NSIDE=5;
+const STR=[];
+{let s=4242;const rnd=()=>(s=(s*16807)%2147483647)/2147483647;
+ for(let k=0;k<26;k++){const a=1+floor(rnd()*4),w0=0.25+rnd()*0.5,wa=(1-w0)*(0.5+rnd()*0.5);
+   STR.push({w:[[0,w0],[a,wa],[1+(a%4),1-w0-wa]],phi:rnd()*TAU,r:0.35+0.65*sqrt(rnd()),om:(rnd()<0.5?-1:1)*(7+rnd()*7),wave:0.004+rnd()*0.006,rad:0.0062+rnd()*0.003,len:1});}
+ for(let k=0;k<4;k++)STR.push({w:[[5+(k&1),1]],phi:rnd()*TAU,r:k<2?0:0.9,om:9+rnd()*5,wave:0.003,rad:0.0034,len:1,loose:true});}
+const hairGeo=new THREE.BufferGeometry();
+{const nv=NSTR*NRING*NSIDE,idx=[],uv=new Float32Array(nv*2);
+ for(let k=0;k<NSTR;k++)for(let i=0;i<NRING;i++)for(let j=0;j<NSIDE;j++){
+   const v=(k*NRING+i)*NSIDE+j;uv[v*2]=STR[k].loose?0.25+0.4*i/(NRING-1):i/(NRING-1);uv[v*2+1]=k+j/NSIDE;
+   if(i<NRING-1){const j2=(j+1)%NSIDE,a=v,b=(k*NRING+i)*NSIDE+j2,c=a+NSIDE,d=b+NSIDE;idx.push(a,b,c,b,d,c);}}
+ for(const n of['position','normal','aTan']){const at=new THREE.BufferAttribute(new Float32Array(nv*3),3);at.setUsage(THREE.DynamicDrawUsage);hairGeo.setAttribute(n,at);}
+ hairGeo.setAttribute('aUV',new THREE.BufferAttribute(uv,2));hairGeo.setIndex(idx);hairGeo.boundingSphere=new THREE.Sphere(new V3(0,1.4,0),3);}
+const hairMesh=new THREE.Mesh(hairGeo,hairMat);hairMesh.frustumCulled=false;hairMesh.castShadow=true;scene.add(hairMesh);
+const _c=new Float32Array(HN*3),_o=new Float32Array(HN*3),_e1=new Float32Array(HN*3),_e2=new Float32Array(HN*3),_rc=new Float32Array(NRING*3),_ref=new V3();
+function updateHairMesh(){
+  const P=hairGeo.attributes.position.array,N=hairGeo.attributes.normal.array,T=hairGeo.attributes.aTan.array;
+  _ref.set(1,0,0).applyQuaternion(wRot[4]);
+  for(let k=0;k<NSTR;k++){
+    const S=STR[k];_c.fill(0);
+    for(const [ci,w] of S.w){const p=CHAINS[ci].p;for(let i=0;i<HN*3;i++)_c[i]+=p[i]*w;}
+    for(let j=0;j<HN;j++){
+      const a=j*3,n=min(j+1,HN-1)*3,m=max(j-1,0)*3,s=j/(HN-1);
+      _v.set(_c[n]-_c[m],_c[n+1]-_c[m+1],_c[n+2]-_c[m+2]).normalize();
+      _u.crossVectors(_v,_ref);if(_u.lengthSq()<1e-4)_u.crossVectors(_v,AY);_u.normalize();_w.crossVectors(_v,_u);
+      const spread=S.loose?0.004*S.r*s:(0.003+0.030*pow(sin(PI*pow(s,0.62)),0.8)*(1-0.45*s))*S.r,
+            wav=S.wave*sstep(0.05,0.3,s),ang=S.phi+s*S.om,cu=cos(S.phi)*spread+cos(ang)*wav,cw=sin(S.phi)*spread+sin(ang)*wav;
+      _o[a]=_c[a]+_u.x*cu+_w.x*cw;_o[a+1]=_c[a+1]+_u.y*cu+_w.y*cw;_o[a+2]=_c[a+2]+_u.z*cu+_w.z*cw;
+      _e1[a]=_u.x;_e1[a+1]=_u.y;_e1[a+2]=_u.z;_e2[a]=_w.x;_e2[a+1]=_w.y;_e2[a+2]=_w.z;
+    }
+    for(let i=0;i<NRING;i++){                                  // Catmull-Rom midpoints double the ring count
+      const j=i>>1,a=j*3;
+      if(i&1){const p0=max(j-1,0)*3,p2=a+3,p3=min(j+2,HN-1)*3;
+        for(let d=0;d<3;d++)_rc[i*3+d]=(-_o[p0+d]+9*_o[a+d]+9*_o[p2+d]-_o[p3+d])/16;}
+      else for(let d=0;d<3;d++)_rc[i*3+d]=_o[a+d];
+    }
+    for(let i=0;i<NRING;i++){
+      const j=i>>1,a=j*3,b=min(j+(i&1),HN-1)*3,s=i/(NRING-1),n=min(i+1,NRING-1)*3,m=max(i-1,0)*3;
+      _v.set(_rc[n]-_rc[m],_rc[n+1]-_rc[m+1],_rc[n+2]-_rc[m+2]).normalize();
+      const rad=S.rad*(0.45+0.75*pow(sin(PI*min(s*0.9+0.08,1)),0.6))*(1-0.55*sstep(0.75,1,s));
+      for(let d=0;d<NSIDE;d++){
+        const th=d/NSIDE*TAU,ct=cos(th),st=sin(th),v=((k*NRING+i)*NSIDE+d)*3;
+        let nx=(_e1[a]+_e1[b])*ct+(_e2[a]+_e2[b])*st,ny=(_e1[a+1]+_e1[b+1])*ct+(_e2[a+1]+_e2[b+1])*st,nz=(_e1[a+2]+_e1[b+2])*ct+(_e2[a+2]+_e2[b+2])*st;
+        const l=1/(sqrt(nx*nx+ny*ny+nz*nz)||1);nx*=l;ny*=l;nz*=l;
+        P[v]=_rc[i*3]+nx*rad;P[v+1]=_rc[i*3+1]+ny*rad;P[v+2]=_rc[i*3+2]+nz*rad;
+        N[v]=nx;N[v+1]=ny;N[v+2]=nz;T[v]=_v.x;T[v+1]=_v.y;T[v+2]=_v.z;
+      }
+    }
+  }
+  hairGeo.attributes.position.needsUpdate=hairGeo.attributes.normal.needsUpdate=hairGeo.attributes.aTan.needsUpdate=true;
+}
+
+/* ======================================================================
+   8. CAMERA PRESETS, TOUCH UI, TAP IMPULSES, MAIN LOOP
+   ====================================================================== */
+const controls=new OrbitControls(persp,canvas);
+controls.enableDamping=true;controls.dampingFactor=0.08;controls.rotateSpeed=0.85;controls.zoomSpeed=0.9;controls.panSpeed=0.8;
+controls.minDistance=0.45;controls.maxDistance=10;controls.maxPolarAngle=PI*0.535;controls.minZoom=0.6;controls.maxZoom=8;
+controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};               // 1 finger orbit, 2 fingers pinch-zoom + pan
+// p = camera position, t = orbit target, w = minimum visible width in metres (pulls the camera back on portrait phones)
+const CAMS={follow:{p:[0,1.46,-2.95],t:[0,1.0,0],w:1.25},hip:{p:[-1.28,1.03,-1.62],t:[0,0.92,0],w:0.92},
+            side:{p:[3.0,1.0,0.0],t:[0,0.9,0],w:1.05},hair:{p:[-0.74,1.63,-1.08],t:[0,1.43,-0.03],w:0.72}};
+function presetPose(name,P,T){
+  const c=CAMS[name];P.set(...c.p);T.set(...c.t);
+  const d=P.distanceTo(T),need=c.w/(2*Math.tan(persp.fov*DEG/2)*persp.aspect);
+  if(need>d)P.sub(T).multiplyScalar(need/d).add(T);
+  P.applyAxisAngle(AY,rootYaw);T.applyAxisAngle(AY,rootYaw);
+}
+const ORTHO_VIEWS=[['Front',[0,0,1]],['Left profile',[1,0,0]],['Back',[0,0,-1]]];
+const camAnim={on:false,u:0,p0:new V3(),p1:new V3(),t0:new V3(),t1:new V3()};
+let orthoIdx=-1,toastTimer=0;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),1300);}
+function fitOrtho(){
+  const asp=innerWidth/innerHeight,hh=max(1.0,0.60/asp);
+  ortho.left=-hh*asp;ortho.right=hh*asp;ortho.top=hh;ortho.bottom=-hh;ortho.updateProjectionMatrix();
+}
+function setCam(name){
+  $$('#cams .chip').forEach(b=>b.classList.toggle('on',b.dataset.cam===name));
+  if(name==='ortho'){
+    orthoIdx=(orthoIdx+1)%3;const [label,d]=ORTHO_VIEWS[orthoIdx];
+    setState('manual');markState();camera=ortho;controls.object=ortho;ortho.zoom=1;fitOrtho();camAnim.on=false;
+    _v.set(...d).applyAxisAngle(AY,rootYaw);
+    controls.target.set(0,0.87,0);ortho.position.copy(controls.target).addScaledVector(_v,6);controls.update();applyBackdrop();
+    toast('Orthographic · '+label+' (tap again to cycle)');return;
+  }
+  orthoIdx=-1;
+  if(camera!==persp){persp.position.copy(ortho.position);camera=persp;controls.object=persp;applyBackdrop();}
+  camAnim.on=true;camAnim.u=0;camAnim.p0.copy(persp.position);camAnim.t0.copy(controls.target);
+  presetPose(name,camAnim.p1,camAnim.t1);
+}
+function markState(){$$('#states .btn').forEach(b=>b.classList.toggle('on',b.dataset.state===ANIM.state));}
+// skeleton overlay for the diagnostic view
+const boneGeo=new THREE.BufferGeometry();boneGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array((NB-1)*6),3));
+const boneLines=new THREE.LineSegments(boneGeo,new THREE.LineBasicMaterial({color:0xe8eeff,transparent:true,opacity:0.55,depthTest:false}));
+boneLines.frustumCulled=false;boneLines.renderOrder=5;boneLines.visible=false;scene.add(boneLines);
+function applyBackdrop(){
+  const heat=LIGHTS.uMode.value>0,studio=camera===ortho;
+  env.visible=sky.visible=!heat&&!studio;grid.visible=heat;
+  scene.background=heat?new THREE.Color(0x14161b):studio?new THREE.Color(0xb4b4b6):null;FOG.density=heat||studio?0:0.016;
+}
+function setMode(m){
+  const heat=m>0;LIGHTS.uMode.value=m;wire.visible=boneLines.visible=heat;applyBackdrop();
+  renderer.toneMapping=heat?THREE.NoToneMapping:THREE.ACESFilmicToneMapping;
+  document.body.classList.toggle('heat',heat);
+  $$('#modes .btn').forEach(b=>b.classList.toggle('on',+b.dataset.mode===m));
+}
+$('#grip').addEventListener('click',()=>$('#drawer').classList.toggle('closed'));
+$$('#states .btn').forEach(b=>b.addEventListener('click',()=>{setState(b.dataset.state);markState();}));
+$$('#modes .btn').forEach(b=>b.addEventListener('click',()=>setMode(+b.dataset.mode)));
+$$('#cams .chip').forEach(b=>b.addEventListener('click',()=>setCam(b.dataset.cam)));
+[['sSpeed','speed',2],['sSway','sway',2],['sK','k',0],['sC','c',1],['sBounce','bounce',2],['sWind','wind',2]].forEach(([id,key,dp])=>{
+  const el=$('#'+id),out=el.parentElement.querySelector('output'),up=()=>{PARAM[key]=+el.value;out.textContent=(+el.value).toFixed(dp);};
+  el.addEventListener('input',up);up();
+});
+
+// ---- tap-to-impulse: analytic ray test against soft-tissue proxies that ride on the animated bones ----
+const PROX=[ // [kind, side(+1 left,-1 right,0), bone, cx,cy,cz, radius, zoneId, label]
+  ['glute',1,0,0.085,0.905,-0.095,0.105,1,'Left glute'],['glute',-1,0,-0.085,0.905,-0.095,0.105,2,'Right glute'],
+  ['hip',1,0,0.165,0.90,0.0,0.085,3,'Left hip'],['hip',-1,0,-0.165,0.90,0.0,0.085,4,'Right hip'],
+  ['thigh',1,11,0.09,0.72,-0.01,0.088,3,'Left thigh'],['thigh',-1,14,-0.09,0.72,-0.01,0.088,4,'Right thigh'],
+  ['core',0,1,0,1.08,0.02,0.105,7,'Waist'],
+  ['chest',1,2,0.074,1.265,0.075,0.078,5,'Left chest'],['chest',-1,2,-0.074,1.265,0.075,0.078,6,'Right chest'],
+  ['shoulder',1,2,0.172,1.38,-0.012,0.078,8,'Left shoulder'],['shoulder',-1,2,-0.172,1.38,-0.012,0.078,9,'Right shoulder'],
+  ['back',0,2,0,1.33,-0.07,0.10,8,'Upper back'],['head',0,4,0,1.61,0.01,0.10,-1,'Head']];
+const ray=new THREE.Raycaster(),ndc=new THREE.Vector2(),_pc=new V3();
+function raySphere(o,d,c,r){_k.copy(c).sub(o);const b=_k.dot(d),q=_k.lengthSq()-b*b;if(q>r*r)return -1;const t=b-sqrt(r*r-q);return t>0?t:-1;}
+function tapImpulse(cx,cy){
+  ndc.set(cx/innerWidth*2-1,-(cy/innerHeight)*2+1);ray.setFromCamera(ndc,camera);
+  const o=ray.ray.origin,d=ray.ray.direction;let best=null,bt=1e9,node=-1;
+  for(const p of PROX){
+    _pc.set(p[3],p[4],p[5]).sub(JOINT[p[2]]).applyQuaternion(wRot[p[2]]).add(wPos[p[2]]);
+    const t=raySphere(o,d,_pc,p[6]);if(t>0&&t<bt){bt=t;best=p;node=-1;}
+  }
+  const hp=CHAINS[0].p;
+  for(let i=2;i<HN;i++){_pc.set(hp[i*3],hp[i*3+1],hp[i*3+2]);const t=raySphere(o,d,_pc,0.05);if(t>0&&t<bt+0.04){bt=t;best=null;node=i;}}
+  if(!best&&node<0)return false;
+  const loc=b=>_f.copy(d).applyQuaternion(_q.copy(wRot[b]).invert());       // push direction in the bone's frame
+  if(node>=0){for(let c=0;c<5;c++)CHAINS[c].kick(d,2.6,max(2,node-3));toast('Ponytail impulse');return true;}
+  const [kind,sx]=best,S=sx>0?'L':'R';
+  if(kind==='glute'){ZONES['glute'+S].kick(loc(0),0.62);ZONES['thigh'+S].kick(loc(sx>0?11:14),0.22);}
+  else if(kind==='hip'){ZONES['thigh'+S].kick(loc(sx>0?11:14),0.5);ZONES['glute'+S].kick(loc(0),0.4);}
+  else if(kind==='thigh')ZONES['thigh'+S].kick(loc(sx>0?11:14),0.55);
+  else if(kind==='core')ZONES.core.kick(loc(1),0.4);
+  else if(kind==='chest'){ZONES['chest'+S].kick(loc(2),0.42);ZONES['chest'+(sx>0?'R':'L')].kick(_f,0.14);}
+  else{
+    const l=loc(2);
+    if(kind==='shoulder'){ZONES['scap'+S].kick(l,0.4);REACT.vy+=-l.z*sx*2.4;REACT.vr+=l.y*sx*1.6;REACT.vp+=l.z*0.5;}
+    else if(kind==='back'){ZONES.scapL.kick(l,0.35);ZONES.scapR.kick(l,0.35);REACT.vp+=l.z*1.5;}
+    else{REACT.vp+=l.z*1.4;REACT.vy+=-l.x*1.0;}
+    for(const c of CHAINS)c.kick(d,kind==='head'?1.5:0.8);
+  }
+  bodyMat.uniforms.uFlashZone.value=best[7];bodyMat.uniforms.uFlash.value=1;
+  toast(best[8]+' impulse');return true;
+}
+let pd=null;
+canvas.addEventListener('pointerdown',e=>{pd=e.isPrimary?{x:e.clientX,y:e.clientY,t:performance.now()}:null;});
+canvas.addEventListener('pointerup',e=>{
+  if(!pd||!e.isPrimary)return;const dx=e.clientX-pd.x,dy=e.clientY-pd.y,dt=performance.now()-pd.t;pd=null;
+  if(dx*dx+dy*dy>90||dt>380)return;
+  const hit=tapImpulse(e.clientX,e.clientY),ring=document.createElement('div');
+  ring.className='tap';ring.style.left=e.clientX+'px';ring.style.top=e.clientY+'px';if(!hit)ring.style.borderColor='rgba(255,255,255,.35)';
+  document.body.appendChild(ring);ring.addEventListener('animationend',()=>ring.parentNode&&ring.parentNode.removeChild(ring));
+});
+addEventListener('resize',()=>{
+  renderer.setSize(innerWidth,innerHeight,false);persp.aspect=innerWidth/innerHeight;persp.updateProjectionMatrix();fitOrtho();
+});
+
+// ---- main loop ----
+let last=performance.now(),acc=0,physDt=0,time=0,fpsN=0,fpsT=0,slow=0,pr=renderer.getPixelRatio(),firstFrame=true;
+function frame(now){
+  requestAnimationFrame(frame);
+  const real=(now-last)/1000,dt=min(max(real,0.001),0.05);last=now;time+=dt;
+  updateAnimation(dt);
+  acc+=dt;physDt+=dt;
+  const steps=min(floor(acc/H),8);acc=min(acc-steps*H,H);
+  if(steps>0){stepSoftBodies(physDt,steps);stepHair(steps,time);physDt=0;}
+  updateHairMesh();
+  scrollWorld();
+  LIGHTS.uTime.value=time;bodyMat.uniforms.uFlash.value*=exp(-dt*4.5);
+  if(boneLines.visible){
+    const a=boneGeo.attributes.position.array;
+    for(let i=1;i<NB;i++){const p=wPos[i],q=wPos[PARENT[i]],o=(i-1)*6;a[o]=p.x;a[o+1]=p.y;a[o+2]=p.z;a[o+3]=q.x;a[o+4]=q.y;a[o+5]=q.z;}
+    boneGeo.attributes.position.needsUpdate=true;
+  }
+  if(camAnim.on){
+    camAnim.u=min(1,camAnim.u+dt/0.65);const e=sstep(0,1,camAnim.u);
+    persp.position.lerpVectors(camAnim.p0,camAnim.p1,e);controls.target.lerpVectors(camAnim.t0,camAnim.t1,e);
+    if(camAnim.u>=1)camAnim.on=false;
+  }
+  controls.update();
+  renderer.render(scene,camera);
+  if(firstFrame){firstFrame=false;$('#loading').classList.add('done');}
+  // fps read-out + adaptive resolution (never above min(devicePixelRatio, 2))
+  fpsN++;fpsT+=real;
+  if(fpsT>=0.5){
+    const fps=fpsN/fpsT;$('#fps').textContent=fps.toFixed(0)+' fps · '+(built.tris/1000).toFixed(0)+'k tris';
+    slow=fps<46?slow+1:0;if(slow>=4&&pr>1){pr=max(1,pr-0.25);renderer.setPixelRatio(pr);renderer.setSize(innerWidth,innerHeight,false);slow=0;}
+    fpsN=0;fpsT=0;
+  }
+}
+presetPose('hip',persp.position,controls.target);fitOrtho();
+updateAnimation(1/60);
+for(let i=0;i<90;i++){stepSoftBodies(1/60,2);stepHair(2,i/60);}                    // let hair and tissue settle before the first frame
+window.__lab={controls,updateAnimation,stepSoftBodies,stepHair,updateHairMesh,ANIM,PARAM,ZONES,CHAINS,REACT,built,renderer,scene,setState,setMode,setCam,tapImpulse,wPos,pose,get camera(){return camera;}};
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
