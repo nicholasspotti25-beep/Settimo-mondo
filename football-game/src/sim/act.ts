@@ -179,7 +179,7 @@ export function touchBall(m: Match, p: P): boolean {
   const reach = stunned ? 0.45 : 0.8 + (mine ? 0.3 : 0) + (opp && !b.shot ? clamp((d.int - 78) / 60, 0, 0.45) : 0);
   if (dh > reach || b.y > 1.25) return false;
   const s = hyp(b.vx - p.vx, b.vz - p.vz) + Math.abs(b.vy) * 0.4;
-  if (!stunned && p.q && m.t - p.q.t < 1.6 && p.team === m.att) { m.firstTime(p); return true; }
+  if (!stunned && p.q && m.t - p.q.t < 2.6 && p.team === m.att) { m.firstTime(p); return true; }
   const comf = 11 + d.fst * 0.15 - (mine ? 0 : 3) - p.press * 1.2;
   if (stunned || s > comf + m.rnd() * 12) { // too hot to handle: it deflects off the body
     if (s < 3) return false;

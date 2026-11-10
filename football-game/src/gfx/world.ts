@@ -247,8 +247,8 @@ export class World {
     if (shootCam) { const d = sp!.team.dir; px = sp!.x - d * 10; py = 3.4; pz = sp!.z * 1.25; lx = d * HL; ly = 1.3; lz = 0; }
     else {
       const fx = m.state === 'goal' && m.scorers.length ? (m.ps.find(p => p.act === 'cele' && p.actKind === 'scorer')?.x ?? b.x) : b.x + clamp(b.vx * 0.35, -6, 6);
-      this.cx += (clamp(fx, -HL + 14, HL - 14) - this.cx) * k; this.cz += (b.z - this.cz) * k;
-      const zoom = this.cam.aspect < 1.5 ? 1.25 : 1; px = this.cx; py = 25 * zoom; pz = (46 + this.cz * 0.3) * zoom; lx = this.cx; ly = 0; lz = this.cz * 0.5 - 1.5;
+      this.cx += (clamp(fx, -HL + 9, HL - 9) - this.cx) * k; this.cz += (b.z - this.cz) * k;
+      const zoom = this.cam.aspect < 1.5 ? 1.35 : 1; px = this.cx; py = 19.5 * zoom; pz = (35 + this.cz * 0.36) * zoom; lx = this.cx; ly = 0; lz = this.cz * 0.5 - 1.5;
     }
     const kk = this.mode !== (shootCam ? 's' : 'n') ? 1 : 1 - Math.exp(-dt * 5); this.mode = shootCam ? 's' : 'n';
     this.camPos.x += (px - this.camPos.x) * kk; this.camPos.y += (py - this.camPos.y) * kk; this.camPos.z += (pz - this.camPos.z) * kk;

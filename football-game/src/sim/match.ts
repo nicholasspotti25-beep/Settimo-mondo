@@ -236,7 +236,7 @@ export class Match {
   header(p: P) {
     const b = this.ball, T = p.team, dir = T.dir, nx = p.x * dir, gd = hyp(HL - nx, p.z), mine = !!b.kicker && b.kicker.team === T;
     if (mine && this.passId === b.kickId) this.stats[T.id].passOk++;
-    if (p.q && this.t - p.q.t < 1.6) { const q = p.q; p.q = null; if (q.type === 'shoot') return doShot(this, p, { power: 0.6 + q.power * 0.4, aimZ: q.aimZ ?? null, mod: '' }); }
+    if (p.q && this.t - p.q.t < 2.6) { const q = p.q; p.q = null; if (q.type === 'shoot') return doShot(this, p, { power: 0.6 + q.power * 0.4, aimZ: q.aimZ ?? null, mod: '' }); }
     if (mine && gd < 16 && nx > 0) return doShot(this, p, { power: 0.75, aimZ: null, mod: '' });
     if (nx < -HL + 30 && !mine) { // defensive clearance
       const a = Math.atan2((p.z >= 0 ? 1 : -1) * 0.6, dir), v = 9 + this.rnd() * 4 + p.d.hdr / 30;

@@ -1,8 +1,9 @@
 // Headless browser smoke test: menus render, a match starts, touch controls drive the player, no page errors.
-import { chromium } from 'playwright';
-import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-const root = join(dirname(fileURLToPath(import.meta.url)), '..'), out = join(root, 'tools', 'out');
+const { chromium } = require('playwright');
+const { join } = require('node:path');
+const { pathToFileURL } = require('node:url');
+const root = join(__dirname, '..'), out = join(root, 'tools', 'out');
+(async () => {
 const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const ctx = await b.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 1, hasTouch: true, isMobile: true });
 const page = await ctx.newPage(); const errors = [];
@@ -12,7 +13,7 @@ await page.waitForTimeout(800); await page.screenshot({ path: join(out, '1-home.
 const shot = async (n) => page.screenshot({ path: join(out, n + '.png') });
 const tapA = async (a) => { await page.locator(`[data-a="${a}"]`).first().tap(); await page.waitForTimeout(250); };
 await tapA('go:squad'); await shot('2-squad'); await tapA('slot:9'); await shot('3-picker'); await tapA('nopick'); await tapA('back');
-await tapA('go:tactics'); await shot('4-tactics'); await tapA('tab:5'); await shot('4b-instr'); await tapA('back');
+await tapA('go:tactics'); await shot('4-tactics'); await tapA('tab:4'); await shot('4b-instr'); await tapA('back');
 await tapA('go:players'); await tapA('card:messi'); await shot('5-card'); await tapA('nocard'); await tapA('back');
 await tapA('go:pre'); await shot('6-pre'); await tapA('play'); await page.waitForTimeout(2500); await shot('7-kickoff');
 const st = () => page.evaluate(() => { const m = window.__fg.match; return { state: m.state, min: m.minute(), score: m.score.join('-'), ctx: m.ctx, ctrl: m.ctrl?.data.short, x: m.ctrl?.x.toFixed(1), z: m.ctrl?.z.toFixed(1), owner: m.ball.owner?.data.short, bx: m.ball.x.toFixed(1), fps: 0 }; });
@@ -33,3 +34,4 @@ await page.waitForTimeout(400); console.log('later', await st()); await shot('11
 await page.locator('.hb.pause').tap(); await page.waitForTimeout(300); await shot('12-pause'); await tapA('go:subs'); await shot('13-subs');
 console.log('errors:', errors.length ? errors : 'none');
 await b.close();
+})().catch(e => { console.error(e); process.exit(1); });
