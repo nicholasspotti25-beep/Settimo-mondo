@@ -1,0 +1,16 @@
+{
+  "name": "football-game",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Football Game — 3D 11v11 mobile football (TypeScript + Three.js, code-only).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build && node tools/inline.mjs",
+    "typecheck": "tsc --noEmit",
+    "sim": "tsx tools/sim-test.ts",
+    "check": "tsc --noEmit && tsx tools/sim-test.ts"
+  },
+  "dependencies": { "three": "0.186.1" },
+  "devDependencies": { "@types/three": "0.186.0", "tsx": "4.23.15", "typescript": "5.9.3", "vite": "7.3.7" }
+}
