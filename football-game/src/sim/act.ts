@@ -150,8 +150,9 @@ export function tackleHit(m: Match, t: P) {
   pr *= 0.75 + 0.25 * fat(t);
   if (bh) pr *= 0.6;
   if (cs < 3.2) pr *= 1 - clamp((c.d.str - t.d.str + 12) / 45, 0, 0.6) * (0.45 + 0.55 * Math.min(1, c.d.shield));
+  pr *= 1 - 0.22 * Math.min(1, c.d.tight); // ball glued to the foot: harder to nick
   if (c.feintT > 0) pr *= 0.42;
-  else if (c.cdFeint <= 0 && m.rnd() < clamp((c.d.ctl - 80) / 42 + c.d.tight * 0.14 + c.d.skl * 0.07, 0, 0.78)) { startFeint(m, c); pr *= 0.5; }
+  else if (c.cdFeint <= 0 && m.rnd() < clamp((c.d.ctl - 80) / 42 + c.d.tight * 0.14 + c.d.skl * 0.07, 0, 0.78)) { startFeint(m, c); pr *= 0.45; }
   const win = m.rnd() < clamp(pr, 0.06, 0.93);
   let pf = 0.05 + (bh ? 0.22 : 0) + (slide ? 0.12 : 0) + (win ? 0 : 0.12) + (t.d.agg - 50) / 100 * 0.14 - (t.d.cln - 75) / 100 * 0.38 + (t.team.tac.inten - 1) * 0.03;
   pf = clamp(pf, 0.012, 0.7) * (win ? 0.3 : 1);

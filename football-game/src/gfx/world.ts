@@ -172,7 +172,7 @@ export class World {
     this.cone = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.3, 4), new THREE.MeshBasicMaterial({ color: 0xffe94a })); this.cone.rotation.x = Math.PI; sc.add(this.cone);
     const ag = new THREE.Shape(); ag.moveTo(0, -0.18); ag.lineTo(5.2, -0.18); ag.lineTo(5.2, -0.5); ag.lineTo(6.6, 0); ag.lineTo(5.2, 0.5); ag.lineTo(5.2, 0.18); ag.lineTo(0, 0.18);
     this.arrow = flat(new THREE.ShapeGeometry(ag), 0xffe94a, 0.85);
-    this.reticle = new THREE.Mesh(new THREE.RingGeometry(0.22, 0.32, 20), new THREE.MeshBasicMaterial({ color: 0xffe94a, side: THREE.DoubleSide, depthTest: false })); this.reticle.visible = false; sc.add(this.reticle);
+    this.reticle = new THREE.Mesh(new THREE.RingGeometry(0.3, 0.44, 24), new THREE.MeshBasicMaterial({ color: 0xffe94a, side: THREE.DoubleSide, depthTest: false })); this.reticle.visible = false; this.reticle.renderOrder = 9; this.reticle.add(new THREE.Mesh(new THREE.CircleGeometry(0.09, 12), this.reticle.material)); sc.add(this.reticle);
     for (let i = 0; i < 22; i++) { const f = new Figure(); this.figs.push(f); sc.add(f.root, f.shadow); f.root.visible = f.shadow.visible = false; }
   }
   setQuality(q: number) { this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, [1, 1.5, 2][q] ?? 1.5)); }
@@ -228,7 +228,8 @@ export class World {
     this.ball.position.set(b.x, b.y, b.z); this.ball.rotation.z = -b.rx / 0.11; this.ball.rotation.x = b.rz / 0.11;
     this.ballSh.position.set(b.x, 0.02, b.z); this.ballSh.scale.setScalar(1 + b.y * 0.25); (this.ballSh.material as THREE.Material).opacity = 0.28;
     const c = m.ctrl, human = !m.auto;
-    this.ring.visible = this.cone.visible = !!c && human && m.state !== 'goal';
+    const aimCam = !!m.sp && m.sp.shoot && m.state === 'setpiece';
+    this.ring.visible = this.cone.visible = !!c && human && m.state !== 'goal' && !aimCam;
     if (c) { this.ring.position.set(c.x, 0.03, c.z); this.cone.position.set(c.x, 2.25 * (c.data.look.h / 182) + (m.ball.owner === c && c.act === 'throw' ? 0.5 : 0), c.z); this.cone.rotation.y += dt * 3; }
     const rt = human && !b.owner && b.passTo && b.passTo !== c ? b.passTo : null; this.recvRing.visible = !!rt; if (rt) this.recvRing.position.set(rt.x, 0.03, rt.z);
     for (const n of this.nets) if (n.amp > 0.005) {
@@ -244,7 +245,7 @@ export class World {
     // camera
     const k = 1 - Math.exp(-dt * 3.2), shootCam = !!sp && sp.shoot && m.state === 'setpiece';
     let px: number, py: number, pz: number, lx: number, ly: number, lz: number;
-    if (shootCam) { const d = sp!.team.dir; px = sp!.x - d * 10; py = 3.4; pz = sp!.z * 1.25; lx = d * HL; ly = 1.3; lz = 0; }
+    if (shootCam) { const d = sp!.team.dir; px = sp!.x - d * 11; py = 4.6; pz = sp!.z * 1.25; lx = d * HL; ly = 0.9; lz = 0; }
     else {
       const fx = m.state === 'goal' && m.scorers.length ? (m.ps.find(p => p.act === 'cele' && p.actKind === 'scorer')?.x ?? b.x) : b.x + clamp(b.vx * 0.35, -6, 6);
       this.cx += (clamp(fx, -HL + 9, HL - 9) - this.cx) * k; this.cz += (b.z - this.cz) * k;

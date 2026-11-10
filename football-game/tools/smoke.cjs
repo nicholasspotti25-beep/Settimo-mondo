@@ -31,6 +31,8 @@ const fps = await page.evaluate(() => new Promise(r => { let n = 0; const t0 = p
 console.log('fps (software GL)', fps.toFixed(0)); await shot('10-play');
 await page.evaluate(() => { const m = window.__fg.match; for (let i = 0; i < 60 * 40; i++) { m.step(); m.ev.length = 0; if (m.state === 'half' || m.state === 'full') break; } });
 await page.waitForTimeout(400); console.log('later', await st()); await shot('11-later');
+await page.evaluate(() => { const m = window.__fg.match; if (m.state === 'half') { m.secondHalf(); } m.state = 'play'; m.award('pen', m.teams[0], 0, 0); }); await page.waitForTimeout(3200); await shot('14-penalty');
+await page.evaluate(() => { const m = window.__fg.match; m.inp.acts.push({ type: 'shoot', power: 0.6, mod: '', curve: 0 }); }); await page.waitForTimeout(900); await shot('15-penalty-kick');
 await page.locator('.hb.pause').tap(); await page.waitForTimeout(300); await shot('12-pause'); await tapA('go:subs'); await shot('13-subs');
 console.log('errors:', errors.length ? errors : 'none');
 await b.close();

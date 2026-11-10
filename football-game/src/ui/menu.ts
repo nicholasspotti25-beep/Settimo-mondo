@@ -14,7 +14,7 @@ const famCls = (f: number) => (f >= 0.94 ? 'ok' : f >= 0.8 ? 'mid' : 'bad');
 const ORDER: Pos[] = ['POR', 'TD', 'TS', 'DC', 'CDC', 'CC', 'COC', 'AD', 'AS', 'ATT'];
 
 export class Menu {
-  root: HTMLElement; screen = ''; match: Match | null = null; sel = -1; pick: { kind: 'xi' | 'bench'; i: number } | null = null; filter = 'ALL'; tab = 0; back = 'home'; subSel = -1;
+  root: HTMLElement; screen = ''; match: Match | null = null; sel = -1; pick: { kind: 'xi' | 'bench'; i: number } | null = null; filter = 'ALL'; tab = 0; back = 'home'; subSel = -1; warn = '';
   onPlay = () => { }; onResume = () => { }; onQuit = () => { }; onNext = () => { }; onChange = () => { }; onSettings = () => { };
   constructor(parent: HTMLElement, public save: Save) {
     this.root = document.createElement('div'); this.root.className = 'ui'; parent.appendChild(this.root);
@@ -54,7 +54,7 @@ export class Menu {
       case 'ins': { const [i, id] = v.split('='); tac.instr[+i] = id; this.changed(); break; }
       case 'set': { const [k, n] = v.split('='); (this.save.set as unknown as Record<string, number | boolean>)[k] = k === 'sound' ? n === '1' : +n; this.onSettings(); break; }
       case 'subp': this.subSel = +v; break;
-      case 'subb': if (this.match && this.subSel >= 0) { const m = this.match, ok = m.sub(m.cfg.human, this.subSel, +v); this.subSel = -1; if (!ok) alert('Sostituzione non possibile (ruolo portiere/giocatore di movimento diverso o cambi esauriti).'); } break;
+      case 'subb': if (this.match && this.subSel >= 0) { const m = this.match, ok = m.sub(m.cfg.human, this.subSel, +v); this.subSel = -1; this.warn = ok ? '' : 'Sostituzione non possibile: un portiere può essere sostituito solo da un portiere, e i cambi sono al massimo 5.'; } break;
       case 'full': try { const d = document.documentElement; if (document.fullscreenElement) document.exitFullscreen(); else d.requestFullscreen?.().catch(() => { }); } catch { /* not allowed in this frame */ } return;
     }
     this.render();
@@ -71,7 +71,7 @@ export class Menu {
   }
   private head(t: string, back = true) { return `<div class="hd">${back ? '<button class="bt sm" data-a="back">‹ Indietro</button>' : ''}<h2>${t}</h2></div>`; }
   private home() {
-    return `<div class="home"><h1>FOOTBALL GAME</h1><p class="sub">Calcio 3D · 11 contro 11 · 57 campioni al loro prime</p>
+    return `<div class="home"><h1>FOOTBALL GAME</h1><p class="sub">Calcio 3D · 11 contro 11 · 57 campioni al loro prime</p><p class="rot">Ruota il telefono in orizzontale per giocare.</p>
       <div class="col"><button class="bt big" data-a="go:pre">Gioca partita</button><button class="bt" data-a="go:squad">Squadra</button><button class="bt" data-a="go:tactics">Tattiche</button>
       <button class="bt" data-a="go:players">Calciatori</button><button class="bt" data-a="go:settings">Impostazioni</button><button class="bt" data-a="go:help">Comandi</button></div></div>`;
   }
@@ -147,7 +147,7 @@ export class Menu {
   }
   private subs() {
     const m = this.match!, T = m.teams[m.cfg.human]; this.back = m.state === 'half' ? 'half' : 'pause';
-    return `<div class="panel">${this.head('Sostituzioni')}<p class="note">Cambi rimasti: ${T.subs - T.pend.length}. Scegli chi esce, poi chi entra: il cambio avviene alla prossima interruzione.</p><div class="row2"><div class="grow"><h3>In campo</h3>
+    return `<div class="panel">${this.head('Sostituzioni')}<p class="note">Cambi rimasti: ${T.subs - T.pend.length}. Scegli chi esce, poi chi entra: il cambio avviene alla prossima interruzione.</p>${this.warn ? `<p class="warn">${this.warn}</p>` : ''}<div class="row2"><div class="grow"><h3>In campo</h3>
       ${T.ps.map((p, i) => `<button class="srow ${this.subSel === i ? 'on' : ''}" ${p.on ? `data-a="subp:${i}"` : 'disabled'}><b>${p.role}</b> ${p.data.short} <span class="stm"><i style="width:${p.st.toFixed(0)}%"></i></span>${p.yellow ? ' ▮' : ''}${p.on ? '' : ' (espulso)'}</button>`).join('')}</div>
       <div class="side"><h3>Panchina</h3>${T.bench.map((p, i) => `<button class="srow" data-a="subb:${i}"><b>${p.pos}</b> ${p.short}</button>`).join('') || '<p class="note">Nessuna riserva.</p>'}</div></div></div>`;
   }

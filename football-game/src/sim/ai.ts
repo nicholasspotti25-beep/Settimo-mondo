@@ -102,7 +102,7 @@ function defendJobs(m: Match, T: Team, O: Team, bx: number, q: string) {
   const counter = T.lostT < 4.5 && tac.lost === 0;
   const engage = bx < [46, 22, 6, -12][tac.press] + (q === 'pressing' || counter ? 60 : 0) || fd < 32;
   const inten = tac.inten + (q === 'pressing' ? 1 : 0);
-  const pressT = (p: P) => { p.job = 'press'; p.ax = (fx + ux * 1.1) * dir; p.az = (fz + uz * 1.1) * dir; p.spr = (hyp(p.x - fx, p.z - fz) > (inten >= 2 ? 1.5 : 2.5) || !!c && hyp(c.vx, c.vz) > 4.5) && p.st > 8; };
+  const pressT = (p: P) => { p.job = 'press'; p.ax = (fx + ux * 1.1) * dir; p.az = (fz + uz * 1.1) * dir; p.spr = (hyp(p.x - fx, p.z - fz) > (inten >= 2 ? 1.5 : 2.5) || !!c && hyp(c.vx, c.vz) > 4.5) && p.st > 8 && (T.ai >= 2 || fd < 34 || (p.i + Math.floor(m.t / 3)) % (T.ai + 2) > 0); };
   if (pr) {
     if (human && human !== pr && dist(human, { x: fx, z: fz }) < 13 && !T.second) { cv = pr; T.cover = pr; } // the user is the first defender
     else if (engage || !c) pressT(pr);
@@ -131,7 +131,7 @@ function defendJobs(m: Match, T: Team, O: Team, bx: number, q: string) {
     }
     if (!best) continue;
     const p = best, od = hyp(o.x - gx, o.z) || 1, gap = clamp(2.1 - (p.d.mrk - 70) / 28, 0.9, 2.4);
-    const mx = (o.x + (gx - o.x) / od * gap + o.vx * 0.3) * dir, mz = (o.z - o.z / od * gap + o.vz * 0.3) * dir, w = tight ? 0.92 : danger ? 0.75 : 0.55;
+    const mx = (o.x + (gx - o.x) / od * gap + o.vx * 0.3) * dir, mz = (o.z - o.z / od * gap + o.vz * 0.3) * dir, w = (tight ? 0.92 : danger ? 0.75 : 0.55) * [0.6, 0.8, 1, 1, 1][T.ai];
     p.job = 'mark'; p.mark = o; p.ax = lerp(p.ax, mx, w); p.az = lerp(p.az, mz, w);
     if (hyp(o.vx, o.vz) > 5.5 && p.st > 12) p.spr = true;
   }

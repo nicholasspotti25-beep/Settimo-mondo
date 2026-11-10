@@ -146,7 +146,7 @@ export class Match {
       const fa = 0.84 + 0.16 * fat(p); let top = d.spd * fa;
       if (hasBall) {
         top *= 0.9 + clamp((d.ctl - 70) / 400, 0, 0.075);
-        if (p.press > 0.75) { const [o, od] = nearestOpp(this, p, p.team.id); if (o && od < 1.1) top *= 1 - clamp((o.d.str - d.str + 18) / 50, 0, 0.6) * 0.2 * (1 - 0.5 * Math.min(1, d.shield)); }
+        if (p.press > 0.75) { const [o, od] = nearestOpp(this, p, p.team.id); if (o && od < 1.1 && o.act === 'none') top *= 1 - clamp((o.d.str - (d.str + d.bal) / 2 + 4) / 50, 0, 0.6) * 0.2 * (1 - 0.5 * Math.min(1, d.shield)); }
       } else if (d.rec > 0 && p.job === 'press') top *= 1 + 0.05 * Math.min(1, d.rec);
       const mag = Math.min(1, hyp(p.mx, p.mz)), mm = hyp(p.mx, p.mz) || 1;
       const maxSp = top * (p.spr && p.st > 2 ? 1 : 0.7) * spMul * (p.jock ? 0.66 : 1) * mag, wx = p.mx / mm * maxSp, wz = p.mz / mm * maxSp;
@@ -465,7 +465,7 @@ export class Match {
         const [lx, lz] = leadPt(p, t); doPass(this, p, t, lx, lz, sp.type === 'throw' && dist(p, t) > 12 ? 'l' : 'g', false, 0.4, noOff); return this.release();
       }
       if (a.type === 'cross' || a.type === 'through' || a.type === 'shoot') {
-        if (sp.type === 'fk' && a.type === 'shoot') { doShot(this, p, { power: a.power, aimZ: null, mod: '', fk: true, curve: a.curve }); return this.release(); }
+        if (sp.type === 'fk' && a.type === 'shoot' && !sp.indirect) { doShot(this, p, { power: a.power, aimZ: null, mod: '', fk: true, curve: a.curve }); return this.release(); }
         const D = sp.type === 'throw' ? 10 + a.power * 14 : 16 + a.power * 34; let tx = sp.x + ax * D, tz = sp.z + az * D, tg: P | null = null, td = 7;
         for (const t of T.ps) if (t.on && t !== p) { const d = hyp(t.x - tx, t.z - tz); if (d < td) { td = d; tg = t; } }
         if (tg && td < 4.5) { tx = tg.x; tz = tg.z; }
@@ -497,7 +497,7 @@ export class Match {
     T.second = inp.second;
     const p = c, mag = Math.min(1, hyp(inp.mx, inp.mz)), ax = mag > 0.2 ? inp.mx / mag : Math.cos(p.face), az = mag > 0.2 ? inp.mz / mag : Math.sin(p.face);
     p.lockFace = null; p.jock = false;
-    const aimZ = () => { const v = clamp(inp.mz * 1.6, -1, 1); return mag > 0.3 && Math.abs(v) > 0.25 ? v : null; };
+    const aimZ = () => { const v = clamp(inp.mz * 1.6, -1, 1); return mag > 0.3 && Math.abs(v) > 0.25 ? v * 0.86 : null; };
     if (b.owner === p && p.act === 'hold') { // keeper holding the ball
       p.mx = p.mz = 0;
       for (const a of inp.acts) {

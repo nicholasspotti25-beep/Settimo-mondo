@@ -104,7 +104,7 @@ export class Hud {
     let hint = '';
     if (mySP) hint = sp!.type === 'pen' ? 'Joystick: mira · TIRO: tieni premuto per la potenza' : sp!.shoot ? 'Joystick: mira · TIRO (trascina ←/→ per l’effetto) · PASSA corto · CROSS in area'
       : sp!.type === 'corner' ? 'Joystick: direzione · CROSS alto (tieni = più lungo) · TIRO teso · PASSA corto' : sp!.type === 'gk' ? 'PASSA: corto · CROSS/TIRO: rinvio lungo' : 'Joystick: direzione · PASSA corto · CROSS lungo';
-    if (hint !== this.hint.textContent) this.hint.textContent = hint;
+    if (hint !== this.hint.textContent) { this.hint.textContent = hint; this.radar.style.visibility = mySP && sp!.shoot ? 'hidden' : ''; }
     if (this.frame % 2 === 0) this.drawRadar(m);
   }
   private drawRadar(m: Match) {
