@@ -27,6 +27,7 @@ Options after `--`:
 | --- | --- | --- |
 | `--save PATH` | – | write a compressed `.blend` |
 | `--render PATH` | – | render the portrait still (Cycles; about 5 minutes on 4 CPU cores) |
+| `--glb PATH` | – | export a lighter glTF binary for web / phone viewers and game engines |
 | `--voxel 0.005` | 5 mm | mesh extraction cell size; smaller = denser mesh |
 | `--samples 96` | 96 | Cycles samples |
 | `--fast` | off | 8 mm mesh, fewer strands, half-size render — for iterating |
@@ -67,6 +68,14 @@ palms, wet asphalt, skyline.
 **Cameras** — `Cam_Portrait` (85 mm, shallow depth of field), `Cam_Follow`,
 `Cam_Hip_ThreeQuarter`, `Cam_Side_Profile`, `Cam_Hair_UpperBody`, and three orthographic
 turnaround cameras.
+
+## Web / phone export
+
+`--glb character.glb` writes a single skinned glTF binary (about 9 MB): body, dress and scalp at
+6.5 mm, hair as thin skinned ribbons, 39 joints and all five actions as named clips. A `.blend`
+only opens in desktop Blender, so this is the file to use for browser viewers and game engines.
+Dress and scalp are cut with texture alpha (use alpha-test at 0.5); the rib-knit detail is not
+baked, so add it in the target engine as a tiling bump map on the dress UVs (164 wales around).
 
 ## Tuning the physics
 

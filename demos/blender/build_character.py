@@ -10,7 +10,7 @@ Run (Blender 4.2+; developed and tested on 5.3):
     blender --python build_character.py                       # build, then explore in the UI
     blender --background --python build_character.py -- --save character.blend --render still.png
 
-Options after "--":  --save PATH   --render PATH   --voxel 0.005   --samples 96   --fast
+Options after "--":  --save PATH   --render PATH   --glb PATH   --voxel 0.005   --samples 96   --fast
 Axes while building: +x = character's left, +y = up, +z = front (metres, 1.70 m tall);
 everything is converted to Blender's Z-up / facing -Y convention when objects are created.
 """
@@ -27,7 +27,7 @@ def _opt(name, default=None, cast=str):
 FAST    = "--fast" in ARGV                       # coarse mesh + fewer strands, for quick iteration
 VOXEL   = _opt("--voxel", 0.008 if FAST else 0.005, float)   # body / dress extraction cell (m)
 SAMPLES = _opt("--samples", 32 if FAST else 96, int)
-SAVE_TO, RENDER_TO = _opt("--save"), _opt("--render")
+SAVE_TO, RENDER_TO, GLB_TO = _opt("--save"), _opt("--render"), _opt("--glb")
 FPS     = 30
 PHYS    = dict(k=380.0, c=7.0, bounce=1.0, wind=0.6, sway=1.0)   # same meaning as the WebGL sliders
 T0      = time.time()
@@ -352,9 +352,9 @@ def heat_color(t):
     f = sat(t) * 4; i = np.minimum(f.astype(int), 3); u = (f - i)[:, None]
     return np.concatenate([stops[i] * (1 - u) + stops[i + 1] * u, np.ones((len(t), 1))], 1)
 
-def build_layers():
+def build_layers(h=None):
     """Extract body, dress and scalp-hair surfaces and bake every per-vertex quantity."""
-    h = VOXEL; out = {}
+    h = h or VOXEL; out = {}
     specs = [("Body", f_body, (-0.505, -0.012, -0.192), (0.505, 1.724, 0.184), h, None, 0),
              ("Dress", f_dress, (-0.225, 0.70, -0.195), (0.225, 1.50, 0.17), h, lambda V: dress_mask(*V.T) > -0.012, 1),
              ("HairCap", f_hair, (-0.105, 1.50, -0.13), (0.105, 1.73, 0.125), h * 0.8, lambda V: hair_mask(*V.T) > -0.010, 2)]
@@ -844,8 +844,8 @@ def mixc(nt, fac, a, b):
     return next(s for s in n.outputs if s.identifier == "Result_Color")
 def attr(nt, name): return node(nt, "ShaderNodeAttribute", dict(attribute_name=name))   # outputs: 0 colour, 1 vector, 2 factor
 
-def face_texture(res=1024):
-    """Painted facial detail (eyes, lashes, brows, lips) as an RGBA image, front-projected onto the head."""
+def face_paint(res=1024):
+    """Painted facial detail (eyes, lashes, brows, lips): returns (rgb over skin tone, coverage alpha), front-projected onto the head."""
     v, u = np.mgrid[0:res, 0:res]
     x = (u + 0.5) / res * 0.2 - 0.1; y = 1.5 + (v + 0.5) / res * 0.2; ax = np.abs(x)
     rgb = np.broadcast_to(np.array([0.72, 0.52, 0.42]), (res, res, 3)).copy(); alpha = np.zeros((res, res))
@@ -877,9 +877,13 @@ def face_texture(res=1024):
     paint((0.22, 0.07, 0.08), 0.85 * sat((0.00055 - np.abs(y - seam)) / 0.0003) * (ax < 0.0232))               # mouth seam
     paint((0.20, 0.09, 0.07), 0.55 * sat(1 - np.hypot((ax - 0.0085) / 0.0042, (y - 1.5755) / 0.0021)) ** 0.6)  # nostrils
     paint((0.80, 0.42, 0.36), 0.15 * np.exp(-(((ax - 0.047) / 0.016) ** 2 + ((y - 1.588) / 0.014) ** 2)))     # blush
-    img = bpy.data.images.new("FaceDetail", res, res, alpha=True)
-    img.pixels.foreach_set(np.concatenate([rgb, alpha[..., None]], 2).astype(np.float32).ravel()); img.pack()
-    return img
+    return rgb, alpha
+
+def new_image(name, rgba):
+    img = bpy.data.images.new(name, rgba.shape[1], rgba.shape[0], alpha=True)
+    img.pixels.foreach_set(np.asarray(rgba, np.float32).ravel()); img.pack(); return img
+def face_texture():
+    rgb, alpha = face_paint(); return new_image("FaceDetail", np.concatenate([rgb, alpha[..., None]], 2))
 
 def make_materials():
     M = {}; link = lambda nt, a, b: nt.links.new(a, b)
@@ -1047,7 +1051,82 @@ def setup_render(scene):
     scene.view_settings.exposure = 0.0
 
 # ---------------------------------------------------------------------------------------
-# 10. BUILD
+# 10. WEB EXPORT: a lighter glTF binary (skinned meshes + every action) for browser viewers
+# ---------------------------------------------------------------------------------------
+def web_material(name, img, rough, extension="EXTEND", alpha=False):
+    m, nt, out = new_mat(name); tex = node(nt, "ShaderNodeTexImage", dict(image=img, extension=extension))
+    b = node(nt, "ShaderNodeBsdfPrincipled", inputs={"Roughness": rough}); nt.links.new(tex.outputs["Color"], b.inputs["Base Color"])
+    if alpha: nt.links.new(tex.outputs["Alpha"], b.inputs["Alpha"])
+    nt.links.new(b.outputs[0], out.inputs["Surface"]); return m
+
+def web_mesh(name, L, coll, rig, mat, uv):
+    """Skinned mesh with a single UV set (per vertex, or per quad corner when uv has shape F x 4 x 2)."""
+    ob = make_mesh(name, L, coll); me = ob.data
+    me.color_attributes.remove(me.color_attributes["jiggle_heat"])
+    li = np.zeros(len(me.loops), np.int32); me.loops.foreach_get("vertex_index", li)
+    me.uv_layers[0].data.foreach_set("uv", (uv.reshape(-1, 2) if uv.ndim == 3 else uv[li]).ravel())
+    me.materials.append(mat); bind(ob, rig, 0); return ob
+
+def hair_ribbons(cap_V, every=2, half=0.0014):
+    """Strands as thin skinned ribbons lying flat on the scalp / fanned around the ponytail (triangles survive glTF skinning)."""
+    V, E, W = build_hair_strands(cap_V, 2600, 3600); E = np.array(E); linked = np.zeros(len(V), bool); linked[E[:, 0]] = True
+    starts = [0] + [i + 1 for i in range(len(V) - 1) if not linked[i]]; ends = starts[1:] + [len(V)]
+    N = gradient(f_hair, V); N /= np.maximum(np.linalg.norm(N, axis=1), 1e-9)[:, None]; nodes = pony_rest_nodes()
+    verts, quads, wts = [], [], []
+    for k, (a, b) in enumerate(zip(starts, ends)):
+        if k % every or b - a < 2: continue
+        P = V[a:b]; t = np.gradient(P, axis=0); t /= np.maximum(np.linalg.norm(t, axis=1), 1e-9)[:, None]
+        o = N[a:b] if "head" in W[a] else P - nodes[:b - a] + 1e-4
+        sd = np.cross(t, o); sd /= np.maximum(np.linalg.norm(sd, axis=1), 1e-9)[:, None]
+        w = half * (1.0 - 0.6 * np.linspace(0, 1, b - a) ** 2)[:, None]; base = len(verts)
+        for i in range(b - a):
+            verts += [P[i] - sd[i] * w[i], P[i] + sd[i] * w[i]]; wts += [W[a + i], W[a + i]]
+            if i: quads.append((base + 2 * i - 2, base + 2 * i - 1, base + 2 * i + 1, base + 2 * i))
+    return np.array(verts), quads, wts
+
+def export_glb(path, rig):
+    import addon_utils
+    try: addon_utils.enable("io_scene_gltf2")
+    except Exception: pass
+    coll = new_collection("WebExport"); L = build_layers(max(VOXEL, 0.0065))
+    # skin: face detail baked over the skin tone; away from the face the UVs slide to a plain border column
+    rgb, _ = face_paint(1024); B = L["Body"]; x, y = B["V"][:, 0], B["V"][:, 1]
+    u = lerp(np.where(x < 0, 0.003, 0.997), (x + 0.1) / 0.2, B["face"])
+    body = web_mesh("Body", B, coll, rig, web_material("SkinWeb", new_image("SkinWeb", np.concatenate([rgb, np.ones(rgb.shape[:2] + (1,))], 2)), 0.5),
+                    np.stack([u, np.clip((y - 1.5) / 0.2, 0.003, 0.997)], 1))
+    # dress: u counts rib-knit wales around the body, v carries the pattern mask so texture alpha cuts hem and neckline cleanly
+    D = L["Dress"]; q = D["Q"]; ang = np.arctan2(D["V"][:, 0], D["V"][:, 2] + 0.012) * 164 / math.tau
+    uq = ang[q]; uq = uq + 164 * (uq < uq.max(1, keepdims=True) - 82)                     # unwrap quads that straddle the back seam
+    vq = np.clip(0.5 + D["dress_mask"] * 12, 0.04, 0.96)[q]
+    tex = np.concatenate([np.broadcast_to(np.array([0.86, 0.43, 0.60]), (32, 8, 3)),                     # ribs are added by the viewer as a bump map
+                          np.broadcast_to((np.arange(32) >= 16).astype(float)[:, None, None], (32, 8, 1))], 2)
+    dress = web_mesh("Dress", D, coll, rig, web_material("DressWeb", new_image("DressWeb", tex), 0.8, "REPEAT", True), np.stack([uq, vq], 2))
+    C = L["HairCap"]; tex = np.concatenate([np.full((32, 8, 3), 0.085), np.broadcast_to((np.arange(32) >= 16).astype(float)[:, None, None], (32, 8, 1))], 2)
+    cap = web_mesh("HairCap", C, coll, rig, web_material("ScalpWeb", new_image("ScalpWeb", tex), 0.8, "EXTEND", True),
+                   np.stack([np.full(len(C["V"]), 0.5), np.clip(0.5 + C["hair_mask"] * 12, 0.04, 0.96)], 1))
+    HV, HQ, HW = hair_ribbons(C["V"]); me = bpy.data.meshes.new("HairRibbons"); me.from_pydata(to_b(HV).tolist(), [], HQ); me.update()
+    me.polygons.foreach_set("use_smooth", np.ones(len(me.polygons), bool)); me.materials.append(flat_mat("HairWeb", (0.020, 0.012, 0.009), 0.42))
+    hair = bpy.data.objects.new("HairRibbons", me); coll.objects.link(hair); groups = {}
+    for i, d in enumerate(HW):
+        for nm, w in d.items(): groups.setdefault((nm, w), []).append(i)
+    for (nm, w), idx in groups.items(): (hair.vertex_groups.get(nm) or hair.vertex_groups.new(name=nm)).add(idx, w, "REPLACE")
+    bind(hair, rig, 0)
+    # every action on its own NLA track -> one named clip each
+    ad = rig.animation_data; active = ad.action; ad.action = None
+    for act in bpy.data.actions:
+        st = ad.nla_tracks.new(); st.name = act.name; st = st.strips.new(act.name, 1, act)
+        if hasattr(st, "action_slot") and len(getattr(act, "slots", [])): st.action_slot = act.slots[0]
+    for o in bpy.context.view_layer.objects: o.select_set(o in (rig, body, dress, cap, hair))
+    bpy.ops.export_scene.gltf(filepath=path, export_format="GLB", use_selection=True, export_animations=True, export_animation_mode="NLA_TRACKS",
+                              export_skins=True, export_apply=False, export_yup=True, export_cameras=False, export_lights=False,
+                              export_vertex_color="NONE", export_morph=False)
+    for tr in list(ad.nla_tracks): ad.nla_tracks.remove(tr)
+    set_action(rig, active)
+    for o in (body, dress, cap, hair): bpy.data.objects.remove(o)
+    bpy.data.collections.remove(coll); log(f"exported {path}")
+
+# ---------------------------------------------------------------------------------------
+# 11. BUILD
 # ---------------------------------------------------------------------------------------
 def set_action(rig, act):
     ad = rig.animation_data; ad.action = act
@@ -1096,6 +1175,7 @@ def main():
     scene.camera = cams["Cam_Hip_ThreeQuarter"]
     if SAVE_TO:
         bpy.ops.wm.save_as_mainfile(filepath=SAVE_TO, compress=True); log(f"saved {SAVE_TO}")
+    if GLB_TO: export_glb(GLB_TO, rig)
     log("done")
 
 if __name__ == "__main__":
