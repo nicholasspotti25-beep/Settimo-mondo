@@ -115,24 +115,32 @@ def f_arm(ax, y, z):
     hand = smin(smin(palm, fing, 0.009), seg(s, p, w, (0.538, 0.002, 0.034), (0.606, 0.006, 0.064), 0.0115, 0.0085), 0.010)
     d = smin(d, hand, 0.018)
     return smin(d, ell(ax - 0.172, y - 1.366, z + 0.012, 0.050, 0.060, 0.056), 0.03)    # deltoid cap
-def f_headneck(ax, y, z):
-    ny = sat((y - 1.43) / 0.125)
-    d = np.sqrt(ax * ax + (y - (1.43 + 0.125 * ny)) ** 2 + (z - (-0.016 + 0.016 * ny)) ** 2) - (0.048 - 0.006 * ny)
-    h = ell(ax, y - 1.612, z - 0.008, 0.075, 0.094, 0.094)                           # cranium
-    h = smin(h, ell(ax, y - 1.560, z - 0.030, 0.051, 0.054, 0.062), 0.03)            # jaw
-    h = smin(h, ell(ax, y - 1.531, z - 0.062, 0.026, 0.022, 0.027), 0.02)            # chin
-    h = smin(h, ell(ax - 0.040, y - 1.592, z - 0.062, 0.024, 0.022, 0.028), 0.03)    # cheekbone
-    h = smax(h, 0.0165 - np.sqrt((ax - 0.031) ** 2 + (y - 1.619) ** 2 + (z - 0.106) ** 2), 0.014)   # eye socket
-    h = smin(h, np.sqrt((ax - 0.031) ** 2 + (y - 1.619) ** 2 + (z - 0.0845) ** 2) - 0.0128, 0.004)  # lid over the eyeball
-    h = smin(h, ell(ax, y - 1.606, z - 0.097, 0.0105, 0.027, 0.014), 0.012)          # nose bridge
-    h = smin(h, ell(ax, y - 1.588, z - 0.108, 0.0140, 0.0120, 0.0155), 0.010)        # nose tip
-    h = smin(h, ell(ax - 0.0115, y - 1.585, z - 0.1005, 0.0080, 0.0070, 0.0095), 0.006)   # nostril wings
-    h = smin(h, ell(ax, y - 1.5650, z - 0.0890, 0.0230, 0.0064, 0.0120), 0.006)      # upper lip
-    h = smin(h, ell(ax, y - 1.5545, z - 0.0880, 0.0200, 0.0074, 0.0120), 0.006)      # lower lip
-    h = smin(h, ell(ax - 0.0735, y - 1.602, z + 0.004, 0.0085, 0.026, 0.015), 0.006) # ear
-    return smin(d, h, 0.02)
+def f_neck(ax, y, z):
+    ny = sat((y - 1.43) / 0.135)
+    return np.sqrt(ax * ax + (y - (1.43 + 0.135 * ny)) ** 2 + (z + 0.018 - 0.003 * ny) ** 2) - (0.050 - 0.005 * ny)
+def f_head(ax, y, z):
+    """Skull built from anatomical masses: cranium, mid-face, mandible with a real jawline, orbits, nose, lips, ears."""
+    h = ell(ax, y - 1.622, z + 0.004, 0.0705, 0.083, 0.090)                          # cranium
+    h = smin(h, ell(ax, y - 1.652, z - 0.030, 0.062, 0.050, 0.058), 0.020)           # frontal bone: an upright forehead
+    h = smin(h, ell(ax, y - 1.585, z - 0.040, 0.055, 0.060, 0.057), 0.025)           # mid-face (narrower than the cranium)
+    h = smin(h, ell(ax, y - 1.546, z - 0.038, 0.044, 0.040, 0.056), 0.020)           # mandible
+    h = smin(h, ell(ax - 0.042, y - 1.549, z - 0.004, 0.012, 0.018, 0.020), 0.015)   # angle of the jaw, below the ear
+    h = smin(h, ell(ax, y - 1.520, z - 0.076, 0.0200, 0.0195, 0.0215), 0.016)        # chin
+    h = smin(h, ell(ax - 0.045, y - 1.594, z - 0.052, 0.020, 0.017, 0.026), 0.020)   # cheekbone
+    h = smin(h, ell(ax - 0.030, y - 1.637, z - 0.082, 0.026, 0.008, 0.012), 0.012)   # brow ridge
+    h = smax(h, 0.0170 - np.sqrt((ax - 0.031) ** 2 + (y - 1.617) ** 2 + (z - 0.098) ** 2), 0.012)   # orbit
+    h = smin(h, np.sqrt((ax - 0.031) ** 2 + (y - 1.617) ** 2 + (z - 0.0745) ** 2) - 0.0125, 0.004)  # lid over the eyeball
+    h = smin(h, seg(ax, y, z, (0, 1.620, 0.091), (0, 1.586, 0.106), 0.0062, 0.0090), 0.010)         # nose bridge
+    h = smin(h, ell(ax, y - 1.582, z - 0.1105, 0.0112, 0.0110, 0.0135), 0.008)       # nose tip
+    h = smin(h, ell(ax - 0.0112, y - 1.5795, z - 0.1020, 0.0080, 0.0072, 0.0100), 0.006)   # nostril wings
+    h = smin(h, ell(ax, y - 1.5578, z - 0.0900, 0.0220, 0.0058, 0.0110), 0.006)      # upper lip
+    h = smin(h, ell(ax, y - 1.5475, z - 0.0890, 0.0190, 0.0068, 0.0110), 0.006)      # lower lip
+    # underside of the jaw: a plane rising from the chin back to the skull base (jawline + chin overhanging the neck)
+    h = smax(h, (1.5035 + 0.50 * np.clip(0.078 - z, 0.0, 0.118) - y) * 0.894, 0.010)
+    return smin(h, ell(ax - 0.0715, y - 1.600, z + 0.006, 0.0068, 0.027, 0.0150), 0.006)   # ear
+def f_headneck(ax, y, z): return smin(f_neck(ax, y, z), f_head(ax, y, z), 0.012)
 def body_parts(x, y, z):
-    """Torso, head+neck, leg and arm fields (kept separate for skin-weight ownership)."""
+    """Torso, neck, head, leg and arm fields (kept separate for skin-weight ownership)."""
     ax = np.abs(x)
     t, zb = f_torso(x, y, z)
     t = smin(t, f_glute(ax, y, z), 0.035)
@@ -140,10 +148,10 @@ def body_parts(x, y, z):
     gf = sstep(0.98, 1.06, y) * sstep(1.42, 1.34, y) * (z < 0)                       # spinal furrow on the bare back
     g = smax(t, 0.004 * gf - np.hypot(ax, z - zb + 0.004), np.maximum(0.02 * gf, 1e-6))
     t = np.where(gf > 0.01, g, t)
-    return t, f_headneck(ax, y, z), f_leg(ax, y, z), f_arm(ax, y, z)
+    return t, f_neck(ax, y, z), f_head(ax, y, z), f_leg(ax, y, z), f_arm(ax, y, z)
 def f_body(x, y, z):
-    t, hn, lg, ar = body_parts(x, y, z)
-    return smin(smin(smin(t, hn, 0.035), lg, 0.022), ar, 0.028)
+    t, nk, hd, lg, ar = body_parts(x, y, z)
+    return smin(smin(smin(t, smin(nk, hd, 0.012), 0.035), lg, 0.022), ar, 0.028)
 def f_dress(x, y, z):
     """Form-fitting dress: the body offset outward, both thighs wrapped by one skirt hull."""
     ax = np.abs(x); t, _ = f_torso(x, y, z)
@@ -151,7 +159,7 @@ def f_dress(x, y, z):
     t = smin(t, f_bust(ax, y, z), 0.035)
     t = smin(t, ell(ax, y - 1.262, z - 0.064, 0.075, 0.058, 0.058), 0.03)            # fabric bridging the bust
     t = smin(t, f_scap(ax, y, z), 0.03)
-    t = smin(t, f_headneck(ax, y, z), 0.035)
+    t = smin(t, f_neck(ax, y, z), 0.035)
     t = smin(t, f_leg(ax, y, z), 0.03)
     cx, cz, rx, rz = LEG(y, 0), LEG(y, 1), LEG(y, 2), LEG(y, 3)
     u, v = ax / (cx + rx * 0.86), np.abs(z - cz) / (rz * 0.94)
@@ -159,11 +167,12 @@ def f_dress(x, y, z):
     hull = smax(smax(hull, y - 0.93, 0.03), 0.60 - y, 0.03)
     return smin(t, hull, 0.02) - 0.0055
 def hair_mask(x, y, z):   # > 0 inside the hairline: forehead arc -> temple -> over the ear -> nape
-    return 0.8 * (y - (1.545 + 0.085 * sstep(-0.055, -0.02, z) + 0.058 * sstep(0.03, 0.085, z)))
+    return 0.8 * (y - (1.545 + 0.085 * sstep(-0.055, -0.02, z) + 0.075 * sstep(0.03, 0.08, z)))
 def f_hair(x, y, z):
     ax = np.abs(x)
-    h = smin(ell(ax, y - 1.612, z - 0.008, 0.075, 0.094, 0.094), ell(ax, y - 1.585, z + 0.020, 0.066, 0.070, 0.072), 0.03)
-    h = h - (0.0025 + 0.0050 * sstep(0.0, 0.02, hair_mask(x, y, z)))
+    h = smin(ell(ax, y - 1.622, z + 0.004, 0.0705, 0.083, 0.090), ell(ax, y - 1.590, z + 0.026, 0.060, 0.062, 0.066), 0.03)
+    h = smin(h, ell(ax, y - 1.652, z - 0.030, 0.062, 0.050, 0.058), 0.020)
+    h = h - (0.0020 + 0.0035 * sstep(0.0, 0.02, hair_mask(x, y, z)))
     return smin(h, ell(ax, y - 1.664, z + 0.080, 0.030, 0.028, 0.030), 0.025)
 def dress_mask(x, y, z):  # > 0 where the garment pattern covers the surface (metres from the cut line)
     ax = np.abs(x); t = sat((y - 1.26) / 0.205); hw = lerp(0.170, 0.034, t ** 0.8)
@@ -314,13 +323,13 @@ def skin_weights(x, y, z, layer):
         W[:, 4] = 1; return W, np.zeros(n)
     P = np.stack(body_parts(x, y, z), 1); ax = np.abs(x)
     w = np.exp(-(P - P.min(1, keepdims=True)) / 0.012)
-    if layer == 1: w[:, 3] = 0                                   # the dress never follows the arms
-    w /= w.sum(1, keepdims=True); wT, wH, wL, wA = w.T
+    if layer == 1: w[:, 4] = 0                                   # the dress never follows the arms
+    w /= w.sum(1, keepdims=True); wT, wN, wH, wL, wA = w.T
     sw = 0.05 if layer == 1 else lerp(0.002, 0.03, sstep(0.79, 0.87, y))
     L = sstep(-sw, sw, x); R = 1 - L
     th, up1, up2, nk = sstep(0.955, 0.79, y), sstep(0.98, 1.10, y), sstep(1.14, 1.30, y), sstep(1.405, 1.47, y)
     sh, ft = sstep(0.545, 0.455, y), sstep(0.115, 0.06, y)
-    s2, hd = 1 - sstep(1.40, 1.46, y), sstep(1.50, 1.565, y)
+    s2, hk = 1 - sstep(1.40, 1.46, y), 0.65 * sstep(1.50, 1.565, y)
     s = (ax - SHX) * SB - (y - SHY) * CB
     ua, fa, hn = sstep(-0.035, 0.055, s), sstep(0.235, 0.315, s), sstep(0.495, 0.555, s)
     W[:, 0] = wT * (1 - up1) * (1 - th) + wL * (1 - th)
@@ -329,9 +338,9 @@ def skin_weights(x, y, z, layer):
     W[:, 12], W[:, 15] = wL * sh * (1 - ft) * L, wL * sh * (1 - ft) * R
     W[:, 13], W[:, 16] = wL * sh * ft * L, wL * sh * ft * R
     W[:, 1] = wT * up1 * (1 - up2)
-    W[:, 2] = wT * up2 * (1 - nk) + wH * s2 + wA * (1 - ua)
-    W[:, 3] = wT * up2 * nk + wH * (1 - s2) * (1 - hd)
-    W[:, 4] = wH * (1 - s2) * hd
+    W[:, 2] = wT * up2 * (1 - nk) + wN * s2 + wA * (1 - ua)
+    W[:, 3] = wT * up2 * nk + wN * (1 - s2) * (1 - hk)
+    W[:, 4] = wH + wN * (1 - s2) * hk
     left = x >= 0
     for o, m in ((5, left), (8, ~left)):
         W[:, o] += m * wA * ua * (1 - fa); W[:, o + 1] += m * wA * ua * fa * (1 - hn); W[:, o + 2] += m * wA * ua * fa * hn
@@ -603,9 +612,9 @@ class SoftZone:
         if l > self.max * 1.6: self.x *= self.max * 1.6 / l; self.v *= 0.5
 
 COLLIDERS = [  # (bone, a, b, radius or ellipsoid radii) in bind space
-    (4, (0, 1.612, 0.008), None, (0.0825, 0.1015, 0.1015)),              # cranium incl. scalp hair
-    (4, (0, 1.575, 0.024), None, 0.081),                                # jaw / face
-    (3, (0, 1.440, -0.014), (0, 1.550, 0.000), 0.052),                  # neck
+    (4, (0, 1.622, -0.004), None, (0.0765, 0.0890, 0.0960)),             # cranium incl. scalp hair
+    (4, (0, 1.570, 0.030), None, 0.070),                                # jaw / face
+    (3, (0, 1.440, -0.018), (0, 1.560, -0.015), 0.056),                 # neck
     (2, (0.165, 1.385, -0.012), None, 0.080), (2, (-0.165, 1.385, -0.012), None, 0.080),   # shoulders
     (2, (-0.105, 1.365, -0.030), (0.105, 1.365, -0.030), 0.088),        # trapezius / shoulder blades
     (2, (0, 1.180, -0.012), (0, 1.400, -0.030), 0.098)]                 # upper back
@@ -761,9 +770,9 @@ def build_hair_strands(cap_V, n_pony, n_scalp, seed=7):
         for k in range(26):
             j = rng.normal(0, 1, 3) * 0.0022; ph = rng.uniform(0, math.tau); ln = rng.uniform(0.78, 1.0)
             tt = t * ln
-            x = sx * (0.047 + 0.036 * sstep(0, 0.32, tt) + 0.004 * np.sin(tt * 14 + ph)) + j[0]
-            y = 1.681 - 0.165 * tt + j[1] * 0.5
-            z = 0.033 + 0.036 * sstep(0, 0.4, tt) + 0.005 * np.cos(tt * 14 + ph) + j[2]
+            x = sx * (0.046 + 0.031 * sstep(0, 0.30, tt) + 0.004 * np.sin(tt * 14 + ph)) + j[0]
+            y = 1.684 - 0.170 * tt + j[1] * 0.5
+            z = 0.021 + 0.032 * sstep(0, 0.45, tt) + 0.005 * np.cos(tt * 14 + ph) + j[2]
             add(np.stack([x, y, z], 1).tolist(), [{"head": 1.0}] * len(t))
     return np.array(verts), edges, wts
 
@@ -843,30 +852,30 @@ def face_texture(res=1024):
     def paint(color, a):
         nonlocal rgb, alpha
         a = sat(a); rgb = rgb * (1 - a[..., None]) + np.asarray(color, float) * a[..., None]; alpha = alpha + a * (1 - alpha)
-    ex = ax - 0.031; ey = y - 1.619 - 0.07 * ex                                   # almond eye, outer corner lifted
-    paint((0.45, 0.28, 0.22), 0.26 * sat(1.0 - np.hypot(ex / 0.020, (y - 1.6265) / 0.0115)) ** 0.7)            # eyeshadow
-    d = np.hypot(ex / 0.0135, ey / np.where(ey > 0, 0.0064, 0.0050)) - 1.0
+    ex = ax - 0.031; ey = y - 1.617 - 0.07 * ex                                   # almond eye, outer corner lifted
+    paint((0.45, 0.28, 0.22), 0.26 * sat(1.0 - np.hypot(ex / 0.020, (y - 1.6245) / 0.0115)) ** 0.7)            # eyeshadow
+    d = np.hypot(ex / 0.0150, ey / np.where(ey > 0, 0.0074, 0.0056)) - 1.0
     eye = sat(-d / 0.10)
-    paint(np.array([0.88, 0.85, 0.82]) * (1 - 0.30 * sat(1 + d * 1.6))[..., None], eye)                          # sclera
+    paint(np.array([0.93, 0.91, 0.89]) * (1 - 0.22 * sat(1 + d * 1.6))[..., None], eye)                          # sclera
     di = np.hypot(ex + 0.0008, ey - 0.0004); th = np.arctan2(ey - 0.0004, ex + 0.0008)
     iris = np.array([0.20, 0.105, 0.05]) + np.array([0.20, 0.11, 0.05]) * (sat(1 - np.abs(di - 0.0036) / 0.0016) * (0.7 + 0.3 * np.sin(th * 46)))[..., None]
-    paint(iris * (1 - 0.6 * sat((di - 0.0046) / 0.001))[..., None], eye * sat((0.0058 - di) / 0.0005))        # iris + limbal ring
+    paint(iris * (1 - 0.6 * sat((di - 0.0052) / 0.001))[..., None], eye * sat((0.0064 - di) / 0.0005))        # iris + limbal ring
     paint((0.01, 0.01, 0.01), eye * sat((0.0023 - di) / 0.0004))                                               # pupil
     paint((1.0, 1.0, 1.0), 0.9 * eye * sat((0.0008 - np.hypot(ex - 0.0016, ey - 0.0022)) / 0.0003))            # catch-light
-    paint((0.035, 0.025, 0.02), 0.92 * sat((0.20 - np.abs(d + 0.02)) / 0.10) * (ey > -0.0006) * sat((0.0165 - np.abs(ex)) / 0.002))   # upper lash line
+    paint((0.035, 0.025, 0.02), 0.92 * sat((0.20 - np.abs(d + 0.02)) / 0.10) * (ey > -0.0006) * sat((0.0182 - np.abs(ex)) / 0.002))   # upper lash line
     paint((0.10, 0.06, 0.05), 0.35 * sat((0.10 - np.abs(d)) / 0.06) * (ey < 0))                                # lower lash line
-    by = y - (1.6405 - 13.0 * (ax - 0.034) ** 2 + 0.09 * (ax - 0.034))
+    by = y - (1.6375 - 13.0 * (ax - 0.034) ** 2 + 0.09 * (ax - 0.034))
     thick = 0.0034 * (1 - 0.6 * sstep(0.034, 0.056, ax))
     paint((0.10, 0.065, 0.05), sat((thick - np.abs(by)) / 0.0012) * sstep(0.009, 0.015, ax) * (1 - sstep(0.052, 0.058, ax))
           * (0.86 + 0.14 * np.sin(ax * 5200 + y * 9000)))                                                      # brows
-    seam = 1.5598 - 6.0 * ax ** 2
+    seam = 1.5527 - 6.0 * ax ** 2
     yu = seam + 0.0086 * np.sqrt(sat(1 - (ax / 0.0245) ** 2)) - 0.0017 * np.exp(-(ax / 0.0042) ** 2)
     yl = seam - 0.0100 * np.sqrt(sat(1 - (ax / 0.0215) ** 2))
     lip = sat(np.minimum(yu - y, y - yl) / 0.0011) * (ax < 0.0245)
-    shade = 0.88 + 0.22 * sat(1 - np.hypot(ax / 0.012, (y - 1.5545) / 0.0045))
+    shade = 0.88 + 0.22 * sat(1 - np.hypot(ax / 0.012, (y - 1.5475) / 0.0045))
     paint(np.array([0.64, 0.285, 0.29]) * shade[..., None], lip * 0.92)                                        # lips
     paint((0.22, 0.07, 0.08), 0.85 * sat((0.00055 - np.abs(y - seam)) / 0.0003) * (ax < 0.0232))               # mouth seam
-    paint((0.20, 0.09, 0.07), 0.55 * sat(1 - np.hypot((ax - 0.0078) / 0.0042, (y - 1.5832) / 0.0021)) ** 0.6)  # nostrils
+    paint((0.20, 0.09, 0.07), 0.55 * sat(1 - np.hypot((ax - 0.0085) / 0.0042, (y - 1.5755) / 0.0021)) ** 0.6)  # nostrils
     paint((0.80, 0.42, 0.36), 0.15 * np.exp(-(((ax - 0.047) / 0.016) ** 2 + ((y - 1.588) / 0.014) ** 2)))     # blush
     img = bpy.data.images.new("FaceDetail", res, res, alpha=True)
     img.pixels.foreach_set(np.concatenate([rgb, alpha[..., None]], 2).astype(np.float32).ravel()); img.pack()
