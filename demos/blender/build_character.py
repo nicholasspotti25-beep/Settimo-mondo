@@ -129,7 +129,7 @@ def f_headneck(ax, y, z):
     h = smin(h, ell(ax - 0.0115, y - 1.585, z - 0.1005, 0.0080, 0.0070, 0.0095), 0.006)   # nostril wings
     h = smin(h, ell(ax, y - 1.5650, z - 0.0890, 0.0230, 0.0064, 0.0120), 0.006)      # upper lip
     h = smin(h, ell(ax, y - 1.5545, z - 0.0880, 0.0200, 0.0074, 0.0120), 0.006)      # lower lip
-    h = smin(h, ell(ax - 0.0765, y - 1.603, z + 0.004, 0.010, 0.028, 0.017), 0.006)  # ear
+    h = smin(h, ell(ax - 0.0735, y - 1.602, z + 0.004, 0.0085, 0.026, 0.015), 0.006) # ear
     return smin(d, h, 0.02)
 def body_parts(x, y, z):
     """Torso, head+neck, leg and arm fields (kept separate for skin-weight ownership)."""
@@ -357,9 +357,9 @@ def build_layers():
         dm, hm = dress_mask(x, y, z), hair_mask(x, y, z)
         if lid == 0:
             torso = arm < 0.5
-            tuck = torso & (dm > 0.010)                                   # tuck skin under the cloth
-            V[tuck] -= N[tuck] * 0.003
-            hidden = (torso & (dm > 0.035)) | ((y > 1.5) & (hm > 0.012))   # never visible: drop those faces
+            tuck = torso & (dm > 0.008)                                   # tuck skin under the cloth
+            V[tuck] -= N[tuck] * 0.0035
+            hidden = (torso & (dm > 0.070)) | ((y > 1.5) & (hm > 0.012))   # never visible: drop those faces
             keepf = ~hidden[Q].all(1)
             used = np.zeros(len(V), bool); used[Q[keepf].ravel()] = True
             V, Q = compact(V, Q, keepf)
@@ -882,7 +882,7 @@ def make_materials():
     link(nt, node(nt, "ShaderNodeUVMap", dict(uv_map="face_uv")).outputs[0], img.inputs["Vector"])
     col = mixc(nt, mth(nt, "MULTIPLY", img.outputs["Alpha"], attr(nt, "face").outputs[2]), base, img.outputs["Color"])
     bsdf = node(nt, "ShaderNodeBsdfPrincipled", inputs={"Roughness": 0.43, "Subsurface Weight": 1.0, "Subsurface Radius": (1.0, 0.36, 0.18),
-                "Subsurface Scale": 0.011, "Coat Weight": 0.10, "Coat Roughness": 0.20, "IOR": 1.40})
+                "Subsurface Scale": 0.011, "Coat Weight": 0.06, "Coat Roughness": 0.28, "IOR": 1.40})
     pores = node(nt, "ShaderNodeTexNoise", inputs={"Scale": 1500.0, "Detail": 2.0}); link(nt, rest.outputs[1], pores.inputs["Vector"])
     bump = node(nt, "ShaderNodeBump", inputs={"Strength": 0.10, "Distance": 0.0004}); link(nt, pores.outputs[0], bump.inputs["Height"])
     link(nt, col, bsdf.inputs["Base Color"]); link(nt, bump.outputs[0], bsdf.inputs["Normal"]); link(nt, bsdf.outputs[0], out.inputs["Surface"])
@@ -950,7 +950,7 @@ def build_set(scene):
     sky.sun_elevation = math.radians(4.0); sky.sun_rotation = math.atan2(SUN.x, SUN.y); sky.sun_disc = False
     for k, v in (("air_density", 1.4), ("aerosol_density", 3.0), ("dust_density", 3.0), ("ozone_density", 2.0)):
         if hasattr(sky, k): setattr(sky, k, v)
-    bg = nt.nodes.new("ShaderNodeBackground"); bg.inputs["Strength"].default_value = 0.22
+    bg = nt.nodes.new("ShaderNodeBackground"); bg.inputs["Strength"].default_value = 0.15
     nt.links.new(sky.outputs[0], bg.inputs["Color"]); nt.links.new(bg.outputs[0], nt.nodes.new("ShaderNodeOutputWorld").inputs["Surface"])
     def lamp(name, kind, loc, color, energy, **kw):
         d = bpy.data.lights.new(name, kind); d.color, d.energy = color, energy
@@ -959,7 +959,7 @@ def build_set(scene):
     sun = lamp("Sun_GoldenHour", "SUN", SUN * 20 + Vector((0, 0, 1)), (1.0, 0.55, 0.26), 3.6, angle=math.radians(3.0)); look_at(sun, (0, 0, 1))
     look_at(lamp("Neon_Magenta", "AREA", (3.0, -1.8, 1.9), (1.0, 0.10, 0.45), 200, size=1.6), (0, 0, 1.1))
     look_at(lamp("Neon_Cyan", "AREA", (2.6, 2.3, 0.9), (0.06, 0.75, 1.0), 120, size=1.4), (0, 0, 1.0))
-    look_at(lamp("Bounce_Warm", "AREA", (-2.6, -1.2, 1.9), (1.0, 0.74, 0.52), 110, size=2.6), (0, 0, 1.35))   # sunset bounce off the lot
+    look_at(lamp("Bounce_Warm", "AREA", (-2.6, -1.2, 1.9), (1.0, 0.74, 0.52), 140, size=2.6), (0, 0, 1.35))   # sunset bounce off the lot
     # --- ground: wet asphalt (puddle-like roughness breakup) with parking-bay lines ---
     m, gnt, out = new_mat("WetAsphalt")
     n1 = node(gnt, "ShaderNodeTexNoise", inputs={"Scale": 0.55, "Detail": 6.0}); n2 = node(gnt, "ShaderNodeTexNoise", inputs={"Scale": 90.0, "Detail": 2.0})
@@ -987,8 +987,8 @@ def build_set(scene):
         cu.materials.append(sign_mat); ob = bpy.data.objects.new(f"{text}_Sign", cu); env.objects.link(ob)
         ob.matrix_world = Matrix.Translation((X - 0.75, y0, 4.55)) @ Matrix(((0, 0, -1), (-1, 0, 0), (0, 1, 0))).to_4x4()
         box(env, f"{text}_SignBack", (0.06, len(text) * 0.95 + 0.6, 1.7), (X - 0.66, y0, 4.55), roof)
-    motel(20.0, 22, "MOTEL", neon_m, wall)
-    motel(-20.0, 15, "OPEN 24H", neon_c, flat_mat("DinerWall", (0.42, 0.14, 0.24), 0.85))
+    motel(-7.0, 22, "MOTEL", neon_m, wall)
+    motel(22.0, 15, "OPEN 24H", neon_c, flat_mat("DinerWall", (0.42, 0.14, 0.24), 0.85))
     # --- palms and a distant skyline as silhouettes against the sky ---
     trunk, leaf, dark = flat_mat("PalmTrunk", (0.035, 0.024, 0.018), 1.0), flat_mat("PalmLeaf", (0.012, 0.035, 0.018), 0.7), flat_mat("Skyline", (0.012, 0.008, 0.014), 1.0)
     for i, (x, y) in enumerate([(-4.6, 34), (-5.4, 17), (-4.2, 2.5), (-5.0, -14), (-4.4, -30), (6.6, 27), (7.2, 9), (6.4, -9), (7.0, -25), (-11, 25), (-12, -5), (-10.5, -36)]):
