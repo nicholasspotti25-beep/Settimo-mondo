@@ -4,13 +4,17 @@
 animation, materials, set, lights and cameras. Nothing is imported; the only output files
 are the ones you ask for.
 
+| Portrait still (`Cam_Portrait`) | Walk cycle frame (`Cam_Hip_ThreeQuarter`) |
+| --- | --- |
+| ![Portrait](preview_portrait.jpg) | ![Walk](preview_walk.jpg) |
+
 Developed and tested on **Blender 5.3**. The script avoids version-specific APIs where it
 can and should run on 4.2 LTS and later, but only 5.3 has been run.
 
 ## Run it
 
 ```bash
-# open Blender with the scene built (about a minute at full quality)
+# open Blender with the scene built (about ten seconds at full quality)
 blender --python build_character.py
 
 # headless: save a .blend and render the hero still
@@ -22,7 +26,7 @@ Options after `--`:
 | Option | Default | Meaning |
 | --- | --- | --- |
 | `--save PATH` | – | write a compressed `.blend` |
-| `--render PATH` | – | render the portrait still (Cycles) |
+| `--render PATH` | – | render the portrait still (Cycles; about 5 minutes on 4 CPU cores) |
 | `--voxel 0.005` | 5 mm | mesh extraction cell size; smaller = denser mesh |
 | `--samples 96` | 96 | Cycles samples |
 | `--fast` | off | 8 mm mesh, fewer strands, half-size render — for iterating |
@@ -78,8 +82,9 @@ multiplier, `wind`, `sway`) and re-run. Per-zone settings are in `ZONE_PARAMS`.
 
 ## Limits
 
-- The face is a smooth sculpted form with painted eyes, brows and lips, not modelled
-  eyelids or teeth; there are no facial or finger bones.
+- The head is sculpted from anatomical masses (cranium, jaw, cheekbones, nose, lips) with
+  painted eyes, brows and lips; there are no modelled eyelids, teeth, or facial and finger
+  bones, and the ears are simple forms.
 - Mesh topology is a uniform voxel-aligned quad grid, not hand-authored edge loops.
 - Physics is baked, not live: change parameters, then re-run the script.
 - The dress pattern (hem, halter neckline) is cut with shader alpha, so the cloth has no
